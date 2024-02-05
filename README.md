@@ -15,6 +15,7 @@ This calendar app provides a user-friendly interface to view, select, and manage
 - React JS (Typescrpit)
 - HTML5, CSS3 (Styled Component)
 - Library Used:
+    - Moment.js
     - Styled Component
     - Typescrpit
 
