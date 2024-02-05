@@ -2,7 +2,7 @@
 
 This calendar app provides a user-friendly interface to view, select, and manage dates. Users can navigate through months and years, add or subtract months, and view/add data for each date.
 
-[![Simple-Calendar](./calender.png)](https://simple-calendar.netlify.app)
+[![Simple-Calendar](./calender.png)](https://calendarsimple.netlify.app)
 
 ## Features
 
@@ -27,14 +27,14 @@ This calendar app provides a user-friendly interface to view, select, and manage
 - **Data Management:** Easily add and retrieve data associated with specific dates.
 
 ## Get Started
-1. Clone this repository: `git clone https://github.com/Jaganath-MSJ/Simple-Calendar.git`
-2. Navigate to the project directory: `cd Simple-Calendar`
+1. Clone this repository: `git clone https://github.com/Jaganath-MSJ/CalendarSimple.git`
+2. Navigate to the project directory: `cd CalendarSimple`
 3. Install dependencies: `npm install`
 4. Start frontend: `npm start`
 5. Open the app in your browser: `http://localhost:3000`
 
 ## Demo:
-For a live demonstration, you can visit [Demo Link](http://simple-calendar.netlify.app).
+For a live demonstration, you can visit [Demo Link](http://calendarsimple.netlify.app).
 
 ## Contact:
 Feel free to reach out to me via email at [jagan.msjc@gmail.com](mailto:jagan.msjc@gmail.com) or connect on [LinkedIn](https://www.linkedin.com/in/jaganathms).
