@@ -1,5 +1,5 @@
 import moment from "moment";
-import { SelectedDataType, DateType } from "./Calender.type";
+import { DateType } from "./Calender.type";
 
 export const getNoOfDays = (date: DateType): number => {
   const noOfDates = date.daysInMonth();
@@ -11,17 +11,14 @@ export const getMonthStartingDay = (date: DateType): number => {
   return monthStartingDay;
 };
 
-export const getDateFromSelectedDate = (
-  selectedDate: SelectedDataType
-): DateType => {
-  const date = moment(selectedDate);
-  console.log(date);
+export const convertToDate = (momentDate: DateType): Date => {
+  const date = momentDate.toDate();
   return date;
 };
 
-export const convertToDate = (selectedDate: DateType): Date => {
-  const date = selectedDate.toDate();
-  return date;
+export const convertToMoment = (date: Date): DateType => {
+  const momentDate = moment(date);
+  return momentDate;
 };
 
 export const getYearList = (
@@ -35,6 +32,7 @@ export const getYearList = (
     { length: yearLength },
     (_, index) => index + yearStarting
   );
+
   if (!yearList.includes(selectedYear)) {
     if (moment().year() <= selectedYear) {
       yearList.push(selectedYear);
@@ -43,6 +41,14 @@ export const getYearList = (
     }
   }
   return yearList;
+};
+
+export const checkIsToday = (selectedDate: DateType, dates: number): boolean => {
+  const cloneSelectedDate = selectedDate.clone();
+  cloneSelectedDate.date(dates);
+
+  const isToday = moment().isSame(cloneSelectedDate, "D");
+  return isToday;
 };
 
 export { moment as date };

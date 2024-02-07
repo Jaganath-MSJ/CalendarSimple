@@ -7,6 +7,7 @@ export interface CalenderType {
   data?: React.ReactNode[];
   width?: number;
   height?: number;
+  selectedDate?: Date;
   onDateClick?: (date: Date) => void;
   onMonthChange?: (date: Date) => void;
   isSelectDate?: boolean;
@@ -18,7 +19,22 @@ export interface CalenderType {
   selectedClassName?: string;
   todayClassName?: string;
   pastYearLength?: number;
-  fututeYearLength?: number;
+  futureYearLength?: number;
+}
+
+export enum EDayType {
+  fullName = "FULL",
+  halfName = "HALF",
+}
+
+export const defaultCalenderProps = {
+  dayType: EDayType.halfName,
+  data: [],
+  width: 400,
+  height: 400,
+  isSelectDate: false,
+  pastYearLength: 5,
+  futureYearLength: 5,
 }
 
 export interface DateDataType {
@@ -33,15 +49,9 @@ export interface DateDataType {
   todayClassName?: string;
 }
 
-export enum EDayType {
-  fullName = "fullName",
-  halfName = "halfName",
-}
-
-export interface SelectedDataType {
-  date: number;
-  month: number;
-  year: number;
+export interface MonthListType {
+  label: string;
+  value: number;
 }
 
 export enum EMonthOption {

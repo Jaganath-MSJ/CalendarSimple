@@ -2,22 +2,23 @@ import React, {
   ChangeEvent,
   useCallback,
   useLayoutEffect,
+  useMemo,
   useState,
+  memo,
+  ReactNode,
 } from "react";
 import {
   CalenderType,
   DateType,
-  EDayType,
   EMonthOption,
   EYearOption,
+  MonthListType,
+  defaultCalenderProps,
 } from "./Calender.type";
 import {
   CALENDER_STRINGS,
-  DAY_LIST_FULL_NAME,
-  DAY_LIST_HALF_NAME,
+  DAY_LIST_NAME,
   MONTH_LIST,
-  YEAR_LIST_FUTURE_LENGTH,
-  YEAR_LIST_PAST_LENGTH,
 } from "./Calender.constant";
 import {
   date,
@@ -25,21 +26,24 @@ import {
   getMonthStartingDay,
   getNoOfDays,
   getYearList,
+  convertToMoment,
+  checkIsToday,
 } from "./Calender.utils";
 import CalenderStyles, { ButtonStyles, SelectStyles } from "./Calender.styles";
 import DateData from "./DateData";
 import LeftArrow from "../assets/LeftArrow";
 import RightArrow from "../assets/RightArrow";
 
-function Calender(props: CalenderType) {
+function Calender(props: CalenderType = defaultCalenderProps) {
   const {
-    dayType = EDayType.halfName,
-    data = [],
-    width = 400,
-    height = 400,
+    dayType = defaultCalenderProps.dayType,
+    data = defaultCalenderProps.data,
+    width = defaultCalenderProps.width,
+    height = defaultCalenderProps.height,
+    selectedDate: selected_date,
     onDateClick,
     onMonthChange,
-    isSelectDate = false,
+    isSelectDate = defaultCalenderProps.isSelectDate,
     className,
     headerClassName,
     tableClassName,
@@ -47,58 +51,50 @@ function Calender(props: CalenderType) {
     dataClassName,
     selectedClassName,
     todayClassName,
-    pastYearLength = YEAR_LIST_PAST_LENGTH,
-    fututeYearLength = YEAR_LIST_FUTURE_LENGTH,
+    pastYearLength = defaultCalenderProps.pastYearLength,
+    futureYearLength = defaultCalenderProps.futureYearLength,
   } = props;
 
-  const [selectedDate, setSelectedDate] = useState<DateType>(date());
-  const [noOfDays, setNoOfDays] = useState<number>(getNoOfDays(date()));
-  const [monthStartDay, setMonthStartDay] = useState<number>(
-    getMonthStartingDay(date())
+  const selectedDateMoment: DateType = useMemo(
+    () => (selected_date ? convertToMoment(selected_date) : date()),
+    [selected_date]
   );
-
-  let dayList: string[] = [];
-  if (dayType === EDayType.fullName) {
-    dayList = DAY_LIST_FULL_NAME;
-  } else if (dayType === EDayType.halfName) {
-    dayList = DAY_LIST_HALF_NAME;
-  }
+  const [selectedDate, setSelectedDate] = useState<DateType>(selectedDateMoment);
 
   useLayoutEffect(() => {
-    setNoOfDays(getNoOfDays(selectedDate));
-    setMonthStartDay(getMonthStartingDay(selectedDate));
-  }, [selectedDate]);
+    setSelectedDate(selectedDateMoment);
+  }, [selectedDateMoment]);
 
-  const getDates = useCallback((): React.ReactNode[] => {
-    const dateComponent: React.ReactNode[] = [];
-    let noOfRows = Math.round((noOfDays + monthStartDay) / 7 + 0.4);
-    let dates = 1;
+  const getDates = useCallback((): ReactNode[] => {
+    const dateComponent: ReactNode[] = [];
+    const noOfDays: number = getNoOfDays(selectedDate.clone());
+    const monthStartDay: number = getMonthStartingDay(selectedDate.clone());
+    const noOfRows: number = Math.round((noOfDays + monthStartDay) / 7 + 0.4);
+    let dates: number = 1;
 
     const onClickDateHandler = (date: number) => {
       const cloneSelectedDate = selectedDate.clone();
-      cloneSelectedDate.date(date);
-      setSelectedDate(cloneSelectedDate);
-      onDateClick?.(convertToDate(cloneSelectedDate));
+      if (date !== cloneSelectedDate.date()) {
+        cloneSelectedDate.date(date);
+        setSelectedDate(cloneSelectedDate.clone());
+        onDateClick?.(convertToDate(cloneSelectedDate.clone()));
+      }
     };
 
     for (let row = 1; row <= noOfRows; row++) {
-      const tableRow: React.ReactNode[] = [];
-      let days = 7;
+      const tableRow: ReactNode[] = [];
+      let days: number = 7;
 
       for (let day = 1; day <= days; day++) {
         if ((row === 1 && day <= monthStartDay) || dates > noOfDays) {
-          const emptyData = <td key={`empty_${day}`} />;
+          const emptyData: ReactNode = <td key={`empty_${day}`} />;
           tableRow.push(emptyData);
         } else {
-          const dateData = (
+          const dateData: ReactNode = (
             <DateData
               key={`date_${dates}`}
               isSelected={isSelectDate && dates === selectedDate.date()}
-              isToday={
-                date().date() === dates &&
-                date().isSame(selectedDate, "month") &&
-                date().isSame(selectedDate, "year")
-              }
+              isToday={checkIsToday(selectedDate, dates)}
               onClick={isSelectDate ? onClickDateHandler : undefined}
               date={dates}
               data={data[dates - 1]}
@@ -112,14 +108,13 @@ function Calender(props: CalenderType) {
           tableRow.push(dateData);
         }
       }
-      dateComponent.push(<tr key={row}>{tableRow}</tr>);
+      const rowData: ReactNode = <tr key={row}>{tableRow}</tr>;
+      dateComponent.push(rowData);
     }
     return dateComponent;
   }, [
-    noOfDays,
     data,
     selectedDate,
-    monthStartDay,
     dataClassName,
     selectedClassName,
     todayClassName,
@@ -129,7 +124,7 @@ function Calender(props: CalenderType) {
   ]);
 
   const onMonthArrowClick = (option: EMonthOption) => {
-    const clonedSelectedDate: DateType = selectedDate.clone();
+    const clonedSelectedDate = selectedDate.clone();
 
     if (option === EMonthOption.add) {
       clonedSelectedDate.month(clonedSelectedDate.month() + 1);
@@ -146,7 +141,7 @@ function Calender(props: CalenderType) {
     option: EYearOption
   ) => {
     const value = Number(event.target.value);
-    const clonedSelectedDate: DateType = selectedDate.clone();
+    const clonedSelectedDate = selectedDate.clone();
 
     if (option === EYearOption.month) {
       clonedSelectedDate.month(value);
@@ -175,7 +170,7 @@ function Calender(props: CalenderType) {
             value={selectedDate.month()}
             onChange={(e) => onDropdownClick(e, EYearOption.month)}
           >
-            {MONTH_LIST.map((month) => (
+            {MONTH_LIST.map((month: MonthListType) => (
               <option key={month.label} value={month.value}>
                 {month.label}
               </option>
@@ -189,9 +184,9 @@ function Calender(props: CalenderType) {
           >
             {getYearList(
               pastYearLength,
-              fututeYearLength,
+              futureYearLength,
               selectedDate.year()
-            ).map((year) => (
+            ).map((year: number) => (
               <option key={year} value={year}>
                 {year}
               </option>
@@ -205,7 +200,7 @@ function Calender(props: CalenderType) {
       <table className={tableClassName}>
         <thead>
           <tr>
-            {dayList.map((day) => (
+            {DAY_LIST_NAME[dayType].map((day: string) => (
               <th key={day}>{day}</th>
             ))}
           </tr>
@@ -216,4 +211,4 @@ function Calender(props: CalenderType) {
   );
 }
 
-export default React.memo(Calender);
+export default memo(Calender);
