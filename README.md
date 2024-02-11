@@ -1,44 +1,50 @@
 # Calendar App
 
-This calendar app provides a user-friendly interface to view, select, and manage dates. Users can navigate through months and years, add or subtract months, and view/add data for each date.
-
-[![Simple-Calendar](./calender.png)](https://calendarsimple.netlify.app)
+A user-friendly calendar app for viewing, selecting, and managing dates with data management capabilities.
 
 ## Features
 
-- Select a date from the calendar.
-- Navigate through months and years using dropdowns.
-- Add or subtract months to view different time periods.
-- Add data for each date.
+- View and navigate through a monthly calendar
+- Select dates and manage selected dates
+- Customizable styling with Styled Components
+- Support for data management and event handling
+- Easy integration into React projects
+- Lightweight and minimal dependencies
 
 ## Tech Stack
-- React JS (Typescrpit)
-- HTML5, CSS3 (Styled Component)
-- Library Used:
-    - Moment.js
-    - Styled Component
-    - Typescrpit
+- React JS
+- TypeScrpit
+- Styled Component
+- Moment.js
 
 ## Key Features
 
-- **User-Friendly Interface:** Intuitive design for easy navigation and interaction.
-- **Dynamic Date Handling:** Utilizes Moment.js for robust date manipulation and formatting.
-- **Type-Safe Development:** Leverages TypeScript to catch errors during development.
-- **Styled Components:** Encapsulated and reusable styles for a maintainable codebase.
-- **Data Management:** Easily add and retrieve data associated with specific dates.
+- **Monthly Calendar View:** Navigate through a monthly calendar with ease.
+- **Date Selection:** Select single or multiple dates from the calendar.
+- **Data Management:** Add, update, or remove data associated with selected dates.
+- **Custom Styling:** Easily customize the calendar appearance using Styled Components.
+- **Event Handling:** Handle user interactions and events seamlessly within the calendar component.
 
-## Get Started
-1. Clone this repository: `git clone https://github.com/Jaganath-MSJ/CalendarSimple.git`
-2. Navigate to the project directory: `cd CalendarSimple`
-3. Install dependencies: `npm install`
-4. Start frontend: `npm start`
-5. Open the app in your browser: `http://localhost:3000`
+## Installation
+    npm install --save calendar-simple
 
-## Demo:
+## Usage
+    import React from 'react';
+    import { Calendar } from 'calendar-simple';
+
+    const App: React.FC = () => {
+        return (
+            <div>
+            <h1>Calendar App</h1>
+            <Calendar />
+            </div>
+        );
+    };
+
+    export default App;
+
+## Demo
 For a live demonstration, you can visit [Demo Link](http://calendarsimple.netlify.app).
 
-## Contact:
-Feel free to reach out to me via email at [jagan.msjc@gmail.com](mailto:jagan.msjc@gmail.com) or connect on [LinkedIn](https://www.linkedin.com/in/jaganathms).
-
-## Thanks To
-[Netlify](https://www.netlify.com)
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.

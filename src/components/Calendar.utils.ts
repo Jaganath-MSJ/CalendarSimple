@@ -1,5 +1,5 @@
 import moment from "moment";
-import { DateType } from "./Calender.type";
+import { DateType } from "./Calendar.type";
 
 export const getNoOfDays = (date: DateType): number => {
   const noOfDates = date.daysInMonth();
@@ -43,7 +43,10 @@ export const getYearList = (
   return yearList;
 };
 
-export const checkIsToday = (selectedDate: DateType, dates: number): boolean => {
+export const checkIsToday = (
+  selectedDate: DateType,
+  dates: number
+): boolean => {
   const cloneSelectedDate = selectedDate.clone();
   cloneSelectedDate.date(dates);
 

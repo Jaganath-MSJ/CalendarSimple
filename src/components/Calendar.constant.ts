@@ -1,4 +1,4 @@
-import { MonthListType } from "./Calender.type";
+import { MonthListType } from "./Calendar.type";
 
 const DAY_LIST = {
   SUNDAY: {
@@ -72,4 +72,9 @@ export const MONTH_LIST: MonthListType[] = Object.values(MONTHS);
 export const CALENDER_STRINGS = {
   MONTH: "monthDropdown",
   YEAR: "yearDropdown",
+};
+
+export const DAY_TYPE = {
+  FULL_NAME: "FULL",
+  HALF_NAME: "HALF",
 };

@@ -8,18 +8,18 @@ import React, {
   ReactNode,
 } from "react";
 import {
-  CalenderType,
+  CalendarType,
   DateType,
   EMonthOption,
   EYearOption,
   MonthListType,
   defaultCalenderProps,
-} from "./Calender.type";
+} from "./Calendar.type";
 import {
   CALENDER_STRINGS,
   DAY_LIST_NAME,
   MONTH_LIST,
-} from "./Calender.constant";
+} from "./Calendar.constant";
 import {
   date,
   convertToDate,
@@ -28,13 +28,13 @@ import {
   getYearList,
   convertToMoment,
   checkIsToday,
-} from "./Calender.utils";
-import CalenderStyles, { ButtonStyles, SelectStyles } from "./Calender.styles";
+} from "./Calendar.utils";
+import CalenderStyles, { ButtonStyles, SelectStyles } from "./Calendar.styles";
 import DateData from "./DateData";
 import LeftArrow from "../assets/LeftArrow";
 import RightArrow from "../assets/RightArrow";
 
-function Calender(props: CalenderType = defaultCalenderProps) {
+const Calender: React.FC<CalendarType> = (props: CalendarType = defaultCalenderProps) => {
   const {
     dayType = defaultCalenderProps.dayType,
     data = defaultCalenderProps.data,
@@ -59,13 +59,14 @@ function Calender(props: CalenderType = defaultCalenderProps) {
     () => (selected_date ? convertToMoment(selected_date) : date()),
     [selected_date]
   );
-  const [selectedDate, setSelectedDate] = useState<DateType>(selectedDateMoment);
+  const [selectedDate, setSelectedDate] =
+    useState<DateType>(selectedDateMoment);
 
   useLayoutEffect(() => {
     setSelectedDate(selectedDateMoment);
   }, [selectedDateMoment]);
 
-  const getDates = useCallback((): ReactNode[] => {
+  const getDates = useCallback<() => ReactNode[]>((): ReactNode[] => {
     const dateComponent: ReactNode[] = [];
     const noOfDays: number = getNoOfDays(selectedDate.clone());
     const monthStartDay: number = getMonthStartingDay(selectedDate.clone());
@@ -83,9 +84,8 @@ function Calender(props: CalenderType = defaultCalenderProps) {
 
     for (let row = 1; row <= noOfRows; row++) {
       const tableRow: ReactNode[] = [];
-      let days: number = 7;
 
-      for (let day = 1; day <= days; day++) {
+      for (let day = 1; day <= 7; day++) {
         if ((row === 1 && day <= monthStartDay) || dates > noOfDays) {
           const emptyData: ReactNode = <td key={`empty_${day}`} />;
           tableRow.push(emptyData);
@@ -209,6 +209,6 @@ function Calender(props: CalenderType = defaultCalenderProps) {
       </table>
     </CalenderStyles>
   );
-}
+};
 
 export default memo(Calender);

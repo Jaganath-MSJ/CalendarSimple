@@ -2,7 +2,7 @@ import { Moment } from "moment";
 
 export type DateType = Moment;
 
-export interface CalenderType {
+export interface CalendarType {
   dayType?: EDayType;
   data?: React.ReactNode[];
   width?: number;
@@ -35,7 +35,7 @@ export const defaultCalenderProps = {
   isSelectDate: false,
   pastYearLength: 5,
   futureYearLength: 5,
-}
+};
 
 export interface DateDataType {
   date: number;

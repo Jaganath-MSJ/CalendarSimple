@@ -1,6 +1,7 @@
+import React from "react";
 import styled from "styled-components";
 import cx from "classnames";
-import { DateDataType } from "./Calender.type";
+import { DateDataType } from "./Calendar.type";
 
 function DateData(props: DateDataType) {
   const {
