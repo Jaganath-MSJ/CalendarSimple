@@ -1,6 +1,6 @@
 {
   "name": "calendar-simple",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "A user-friendly calendar app for viewing, selecting, and managing dates with data management capabilities.",
   "main": "./dist/index.js",
   "module": "./dist/index.esm.js",
@@ -26,7 +26,6 @@
     "styled-components": "^6.1.8"
   },
   "devDependencies": {
-    "@types/jest": "^27.5.2",
     "@types/node": "^16.18.76",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
