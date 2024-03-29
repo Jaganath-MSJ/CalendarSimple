@@ -39,6 +39,7 @@ const DateDataStyles = styled.td<{
   $isSelected: boolean;
   $isToday: boolean;
 }>`
+  cursor: pointer;
   & > div {
     height: 100%;
     width: 100%;

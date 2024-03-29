@@ -9,8 +9,8 @@ const CalenderStyles = styled.section<{
     margin: 0;
     outline: none;
   }
-  width: ${(props) => props.$width};
-  height: ${(props) => props.$height};
+  width: max-content;
+  height: max-content;
   & > div {
     display: flex;
     justify-content: space-between;
@@ -55,6 +55,7 @@ export const ButtonStyles = styled.button`
 export const SelectStyles = styled.select`
   border-radius: 3px;
   padding: 2px;
+  cursor: pointer;
 `;
 
 export default CalenderStyles;
