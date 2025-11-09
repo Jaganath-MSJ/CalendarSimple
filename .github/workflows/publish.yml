@@ -1,0 +1,36 @@
+name: Publish Version
+
+on:
+  push:
+    branches:
+      - release
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      packages: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: [20, 22]
+
+      - run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Semantic Release
+        run: npx semantic-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Published Version Name
+        run: echo "Version Name ${{ steps.extract_version.outputs.version_name }}"
