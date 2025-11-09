@@ -27,7 +27,7 @@ export const getYearList = (
   selectedYear: number
 ): number[] => {
   const yearLength = pastLength + futureLength;
-  const yearStarting = moment().year() - pastLength + 1;
+  const yearStarting = moment().year() - pastLength;
   const yearList = Array.from(
     { length: yearLength },
     (_, index) => index + yearStarting
