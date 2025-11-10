@@ -20,6 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          registry-url: https://npm.pkg.github.com/
 
       - run: npm install
 
@@ -37,13 +38,13 @@ jobs:
       - name: Published Version Name
         id: version_name
         run: |
-          version="${{ steps.semantic_release.outputs.parsed_data }}"
+          last_line="${{ steps.semantic_release.outputs.parsed_data }}"
           branch_name="${{ github.ref }}"
           if [[ "$branch_name" == "refs/heads/release" ]]; then
-            version_number=$(echo "$version" | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+-[a-zA-Z0-9.-]+')
+            version_number=$(echo "$last_line" | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+-[a-zA-Z0-9.-]+' || true)
             name="Beta"
           else
-            version_number=$(echo "$version" | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
+            version_number=$(echo "$last_line" | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+' || true)
             name="Standard"
           fi
           echo "$name Version: $version_number"
