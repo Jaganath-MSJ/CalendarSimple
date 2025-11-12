@@ -15,7 +15,7 @@
     [
       "@semantic-release/changelog",
       {
-        "changelogFile": "README.md"
+        "changelogFile": "CHANGE_LOG.md"
       }
     ],
     "@semantic-release/npm"
