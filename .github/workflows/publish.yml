@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: 22
           registry-url: https://npm.pkg.github.com/
-      
+
       - name: Clean npm config
         run: npm config delete always-auth || true
 
@@ -35,6 +35,38 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Setup Git
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+      - name: Clean up existing tags
+        run: |
+          git fetch --tags
+          # Get current branch
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          
+          if [[ "$BRANCH" == "beta" ]]; then
+            # Clean up any existing beta tags that might conflict
+            EXISTING_TAGS=$(git tag -l "v*-beta.*" | tail -n 5)
+          else
+            # Clean up any existing production tags that might conflict
+            EXISTING_TAGS=$(git tag -l "v*" | grep -v "beta" | tail -n 5)
+          fi
+          
+          if [ ! -z "$EXISTING_TAGS" ]; then
+            echo "Checking for duplicate tags..."
+            for tag in $EXISTING_TAGS; do
+              # Only delete if semantic-release will try to recreate it
+              echo "Found tag: $tag"
+              git tag -d $tag 2>/dev/null || true
+              git push --delete origin $tag 2>/dev/null || true
+            done
+          fi
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Semantic Release
         id: semantic_release
