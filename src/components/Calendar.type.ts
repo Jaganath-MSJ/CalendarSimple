@@ -1,6 +1,6 @@
-import { Moment } from "moment";
+import { Dayjs } from "dayjs";
 
-export type DateType = Moment;
+export type DateType = Dayjs;
 
 export interface CalendarType {
   dayType?: EDayType;
