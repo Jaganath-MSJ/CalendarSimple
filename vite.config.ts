@@ -29,7 +29,7 @@ export default defineConfig({
     sourcemap: true,
     emptyOutDir: true, // Equivalent to tsup's clean: true
     target: "es2020",
-    minify: "terser", // or 'esbuild'
+    minify: "esbuild", // or 'terser'
   },
   plugins: [
     // Generates .d.ts files (equivalent to tsup's dts: true)
