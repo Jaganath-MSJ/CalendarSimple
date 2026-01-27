@@ -35,16 +35,16 @@ A user-friendly calendar app for viewing, selecting, and managing dates with dat
     const App: React.FC = () => {
         return (
             <div>
-            <h1>Calendar App</h1>
-            <Calendar />
+                <h1>Calendar App</h1>
+                <Calendar />
             </div>
         );
     };
 
     export default App;
 
-## Demo
-For a live demonstration, you can visit [Demo Link](http://calendarsimple.netlify.app).
+## Library
+For a more information, you can visit [Lib Link](https://www.npmjs.com/package/calendar-simple).
 
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.

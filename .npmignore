@@ -27,3 +27,10 @@ yarn-error.log*
 # Config files
 tsconfig.json
 tsup.config.ts
+
+# Actions
+.github
+.releaserc
+
+# Playground
+playground
