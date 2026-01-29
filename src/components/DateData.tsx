@@ -7,6 +7,7 @@ function DateData(props: DateDataType) {
   const {
     date,
     data,
+    cellWidth,
     className,
     dataClassName,
     isSelected,
@@ -29,7 +30,51 @@ function DateData(props: DateDataType) {
     >
       <div>
         <p>{date}</p>
-        {data && <div className={dataClassName}>{data}</div>}
+        {/* {data && <div className={dataClassName}>{data}</div>} */}
+        {data && (
+          <div
+            className={dataClassName}
+            style={{
+              padding: "4px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "4px",
+            }}
+          >
+            {data.map((item, index) => {
+              let diffDates = 1;
+              if (item.endDate) {
+                diffDates =
+                  dateFn(item.endDate).diff(item.startDate, "days") + 1;
+              }
+              const width = `${cellWidth * diffDates - 16}px`;
+
+              return (
+                <div
+                  key={`${item.startDate}-${index}`}
+                  style={{
+                    backgroundColor: "#2E75B6",
+                    borderRadius: "4px",
+                    width,
+                    zIndex: 2,
+                    position: "relative",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    fontSize: "12px",
+                    padding: "2px 4px",
+                    color: "white",
+                    fontWeight: "normal",
+                    height: "20px", // Fixed height for alignment
+                    boxSizing: "border-box",
+                  }}
+                >
+                  {item.value}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </DateDataStyles>
   );

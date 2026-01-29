@@ -4,7 +4,44 @@ function App() {
   return (
     <Calendar
       dayType={EDayType.fullName}
-      data={["22", "", "92", "", "", "829", "", "", "", "2810"]}
+      data={[
+        {
+          startDate: "2026-01-01",
+          endDate: "2026-01-02",
+          value: "22",
+        },
+        {
+          startDate: "2026-01-03",
+          endDate: "2026-01-04",
+          value: "92",
+        },
+        { startDate: "2026-01-05", value: "55" },
+        {
+          startDate: "2026-01-06",
+          endDate: "2026-01-08",
+          value: "829",
+        },
+        {
+          startDate: "2026-01-09",
+          endDate: "2026-01-10",
+          value: "2810",
+        },
+        {
+          startDate: "2025-12-22",
+          endDate: "2026-01-02",
+          value: "Leave",
+        },
+        {
+          startDate: "2026-01-10",
+          endDate: "2026-02-10",
+          value: "5678",
+        },
+        {
+          startDate: '2026-01-10',
+          endDate: '2026-01-26',
+          value: '939912'
+        }
+      ]}
       width={700}
       height={500}
       selectedDate={new Date('2026-01-26')}

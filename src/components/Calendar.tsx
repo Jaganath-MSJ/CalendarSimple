@@ -33,9 +33,7 @@ import LeftArrow from "../assets/LeftArrow";
 import RightArrow from "../assets/RightArrow";
 import calendarize from "calendarize";
 
-const Calender: React.FC<CalendarType> = (
-  props: CalendarType = defaultCalenderProps
-) => {
+function Calender(props: CalendarType = defaultCalenderProps) {
   const {
     dayType = defaultCalenderProps.dayType,
     data = defaultCalenderProps.data,
@@ -60,12 +58,19 @@ const Calender: React.FC<CalendarType> = (
     () => (selected_date ? convertToDayjs(selected_date) : date()),
     [selected_date]
   );
-  const [selectedDate, setSelectedDate] =
-    useState<DateType>(selectedDateDayjs);
+  const [selectedDate, setSelectedDate] = useState<DateType>(selectedDateDayjs);
 
   useLayoutEffect(() => {
     setSelectedDate(selectedDateDayjs);
   }, [selectedDateDayjs]);
+
+  const dataEvents = useMemo(
+    () =>
+      data.sort((a, b) => {
+        return date(a.startDate).diff(date(b.startDate), "days");
+      }),
+    [data]
+  );
 
   const getDates = useCallback<() => ReactNode[]>((): ReactNode[] => {
     const onClickDateHandler = (dateInput: number) => {
@@ -77,32 +82,37 @@ const Calender: React.FC<CalendarType> = (
     };
 
     const calendarArray = calendarize(convertToDate(selectedDate));
-    const dateComponent = calendarArray.map((week, index) => (
-      <tr key={(index + 1)}>
-        {week.map((day, index) =>
-          day === 0 ? (
-            <td key={`empty_idx_${index}`} />
-          ) : (
+    const dateComponent = calendarArray.map((week, weekIndex) => {
+      return (
+        <tr key={weekIndex + 1}>
+          {week.map((day, dayIndex) => {
+            if (day === 0) return <td key={`empty_idx${day}_${dayIndex}`} />;
+            const data = dataEvents.filter(
+              (event) => date(event.startDate).day() === day,
+            );
+            return (
             <DateData
-              key={`date_${day}`}
+                key={`date_${weekIndex}_${dayIndex}`}
               isSelected={isSelectDate && day === selectedDate.date()}
               isToday={checkIsToday(selectedDate, day)}
               onClick={isSelectDate ? onClickDateHandler : undefined}
               date={day}
-              data={data[day - 1]}
+                data={data}
+                cellWidth={width / 7}
               className={tableDateClassName}
               dataClassName={dataClassName}
               selectedClassName={selectedClassName}
               todayClassName={todayClassName}
             />
-          )
-        )}
+            );
+          })}
       </tr>
-    ));
+      );
+    });
 
     return dateComponent;
   }, [
-    data,
+    dataEvents,
     selectedDate,
     dataClassName,
     selectedClassName,
@@ -116,9 +126,13 @@ const Calender: React.FC<CalendarType> = (
     let clonedSelectedDate = selectedDate;
 
     if (option === EMonthOption.add) {
-      clonedSelectedDate = date(clonedSelectedDate).month(clonedSelectedDate.month() + 1);
+      clonedSelectedDate = date(clonedSelectedDate).month(
+        clonedSelectedDate.month() + 1
+      );
     } else if (option === EMonthOption.sub) {
-      clonedSelectedDate = date(clonedSelectedDate).month(clonedSelectedDate.month() - 1);
+      clonedSelectedDate = date(clonedSelectedDate).month(
+        clonedSelectedDate.month() - 1
+      );
     }
 
     setSelectedDate(clonedSelectedDate);

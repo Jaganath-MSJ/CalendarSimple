@@ -2,9 +2,15 @@ import { Dayjs } from "dayjs";
 
 export type DateType = Dayjs;
 
+export interface DataType {
+  startDate: string;
+  endDate?: string;
+  value: string;
+}
+
 export interface CalendarType {
   dayType?: EDayType;
-  data?: React.ReactNode[];
+  data?: DataType[];
   width?: number;
   height?: number;
   selectedDate?: Date;
@@ -39,7 +45,8 @@ export const defaultCalenderProps = {
 
 export interface DateDataType {
   date: number;
-  data: React.ReactNode;
+  data: DataType[];
+  cellWidth: number;
   className?: string;
   dataClassName?: string;
   isSelected: boolean;
