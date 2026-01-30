@@ -56,7 +56,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
 
   const selectedDateDayjs: DateType = useMemo(
     () => (selected_date ? convertToDayjs(selected_date) : date()),
-    [selected_date]
+    [selected_date],
   );
   const [selectedDate, setSelectedDate] = useState<DateType>(selectedDateDayjs);
 
@@ -82,33 +82,70 @@ function Calender(props: CalendarType = defaultCalenderProps) {
     };
 
     const calendarArray = calendarize(convertToDate(selectedDate));
-    const dateComponent = calendarArray.map((week, weekIndex) => {
-      return (
-        <tr key={weekIndex + 1}>
-          {week.map((day, dayIndex) => {
-            if (day === 0) return <td key={`empty_idx${day}_${dayIndex}`} />;
-            const data = dataEvents.filter(
-              (event) => date(event.startDate).day() === day,
-            );
-            return (
+    const dateComponent = calendarArray.map((week, weekIndex) => (
+      <tr key={weekIndex + 1}>
+        {week.map((day, dayIndex) => {
+          if (day === 0) return <td key={`empty_idx_${dayIndex}`} />;
+          const currentDate = date(selectedDate).date(day);
+          const currentStaringDates = data.filter((item) => {
+            const itemStartDate = date(item.startDate);
+            const itemEndDate = item.endDate
+              ? date(item.endDate)
+              : itemStartDate;
+
+            const isStart = itemStartDate.isSame(currentDate, "date");
+            const isContinuation =
+              itemStartDate.isBefore(currentDate, "date") &&
+              (itemEndDate.isSame(currentDate, "date") ||
+                itemEndDate.isAfter(currentDate, "date")) &&
+              (dayIndex === 0 || day === 1);
+
+            return isStart || isContinuation;
+          });
+
+          const formattedData = currentStaringDates.map((item) => {
+            const itemEndDate = item.endDate
+              ? date(item.endDate)
+              : date(item.startDate);
+            const endOfWeekDate = date(currentDate).add(6 - dayIndex, "day");
+
+            let effectiveEndDate = itemEndDate;
+            if (itemEndDate.isAfter(endOfWeekDate, "date")) {
+              effectiveEndDate = endOfWeekDate;
+            }
+
+            return {
+              ...item,
+              startDate: currentDate.format("YYYY-MM-DD"),
+              endDate: effectiveEndDate.format("YYYY-MM-DD"),
+            };
+          });
+
+          console.log("all week data", {
+            day,
+            currentDate: currentDate.format("YYYY-MM-DD"),
+            currentStaringDates,
+            formattedData,
+          });
+
+          return (
             <DateData
-                key={`date_${weekIndex}_${dayIndex}`}
+              key={`date_${weekIndex}_${dayIndex}`}
               isSelected={isSelectDate && day === selectedDate.date()}
               isToday={checkIsToday(selectedDate, day)}
               onClick={isSelectDate ? onClickDateHandler : undefined}
               date={day}
-                data={data}
-                cellWidth={width / 7}
+              data={formattedData}
+              cellWidth={width / 7}
               className={tableDateClassName}
               dataClassName={dataClassName}
               selectedClassName={selectedClassName}
               todayClassName={todayClassName}
             />
-            );
-          })}
+          );
+        })}
       </tr>
-      );
-    });
+    ));
 
     return dateComponent;
   }, [
@@ -127,11 +164,11 @@ function Calender(props: CalendarType = defaultCalenderProps) {
 
     if (option === EMonthOption.add) {
       clonedSelectedDate = date(clonedSelectedDate).month(
-        clonedSelectedDate.month() + 1
+        clonedSelectedDate.month() + 1,
       );
     } else if (option === EMonthOption.sub) {
       clonedSelectedDate = date(clonedSelectedDate).month(
-        clonedSelectedDate.month() - 1
+        clonedSelectedDate.month() - 1,
       );
     }
 
@@ -141,7 +178,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
 
   const onDropdownClick = (
     event: ChangeEvent<HTMLSelectElement>,
-    option: EYearOption
+    option: EYearOption,
   ) => {
     const value = Number(event.target.value);
     let clonedSelectedDate = selectedDate;
@@ -188,7 +225,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
             {getYearList(
               pastYearLength,
               futureYearLength,
-              selectedDate.year()
+              selectedDate.year(),
             ).map((year: number) => (
               <option key={year} value={year}>
                 {year}
@@ -212,6 +249,6 @@ function Calender(props: CalendarType = defaultCalenderProps) {
       </table>
     </CalenderStyles>
   );
-};
+}
 
 export default memo(Calender);

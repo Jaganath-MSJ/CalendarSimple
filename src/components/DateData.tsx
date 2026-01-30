@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import cx from "classnames";
 import { DateDataType } from "./Calendar.type";
+import { date as dateFn } from "./Calendar.utils";
 
 function DateData(props: DateDataType) {
   const {
@@ -25,13 +26,13 @@ function DateData(props: DateDataType) {
       className={cx(
         className,
         isSelected && selectedClassName,
-        isToday && todayClassName
+        isToday && todayClassName,
       )}
     >
       <div>
         <p>{date}</p>
         {/* {data && <div className={dataClassName}>{data}</div>} */}
-        {data && (
+        {data &&(
           <div
             className={dataClassName}
             style={{
@@ -47,7 +48,7 @@ function DateData(props: DateDataType) {
                 diffDates =
                   dateFn(item.endDate).diff(item.startDate, "days") + 1;
               }
-              const width = `${cellWidth * diffDates - 16}px`;
+              const width = `${(cellWidth * diffDates) - 16}px`;
 
               return (
                 <div
@@ -63,11 +64,10 @@ function DateData(props: DateDataType) {
                     textOverflow: "ellipsis",
                     fontSize: "12px",
                     padding: "2px 4px",
-                    color: "white",
-                    fontWeight: "normal",
-                    height: "20px", // Fixed height for alignment
-                    boxSizing: "border-box",
+                    color: 'black',
+                    fontWeight: 'normal',
                   }}
+                  title={item.value}
                 >
                   {item.value}
                 </div>
@@ -91,10 +91,13 @@ const DateDataStyles = styled.td<{
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    & > div > * {
+    & > div > p {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+    & > div > div {
+       overflow: visible;
     }
   }
   ${(props) =>
