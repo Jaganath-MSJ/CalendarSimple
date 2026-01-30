@@ -16,6 +16,7 @@ function DateData(props: DateDataType) {
     onClick,
     selectedClassName,
     todayClassName,
+    isCurrentMonth,
   } = props;
 
   return (
@@ -32,7 +33,7 @@ function DateData(props: DateDataType) {
       <div>
         <p>{date}</p>
         {/* {data && <div className={dataClassName}>{data}</div>} */}
-        {data &&(
+        {data && (
           <div
             className={dataClassName}
             style={{
@@ -43,6 +44,19 @@ function DateData(props: DateDataType) {
             }}
           >
             {data.map((item, index) => {
+              if (!item) {
+                return (
+                  <div
+                    key={`spacer-${index}`}
+                    style={{
+                      height: "20px", // Match event height
+                      padding: "2px 4px",
+                      marginBottom: "0px",
+                    }}
+                  />
+                );
+              }
+
               let diffDates = 1;
               if (item.endDate) {
                 diffDates =
@@ -64,8 +78,10 @@ function DateData(props: DateDataType) {
                     textOverflow: "ellipsis",
                     fontSize: "12px",
                     padding: "2px 4px",
-                    color: 'black',
-                    fontWeight: 'normal',
+                    color: "white",
+                    fontWeight: "normal",
+                    height: "20px", // Fixed height for alignment
+                    boxSizing: "border-box",
                   }}
                   title={item.value}
                 >

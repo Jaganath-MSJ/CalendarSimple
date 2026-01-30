@@ -43,14 +43,20 @@ export const defaultCalenderProps = {
   futureYearLength: 5,
 };
 
+export interface DataTypeList extends DataType {
+  startDateWeek?: string;
+  endDateWeek?: string;
+}
+
 export interface DateDataType {
   date: number;
-  data: DataType[];
+  data: (DataTypeList | null)[];
   cellWidth: number;
   className?: string;
   dataClassName?: string;
   isSelected: boolean;
   isToday: boolean;
+  isCurrentMonth: boolean;
   onClick?: (date: number) => void;
   selectedClassName?: string;
   todayClassName?: string;
