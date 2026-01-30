@@ -56,7 +56,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
 
   const selectedDateDayjs: DateType = useMemo(
     () => (selected_date ? convertToDayjs(selected_date) : date()),
-    [selected_date]
+    [selected_date],
   );
   const [selectedDate, setSelectedDate] = useState<DateType>(selectedDateDayjs);
 
@@ -69,7 +69,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
       data.sort((a, b) => {
         return date(a.startDate).diff(date(b.startDate), "days");
       }),
-    [data]
+    [data],
   );
 
   const getDates = useCallback<() => ReactNode[]>((): ReactNode[] => {
@@ -96,7 +96,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
             const startDayOfWeek = startOfMonth.day();
             currentDate = startOfMonth.subtract(
               startDayOfWeek - dayIndex,
-              "day"
+              "day",
             );
             displayDay = currentDate.date();
           } else {
@@ -193,7 +193,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
       });
 
       return (
-      <tr key={weekIndex + 1}>
+        <tr key={weekIndex + 1}>
           {processedWeek.map((dayObj, dayIndex) => {
             const { currentDate, isCurrentMonth, displayDay } = dayObj;
 
@@ -210,7 +210,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
             // Construct display array with spacers
             const maxSlot = Math.max(
               ...slots[dayIndex].map((_, i) => i),
-              activeEvents.length > 0 ? 0 : -1
+              activeEvents.length > 0 ? 0 : -1,
             );
             const displayData = [];
 
@@ -222,7 +222,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
 
             for (let s = 0; s <= maxDaySlot; s++) {
               const event = activeEvents.find(
-                (e) => eventSlots.get((e as any)._tempId) === s
+                (e) => eventSlots.get((e as any)._tempId) === s,
               );
               if (displayDay === 5) {
                 console.log("check all", {
@@ -246,13 +246,13 @@ function Calender(props: CalendarType = defaultCalenderProps) {
                     : date(event.startDate);
                   const endOfWeekDate = date(currentDate).add(
                     6 - dayIndex,
-                    "day"
+                    "day",
                   );
 
-            let effectiveEndDate = itemEndDate;
-            if (itemEndDate.isAfter(endOfWeekDate, "date")) {
-              effectiveEndDate = endOfWeekDate;
-            }
+                  let effectiveEndDate = itemEndDate;
+                  if (itemEndDate.isAfter(endOfWeekDate, "date")) {
+                    effectiveEndDate = endOfWeekDate;
+                  }
 
                   displayData.push({
                     ...event,
@@ -269,9 +269,9 @@ function Calender(props: CalendarType = defaultCalenderProps) {
               }
             }
 
-          return (
-            <DateData
-              key={`date_${weekIndex}_${dayIndex}`}
+            return (
+              <DateData
+                key={`date_${weekIndex}_${dayIndex}`}
                 isSelected={
                   isSelectDate &&
                   isCurrentMonth &&
@@ -288,15 +288,15 @@ function Calender(props: CalendarType = defaultCalenderProps) {
                 }
                 date={displayDay}
                 data={displayData}
-              cellWidth={width / 7}
-              className={tableDateClassName}
-              dataClassName={dataClassName}
-              selectedClassName={selectedClassName}
-              todayClassName={todayClassName}
-            />
-          );
-        })}
-      </tr>
+                cellWidth={width / 7}
+                className={tableDateClassName}
+                dataClassName={dataClassName}
+                selectedClassName={selectedClassName}
+                todayClassName={todayClassName}
+              />
+            );
+          })}
+        </tr>
       );
     });
 
@@ -317,11 +317,11 @@ function Calender(props: CalendarType = defaultCalenderProps) {
 
     if (option === EMonthOption.add) {
       clonedSelectedDate = date(clonedSelectedDate).month(
-        clonedSelectedDate.month() + 1
+        clonedSelectedDate.month() + 1,
       );
     } else if (option === EMonthOption.sub) {
       clonedSelectedDate = date(clonedSelectedDate).month(
-        clonedSelectedDate.month() - 1
+        clonedSelectedDate.month() - 1,
       );
     }
 
@@ -331,7 +331,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
 
   const onDropdownClick = (
     event: ChangeEvent<HTMLSelectElement>,
-    option: EYearOption
+    option: EYearOption,
   ) => {
     const value = Number(event.target.value);
     let clonedSelectedDate = selectedDate;

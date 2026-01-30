@@ -23,6 +23,7 @@ function DateData(props: DateDataType) {
     <DateDataStyles
       $isSelected={isSelected}
       $isToday={isToday}
+      $isCurrentMonth={isCurrentMonth}
       onClick={() => onClick?.(date)}
       className={cx(
         className,
@@ -58,11 +59,11 @@ function DateData(props: DateDataType) {
               }
 
               let diffDates = 1;
-              if (item.endDate) {
+              if (item.endDateWeek) {
                 diffDates =
-                  dateFn(item.endDate).diff(item.startDate, "days") + 1;
+                  dateFn(item.endDateWeek).diff(item.startDateWeek, "days") + 1;
               }
-              const width = `${(cellWidth * diffDates) - 16}px`;
+              const width = `${cellWidth * diffDates - 16}px`;
 
               return (
                 <div
@@ -99,21 +100,23 @@ function DateData(props: DateDataType) {
 const DateDataStyles = styled.td<{
   $isSelected: boolean;
   $isToday: boolean;
+  $isCurrentMonth: boolean;
 }>`
   cursor: pointer;
+  color: #ccc;
   & > div {
     height: 100%;
     width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: flex-start;
     & > div > p {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
     & > div > div {
-       overflow: visible;
+      overflow: visible;
     }
   }
   ${(props) =>
@@ -130,6 +133,12 @@ const DateDataStyles = styled.td<{
         color: #2E75B6;
         font-size: 18px;
         font-weight: bold;
+      `
+      : ``}
+  ${(props) =>
+    props.$isCurrentMonth
+      ? `
+        color: inherit;
       `
       : ``}
 `;
