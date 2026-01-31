@@ -1,0 +1,64 @@
+.dateData {
+  cursor: pointer;
+  color: #ccc;
+}
+
+.currentMonth {
+  color: inherit;
+}
+
+.cellContent {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.dateLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selected {
+  background-color: #EEEEEE;
+  color: #737373;
+  font-weight: bold;
+}
+
+.today {
+  color: #2E75B6;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.dataContainer {
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: visible;
+}
+
+.spacer {
+  height: 20px;
+  padding: 2px 4px;
+  margin-bottom: 0px;
+}
+
+.eventItem {
+  background-color: #2E75B6;
+  border-radius: 4px;
+  z-index: 2;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  padding: 2px 4px;
+  color: white;
+  font-weight: normal;
+  height: 20px;
+  box-sizing: border-box;
+}

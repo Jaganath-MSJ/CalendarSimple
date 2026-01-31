@@ -7,6 +7,7 @@ import React, {
   memo,
   ReactNode,
 } from "react";
+import cx from "classnames";
 import {
   CalendarType,
   DateType,
@@ -27,7 +28,7 @@ import {
   convertToDayjs,
   checkIsToday,
 } from "./Calendar.utils";
-import CalenderStyles, { ButtonStyles, SelectStyles } from "./Calendar.styles";
+import styles from "./Calendar.module.css";
 import DateData from "./DateData";
 import LeftArrow from "../assets/LeftArrow";
 import RightArrow from "../assets/RightArrow";
@@ -289,7 +290,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
                 date={displayDay}
                 data={displayData}
                 cellWidth={width / 7}
-                className={tableDateClassName}
+                className={cx(styles.tableCell, tableDateClassName)}
                 dataClassName={dataClassName}
                 selectedClassName={selectedClassName}
                 todayClassName={todayClassName}
@@ -347,17 +348,25 @@ function Calender(props: CalendarType = defaultCalenderProps) {
   };
 
   return (
-    <CalenderStyles
-      $width={`${width}px`}
-      $height={`${height}px`}
-      className={className}
+    <section
+      style={
+        {
+          "--calendar-width": `${width}px`,
+          "--calendar-height": `${height}px`,
+        } as React.CSSProperties
+      }
+      className={cx(styles.calendar, className)}
     >
-      <div className={headerClassName}>
-        <ButtonStyles onClick={() => onMonthArrowClick(EMonthOption.sub)}>
+      <div className={cx(styles.header, headerClassName)}>
+        <button
+          className={styles.button}
+          onClick={() => onMonthArrowClick(EMonthOption.sub)}
+        >
           <LeftArrow />
-        </ButtonStyles>
-        <div>
-          <SelectStyles
+        </button>
+        <div className={styles.selectGroup}>
+          <select
+            className={styles.select}
             id={CALENDER_STRINGS.MONTH}
             name={CALENDER_STRINGS.MONTH}
             value={selectedDate.month()}
@@ -368,8 +377,9 @@ function Calender(props: CalendarType = defaultCalenderProps) {
                 {month.label}
               </option>
             ))}
-          </SelectStyles>
-          <SelectStyles
+          </select>
+          <select
+            className={styles.select}
             id={CALENDER_STRINGS.YEAR}
             name={CALENDER_STRINGS.YEAR}
             value={selectedDate.year()}
@@ -378,29 +388,32 @@ function Calender(props: CalendarType = defaultCalenderProps) {
             {getYearList(
               pastYearLength,
               futureYearLength,
-              selectedDate.year(),
+              selectedDate.year()
             ).map((year: number) => (
               <option key={year} value={year}>
                 {year}
               </option>
             ))}
-          </SelectStyles>
+          </select>
         </div>
-        <ButtonStyles onClick={() => onMonthArrowClick(EMonthOption.add)}>
+        <button
+          className={styles.button}
+          onClick={() => onMonthArrowClick(EMonthOption.add)}
+        >
           <RightArrow />
-        </ButtonStyles>
+        </button>
       </div>
-      <table className={tableClassName}>
+      <table className={cx(styles.table, tableClassName)}>
         <thead>
           <tr>
             {DAY_LIST_NAME[dayType].map((day: string) => (
-              <th key={day}>{day}</th>
+              <th key={day} className={styles.tableHeader}>{day}</th>
             ))}
           </tr>
         </thead>
         <tbody>{getDates()}</tbody>
       </table>
-    </CalenderStyles>
+    </section>
   );
 }
 

@@ -1,0 +1,65 @@
+.calendar {
+  width: max-content;
+  height: max-content;
+  /* Default values, overridden by inline styles */
+  --calendar-width: 0px;
+  --calendar-height: 0px;
+
+  & * {
+    padding: 0;
+    margin: 0;
+    outline: none;
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  margin-bottom: 10px;
+}
+
+.selectGroup {
+  display: flex;
+  gap: 20px;
+}
+
+.table {
+  border-collapse: collapse;
+}
+
+.tableHeader,
+.tableCell {
+  border: 1px solid black;
+  text-align: center;
+  min-width: calc(var(--calendar-width) / 7);
+  max-width: calc(var(--calendar-width) / 7);
+}
+
+.tableHeader {
+  height: calc(var(--calendar-height) / 10);
+}
+
+.tableCell {
+  height: calc(var(--calendar-height) / 7);
+}
+
+.button {
+  outline: none;
+  border: none;
+  background: none;
+  color: rgb(211, 211, 211);
+  border-radius: 5px;
+}
+
+.button:hover {
+  background-color: rgba(211, 211, 211, 0.5);
+  transition: 0.2s ease-in-out;
+}
+
+.select {
+  border-radius: 3px;
+  padding: 2px;
+  cursor: pointer;
+}
