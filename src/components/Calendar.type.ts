@@ -62,6 +62,7 @@ export interface DataTypeList extends DataType {
 
 export interface DateDataType {
   date: number;
+  dateObj: DateType;
   data: (DataTypeList | null)[];
   cellWidth: number;
   className?: string;
@@ -69,7 +70,7 @@ export interface DateDataType {
   isSelected: boolean;
   isToday: boolean;
   isCurrentMonth: boolean;
-  onClick?: (date: number) => void;
+  onClick?: (date: DateType) => void;
   selectedClassName?: string;
   todayClassName?: string;
   theme?: CalendarTheme;

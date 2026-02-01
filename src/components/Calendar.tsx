@@ -74,11 +74,11 @@ function Calender(props: CalendarType = defaultCalenderProps) {
   );
 
   const getDates = useCallback<() => ReactNode[]>((): ReactNode[] => {
-    const onClickDateHandler = (dateInput: number) => {
-      if (dateInput !== date(selectedDate).date()) {
-        const cloneSelectedDate = date(selectedDate).date(dateInput);
-        setSelectedDate(date(cloneSelectedDate));
-        onDateClick?.(convertToDate(cloneSelectedDate));
+    const onClickDateHandler = (dateInput: DateType) => {
+      const newDate = date(dateInput);
+      if (!newDate.isSame(selectedDate, "day")) {
+        setSelectedDate(newDate);
+        onDateClick?.(convertToDate(newDate));
       }
     };
 
@@ -282,12 +282,9 @@ function Calender(props: CalendarType = defaultCalenderProps) {
                   checkIsToday(selectedDate, displayDay) && isCurrentMonth
                 }
                 isCurrentMonth={isCurrentMonth}
-                onClick={
-                  isSelectDate && isCurrentMonth
-                    ? onClickDateHandler
-                    : undefined
-                }
+                onClick={isSelectDate ? onClickDateHandler : undefined}
                 date={displayDay}
+                dateObj={currentDate}
                 data={displayData}
                 cellWidth={width / 7}
                 className={cx(styles.tableCell, tableDateClassName)}

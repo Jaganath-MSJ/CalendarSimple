@@ -7,6 +7,7 @@ import styles from "./DateData.module.css";
 function DateData(props: DateDataType) {
   const {
     date,
+    dateObj,
     data,
     cellWidth,
     className,
@@ -34,7 +35,7 @@ function DateData(props: DateDataType) {
   return (
     <td
       style={style}
-      onClick={() => onClick?.(date)}
+      onClick={() => onClick?.(dateObj)}
       className={cx(styles.dateData, className, {
         [styles.currentMonth]: isCurrentMonth,
         [cx(styles.selected, selectedClassName)]: isSelected,
@@ -69,6 +70,17 @@ function DateData(props: DateDataType) {
                   className={styles.eventItem}
                   style={{ width }}
                   title={tooltipText}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!onClick) return;
+
+                    const clickOffset = e.nativeEvent.offsetX;
+                    const dayIndex = Math.floor(clickOffset / cellWidth);
+                    const startDate = item.startDateWeek || item.startDate;
+                    const targetDate = dateFn(startDate).add(dayIndex, "day");
+
+                    onClick(targetDate);
+                  }}
                 >
                   {item.value}
                 </div>
