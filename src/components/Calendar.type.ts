@@ -2,6 +2,17 @@ import { Dayjs } from "dayjs";
 
 export type DateType = Dayjs;
 
+export interface ThemeStyle {
+  color?: string;
+  bgColor?: string;
+}
+
+export interface CalendarTheme {
+  default?: ThemeStyle;
+  selected?: ThemeStyle;
+  today?: ThemeStyle;
+}
+
 export interface DataType {
   startDate: string;
   endDate?: string;
@@ -26,6 +37,7 @@ export interface CalendarType {
   todayClassName?: string;
   pastYearLength?: number;
   futureYearLength?: number;
+  theme?: CalendarTheme;
 }
 
 export enum EDayType {
@@ -60,6 +72,7 @@ export interface DateDataType {
   onClick?: (date: number) => void;
   selectedClassName?: string;
   todayClassName?: string;
+  theme?: CalendarTheme;
 }
 
 export interface MonthListType {

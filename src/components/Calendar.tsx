@@ -294,6 +294,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
                 dataClassName={dataClassName}
                 selectedClassName={selectedClassName}
                 todayClassName={todayClassName}
+                theme={props.theme}
               />
             );
           })}
@@ -388,7 +389,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
             {getYearList(
               pastYearLength,
               futureYearLength,
-              selectedDate.year()
+              selectedDate.year(),
             ).map((year: number) => (
               <option key={year} value={year}>
                 {year}
@@ -407,7 +408,9 @@ function Calender(props: CalendarType = defaultCalenderProps) {
         <thead>
           <tr>
             {DAY_LIST_NAME[dayType].map((day: string) => (
-              <th key={day} className={styles.tableHeader}>{day}</th>
+              <th key={day} className={styles.tableHeader}>
+                {day}
+              </th>
             ))}
           </tr>
         </thead>

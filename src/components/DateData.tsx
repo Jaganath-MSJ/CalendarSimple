@@ -17,10 +17,23 @@ function DateData(props: DateDataType) {
     selectedClassName,
     todayClassName,
     isCurrentMonth,
+    theme,
   } = props;
+
+  const styleSource = isSelected
+    ? theme?.selected
+    : isToday
+      ? theme?.today
+      : theme?.default;
+
+  const style = {
+    color: styleSource?.color,
+    backgroundColor: styleSource?.bgColor,
+  };
 
   return (
     <td
+      style={style}
       onClick={() => onClick?.(date)}
       className={cx(styles.dateData, className, {
         [styles.currentMonth]: isCurrentMonth,

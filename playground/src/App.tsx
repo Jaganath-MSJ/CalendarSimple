@@ -37,17 +37,22 @@ function App() {
           value: "5678",
         },
         {
-          startDate: '2026-01-10',
-          endDate: '2026-01-26',
-          value: '939912'
-        }
+          startDate: "2026-01-10",
+          endDate: "2026-01-26",
+          value: "939912",
+        },
       ]}
       width={700}
       height={500}
-      selectedDate={new Date('2026-01-26')}
+      selectedDate={new Date("2026-01-26")}
       isSelectDate
       pastYearLength={2}
       futureYearLength={3}
+      theme={{
+        default: { color: "#333", bgColor: "#f0f0f0" },
+        selected: { color: "#fff", bgColor: "#007bff" },
+        today: { color: "#007bff", bgColor: "#e6f2ff" },
+      }}
     />
   );
 }
