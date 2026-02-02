@@ -292,6 +292,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
                 selectedClassName={selectedClassName}
                 todayClassName={todayClassName}
                 theme={props.theme}
+                maxEvents={props.maxEvents}
               />
             );
           })}

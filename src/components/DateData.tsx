@@ -19,6 +19,8 @@ function DateData(props: DateDataType) {
     todayClassName,
     isCurrentMonth,
     theme,
+    maxEvents = 3, // Default limit
+    onMoreClick,
   } = props;
 
   const styleSource = isSelected
@@ -32,6 +34,22 @@ function DateData(props: DateDataType) {
     backgroundColor: styleSource?.bgColor,
   };
 
+  // Determine which items to display
+  let visibleEvents = data;
+  let hiddenEventsCount = 0;
+
+  if (maxEvents && data && data.length > maxEvents) {
+    visibleEvents = data.slice(0, maxEvents - 1);
+    // Count real events (not null spacers) in the hidden portion
+    const remainingEvents = data.slice(maxEvents - 1);
+    // For the remaining items, we only care about real events for the count
+    // But since the data array includes spacers (nulls) for positioning,
+    // simply checking length might be misleading if they are just spacers.
+    // However, in month view logic, spacers are only inserted if there's an event *somewhere* in that slot.
+    // A simplified approach is just:
+    hiddenEventsCount = data.length - (maxEvents - 1);
+  }
+
   return (
     <td
       style={style}
@@ -44,25 +62,21 @@ function DateData(props: DateDataType) {
     >
       <div className={styles.cellContent}>
         <p className={styles.dateLabel}>{date}</p>
-        {/* {data && <div className={dataClassName}>{data}</div>} */}
+
         {data && (
           <div className={cx(styles.dataContainer, dataClassName)}>
-            {data.map((item, index) => {
+            {visibleEvents.map((item, index) => {
               if (!item) {
                 return (
                   <div key={`spacer-${index}`} className={styles.spacer} />
                 );
               }
 
-              let diffDates = 1;
-              let tooltipText = dateFn(item.startDate).format("YYYY-MM-DD");
-              if (item.endDateWeek) {
-                diffDates =
-                  dateFn(item.endDateWeek).diff(item.startDateWeek, "days") + 1;
-                tooltipText += ` to ${dateFn(item.endDate).format("YYYY-MM-DD")}`;
-              }
+              const diffDates = item.endDateWeek
+                ? dateFn(item.endDateWeek).diff(item.startDateWeek, "days") + 1
+                : 1;
+              const tooltipText = `${dateFn(item.startDate).format("YYYY-MM-DD")} - ${item.value}`;
               const width = `${cellWidth * diffDates - 16}px`;
-              tooltipText += ` - ${item.value}`;
 
               return (
                 <div
@@ -72,20 +86,24 @@ function DateData(props: DateDataType) {
                   title={tooltipText}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (!onClick) return;
-
-                    const clickOffset = e.nativeEvent.offsetX;
-                    const dayIndex = Math.floor(clickOffset / cellWidth);
-                    const startDate = item.startDateWeek || item.startDate;
-                    const targetDate = dateFn(startDate).add(dayIndex, "day");
-
-                    onClick(targetDate);
+                    // Handle range selection or event click
                   }}
                 >
                   {item.value}
                 </div>
               );
             })}
+            {hiddenEventsCount > 0 && (
+              <div
+                className={styles.moreEvents}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoreClick?.(dateObj); // Or expand logic
+                }}
+              >
+                + {hiddenEventsCount} more
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -38,6 +38,7 @@ export interface CalendarType {
   pastYearLength?: number;
   futureYearLength?: number;
   theme?: CalendarTheme;
+  maxEvents?: number;
 }
 
 export enum EDayType {
@@ -53,6 +54,7 @@ export const defaultCalenderProps = {
   isSelectDate: false,
   pastYearLength: 5,
   futureYearLength: 5,
+  maxEvents: 3,
 };
 
 export interface DataTypeList extends DataType {
@@ -71,9 +73,11 @@ export interface DateDataType {
   isToday: boolean;
   isCurrentMonth: boolean;
   onClick?: (date: DateType) => void;
+  onMoreClick?: (date: DateType) => void;
   selectedClassName?: string;
   todayClassName?: string;
   theme?: CalendarTheme;
+  maxEvents?: number;
 }
 
 export interface MonthListType {

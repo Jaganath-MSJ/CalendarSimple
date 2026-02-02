@@ -11,9 +11,24 @@ function App() {
           value: "22",
         },
         {
+          startDate: "2026-01-02",
+          endDate: "2026-01-03",
+          value: "392",
+        },
+        {
+          startDate: "2026-01-01",
+          endDate: "2026-01-03",
+          value: "39332",
+        },
+        {
           startDate: "2026-01-03",
           endDate: "2026-01-04",
           value: "92",
+        },
+        {
+          startDate: "2026-01-02",
+          endDate: "2026-01-03",
+          value: "39232",
         },
         { startDate: "2026-01-05", value: "55" },
         {
@@ -25,6 +40,11 @@ function App() {
           startDate: "2026-01-09",
           endDate: "2026-01-10",
           value: "2810",
+        },
+        {
+          startDate: "2026-01-12",
+          endDate: "2026-01-12",
+          value: "28133220",
         },
         {
           startDate: "2025-12-22",
@@ -48,6 +68,7 @@ function App() {
       isSelectDate
       pastYearLength={2}
       futureYearLength={3}
+      maxEvents={2}
       theme={{
         default: { color: "#333", bgColor: "#f0f0f0" },
         selected: { color: "#fff", bgColor: "#007bff" },
