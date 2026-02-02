@@ -13,12 +13,12 @@ function App() {
         {
           startDate: "2026-01-02",
           endDate: "2026-01-03",
-          value: "392",
+          value: "98392",
         },
         {
           startDate: "2026-01-01",
-          endDate: "2026-01-03",
-          value: "39332",
+          endDate: "2026-01-02",
+          value: "3932329",
         },
         {
           startDate: "2026-01-03",
@@ -43,7 +43,7 @@ function App() {
         },
         {
           startDate: "2026-01-12",
-          endDate: "2026-01-12",
+          endDate: "2026-01-13",
           value: "28133220",
         },
         {

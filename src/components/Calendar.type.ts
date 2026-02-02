@@ -60,6 +60,7 @@ export const defaultCalenderProps = {
 export interface DataTypeList extends DataType {
   startDateWeek?: string;
   endDateWeek?: string;
+  isSpacer?: boolean;
 }
 
 export interface DateDataType {
@@ -78,6 +79,7 @@ export interface DateDataType {
   todayClassName?: string;
   theme?: CalendarTheme;
   maxEvents?: number;
+  totalEvents?: number;
 }
 
 export interface MonthListType {

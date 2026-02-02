@@ -21,6 +21,7 @@ function DateData(props: DateDataType) {
     theme,
     maxEvents = 3, // Default limit
     onMoreClick,
+    totalEvents = 0,
   } = props;
 
   const styleSource = isSelected
@@ -38,16 +39,26 @@ function DateData(props: DateDataType) {
   let visibleEvents = data;
   let hiddenEventsCount = 0;
 
-  if (maxEvents && data && data.length > maxEvents) {
-    visibleEvents = data.slice(0, maxEvents - 1);
-    // Count real events (not null spacers) in the hidden portion
-    const remainingEvents = data.slice(maxEvents - 1);
-    // For the remaining items, we only care about real events for the count
-    // But since the data array includes spacers (nulls) for positioning,
-    // simply checking length might be misleading if they are just spacers.
-    // However, in month view logic, spacers are only inserted if there's an event *somewhere* in that slot.
-    // A simplified approach is just:
-    hiddenEventsCount = data.length - (maxEvents - 1);
+  if (
+    maxEvents &&
+    data &&
+    (totalEvents >= maxEvents || data.length > maxEvents)
+  ) {
+    visibleEvents = data.slice(0, maxEvents);
+
+    // Calculate how many events are actually shown (excluding empty spacers being used for alignment)
+    // Wait, spacers occupy a slot. So 1 slot = 1 event (rendered or invisible).
+    // The previous logic counted remaining non-nulls.
+    // New logic: totalEvents - (events consumed by visible slots).
+    // But visible slots might contain nulls (alignment holes).
+    // We only care about events *represented* in visible slots.
+    // If visibleEvents[0] is E. That's 1 event.
+    // If visibleEvents[0] is null. That's 0 events.
+
+    const visibleRealEventsCount = visibleEvents.filter(
+      (e) => e !== null,
+    ).length;
+    hiddenEventsCount = totalEvents - visibleRealEventsCount;
   }
 
   return (
@@ -66,7 +77,7 @@ function DateData(props: DateDataType) {
         {data && (
           <div className={cx(styles.dataContainer, dataClassName)}>
             {visibleEvents.map((item, index) => {
-              if (!item) {
+              if (!item || item.isSpacer) {
                 return (
                   <div key={`spacer-${index}`} className={styles.spacer} />
                 );

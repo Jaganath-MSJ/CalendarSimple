@@ -15,6 +15,7 @@ import {
   EYearOption,
   MonthListType,
   defaultCalenderProps,
+  DataTypeList,
 } from "./Calendar.type";
 import {
   CALENDER_STRINGS,
@@ -208,12 +209,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
               );
             });
 
-            // Construct display array with spacers
-            const maxSlot = Math.max(
-              ...slots[dayIndex].map((_, i) => i),
-              activeEvents.length > 0 ? 0 : -1,
-            );
-            const displayData = [];
+            const displayData: (DataTypeList | null)[] = [];
 
             let maxDaySlot = -1;
             activeEvents.forEach((e) => {
@@ -225,16 +221,6 @@ function Calender(props: CalendarType = defaultCalenderProps) {
               const event = activeEvents.find(
                 (e) => eventSlots.get((e as any)._tempId) === s,
               );
-              if (displayDay === 5) {
-                console.log("check all", {
-                  s,
-                  event,
-                  activeEvents,
-                  eventSlots,
-                  weekIndex,
-                  displayDay,
-                });
-              }
               if (event) {
                 const itemStartDate = date(event.startDate);
                 const isStart = itemStartDate.isSame(currentDate, "day");
@@ -262,11 +248,11 @@ function Calender(props: CalendarType = defaultCalenderProps) {
                   });
                 } else {
                   // Spacer (Event exists but rendered in previous cell)
-                  displayData.push(null);
+                  displayData.push({ ...event, isSpacer: true });
                 }
               } else {
                 // Empty slot
-                // displayData.push(null);
+                displayData.push(null);
               }
             }
 
@@ -293,6 +279,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
                 todayClassName={todayClassName}
                 theme={props.theme}
                 maxEvents={props.maxEvents}
+                totalEvents={activeEvents.length}
               />
             );
           })}
