@@ -1,5 +1,4 @@
 import React, {
-  ChangeEvent,
   useCallback,
   useLayoutEffect,
   useMemo,
@@ -11,29 +10,20 @@ import cx from "classnames";
 import {
   CalendarType,
   DateType,
-  EMonthOption,
-  EYearOption,
-  MonthListType,
   defaultCalenderProps,
   DataTypeList,
 } from "./Calendar.type";
-import {
-  CALENDER_STRINGS,
-  DAY_LIST_NAME,
-  MONTH_LIST,
-} from "./Calendar.constant";
+import { DAY_LIST_NAME } from "./Calendar.constant";
 import {
   date,
   convertToDate,
-  getYearList,
   convertToDayjs,
   checkIsToday,
 } from "./Calendar.utils";
 import styles from "./Calendar.module.css";
 import DateData from "./DateData";
-import LeftArrow from "../assets/LeftArrow";
-import RightArrow from "../assets/RightArrow";
 import calendarize from "calendarize";
+import Header from "../layout/Header";
 
 function Calender(props: CalendarType = defaultCalenderProps) {
   const {
@@ -303,40 +293,6 @@ function Calender(props: CalendarType = defaultCalenderProps) {
     isSelectDate,
   ]);
 
-  const onMonthArrowClick = (option: EMonthOption) => {
-    let clonedSelectedDate = selectedDate;
-
-    if (option === EMonthOption.add) {
-      clonedSelectedDate = date(clonedSelectedDate).month(
-        clonedSelectedDate.month() + 1,
-      );
-    } else if (option === EMonthOption.sub) {
-      clonedSelectedDate = date(clonedSelectedDate).month(
-        clonedSelectedDate.month() - 1,
-      );
-    }
-
-    setSelectedDate(clonedSelectedDate);
-    onMonthChange?.(convertToDate(clonedSelectedDate));
-  };
-
-  const onDropdownClick = (
-    event: ChangeEvent<HTMLSelectElement>,
-    option: EYearOption,
-  ) => {
-    const value = Number(event.target.value);
-    let clonedSelectedDate = selectedDate;
-
-    if (option === EYearOption.month) {
-      clonedSelectedDate = date(clonedSelectedDate).month(value);
-    } else if (option === EYearOption.year) {
-      clonedSelectedDate = date(clonedSelectedDate).year(value);
-    }
-
-    setSelectedDate(clonedSelectedDate);
-    onMonthChange?.(convertToDate(clonedSelectedDate));
-  };
-
   return (
     <section
       style={
@@ -347,52 +303,14 @@ function Calender(props: CalendarType = defaultCalenderProps) {
       }
       className={cx(styles.calendar, className)}
     >
-      <div className={cx(styles.header, headerClassName)}>
-        <button
-          className={styles.button}
-          onClick={() => onMonthArrowClick(EMonthOption.sub)}
-        >
-          <LeftArrow />
-        </button>
-        <div className={styles.selectGroup}>
-          <select
-            className={styles.select}
-            id={CALENDER_STRINGS.MONTH}
-            name={CALENDER_STRINGS.MONTH}
-            value={selectedDate.month()}
-            onChange={(e) => onDropdownClick(e, EYearOption.month)}
-          >
-            {MONTH_LIST.map((month: MonthListType) => (
-              <option key={month.label} value={month.value}>
-                {month.label}
-              </option>
-            ))}
-          </select>
-          <select
-            className={styles.select}
-            id={CALENDER_STRINGS.YEAR}
-            name={CALENDER_STRINGS.YEAR}
-            value={selectedDate.year()}
-            onChange={(e) => onDropdownClick(e, EYearOption.year)}
-          >
-            {getYearList(
-              pastYearLength,
-              futureYearLength,
-              selectedDate.year(),
-            ).map((year: number) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button
-          className={styles.button}
-          onClick={() => onMonthArrowClick(EMonthOption.add)}
-        >
-          <RightArrow />
-        </button>
-      </div>
+      <Header
+        headerClassName={headerClassName}
+        selectedDate={selectedDate}
+        onMonthChange={onMonthChange}
+        setSelectedDate={setSelectedDate}
+        pastYearLength={pastYearLength}
+        futureYearLength={futureYearLength}
+      />
       <table className={cx(styles.table, tableClassName)}>
         <thead>
           <tr>
