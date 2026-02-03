@@ -69,7 +69,9 @@ function Calender(props: CalendarType = defaultCalenderProps) {
   const dataEvents = useMemo(
     () =>
       data.sort((a, b) => {
-        return date(a.startDate).diff(date(b.startDate), "days");
+        return date(a.startDate)
+          .startOf("day")
+          .diff(date(b.startDate).startOf("day"), "days");
       }),
     [data],
   );
@@ -127,12 +129,12 @@ function Calender(props: CalendarType = defaultCalenderProps) {
       });
 
       // 2. Identify all events overlapping with this week
-      const weekStart = processedWeek[0].currentDate;
-      const weekEnd = processedWeek[6].currentDate;
+      const weekStart = processedWeek[0].currentDate.startOf("day");
+      const weekEnd = processedWeek[6].currentDate.startOf("day");
 
       const weekEvents = dataEvents.filter((item) => {
-        const start = date(item.startDate);
-        const end = item.endDate ? date(item.endDate) : start;
+        const start = date(item.startDate).startOf("day");
+        const end = item.endDate ? date(item.endDate).startOf("day") : start;
         // Check overlap
         return (
           start.isBefore(weekEnd.add(1, "day"), "day") &&
@@ -142,12 +144,12 @@ function Calender(props: CalendarType = defaultCalenderProps) {
 
       // 3. Sort events: Start Date asc, then Duration desc
       weekEvents.sort((a, b) => {
-        const startA = date(a.startDate);
-        const startB = date(b.startDate);
+        const startA = date(a.startDate).startOf("day");
+        const startB = date(b.startDate).startOf("day");
         if (!startA.isSame(startB, "day")) return startA.diff(startB);
 
-        const endA = a.endDate ? date(a.endDate) : startA;
-        const endB = b.endDate ? date(b.endDate) : startB;
+        const endA = a.endDate ? date(a.endDate).startOf("day") : startA;
+        const endB = b.endDate ? date(b.endDate).startOf("day") : startB;
         const durA = endA.diff(startA, "day");
         const durB = endB.diff(startB, "day");
         return durB - durA;
@@ -161,8 +163,8 @@ function Calender(props: CalendarType = defaultCalenderProps) {
 
       weekEvents.forEach((event, index) => {
         // Determine start/end indices in this week (0..6)
-        const start = date(event.startDate);
-        const end = event.endDate ? date(event.endDate) : start;
+        const start = date(event.startDate).startOf("day");
+        const end = event.endDate ? date(event.endDate).startOf("day") : start;
 
         let startIndex = start.diff(weekStart, "day");
         let endIndex = end.diff(weekStart, "day");
@@ -201,8 +203,10 @@ function Calender(props: CalendarType = defaultCalenderProps) {
 
             // Find events active on this day
             const activeEvents = weekEvents.filter((event) => {
-              const start = date(event.startDate);
-              const end = event.endDate ? date(event.endDate) : start;
+              const start = date(event.startDate).startOf("day");
+              const end = event.endDate
+                ? date(event.endDate).startOf("day")
+                : start;
               return (
                 !currentDate.isBefore(start, "day") &&
                 !currentDate.isAfter(end, "day")
@@ -222,15 +226,15 @@ function Calender(props: CalendarType = defaultCalenderProps) {
                 (e) => eventSlots.get((e as any)._tempId) === s,
               );
               if (event) {
-                const itemStartDate = date(event.startDate);
+                const itemStartDate = date(event.startDate).startOf("day");
                 const isStart = itemStartDate.isSame(currentDate, "day");
                 const isWeekStart = dayIndex === 0;
 
                 if (isStart || isWeekStart) {
                   // Render Event
                   const itemEndDate = event.endDate
-                    ? date(event.endDate)
-                    : date(event.startDate);
+                    ? date(event.endDate).startOf("day")
+                    : date(event.startDate).startOf("day");
                   const endOfWeekDate = date(currentDate).add(
                     6 - dayIndex,
                     "day",
