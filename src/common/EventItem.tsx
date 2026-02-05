@@ -1,10 +1,10 @@
 import React from "react";
 import cx from "classnames";
-import { DateDataType } from "./Calendar.type";
-import { date as dateFn } from "./Calendar.utils";
-import styles from "./DateData.module.css";
+import { DateDataType } from "../components/Calendar.type";
+import { date as dateFn } from "../components/Calendar.utils";
+import styles from "./EventItem.module.css";
 
-function DateData(props: DateDataType) {
+function EventItem(props: DateDataType) {
   const {
     date,
     dateObj,
@@ -122,4 +122,4 @@ function DateData(props: DateDataType) {
   );
 }
 
-export default DateData;
+export default EventItem;

@@ -21,7 +21,7 @@ import {
   checkIsToday,
 } from "./Calendar.utils";
 import styles from "./Calendar.module.css";
-import DateData from "./DateData";
+import EventItem from "../common/EventItem";
 import calendarize from "calendarize";
 import Header from "../layout/Header";
 
@@ -251,7 +251,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
             }
 
             return (
-              <DateData
+              <EventItem
                 key={`date_${weekIndex}_${dayIndex}`}
                 isSelected={
                   isSelectDate &&
