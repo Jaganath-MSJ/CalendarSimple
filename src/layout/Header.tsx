@@ -25,14 +25,14 @@ interface HeaderProps {
   futureYearLength?: number;
 }
 
-const Header: React.FC<HeaderProps> = ({
+function Header({
   selectedDate,
   onMonthChange,
   setSelectedDate,
   headerClassName,
   pastYearLength = 5,
   futureYearLength = 5,
-}) => {
+}: HeaderProps) {
   const onMonthArrowClick = (option: EMonthOption) => {
     let clonedSelectedDate = selectedDate;
 
@@ -69,13 +69,34 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <div className={cx(styles.header, headerClassName)}>
-      <button
-        className={styles.button}
-        onClick={() => onMonthArrowClick(EMonthOption.sub)}
-      >
-        <LeftArrow />
-      </button>
-      <div className={styles.selectGroup}>
+      <div className={styles.navigation}>
+        <button
+          className={styles.todayButton}
+          onClick={() => {
+            setSelectedDate(dateFn());
+            onMonthChange?.(convertToDate(dateFn()));
+          }}
+        >
+          Today
+        </button>
+        <div className={styles.arrows}>
+          <button
+            className={styles.iconButton}
+            onClick={() => onMonthArrowClick(EMonthOption.sub)}
+          >
+            <LeftArrow />
+          </button>
+          <button
+            className={styles.iconButton}
+            onClick={() => onMonthArrowClick(EMonthOption.add)}
+          >
+            <RightArrow />
+          </button>
+        </div>
+        <h2 className={styles.dateTitle}>{selectedDate.format("MMMM YYYY")}</h2>
+      </div>
+
+      <div className={styles.controls}>
         <select
           className={styles.select}
           id={CALENDER_STRINGS.MONTH}
@@ -107,14 +128,8 @@ const Header: React.FC<HeaderProps> = ({
           ))}
         </select>
       </div>
-      <button
-        className={styles.button}
-        onClick={() => onMonthArrowClick(EMonthOption.add)}
-      >
-        <RightArrow />
-      </button>
     </div>
   );
-};
+}
 
 export default Header;
