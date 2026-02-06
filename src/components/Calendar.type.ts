@@ -26,6 +26,8 @@ export interface CalendarType {
   height?: number;
   selectedDate?: Date;
   onDateClick?: (date: Date) => void;
+  onEventClick?: (event: DataType) => void;
+  onMoreClick?: (date: Date) => void;
   onMonthChange?: (date: Date) => void;
   isSelectDate?: boolean;
   className?: string;
@@ -74,6 +76,7 @@ export interface DateDataType {
   isToday: boolean;
   isCurrentMonth: boolean;
   onClick?: (date: DateType) => void;
+  onEventClick?: (event: DataType) => void;
   onMoreClick?: (date: DateType) => void;
   selectedClassName?: string;
   todayClassName?: string;

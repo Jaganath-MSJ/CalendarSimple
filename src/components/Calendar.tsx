@@ -33,6 +33,8 @@ function Calender(props: CalendarType = defaultCalenderProps) {
     height = defaultCalenderProps.height,
     selectedDate: selected_date,
     onDateClick,
+    onEventClick,
+    onMoreClick,
     onMonthChange,
     isSelectDate = defaultCalenderProps.isSelectDate,
     className,
@@ -274,6 +276,8 @@ function Calender(props: CalendarType = defaultCalenderProps) {
                 theme={props.theme}
                 maxEvents={props.maxEvents}
                 totalEvents={activeEvents.length}
+                onEventClick={onEventClick}
+                onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
               />
             );
           })}

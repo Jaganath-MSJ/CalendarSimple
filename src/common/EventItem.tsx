@@ -21,6 +21,7 @@ function EventItem(props: DateDataType) {
     theme,
     maxEvents = 3, // Default limit
     onMoreClick,
+    onEventClick,
     totalEvents = 0,
   } = props;
 
@@ -45,15 +46,6 @@ function EventItem(props: DateDataType) {
     (totalEvents >= maxEvents || data.length > maxEvents)
   ) {
     visibleEvents = data.slice(0, maxEvents);
-
-    // Calculate how many events are actually shown (excluding empty spacers being used for alignment)
-    // Wait, spacers occupy a slot. So 1 slot = 1 event (rendered or invisible).
-    // The previous logic counted remaining non-nulls.
-    // New logic: totalEvents - (events consumed by visible slots).
-    // But visible slots might contain nulls (alignment holes).
-    // We only care about events *represented* in visible slots.
-    // If visibleEvents[0] is E. That's 1 event.
-    // If visibleEvents[0] is null. That's 0 events.
 
     const visibleRealEventsCount = visibleEvents.filter(
       (e) => e !== null,
@@ -97,7 +89,7 @@ function EventItem(props: DateDataType) {
                   title={tooltipText}
                   onClick={(e) => {
                     e.stopPropagation();
-                    // Handle range selection or event click
+                    onEventClick?.(item);
                   }}
                 >
                   {item.value}
@@ -109,7 +101,7 @@ function EventItem(props: DateDataType) {
                 className={styles.moreEvents}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onMoreClick?.(dateObj); // Or expand logic
+                  onMoreClick?.(dateObj);
                 }}
               >
                 + {hiddenEventsCount} more
