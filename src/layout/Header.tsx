@@ -4,7 +4,6 @@ import {
   EMonthOption,
   EYearOption,
   MonthListType,
-  DateType,
 } from "../components/Calendar.type";
 import { CALENDER_STRINGS, MONTH_LIST } from "../components/Calendar.constant";
 import {
@@ -15,39 +14,35 @@ import {
 import styles from "./Header.module.css";
 import LeftArrow from "../assets/LeftArrow";
 import RightArrow from "../assets/RightArrow";
+import { useCalendar } from "../components/Calendar/context/CalendarContext";
 
 interface HeaderProps {
-  selectedDate: DateType;
-  onMonthChange?: (date: Date) => void;
-  setSelectedDate: (date: DateType) => void;
   headerClassName?: string;
   pastYearLength?: number;
   futureYearLength?: number;
+  // Optional callback for external listeners if needed
+  onMonthChange?: (date: Date) => void;
 }
 
 function Header({
-  selectedDate,
-  onMonthChange,
-  setSelectedDate,
   headerClassName,
   pastYearLength = 5,
   futureYearLength = 5,
+  onMonthChange,
 }: HeaderProps) {
+  const { state, dispatch } = useCalendar();
+  const { currentDate } = state;
+
   const onMonthArrowClick = (option: EMonthOption) => {
-    let clonedSelectedDate = selectedDate;
-
     if (option === EMonthOption.add) {
-      clonedSelectedDate = dateFn(clonedSelectedDate).month(
-        clonedSelectedDate.month() + 1,
-      );
+      dispatch({ type: "NEXT" });
+      const nextDate = currentDate.add(1, "month"); // predictive for callback
+      onMonthChange?.(convertToDate(nextDate));
     } else if (option === EMonthOption.sub) {
-      clonedSelectedDate = dateFn(clonedSelectedDate).month(
-        clonedSelectedDate.month() - 1,
-      );
+      dispatch({ type: "PREV" });
+      const prevDate = currentDate.subtract(1, "month"); // predictive for callback
+      onMonthChange?.(convertToDate(prevDate));
     }
-
-    setSelectedDate(clonedSelectedDate);
-    onMonthChange?.(convertToDate(clonedSelectedDate));
   };
 
   const onDropdownClick = (
@@ -55,16 +50,16 @@ function Header({
     option: EYearOption,
   ) => {
     const value = Number(event.target.value);
-    let clonedSelectedDate = selectedDate;
+    let newDate = currentDate;
 
     if (option === EYearOption.month) {
-      clonedSelectedDate = dateFn(clonedSelectedDate).month(value);
+      newDate = dateFn(currentDate).month(value);
     } else if (option === EYearOption.year) {
-      clonedSelectedDate = dateFn(clonedSelectedDate).year(value);
+      newDate = dateFn(currentDate).year(value);
     }
 
-    setSelectedDate(clonedSelectedDate);
-    onMonthChange?.(convertToDate(clonedSelectedDate));
+    dispatch({ type: "SET_DATE", payload: newDate });
+    onMonthChange?.(convertToDate(newDate));
   };
 
   return (
@@ -73,7 +68,7 @@ function Header({
         <button
           className={styles.todayButton}
           onClick={() => {
-            setSelectedDate(dateFn());
+            dispatch({ type: "TODAY" });
             onMonthChange?.(convertToDate(dateFn()));
           }}
         >
@@ -93,7 +88,7 @@ function Header({
             <RightArrow />
           </button>
         </div>
-        <h2 className={styles.dateTitle}>{selectedDate.format("MMMM YYYY")}</h2>
+        <h2 className={styles.dateTitle}>{currentDate.format("MMMM YYYY")}</h2>
       </div>
 
       <div className={styles.controls}>
@@ -101,7 +96,7 @@ function Header({
           className={styles.select}
           id={CALENDER_STRINGS.MONTH}
           name={CALENDER_STRINGS.MONTH}
-          value={selectedDate.month()}
+          value={currentDate.month()}
           onChange={(e) => onDropdownClick(e, EYearOption.month)}
         >
           {MONTH_LIST.map((month: MonthListType) => (
@@ -114,13 +109,13 @@ function Header({
           className={styles.select}
           id={CALENDER_STRINGS.YEAR}
           name={CALENDER_STRINGS.YEAR}
-          value={selectedDate.year()}
+          value={currentDate.year()}
           onChange={(e) => onDropdownClick(e, EYearOption.year)}
         >
           {getYearList(
             pastYearLength,
             futureYearLength,
-            selectedDate.year(),
+            currentDate.year(),
           ).map((year: number) => (
             <option key={year} value={year}>
               {year}

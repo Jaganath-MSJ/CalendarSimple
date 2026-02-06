@@ -43,6 +43,17 @@ export interface CalendarType {
   maxEvents?: number;
 }
 
+export interface CalendarContentType extends CalendarType {
+  dayType: EDayType;
+  data: DataType[];
+  width: number;
+  height: number;
+  isSelectDate: boolean;
+  pastYearLength: number;
+  futureYearLength: number;
+  maxEvents: number;
+}
+
 export enum EDayType {
   fullName = "FULL",
   halfName = "HALF",

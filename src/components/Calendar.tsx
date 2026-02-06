@@ -1,14 +1,8 @@
-import React, {
-  useCallback,
-  useLayoutEffect,
-  useMemo,
-  useState,
-  memo,
-  ReactNode,
-} from "react";
+import React, { useCallback, useMemo, memo, ReactNode, useEffect } from "react";
 import cx from "classnames";
 import {
   CalendarType,
+  CalendarContentType,
   DateType,
   defaultCalenderProps,
   DataTypeList,
@@ -24,19 +18,24 @@ import styles from "./Calendar.module.css";
 import EventItem from "../common/EventItem";
 import calendarize from "calendarize";
 import Header from "../layout/Header";
+import {
+  CalendarProvider,
+  useCalendar,
+} from "./Calendar/context/CalendarContext";
 
-function Calender(props: CalendarType = defaultCalenderProps) {
+function CalendarContent(props: CalendarContentType) {
+  const { state, dispatch } = useCalendar();
+  const { currentDate: selectedDate, events: data } = state;
+
   const {
-    dayType = defaultCalenderProps.dayType,
-    data = defaultCalenderProps.data,
-    width = defaultCalenderProps.width,
-    height = defaultCalenderProps.height,
-    selectedDate: selected_date,
+    dayType,
+    width,
+    height,
     onDateClick,
     onEventClick,
     onMoreClick,
     onMonthChange,
-    isSelectDate = defaultCalenderProps.isSelectDate,
+    isSelectDate,
     className,
     headerClassName,
     tableClassName,
@@ -44,23 +43,22 @@ function Calender(props: CalendarType = defaultCalenderProps) {
     dataClassName,
     selectedClassName,
     todayClassName,
-    pastYearLength = defaultCalenderProps.pastYearLength,
-    futureYearLength = defaultCalenderProps.futureYearLength,
+    pastYearLength,
+    futureYearLength,
+    data: propsData, // Capture props data to sync
   } = props;
 
-  const selectedDateDayjs: DateType = useMemo(
-    () => (selected_date ? convertToDayjs(selected_date) : date()),
-    [selected_date],
-  );
-  const [selectedDate, setSelectedDate] = useState<DateType>(selectedDateDayjs);
-
-  useLayoutEffect(() => {
-    setSelectedDate(selectedDateDayjs);
-  }, [selectedDateDayjs]);
+  // Sync data from props to context
+  useEffect(() => {
+    if (propsData) {
+      dispatch({ type: "SET_EVENTS", payload: propsData });
+    }
+  }, [propsData, dispatch]);
 
   const dataEvents = useMemo(
     () =>
-      data.sort((a, b) => {
+      [...data].sort((a, b) => {
+        // Create a copy to avoid mutating state if sort is in-place (though sort is in-place)
         return date(a.startDate)
           .startOf("day")
           .diff(date(b.startDate).startOf("day"), "days");
@@ -72,7 +70,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
     const onClickDateHandler = (dateInput: DateType) => {
       const newDate = date(dateInput);
       if (!newDate.isSame(selectedDate, "day")) {
-        setSelectedDate(newDate);
+        dispatch({ type: "SET_DATE", payload: newDate });
         onDateClick?.(convertToDate(newDate));
       }
     };
@@ -295,6 +293,12 @@ function Calender(props: CalendarType = defaultCalenderProps) {
     tableDateClassName,
     onDateClick,
     isSelectDate,
+    props.theme,
+    props.maxEvents,
+    onEventClick,
+    onMoreClick,
+    width,
+    dispatch,
   ]);
 
   return (
@@ -309,9 +313,7 @@ function Calender(props: CalendarType = defaultCalenderProps) {
     >
       <Header
         headerClassName={headerClassName}
-        selectedDate={selectedDate}
         onMonthChange={onMonthChange}
-        setSelectedDate={setSelectedDate}
         pastYearLength={pastYearLength}
         futureYearLength={futureYearLength}
       />
@@ -331,4 +333,20 @@ function Calender(props: CalendarType = defaultCalenderProps) {
   );
 }
 
-export default memo(Calender);
+function Calendar(props: CalendarType = defaultCalenderProps) {
+  const allProps = { ...defaultCalenderProps, ...props };
+  const { data, selectedDate } = allProps;
+
+  const initialDate = useMemo(
+    () => (selectedDate ? convertToDayjs(selectedDate) : undefined),
+    [selectedDate],
+  );
+
+  return (
+    <CalendarProvider initialEvents={data} initialDate={initialDate}>
+      <CalendarContent {...allProps} />
+    </CalendarProvider>
+  );
+}
+
+export default memo(Calendar);
