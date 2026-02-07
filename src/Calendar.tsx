@@ -13,10 +13,10 @@ import {
   checkIsToday,
   DateType,
   DAY_LIST_NAME,
+  generateCalendarGrid,
 } from "./utils";
 import styles from "./Calendar.module.css";
 import EventItem from "./common/EventItem";
-import calendarize from "calendarize";
 import Header from "./layout/Header";
 import { CalendarProvider, useCalendar } from "./context/CalendarContext";
 
@@ -52,253 +52,21 @@ function CalendarContent(props: CalendarContentType) {
     }
   }, [propsData, dispatch]);
 
-  const dataEvents = useMemo(
-    () =>
-      [...data].sort((a, b) => {
-        // Create a copy to avoid mutating state if sort is in-place (though sort is in-place)
-        return dateFn(a.startDate)
-          .startOf("day")
-          .diff(dateFn(b.startDate).startOf("day"), "days");
-      }),
-    [data],
+  const calendarGrid = useMemo(
+    () => generateCalendarGrid(selectedDate, data),
+    [selectedDate, data],
   );
 
-  const getDates = useCallback<() => ReactNode[]>((): ReactNode[] => {
-    const onClickDateHandler = (dateInput: DateType) => {
+  const onClickDateHandler = useCallback(
+    (dateInput: DateType) => {
       const newDate = dateFn(dateInput);
       if (!newDate.isSame(selectedDate, "day")) {
         dispatch({ type: "SET_DATE", payload: newDate });
         onDateClick?.(convertToDate(newDate));
       }
-    };
-
-    const calendarArray = calendarize(convertToDate(selectedDate));
-    const dateComponent = calendarArray.map((week, weekIndex) => {
-      // 1. Calculate dates for the entire week first
-      const processedWeek = week.map((day, dayIndex) => {
-        let currentDate = dateFn(selectedDate);
-        let isCurrentMonth = true;
-        let displayDay = day;
-
-        if (day === 0) {
-          isCurrentMonth = false;
-          if (weekIndex === 0) {
-            const startOfMonth = dateFn(selectedDate).startOf("month");
-            const startDayOfWeek = startOfMonth.day();
-            currentDate = startOfMonth.subtract(
-              startDayOfWeek - dayIndex,
-              "day",
-            );
-            displayDay = currentDate.date();
-          } else {
-            const startOfMonth = dateFn(selectedDate).startOf("month");
-            const startDayOfWeek = startOfMonth.day();
-            const daysInMonth = selectedDate.daysInMonth();
-
-            const globalIndex = weekIndex * 7 + dayIndex;
-            const daysFromStart = globalIndex - startDayOfWeek;
-
-            if (daysFromStart < 0) {
-              currentDate = startOfMonth.add(daysFromStart, "day");
-              displayDay = currentDate.date();
-            } else if (daysFromStart >= daysInMonth) {
-              currentDate = startOfMonth.add(daysFromStart, "day");
-              displayDay = currentDate.date();
-            } else {
-              currentDate = startOfMonth.add(daysFromStart, "day");
-              displayDay = currentDate.date();
-            }
-          }
-        } else {
-          currentDate = dateFn(selectedDate).date(day);
-        }
-        return { currentDate, isCurrentMonth, displayDay };
-      });
-
-      // 2. Identify all events overlapping with this week
-      const weekStart = processedWeek[0].currentDate.startOf("day");
-      const weekEnd = processedWeek[6].currentDate.startOf("day");
-
-      const weekEvents = dataEvents.filter((item) => {
-        const start = dateFn(item.startDate).startOf("day");
-        const end = item.endDate ? dateFn(item.endDate).startOf("day") : start;
-        // Check overlap
-        return (
-          start.isBefore(weekEnd.add(1, "day"), "day") &&
-          end.isAfter(weekStart.subtract(1, "day"), "day")
-        );
-      });
-
-      // 3. Sort events: Start Date asc, then Duration desc
-      weekEvents.sort((a, b) => {
-        const startA = dateFn(a.startDate).startOf("day");
-        const startB = dateFn(b.startDate).startOf("day");
-        if (!startA.isSame(startB, "day")) return startA.diff(startB);
-
-        const endA = a.endDate ? dateFn(a.endDate).startOf("day") : startA;
-        const endB = b.endDate ? dateFn(b.endDate).startOf("day") : startB;
-        const durA = endA.diff(startA, "day");
-        const durB = endB.diff(startB, "day");
-        return durB - durA;
-      });
-
-      // 4. Assign slots
-      const slots: string[][] = Array(7)
-        .fill(null)
-        .map(() => []); // slots[dayIndex][slotIndex] = eventId
-      const eventSlots = new Map<string, number>(); // eventId -> slotIndex (for this week)
-
-      weekEvents.forEach((event, index) => {
-        // Determine start/end indices in this week (0..6)
-        const start = dateFn(event.startDate).startOf("day");
-        const end = event.endDate
-          ? dateFn(event.endDate).startOf("day")
-          : start;
-
-        let startIndex = start.diff(weekStart, "day");
-        let endIndex = end.diff(weekStart, "day");
-
-        if (startIndex < 0) startIndex = 0;
-        if (endIndex > 6) endIndex = 6;
-
-        // Find first available slot
-        let slotIndex = 0;
-        while (true) {
-          let isAvailable = true;
-          for (let i = startIndex; i <= endIndex; i++) {
-            if (slots[i][slotIndex]) {
-              isAvailable = false;
-              break;
-            }
-          }
-          if (isAvailable) break;
-          slotIndex++;
-        }
-
-        // Assign slot
-        const eventId = event.startDate + event.value + index; // specific ID for this instance
-        eventSlots.set(eventId, slotIndex);
-        for (let i = startIndex; i <= endIndex; i++) {
-          slots[i][slotIndex] = eventId;
-        }
-        // We need to attach this ID to the event object for retrieval or use map
-        (event as any)._tempId = eventId;
-      });
-
-      return (
-        <tr key={weekIndex + 1}>
-          {processedWeek.map((dayObj, dayIndex) => {
-            const { currentDate, isCurrentMonth, displayDay } = dayObj;
-
-            // Find events active on this day
-            const activeEvents = weekEvents.filter((event) => {
-              const start = dateFn(event.startDate).startOf("day");
-              const end = event.endDate
-                ? dateFn(event.endDate).startOf("day")
-                : start;
-              return (
-                !currentDate.isBefore(start, "day") &&
-                !currentDate.isAfter(end, "day")
-              );
-            });
-
-            const displayData: (DataTypeList | null)[] = [];
-
-            let maxDaySlot = -1;
-            activeEvents.forEach((e) => {
-              const s = eventSlots.get((e as any)._tempId);
-              if (s !== undefined && s > maxDaySlot) maxDaySlot = s;
-            });
-
-            for (let s = 0; s <= maxDaySlot; s++) {
-              const event = activeEvents.find(
-                (e) => eventSlots.get((e as any)._tempId) === s,
-              );
-              if (event) {
-                const itemStartDate = dateFn(event.startDate).startOf("day");
-                const isStart = itemStartDate.isSame(currentDate, "day");
-                const isWeekStart = dayIndex === 0;
-
-                if (isStart || isWeekStart) {
-                  // Render Event
-                  const itemEndDate = event.endDate
-                    ? dateFn(event.endDate).startOf("day")
-                    : dateFn(event.startDate).startOf("day");
-                  const endOfWeekDate = dateFn(currentDate).add(
-                    6 - dayIndex,
-                    "day",
-                  );
-
-                  let effectiveEndDate = itemEndDate;
-                  if (itemEndDate.isAfter(endOfWeekDate, "date")) {
-                    effectiveEndDate = endOfWeekDate;
-                  }
-
-                  displayData.push({
-                    ...event,
-                    startDateWeek: currentDate.format("YYYY-MM-DD"),
-                    endDateWeek: effectiveEndDate.format("YYYY-MM-DD"),
-                  });
-                } else {
-                  // Spacer (Event exists but rendered in previous cell)
-                  displayData.push({ ...event, isSpacer: true });
-                }
-              } else {
-                // Empty slot
-                displayData.push(null);
-              }
-            }
-
-            return (
-              <EventItem
-                key={`date_${weekIndex}_${dayIndex}`}
-                isSelected={
-                  isSelectDate &&
-                  isCurrentMonth &&
-                  displayDay === selectedDate.date()
-                }
-                isToday={
-                  checkIsToday(selectedDate, displayDay) && isCurrentMonth
-                }
-                isCurrentMonth={isCurrentMonth}
-                onClick={isSelectDate ? onClickDateHandler : undefined}
-                date={displayDay}
-                dateObj={currentDate}
-                data={displayData}
-                cellWidth={width / 7}
-                className={cx(styles.tableCell, tableDateClassName)}
-                dataClassName={dataClassName}
-                selectedClassName={selectedClassName}
-                todayClassName={todayClassName}
-                theme={props.theme}
-                maxEvents={props.maxEvents}
-                totalEvents={activeEvents.length}
-                onEventClick={onEventClick}
-                onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
-              />
-            );
-          })}
-        </tr>
-      );
-    });
-
-    return dateComponent;
-  }, [
-    dataEvents,
-    selectedDate,
-    dataClassName,
-    selectedClassName,
-    todayClassName,
-    tableDateClassName,
-    onDateClick,
-    isSelectDate,
-    props.theme,
-    props.maxEvents,
-    onEventClick,
-    onMoreClick,
-    width,
-    dispatch,
-  ]);
+    },
+    [selectedDate, dispatch, onDateClick],
+  );
 
   return (
     <section
@@ -326,7 +94,38 @@ function CalendarContent(props: CalendarContentType) {
             ))}
           </tr>
         </thead>
-        <tbody>{getDates()}</tbody>
+        <tbody>
+          {calendarGrid.map((week, weekIndex) => (
+            <tr key={weekIndex}>
+              {week.map((dayInfo, dayIndex) => (
+                <EventItem
+                  key={`date_${weekIndex}_${dayIndex}`}
+                  isSelected={
+                    isSelectDate &&
+                    dayInfo.isCurrentMonth &&
+                    dayInfo.displayDay === selectedDate.date()
+                  }
+                  isToday={dayInfo.isToday}
+                  isCurrentMonth={dayInfo.isCurrentMonth}
+                  onClick={isSelectDate ? onClickDateHandler : undefined}
+                  date={dayInfo.displayDay}
+                  dateObj={dayInfo.currentDate}
+                  data={dayInfo.events}
+                  cellWidth={width / 7}
+                  className={cx(styles.tableCell, tableDateClassName)}
+                  dataClassName={dataClassName}
+                  selectedClassName={selectedClassName}
+                  todayClassName={todayClassName}
+                  theme={props.theme}
+                  maxEvents={props.maxEvents}
+                  totalEvents={dayInfo.totalEvents}
+                  onEventClick={onEventClick}
+                  onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
+                />
+              ))}
+            </tr>
+          ))}
+        </tbody>
       </table>
     </section>
   );
