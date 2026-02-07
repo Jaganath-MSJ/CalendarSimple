@@ -1,7 +1,7 @@
-import Calendar from "./components/Calendar";
-import { EDayType } from "./components/Calendar.type";
-import type { CalendarType } from "./components/Calendar.type";
-import { DAY_TYPE } from "./components/Calendar.constant";
+import Calendar from "./Calendar";
+import { EDayType } from "./types";
+import type { CalendarType } from "./types";
+import { DAY_TYPE } from "./utils";
 
 export { EDayType, CalendarType, DAY_TYPE };
 export default Calendar;

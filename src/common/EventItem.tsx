@@ -1,7 +1,7 @@
 import React from "react";
 import cx from "classnames";
-import { DateDataType } from "../components/Calendar.type";
-import { date as dateFn } from "../components/Calendar.utils";
+import { DateDataType } from "../types";
+import { dateFn } from "../utils";
 import styles from "./EventItem.module.css";
 
 function EventItem(props: DateDataType) {
@@ -75,10 +75,14 @@ function EventItem(props: DateDataType) {
                 );
               }
 
-              const diffDates = item.endDateWeek
-                ? dateFn(item.endDateWeek).diff(item.startDateWeek, "days") + 1
-                : 1;
-              const tooltipText = `${dateFn(item.startDate).format("YYYY-MM-DD")} - ${item.value}`;
+              let diffDates = 1;
+              let tooltipText = dateFn(item.startDate).format("YYYY-MM-DD");
+              if (item.endDateWeek) {
+                diffDates =
+                  dateFn(item.endDateWeek).diff(item.startDateWeek, "days") + 1;
+                tooltipText += ` to ${dateFn(item.endDate).format("YYYY-MM-DD")}`;
+              }
+              tooltipText += ` - ${item.value}`;
               const width = `${cellWidth * diffDates - 16}px`;
 
               return (

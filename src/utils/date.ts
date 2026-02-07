@@ -1,5 +1,7 @@
-import dayjs from "dayjs";
-import { DateType } from "./Calendar.type";
+import dayjs, { Dayjs } from "dayjs";
+
+export type DateType = Dayjs;
+export const dateFn = dayjs;
 
 export const getNoOfDays = (date: DateType): number => {
   const noOfDates = dayjs(date).daysInMonth();
@@ -24,13 +26,13 @@ export const convertToDayjs = (date: Date): DateType => {
 export const getYearList = (
   pastLength: number,
   futureLength: number,
-  selectedYear: number
+  selectedYear: number,
 ): number[] => {
   const yearLength = pastLength + futureLength;
   const yearStarting = dayjs().year() - pastLength;
   const yearList = Array.from(
     { length: yearLength },
-    (_, index) => index + yearStarting
+    (_, index) => index + yearStarting,
   );
 
   if (!yearList.includes(selectedYear)) {
@@ -45,12 +47,10 @@ export const getYearList = (
 
 export const checkIsToday = (
   selectedDate: DateType,
-  dates: number
+  dates: number,
 ): boolean => {
   const cloneSelectedDate = dayjs(selectedDate).date(dates);
 
   const isToday = dayjs().isSame(cloneSelectedDate, "day");
   return isToday;
 };
-
-export { dayjs as date };

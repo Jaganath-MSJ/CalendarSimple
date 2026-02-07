@@ -5,21 +5,18 @@ import React, {
   ReactNode,
   useMemo,
 } from "react";
-import { Dayjs } from "dayjs";
-import { date as dayjsInstance } from "../../Calendar.utils";
-import { DataType } from "../../Calendar.type";
-
-export type CalendarView = "month" | "week" | "day";
+import { dateFn, DateType } from "../utils";
+import { DataType, CalendarView } from "../types";
 
 interface CalendarState {
-  currentDate: Dayjs;
-  selectedDate: Dayjs;
+  currentDate: DateType;
+  selectedDate: DateType;
   view: CalendarView;
   events: DataType[];
 }
 
 type CalendarAction =
-  | { type: "SET_DATE"; payload: Dayjs }
+  | { type: "SET_DATE"; payload: DateType }
   | { type: "SET_VIEW"; payload: CalendarView }
   | { type: "SET_EVENTS"; payload: DataType[] }
   | { type: "NEXT" }
@@ -27,8 +24,8 @@ type CalendarAction =
   | { type: "TODAY" };
 
 const initialState: CalendarState = {
-  currentDate: dayjsInstance(),
-  selectedDate: dayjsInstance(),
+  currentDate: dateFn(),
+  selectedDate: dateFn(),
   view: "month",
   events: [],
 };
@@ -73,8 +70,8 @@ function calendarReducer(
     case "TODAY":
       return {
         ...state,
-        currentDate: dayjsInstance(),
-        selectedDate: dayjsInstance(),
+        currentDate: dateFn(),
+        selectedDate: dateFn(),
       };
     default:
       return state;
@@ -84,7 +81,7 @@ function calendarReducer(
 export const CalendarProvider: React.FC<{
   children: ReactNode;
   initialEvents?: DataType[];
-  initialDate?: Dayjs;
+  initialDate?: DateType;
 }> = ({ children, initialEvents = [], initialDate }) => {
   const [state, dispatch] = useReducer(calendarReducer, {
     ...initialState,

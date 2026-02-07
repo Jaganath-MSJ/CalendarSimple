@@ -3,25 +3,22 @@ import cx from "classnames";
 import {
   CalendarType,
   CalendarContentType,
-  DateType,
   defaultCalenderProps,
   DataTypeList,
-} from "./Calendar.type";
-import { DAY_LIST_NAME } from "./Calendar.constant";
+} from "./types";
 import {
-  date,
+  dateFn,
   convertToDate,
   convertToDayjs,
   checkIsToday,
-} from "./Calendar.utils";
+  DateType,
+  DAY_LIST_NAME,
+} from "./utils";
 import styles from "./Calendar.module.css";
-import EventItem from "../common/EventItem";
+import EventItem from "./common/EventItem";
 import calendarize from "calendarize";
-import Header from "../layout/Header";
-import {
-  CalendarProvider,
-  useCalendar,
-} from "./Calendar/context/CalendarContext";
+import Header from "./layout/Header";
+import { CalendarProvider, useCalendar } from "./context/CalendarContext";
 
 function CalendarContent(props: CalendarContentType) {
   const { state, dispatch } = useCalendar();
@@ -59,16 +56,16 @@ function CalendarContent(props: CalendarContentType) {
     () =>
       [...data].sort((a, b) => {
         // Create a copy to avoid mutating state if sort is in-place (though sort is in-place)
-        return date(a.startDate)
+        return dateFn(a.startDate)
           .startOf("day")
-          .diff(date(b.startDate).startOf("day"), "days");
+          .diff(dateFn(b.startDate).startOf("day"), "days");
       }),
     [data],
   );
 
   const getDates = useCallback<() => ReactNode[]>((): ReactNode[] => {
     const onClickDateHandler = (dateInput: DateType) => {
-      const newDate = date(dateInput);
+      const newDate = dateFn(dateInput);
       if (!newDate.isSame(selectedDate, "day")) {
         dispatch({ type: "SET_DATE", payload: newDate });
         onDateClick?.(convertToDate(newDate));
@@ -79,14 +76,14 @@ function CalendarContent(props: CalendarContentType) {
     const dateComponent = calendarArray.map((week, weekIndex) => {
       // 1. Calculate dates for the entire week first
       const processedWeek = week.map((day, dayIndex) => {
-        let currentDate = date(selectedDate);
+        let currentDate = dateFn(selectedDate);
         let isCurrentMonth = true;
         let displayDay = day;
 
         if (day === 0) {
           isCurrentMonth = false;
           if (weekIndex === 0) {
-            const startOfMonth = date(selectedDate).startOf("month");
+            const startOfMonth = dateFn(selectedDate).startOf("month");
             const startDayOfWeek = startOfMonth.day();
             currentDate = startOfMonth.subtract(
               startDayOfWeek - dayIndex,
@@ -94,7 +91,7 @@ function CalendarContent(props: CalendarContentType) {
             );
             displayDay = currentDate.date();
           } else {
-            const startOfMonth = date(selectedDate).startOf("month");
+            const startOfMonth = dateFn(selectedDate).startOf("month");
             const startDayOfWeek = startOfMonth.day();
             const daysInMonth = selectedDate.daysInMonth();
 
@@ -113,7 +110,7 @@ function CalendarContent(props: CalendarContentType) {
             }
           }
         } else {
-          currentDate = date(selectedDate).date(day);
+          currentDate = dateFn(selectedDate).date(day);
         }
         return { currentDate, isCurrentMonth, displayDay };
       });
@@ -123,8 +120,8 @@ function CalendarContent(props: CalendarContentType) {
       const weekEnd = processedWeek[6].currentDate.startOf("day");
 
       const weekEvents = dataEvents.filter((item) => {
-        const start = date(item.startDate).startOf("day");
-        const end = item.endDate ? date(item.endDate).startOf("day") : start;
+        const start = dateFn(item.startDate).startOf("day");
+        const end = item.endDate ? dateFn(item.endDate).startOf("day") : start;
         // Check overlap
         return (
           start.isBefore(weekEnd.add(1, "day"), "day") &&
@@ -134,12 +131,12 @@ function CalendarContent(props: CalendarContentType) {
 
       // 3. Sort events: Start Date asc, then Duration desc
       weekEvents.sort((a, b) => {
-        const startA = date(a.startDate).startOf("day");
-        const startB = date(b.startDate).startOf("day");
+        const startA = dateFn(a.startDate).startOf("day");
+        const startB = dateFn(b.startDate).startOf("day");
         if (!startA.isSame(startB, "day")) return startA.diff(startB);
 
-        const endA = a.endDate ? date(a.endDate).startOf("day") : startA;
-        const endB = b.endDate ? date(b.endDate).startOf("day") : startB;
+        const endA = a.endDate ? dateFn(a.endDate).startOf("day") : startA;
+        const endB = b.endDate ? dateFn(b.endDate).startOf("day") : startB;
         const durA = endA.diff(startA, "day");
         const durB = endB.diff(startB, "day");
         return durB - durA;
@@ -153,8 +150,10 @@ function CalendarContent(props: CalendarContentType) {
 
       weekEvents.forEach((event, index) => {
         // Determine start/end indices in this week (0..6)
-        const start = date(event.startDate).startOf("day");
-        const end = event.endDate ? date(event.endDate).startOf("day") : start;
+        const start = dateFn(event.startDate).startOf("day");
+        const end = event.endDate
+          ? dateFn(event.endDate).startOf("day")
+          : start;
 
         let startIndex = start.diff(weekStart, "day");
         let endIndex = end.diff(weekStart, "day");
@@ -193,9 +192,9 @@ function CalendarContent(props: CalendarContentType) {
 
             // Find events active on this day
             const activeEvents = weekEvents.filter((event) => {
-              const start = date(event.startDate).startOf("day");
+              const start = dateFn(event.startDate).startOf("day");
               const end = event.endDate
-                ? date(event.endDate).startOf("day")
+                ? dateFn(event.endDate).startOf("day")
                 : start;
               return (
                 !currentDate.isBefore(start, "day") &&
@@ -216,16 +215,16 @@ function CalendarContent(props: CalendarContentType) {
                 (e) => eventSlots.get((e as any)._tempId) === s,
               );
               if (event) {
-                const itemStartDate = date(event.startDate).startOf("day");
+                const itemStartDate = dateFn(event.startDate).startOf("day");
                 const isStart = itemStartDate.isSame(currentDate, "day");
                 const isWeekStart = dayIndex === 0;
 
                 if (isStart || isWeekStart) {
                   // Render Event
                   const itemEndDate = event.endDate
-                    ? date(event.endDate).startOf("day")
-                    : date(event.startDate).startOf("day");
-                  const endOfWeekDate = date(currentDate).add(
+                    ? dateFn(event.endDate).startOf("day")
+                    : dateFn(event.startDate).startOf("day");
+                  const endOfWeekDate = dateFn(currentDate).add(
                     6 - dayIndex,
                     "day",
                   );

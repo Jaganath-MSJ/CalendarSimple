@@ -1,6 +1,4 @@
-import { Dayjs } from "dayjs";
-
-export type DateType = Dayjs;
+import { DateType } from "../utils";
 
 export interface ThemeStyle {
   color?: string;
@@ -110,3 +108,5 @@ export enum EYearOption {
   month = "month",
   year = "year",
 }
+
+export type CalendarView = "month" | "week" | "day";

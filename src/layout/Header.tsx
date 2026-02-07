@@ -1,20 +1,17 @@
 import React, { ChangeEvent } from "react";
 import cx from "classnames";
+import { EMonthOption, EYearOption, MonthListType } from "../types";
 import {
-  EMonthOption,
-  EYearOption,
-  MonthListType,
-} from "../components/Calendar.type";
-import { CALENDER_STRINGS, MONTH_LIST } from "../components/Calendar.constant";
-import {
-  date as dateFn,
+  dateFn,
   getYearList,
   convertToDate,
-} from "../components/Calendar.utils";
+  CALENDER_STRINGS,
+  MONTH_LIST,
+} from "../utils";
 import styles from "./Header.module.css";
 import LeftArrow from "../assets/LeftArrow";
 import RightArrow from "../assets/RightArrow";
-import { useCalendar } from "../components/Calendar/context/CalendarContext";
+import { useCalendar } from "../context/CalendarContext";
 
 interface HeaderProps {
   headerClassName?: string;

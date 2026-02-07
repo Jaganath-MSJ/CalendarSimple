@@ -1,4 +1,4 @@
-import { MonthListType } from "./Calendar.type";
+import { MonthListType } from "../types";
 
 const DAY_LIST = {
   SUNDAY: {
