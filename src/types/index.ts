@@ -65,7 +65,6 @@ export const defaultCalenderProps = {
   isSelectDate: false,
   pastYearLength: 5,
   futureYearLength: 5,
-  maxEvents: 3,
 };
 
 export interface DataTypeList extends DataType {

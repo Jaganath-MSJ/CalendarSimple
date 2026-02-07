@@ -12,6 +12,7 @@ import {
   DateType,
   DAY_LIST_NAME,
   generateCalendarGrid,
+  calculateMaxEvents,
 } from "./utils";
 import styles from "./Calendar.module.css";
 import EventItem from "./common/EventItem";
@@ -128,9 +129,11 @@ function Calendar(props: CalendarType = defaultCalenderProps) {
     [selectedDate],
   );
 
+  const maxEvents = allProps.maxEvents ?? calculateMaxEvents(allProps.height);
+
   return (
     <CalendarProvider initialEvents={data} initialDate={initialDate}>
-      <CalendarContent {...allProps} />
+      <CalendarContent {...allProps} maxEvents={maxEvents} />
     </CalendarProvider>
   );
 }
