@@ -3,27 +3,28 @@ import cx from "classnames";
 import { DateDataType } from "../types";
 import { dateFn } from "../utils";
 import styles from "./EventItem.module.css";
+import Popover from "./Popover";
 
-function EventItem(props: DateDataType) {
-  const {
-    date,
-    dateObj,
-    data,
-    cellWidth,
-    className,
-    dataClassName,
-    isSelected,
-    isToday,
-    onClick,
-    selectedClassName,
-    todayClassName,
-    isCurrentMonth,
-    theme,
-    maxEvents = 3, // Default limit
-    onMoreClick,
-    onEventClick,
-    totalEvents = 0,
-  } = props;
+function EventItem({
+  date,
+  dateObj,
+  data,
+  cellWidth,
+  className,
+  dataClassName,
+  isSelected,
+  isToday,
+  onClick,
+  selectedClassName,
+  todayClassName,
+  isCurrentMonth,
+  theme,
+  maxEvents = 3, // Default limit
+  onMoreClick,
+  onEventClick,
+  totalEvents = 0,
+}: DateDataType) {
+  const [showPopover, setShowPopover] = React.useState(false);
 
   const styleSource = isSelected
     ? theme?.selected
@@ -52,6 +53,8 @@ function EventItem(props: DateDataType) {
     ).length;
     hiddenEventsCount = totalEvents - visibleRealEventsCount;
   }
+
+  const allDayEvents = data?.filter((e) => e !== null) || [];
 
   return (
     <td
@@ -101,14 +104,25 @@ function EventItem(props: DateDataType) {
               );
             })}
             {hiddenEventsCount > 0 && (
-              <div
-                className={styles.moreEvents}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoreClick?.(dateObj);
-                }}
-              >
-                + {hiddenEventsCount} more
+              <div className={styles.moreEventsContainer}>
+                <button
+                  className={styles.moreEvents}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowPopover(true);
+                    onMoreClick?.(dateObj);
+                  }}
+                >
+                  + {hiddenEventsCount} more
+                </button>
+                {showPopover && (
+                  <Popover
+                    dateObj={dateObj}
+                    events={allDayEvents}
+                    onEventClick={onEventClick}
+                    onClose={() => setShowPopover(false)}
+                  />
+                )}
               </div>
             )}
           </div>

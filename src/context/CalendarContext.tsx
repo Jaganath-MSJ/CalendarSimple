@@ -78,11 +78,17 @@ function calendarReducer(
   }
 }
 
-export const CalendarProvider: React.FC<{
+interface CalendarProviderProps {
   children: ReactNode;
   initialEvents?: DataType[];
   initialDate?: DateType;
-}> = ({ children, initialEvents = [], initialDate }) => {
+}
+
+export function CalendarProvider({
+  children,
+  initialEvents = [],
+  initialDate,
+}: CalendarProviderProps) {
   const [state, dispatch] = useReducer(calendarReducer, {
     ...initialState,
     events: initialEvents,
@@ -97,7 +103,7 @@ export const CalendarProvider: React.FC<{
       {children}
     </CalendarContext.Provider>
   );
-};
+}
 
 export const useCalendar = () => {
   const context = useContext(CalendarContext);
