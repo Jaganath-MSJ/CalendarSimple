@@ -61,6 +61,15 @@ function App() {
           endDate: "2026-01-26",
           value: "939912",
         },
+        {
+          startDate: "2026-01-01",
+          endDate: "2026-01-03",
+          value: "only 1-3 jan 2",
+        },
+        {
+          startDate: "2026-01-02",
+          value: "only sajasj 2",
+        },
       ]}
       width={700}
       height={500}

@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from "react";
+import cx from "classnames";
 import styles from "./Popover.module.css";
 import { dateFn, DateType } from "../utils";
 import { DataTypeList } from "../types";
@@ -38,20 +39,34 @@ function Popover({ dateObj, events, onEventClick, onClose }: PopoverProps) {
       <div className={styles.popoverHeader}>
         {dateFn(dateObj).format("ddd, D MMM")}
       </div>
-      {events.map((item, idx) => (
-        <div
-          key={`pop-${idx}`}
-          className={styles.popoverItem}
-          onClick={(e) => {
-            e.stopPropagation();
-            onEventClick?.(item);
-            onClose();
-          }}
-          title={item.value}
-        >
-          {item.value}
-        </div>
-      ))}
+      {events.map((item, idx) => {
+        const dayStart = dateFn(dateObj).startOf("day");
+        const eventStart = dateFn(item.startDate).startOf("day");
+        const eventEnd = item.endDate
+          ? dateFn(item.endDate).startOf("day")
+          : eventStart;
+
+        const isStartBefore = eventStart.isBefore(dayStart, "day");
+        const isEndAfter = eventEnd.isAfter(dayStart, "day");
+
+        return (
+          <div
+            key={`pop-${idx}`}
+            className={cx(styles.popoverItem, {
+              [styles.startBefore]: isStartBefore,
+              [styles.endAfter]: isEndAfter,
+            })}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEventClick?.(item);
+              onClose();
+            }}
+            title={item.value}
+          >
+            {item.value}
+          </div>
+        );
+      })}
     </div>
   );
 }

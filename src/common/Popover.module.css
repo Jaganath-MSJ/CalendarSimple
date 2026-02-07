@@ -28,7 +28,7 @@
 }
 
 .popoverItem {
-  padding: 4px;
+  padding: 4px 8px;
   background-color: #2e75b6;
   color: white;
   border-radius: 3px;
@@ -37,8 +37,43 @@
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
+  margin-bottom: 2px;
 }
 
 .popoverItem:hover {
   opacity: 0.9;
+}
+
+.popoverItem.startBefore {
+  clip-path: polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%);
+  padding-left: 14px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.popoverItem.endAfter {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 50%,
+    calc(100% - 10px) 100%,
+    0 100%
+  );
+  padding-right: 14px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.popoverItem.startBefore.endAfter {
+  clip-path: polygon(
+    10px 0,
+    calc(100% - 10px) 0,
+    100% 50%,
+    calc(100% - 10px) 100%,
+    10px 100%,
+    0 50%
+  );
+  padding-left: 14px;
+  padding-right: 14px;
+  border-radius: 0;
 }

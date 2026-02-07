@@ -61,7 +61,7 @@ function EventItem({
       style={style}
       onClick={() => onClick?.(dateObj)}
       className={cx(styles.dateData, className, {
-        [styles.currentMonth]: isCurrentMonth,
+        [styles.currentMonth]: !isCurrentMonth,
         [cx(styles.selected, selectedClassName)]: isSelected,
         [cx(styles.today, todayClassName)]: isToday,
       })}
@@ -109,7 +109,7 @@ function EventItem({
                   className={styles.moreEvents}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setShowPopover(true);
+                    !showPopover && setShowPopover(true);
                     onMoreClick?.(dateObj);
                   }}
                 >

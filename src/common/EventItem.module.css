@@ -1,10 +1,9 @@
 .dateData {
   cursor: pointer;
-  color: #ccc;
 }
 
 .currentMonth {
-  color: inherit;
+  color: #ccc;
 }
 
 .cellContent {
