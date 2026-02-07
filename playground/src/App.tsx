@@ -77,7 +77,7 @@ function App() {
       isSelectDate
       pastYearLength={2}
       futureYearLength={3}
-      maxEvents={2}
+      maxEvents={1}
       theme={{
         default: { color: "#333", bgColor: "#f0f0f0" },
         selected: { color: "#fff", bgColor: "#007bff" },

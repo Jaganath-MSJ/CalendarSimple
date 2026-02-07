@@ -2,90 +2,100 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 20px;
-  margin-bottom: 20px;
-  background-color: transparent; /* or white */
+  padding: 1rem;
+  background-color: transparent;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .navigation {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 1rem;
 }
 
 .todayButton {
   background-color: transparent;
-  border: 1px solid #dadce0;
-  border-radius: 4px;
-  color: #3c4043;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
   cursor: pointer;
-  font-family: "Google Sans", Roboto, Arial, sans-serif;
-  font-size: 14px;
+  font-family: inherit;
+  font-size: 0.875rem;
   font-weight: 500;
-  line-height: 20px;
-  padding: 7px 16px;
-  transition: background-color 0.2s;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
 }
 
 .todayButton:hover {
-  background-color: #f1f3f4;
+  background-color: var(--bg-hover);
+  border-color: var(--text-secondary);
 }
 
 .arrows {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .iconButton {
   background: transparent;
-  border: none;
-  border-radius: 50%;
-  color: #5f6368;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 32px;
-  width: 32px;
+  height: 2rem;
+  width: 2rem;
   outline: none;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .iconButton:hover {
-  background-color: rgba(95, 99, 104, 0.08); /* faint grey circle */
-  color: #202124;
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .dateTitle {
-  color: #3c4043;
-  font-family: "Google Sans", Roboto, Arial, sans-serif;
-  font-size: 22px;
-  font-weight: 400;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 1.25rem;
+  font-weight: 600;
   margin: 0;
-  line-height: 24px;
   white-space: nowrap;
 }
 
 .controls {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .select {
-  background-color: transparent;
-  border: 1px solid #dadce0;
-  border-radius: 4px;
-  color: #3c4043;
+  appearance: none;
+  background-color: var(--bg-color);
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
   cursor: pointer;
-  font-family: "Google Sans", Roboto, Arial, sans-serif;
-  font-size: 14px;
-  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  padding: 0.5rem 2.5rem 0.5rem 1rem;
+  transition: border-color 0.2s ease;
   outline: none;
 }
 
 .select:hover {
-  background-color: #f1f3f4;
-  border-color: #dadce0;
+  border-color: var(--text-secondary);
+}
+
+.select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }

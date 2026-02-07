@@ -1,16 +1,14 @@
-import React, { useCallback, useMemo, memo, ReactNode, useEffect } from "react";
+import React, { useCallback, useMemo, memo, useEffect } from "react";
 import cx from "classnames";
 import {
   CalendarType,
   CalendarContentType,
   defaultCalenderProps,
-  DataTypeList,
 } from "./types";
 import {
   dateFn,
   convertToDate,
   convertToDayjs,
-  checkIsToday,
   DateType,
   DAY_LIST_NAME,
   generateCalendarGrid,
@@ -20,30 +18,20 @@ import EventItem from "./common/EventItem";
 import Header from "./layout/Header";
 import { CalendarProvider, useCalendar } from "./context/CalendarContext";
 
-function CalendarContent(props: CalendarContentType) {
+function CalendarContent({
+  dayType,
+  width,
+  height,
+  onDateClick,
+  onEventClick,
+  onMoreClick,
+  onMonthChange,
+  isSelectDate,
+  data: propsData, // Capture props data to sync
+  ...restProps
+}: CalendarContentType) {
   const { state, dispatch } = useCalendar();
   const { currentDate: selectedDate, events: data } = state;
-
-  const {
-    dayType,
-    width,
-    height,
-    onDateClick,
-    onEventClick,
-    onMoreClick,
-    onMonthChange,
-    isSelectDate,
-    className,
-    headerClassName,
-    tableClassName,
-    tableDateClassName,
-    dataClassName,
-    selectedClassName,
-    todayClassName,
-    pastYearLength,
-    futureYearLength,
-    data: propsData, // Capture props data to sync
-  } = props;
 
   // Sync data from props to context
   useEffect(() => {
@@ -76,15 +64,15 @@ function CalendarContent(props: CalendarContentType) {
           "--calendar-height": `${height}px`,
         } as React.CSSProperties
       }
-      className={cx(styles.calendar, className)}
+      className={cx(styles.calendar, restProps.className)}
     >
       <Header
-        headerClassName={headerClassName}
+        headerClassName={restProps.headerClassName}
         onMonthChange={onMonthChange}
-        pastYearLength={pastYearLength}
-        futureYearLength={futureYearLength}
+        pastYearLength={restProps.pastYearLength}
+        futureYearLength={restProps.futureYearLength}
       />
-      <table className={cx(styles.table, tableClassName)}>
+      <table className={cx(styles.table, restProps.tableClassName)}>
         <thead>
           <tr>
             {DAY_LIST_NAME[dayType].map((day: string) => (
@@ -112,12 +100,12 @@ function CalendarContent(props: CalendarContentType) {
                   dateObj={dayInfo.currentDate}
                   data={dayInfo.events}
                   cellWidth={width / 7}
-                  className={cx(styles.tableCell, tableDateClassName)}
-                  dataClassName={dataClassName}
-                  selectedClassName={selectedClassName}
-                  todayClassName={todayClassName}
-                  theme={props.theme}
-                  maxEvents={props.maxEvents}
+                  className={cx(styles.tableCell, restProps.tableDateClassName)}
+                  dataClassName={restProps.dataClassName}
+                  selectedClassName={restProps.selectedClassName}
+                  todayClassName={restProps.todayClassName}
+                  theme={restProps.theme}
+                  maxEvents={restProps.maxEvents}
                   totalEvents={dayInfo.totalEvents}
                   onEventClick={onEventClick}
                   onMoreClick={(d) => onMoreClick?.(convertToDate(d))}

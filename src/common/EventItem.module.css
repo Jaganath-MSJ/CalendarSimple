@@ -1,9 +1,21 @@
 .dateData {
   cursor: pointer;
+  position: relative;
+  transition: background-color 0.15s ease;
+  vertical-align: top;
+  height: calc(var(--calendar-height) / 6); /* Approx 6 rows usually */
+  min-width: calc(var(--calendar-width) / 7);
+  max-width: calc(var(--calendar-width) / 7);
+  padding: 0.25rem;
+}
+
+.dateData:hover {
+  background-color: #fafafa;
 }
 
 .currentMonth {
-  color: #ccc;
+  color: #9ca3af; /* muted text */
+  background-color: #f9fafb;
 }
 
 .cellContent {
@@ -12,72 +24,94 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  gap: 0.25rem;
 }
 
 .dateLabel {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.25rem;
+  border-radius: 50%;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+  color: var(--text-primary);
 }
 
-.selected {
-  background-color: #eeeeee;
-  color: #737373;
-  font-weight: bold;
+.selected .dateLabel {
+  background-color: var(--primary-color);
+  color: white;
 }
 
-.today {
-  color: #2e75b6;
-  font-size: 18px;
-  font-weight: bold;
+.today .dateLabel {
+  background-color: var(--primary-color);
+  color: white;
 }
 
 .dataContainer {
-  padding: 4px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   overflow: visible;
+  flex: 1;
 }
 
 .spacer {
-  height: 20px;
-  padding: 2px 4px;
-  margin-bottom: 0px;
+  height: 1.5rem; /* Match eventItem height */
+  margin-bottom: 2px;
 }
 
 .eventItem {
-  background-color: #2e75b6;
-  border-radius: 4px;
+  background-color: var(--primary-color);
+  border-radius: 4px; /* Slightly rounded */
   z-index: 2;
   position: relative;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 12px;
-  padding: 2px 4px;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
   color: white;
-  font-weight: normal;
-  height: 20px;
+  font-weight: 500;
+  height: 1.5rem;
+  line-height: 1.2rem;
   box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+  cursor: pointer;
+}
+
+.eventItem:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  filter: brightness(1.05);
 }
 
 .moreEventsContainer {
   position: relative;
+  margin-top: 2px;
 }
 
 .moreEvents {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #555;
+  color: var(--text-secondary);
   cursor: pointer;
-  padding: 2px 4px;
+  padding: 0.15rem 0.5rem;
   background: transparent;
   border: none;
   width: 100%;
   text-align: left;
-}
-.moreEvents:hover {
-  background-color: #f0f0f0;
   border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.moreEvents:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
 }
