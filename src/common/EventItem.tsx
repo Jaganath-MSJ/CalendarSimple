@@ -4,6 +4,7 @@ import { DataTypeList, DateDataType } from "../types";
 import { dateFn } from "../utils";
 import styles from "./EventItem.module.css";
 import Popover from "./Popover";
+import { defaultTheme } from "../constants";
 
 function EventItem({
   date,
@@ -27,10 +28,10 @@ function EventItem({
   const [showPopover, setShowPopover] = React.useState(false);
 
   const styleSource = isSelected
-    ? theme?.selected
+    ? { ...defaultTheme.selected, ...theme?.selected }
     : isToday
-      ? theme?.today
-      : theme?.default;
+      ? { ...defaultTheme.today, ...theme?.today }
+      : { ...defaultTheme.default, ...theme?.default };
 
   const style = {
     color: styleSource?.color,

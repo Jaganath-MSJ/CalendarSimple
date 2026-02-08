@@ -58,16 +58,6 @@ export enum EDayType {
   halfName = "HALF",
 }
 
-export const defaultCalenderProps = {
-  dayType: EDayType.halfName,
-  data: [],
-  width: 400,
-  height: 400,
-  isSelectDate: false,
-  pastYearLength: 5,
-  futureYearLength: 5,
-};
-
 export interface DataTypeList extends DataType {
   startDateWeek?: string;
   endDateWeek?: string;

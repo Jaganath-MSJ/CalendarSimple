@@ -1,4 +1,4 @@
-import { MonthListType } from "../types";
+import { EDayType, MonthListType } from "../types";
 
 const DAY_LIST = {
   SUNDAY: {
@@ -77,4 +77,30 @@ export const CALENDER_STRINGS = {
 export const DAY_TYPE = {
   FULL_NAME: "FULL",
   HALF_NAME: "HALF",
+};
+
+export const defaultTheme = {
+  default: {
+    color: "#000",
+    bgColor: "#fff",
+  },
+  selected: {
+    color: "#fff",
+    bgColor: "#007bff",
+  },
+  today: {
+    color: "#007bff",
+    bgColor: "#e6f2ff",
+  },
+};
+
+export const defaultCalenderProps = {
+  dayType: EDayType.halfName,
+  data: [],
+  width: 400,
+  height: 400,
+  isSelectDate: false,
+  pastYearLength: 5,
+  futureYearLength: 5,
+  theme: defaultTheme,
 };

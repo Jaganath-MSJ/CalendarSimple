@@ -1,13 +1,8 @@
 import React, { ChangeEvent } from "react";
 import cx from "classnames";
 import { EMonthOption, EYearOption, MonthListType } from "../types";
-import {
-  dateFn,
-  getYearList,
-  convertToDate,
-  CALENDER_STRINGS,
-  MONTH_LIST,
-} from "../utils";
+import { CALENDER_STRINGS, MONTH_LIST } from "../constants";
+import { dateFn, getYearList, convertToDate } from "../utils";
 import styles from "./Header.module.css";
 import LeftArrow from "../assets/LeftArrow";
 import RightArrow from "../assets/RightArrow";

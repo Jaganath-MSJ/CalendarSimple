@@ -1,16 +1,12 @@
 import React, { useCallback, useMemo, memo, useEffect } from "react";
 import cx from "classnames";
-import {
-  CalendarType,
-  CalendarContentType,
-  defaultCalenderProps,
-} from "./types";
+import { CalendarType, CalendarContentType } from "./types";
+import { DAY_LIST_NAME, defaultCalenderProps } from "./constants";
 import {
   dateFn,
   convertToDate,
   convertToDayjs,
   DateType,
-  DAY_LIST_NAME,
   generateCalendarGrid,
   calculateMaxEvents,
 } from "./utils";

@@ -1,7 +1,7 @@
 import Calendar from "./Calendar";
 import { EDayType } from "./types";
-import type { CalendarType } from "./types";
-import { DAY_TYPE } from "./utils";
+import type { CalendarType, DataType } from "./types";
+import { DAY_TYPE } from "./constants";
 
-export { EDayType, CalendarType, DAY_TYPE };
+export { EDayType, CalendarType, DataType, DAY_TYPE };
 export default Calendar;
