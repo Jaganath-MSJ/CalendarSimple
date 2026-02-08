@@ -15,6 +15,7 @@ export interface DataType {
   startDate: string;
   endDate?: string;
   value: string;
+  color?: string;
 }
 
 export interface CalendarType {

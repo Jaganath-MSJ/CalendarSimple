@@ -9,6 +9,7 @@ function App() {
           startDate: "2026-01-01",
           endDate: "2026-01-02",
           value: "22",
+          color: "red",
         },
         {
           startDate: "2026-01-02",
@@ -50,11 +51,13 @@ function App() {
           startDate: "2025-12-22",
           endDate: "2026-01-02",
           value: "Leave",
+          color: "blue",
         },
         {
           startDate: "2026-01-10",
           endDate: "2026-02-10",
           value: "5678",
+          color: "green",
         },
         {
           startDate: "2026-01-10",

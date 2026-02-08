@@ -1,6 +1,6 @@
 import React from "react";
 import cx from "classnames";
-import { DateDataType } from "../types";
+import { DataTypeList, DateDataType } from "../types";
 import { dateFn } from "../utils";
 import styles from "./EventItem.module.css";
 import Popover from "./Popover";
@@ -54,7 +54,8 @@ function EventItem({
     hiddenEventsCount = totalEvents - visibleRealEventsCount;
   }
 
-  const allDayEvents = data?.filter((e) => e !== null) || [];
+  const allDayEvents: DataTypeList[] =
+    data?.filter((e): e is DataTypeList => e !== null) || [];
 
   return (
     <td
@@ -92,7 +93,7 @@ function EventItem({
                 <div
                   key={`${item.startDate}-${index}`}
                   className={styles.eventItem}
-                  style={{ width }}
+                  style={{ width, backgroundColor: item.color }}
                   title={tooltipText}
                   onClick={(e) => {
                     e.stopPropagation();

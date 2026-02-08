@@ -56,6 +56,7 @@ function Popover({ dateObj, events, onEventClick, onClose }: PopoverProps) {
               [styles.startBefore]: isStartBefore,
               [styles.endAfter]: isEndAfter,
             })}
+            style={{ backgroundColor: item.color }}
             onClick={(e) => {
               e.stopPropagation();
               onEventClick?.(item);
