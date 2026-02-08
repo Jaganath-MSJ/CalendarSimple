@@ -21,7 +21,7 @@
     "url": "https://github.com/Jaganath-MSJ/CalendarSimple.git"
   },
   "scripts": {
-    "build": "vite build"
+    "build": "rmdir /s /q dist & vite build"
   },
   "keywords": [
     "calendar",
