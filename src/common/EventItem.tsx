@@ -43,7 +43,7 @@ function EventItem({
   let hiddenEventsCount = 0;
 
   if (
-    maxEvents &&
+    (maxEvents || maxEvents === 0) &&
     data &&
     (totalEvents >= maxEvents || data.length > maxEvents)
   ) {

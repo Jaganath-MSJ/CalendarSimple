@@ -97,8 +97,6 @@ export const defaultTheme = {
 export const defaultCalenderProps = {
   dayType: EDayType.halfName,
   data: [],
-  width: 400,
-  height: 400,
   isSelectDate: false,
   pastYearLength: 5,
   futureYearLength: 5,

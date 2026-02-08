@@ -9,6 +9,7 @@ import {
   DateType,
   generateCalendarGrid,
   calculateMaxEvents,
+  useResizeObserver,
 } from "./utils";
 import styles from "./Calendar.module.css";
 import EventItem from "./common/EventItem";
@@ -79,7 +80,7 @@ function CalendarContent({
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody className={styles.tableBody}>
           {calendarGrid.map((week, weekIndex) => (
             <tr key={weekIndex}>
               {week.map((dayInfo, dayIndex) => (
@@ -117,19 +118,35 @@ function CalendarContent({
 }
 
 function Calendar(props: CalendarType = defaultCalenderProps) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const { width: observedWidth, height: observedHeight } =
+    useResizeObserver(containerRef);
+
   const allProps = { ...defaultCalenderProps, ...props };
   const { data, selectedDate } = allProps;
+
+  // Use props if provided, otherwise use observed size
+  const width = props.width ?? observedWidth ?? 0;
+  const mainHeight = props.height ?? observedHeight ?? 0;
+  const height = mainHeight - 120;
 
   const initialDate = useMemo(
     () => (selectedDate ? convertToDayjs(selectedDate) : undefined),
     [selectedDate],
   );
 
-  const maxEvents = allProps.maxEvents ?? calculateMaxEvents(allProps.height);
+  const maxEvents = allProps.maxEvents ?? calculateMaxEvents(height);
 
   return (
     <CalendarProvider initialEvents={data} initialDate={initialDate}>
-      <CalendarContent {...allProps} maxEvents={maxEvents} />
+      <div ref={containerRef} className={styles.calendarContainer}>
+        <CalendarContent
+          {...allProps}
+          width={width}
+          height={height}
+          maxEvents={maxEvents}
+        />
+      </div>
     </CalendarProvider>
   );
 }
