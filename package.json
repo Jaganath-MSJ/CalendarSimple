@@ -1,6 +1,6 @@
 {
   "name": "calendar-simple",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A user-friendly calendar app for viewing, selecting, and managing dates with data management capabilities.",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
@@ -13,14 +13,15 @@
       "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js",
       "types": "./dist/index.d.ts"
-    }
+    },
+    "./dist/styles.css": "./dist/calendar-simple.css"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/Jaganath-MSJ/CalendarSimple.git"
   },
   "scripts": {
-    "build": "vite build"
+    "build": "rmdir /s /q dist & vite build"
   },
   "keywords": [
     "calendar",
@@ -32,11 +33,11 @@
   "dependencies": {
     "calendarize": "^1.1.1",
     "classnames": "^2.5.1",
-    "dayjs": "^1.11.19",
-    "styled-components": "^6.1.19"
+    "dayjs": "^1.11.19"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@types/node": "^24.8.1",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
