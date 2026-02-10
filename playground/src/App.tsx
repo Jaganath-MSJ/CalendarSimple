@@ -1,5 +1,5 @@
-import Calendar, { type DataType } from "../../src";
-// import "calendar-simple/dist/styles.css";
+import Calendar, { type DataType } from "calendar-simple";
+import "calendar-simple/dist/styles.css";
 
 function App() {
   const eventsList: DataType[] = [
