@@ -1,0 +1,102 @@
+import { DateType } from "../utils";
+
+export interface ThemeStyle {
+  color?: string;
+  bgColor?: string;
+}
+
+export interface CalendarTheme {
+  default?: ThemeStyle;
+  selected?: ThemeStyle;
+  today?: ThemeStyle;
+}
+
+export interface DataType {
+  startDate: string;
+  endDate?: string;
+  value: string;
+  color?: string;
+}
+
+export interface CalendarType {
+  dayType?: EDayType;
+  data?: DataType[];
+  width?: number;
+  height?: number;
+  selectedDate?: Date;
+  onDateClick?: (date: Date) => void;
+  onEventClick?: (event: DataType) => void;
+  onMoreClick?: (date: Date) => void;
+  onMonthChange?: (date: Date) => void;
+  isSelectDate?: boolean;
+  className?: string;
+  headerClassName?: string;
+  tableClassName?: string;
+  tableDateClassName?: string;
+  dataClassName?: string;
+  selectedClassName?: string;
+  todayClassName?: string;
+  pastYearLength?: number;
+  futureYearLength?: number;
+  theme?: CalendarTheme;
+  maxEvents?: number;
+}
+
+export interface CalendarContentType extends CalendarType {
+  dayType: EDayType;
+  data: DataType[];
+  width: number;
+  height: number;
+  isSelectDate: boolean;
+  pastYearLength: number;
+  futureYearLength: number;
+  maxEvents: number;
+}
+
+export enum EDayType {
+  fullName = "FULL",
+  halfName = "HALF",
+}
+
+export interface DataTypeList extends DataType {
+  startDateWeek?: string;
+  endDateWeek?: string;
+  isSpacer?: boolean;
+}
+
+export interface DateDataType {
+  date: number;
+  dateObj: DateType;
+  data: (DataTypeList | null)[];
+  cellWidth: number;
+  className?: string;
+  dataClassName?: string;
+  isSelected: boolean;
+  isToday: boolean;
+  isCurrentMonth: boolean;
+  onClick?: (date: DateType) => void;
+  onEventClick?: (event: DataType) => void;
+  onMoreClick?: (date: DateType) => void;
+  selectedClassName?: string;
+  todayClassName?: string;
+  theme?: CalendarTheme;
+  maxEvents?: number;
+  totalEvents?: number;
+}
+
+export interface MonthListType {
+  label: string;
+  value: number;
+}
+
+export enum EMonthOption {
+  add = "add",
+  sub = "sub",
+}
+
+export enum EYearOption {
+  month = "month",
+  year = "year",
+}
+
+export type CalendarView = "month" | "week" | "day";
