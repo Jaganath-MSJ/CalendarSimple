@@ -36,7 +36,7 @@ function CalendarContent({
     if (propsData) {
       dispatch({ type: "SET_EVENTS", payload: propsData });
     }
-  }, [propsData, dispatch]);
+  }, [propsData]);
 
   const calendarGrid = useMemo(
     () => generateCalendarGrid(selectedDate, data),
@@ -46,12 +46,12 @@ function CalendarContent({
   const onClickDateHandler = useCallback(
     (dateInput: DateType) => {
       const newDate = dateFn(dateInput);
-      if (!newDate.isSame(selectedDate, "day")) {
+      onDateClick?.(convertToDate(newDate));
+      if (isSelectDate && !newDate.isSame(selectedDate, "day")) {
         dispatch({ type: "SET_DATE", payload: newDate });
-        onDateClick?.(convertToDate(newDate));
       }
     },
-    [selectedDate, dispatch, onDateClick],
+    [selectedDate, onDateClick],
   );
 
   return (
@@ -93,7 +93,7 @@ function CalendarContent({
                   }
                   isToday={dayInfo.isToday}
                   isCurrentMonth={dayInfo.isCurrentMonth}
-                  onClick={isSelectDate ? onClickDateHandler : undefined}
+                  onClick={onClickDateHandler}
                   date={dayInfo.displayDay}
                   dateObj={dayInfo.currentDate}
                   data={dayInfo.events}
