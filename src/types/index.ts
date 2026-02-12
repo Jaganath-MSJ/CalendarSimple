@@ -50,7 +50,6 @@ export interface CalendarContentType extends CalendarType {
   isSelectDate: boolean;
   pastYearLength: number;
   futureYearLength: number;
-  maxEvents: number;
 }
 
 export enum EDayType {

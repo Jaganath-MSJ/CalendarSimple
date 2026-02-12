@@ -85,6 +85,8 @@ function EventItem({
               if (item.endDateWeek) {
                 diffDates =
                   dateFn(item.endDateWeek).diff(item.startDateWeek, "days") + 1;
+              }
+              if (item.endDate) {
                 tooltipText += ` to ${dateFn(item.endDate).format("YYYY-MM-DD")}`;
               }
               tooltipText += ` - ${item.value}`;

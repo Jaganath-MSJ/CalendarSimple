@@ -43,6 +43,13 @@ function CalendarContent({
     [selectedDate, data],
   );
 
+  const maxEvents = useMemo(
+    () =>
+      restProps.maxEvents ??
+      calculateMaxEvents(height, calendarGrid.length || 4),
+    [restProps.maxEvents, height, calendarGrid.length],
+  );
+
   const onClickDateHandler = useCallback(
     (dateInput: DateType) => {
       const newDate = dateFn(dateInput);
@@ -103,7 +110,7 @@ function CalendarContent({
                   selectedClassName={restProps.selectedClassName}
                   todayClassName={restProps.todayClassName}
                   theme={restProps.theme}
-                  maxEvents={restProps.maxEvents}
+                  maxEvents={maxEvents}
                   totalEvents={dayInfo.totalEvents}
                   onEventClick={onEventClick}
                   onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
@@ -135,17 +142,10 @@ function Calendar(props: CalendarType = defaultCalenderProps) {
     [selectedDate],
   );
 
-  const maxEvents = allProps.maxEvents ?? calculateMaxEvents(height);
-
   return (
     <CalendarProvider initialEvents={data} initialDate={initialDate}>
       <div ref={containerRef} className={styles.calendarContainer}>
-        <CalendarContent
-          {...allProps}
-          width={width}
-          height={height}
-          maxEvents={maxEvents}
-        />
+        <CalendarContent {...allProps} width={width} height={height} />
       </div>
     </CalendarProvider>
   );
