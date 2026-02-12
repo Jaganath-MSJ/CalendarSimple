@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "calendar-simple": "^1.1.0",
+    "calendar-simple": "^1.1.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
