@@ -1,3 +1,5 @@
+import { CALENDAR_CONSTANTS } from "../constants";
+
 /**
  * Calculates the maximum number of events that can be displayed in a cell based on the calendar height.
  *
@@ -8,9 +10,7 @@ export const calculateMaxEvents = (
   height: number,
   rowsInView: number,
 ): number => {
-  const DATE_LABEL_HEIGHT = 28; // height of the date circle + margins
-  const CELL_PADDING = 8; // approx padding
-  const EVENT_HEIGHT = 26; // 24px height + 2px margin
+  const { DATE_LABEL_HEIGHT, CELL_PADDING, EVENT_HEIGHT } = CALENDAR_CONSTANTS;
 
   const cellHeight = height / rowsInView;
   const availableHeight = cellHeight - DATE_LABEL_HEIGHT - CELL_PADDING;

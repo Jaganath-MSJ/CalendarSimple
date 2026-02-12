@@ -1,7 +1,11 @@
 import React, { useCallback, useMemo, memo, useEffect } from "react";
 import cx from "classnames";
 import { CalendarType, CalendarContentType } from "./types";
-import { DAY_LIST_NAME, defaultCalenderProps } from "./constants";
+import {
+  DAY_LIST_NAME,
+  defaultCalenderProps,
+  CALENDAR_CONSTANTS,
+} from "./constants";
 import {
   dateFn,
   convertToDate,
@@ -46,7 +50,10 @@ function CalendarContent({
   const maxEvents = useMemo(
     () =>
       restProps.maxEvents ??
-      calculateMaxEvents(height, calendarGrid.length || 4),
+      calculateMaxEvents(
+        height,
+        calendarGrid.length || CALENDAR_CONSTANTS.MIN_ROWS,
+      ),
     [restProps.maxEvents, height, calendarGrid.length],
   );
 
@@ -67,6 +74,8 @@ function CalendarContent({
         {
           "--calendar-width": `${width}px`,
           "--calendar-height": `${height}px`,
+          "--calendar-rows":
+            calendarGrid.length || CALENDAR_CONSTANTS.DEFAULT_ROWS,
         } as React.CSSProperties
       }
       className={cx(styles.calendar, restProps.className)}
@@ -104,7 +113,7 @@ function CalendarContent({
                   date={dayInfo.displayDay}
                   dateObj={dayInfo.currentDate}
                   data={dayInfo.events}
-                  cellWidth={width / 7}
+                  cellWidth={width / CALENDAR_CONSTANTS.DAYS_IN_WEEK}
                   className={cx(styles.tableCell, restProps.tableDateClassName)}
                   dataClassName={restProps.dataClassName}
                   selectedClassName={restProps.selectedClassName}
@@ -135,7 +144,7 @@ function Calendar(props: CalendarType = defaultCalenderProps) {
   // Use props if provided, otherwise use observed size
   const width = props.width ?? observedWidth ?? 0;
   const mainHeight = props.height ?? observedHeight ?? 0;
-  const height = mainHeight - 120;
+  const height = mainHeight - CALENDAR_CONSTANTS.HEADER_HEIGHT;
 
   const initialDate = useMemo(
     () => (selectedDate ? convertToDayjs(selectedDate) : undefined),

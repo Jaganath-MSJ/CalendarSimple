@@ -4,7 +4,7 @@ import { DataTypeList, DateDataType } from "../types";
 import { dateFn } from "../utils";
 import styles from "./EventItem.module.css";
 import Popover from "./Popover";
-import { defaultTheme } from "../constants";
+import { CALENDAR_CONSTANTS, defaultTheme } from "../constants";
 
 function EventItem({
   date,
@@ -20,7 +20,7 @@ function EventItem({
   todayClassName,
   isCurrentMonth,
   theme,
-  maxEvents = 3, // Default limit
+  maxEvents,
   onMoreClick,
   onEventClick,
   totalEvents = 0,
@@ -90,7 +90,7 @@ function EventItem({
                 tooltipText += ` to ${dateFn(item.endDate).format("YYYY-MM-DD")}`;
               }
               tooltipText += ` - ${item.value}`;
-              const width = `${cellWidth * diffDates - 16}px`;
+              const width = `${cellWidth * diffDates - CALENDAR_CONSTANTS.EVENT_ITEM_PADDING}px`;
 
               return (
                 <div

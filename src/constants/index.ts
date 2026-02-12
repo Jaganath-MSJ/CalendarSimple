@@ -102,3 +102,14 @@ export const defaultCalenderProps = {
   futureYearLength: 5,
   theme: defaultTheme,
 };
+
+export const CALENDAR_CONSTANTS = {
+  HEADER_HEIGHT: 122,
+  DATE_LABEL_HEIGHT: 28,
+  CELL_PADDING: 8,
+  EVENT_HEIGHT: 26,
+  DEFAULT_ROWS: 6,
+  MIN_ROWS: 4,
+  DAYS_IN_WEEK: 7,
+  EVENT_ITEM_PADDING: 16, // used in width calculation
+};
