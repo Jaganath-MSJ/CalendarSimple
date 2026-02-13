@@ -62,11 +62,11 @@ export const generateCalendarGrid = (
 
   const calendarArray = calendarize(selectedDate.toDate());
 
-  return calendarArray.map((week, weekIndex) => {
+  return calendarArray.map((week: number[], weekIndex: number) => {
     // -------------------------------------------------------------------------
     // 1. Grid Generation: Calculate dates for the entire week first
     // -------------------------------------------------------------------------
-    const processedWeek = week.map((day, dayIndex) => {
+    const processedWeek = week.map((day: number, dayIndex: number) => {
       let currentDate = dateFn(selectedDate);
       let isCurrentMonth = true;
       let displayDay = day;
@@ -200,7 +200,7 @@ export const generateCalendarGrid = (
     // 5. Content Generation: Generate final display data for each day
     // Map the calculated slots back to individual day cells.
     // -------------------------------------------------------------------------
-    return processedWeek.map((dayObj, dayIndex) => {
+    return processedWeek.map((dayObj: any, dayIndex: number) => {
       const { currentDate, isCurrentMonth, displayDay } = dayObj;
 
       // Find events active on this day
