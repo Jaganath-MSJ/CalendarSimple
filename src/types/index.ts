@@ -79,7 +79,7 @@ export interface DateDataType {
   selectedClassName?: string;
   todayClassName?: string;
   theme?: CalendarTheme;
-  maxEvents?: number;
+  maxEvents: number;
   totalEvents?: number;
 }
 

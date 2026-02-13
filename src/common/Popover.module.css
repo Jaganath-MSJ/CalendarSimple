@@ -8,9 +8,10 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   padding: 0.5rem;
-  min-width: 180px;
-  max-width: 240px;
-  max-height: 240px;
+  /* min-width: 180px; - allow it to be wider if needed, or keep? Keeping for now */
+  min-width: 200px;
+  max-width: 300px;
+  max-height: 300px; /* Increased from 240px */
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -41,6 +42,10 @@
   border-bottom: 1px solid var(--border-color);
 }
 
+.popoverContent {
+  overflow-y: auto;
+}
+
 .popoverItem {
   padding: 0.25rem 0.5rem;
   background-color: var(--primary-color);
@@ -53,6 +58,7 @@
   cursor: pointer;
   margin-bottom: 2px;
   transition: opacity 0.2s ease;
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .popoverItem:hover {
