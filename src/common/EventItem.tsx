@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import cx from "classnames";
 import { DataTypeList, DateDataType } from "../types";
-import { dateFn } from "../utils";
+import { formatDate, getDiffDays } from "../utils";
 import styles from "./EventItem.module.css";
 import Popover from "./Popover";
 import { CALENDAR_CONSTANTS, defaultTheme } from "../constants";
@@ -82,13 +82,16 @@ function EventItem({
               }
 
               let diffDates = 1;
-              let tooltipText = dateFn(item.startDate).format("YYYY-MM-DD");
+              let tooltipText = formatDate(item.startDate, "YYYY-MM-DD");
               if (item.endDateWeek) {
                 diffDates =
-                  dateFn(item.endDateWeek).diff(item.startDateWeek, "days") + 1;
+                  getDiffDays(
+                    item.endDateWeek,
+                    item.startDateWeek || item.startDate,
+                  ) + 1;
               }
               if (item.endDate) {
-                tooltipText += ` to ${dateFn(item.endDate).format("YYYY-MM-DD")}`;
+                tooltipText += ` to ${formatDate(item.endDate, "YYYY-MM-DD")}`;
               }
               tooltipText += ` - ${item.value}`;
               const width = `${cellWidth * diffDates - CALENDAR_CONSTANTS.EVENT_ITEM_PADDING}px`;

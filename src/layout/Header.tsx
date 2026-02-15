@@ -2,7 +2,18 @@ import React, { ChangeEvent } from "react";
 import cx from "classnames";
 import { EMonthOption, EYearOption, MonthListType } from "../types";
 import { CALENDER_STRINGS, MONTH_LIST } from "../constants";
-import { dateFn, getYearList, convertToDate } from "../utils";
+import {
+  dateFn,
+  getYearList,
+  convertToDate,
+  addMonths,
+  subMonths,
+  setMonth,
+  setYear,
+  formatDate,
+  getMonth,
+  getYear,
+} from "../utils";
 import styles from "./Header.module.css";
 import LeftArrow from "../assets/LeftArrow";
 import RightArrow from "../assets/RightArrow";
@@ -28,11 +39,11 @@ function Header({
   const onMonthArrowClick = (option: EMonthOption) => {
     if (option === EMonthOption.add) {
       dispatch({ type: "NEXT" });
-      const nextDate = currentDate.add(1, "month"); // predictive for callback
+      const nextDate = addMonths(currentDate, 1); // predictive for callback
       onMonthChange?.(convertToDate(nextDate));
     } else if (option === EMonthOption.sub) {
       dispatch({ type: "PREV" });
-      const prevDate = currentDate.subtract(1, "month"); // predictive for callback
+      const prevDate = subMonths(currentDate, 1); // predictive for callback
       onMonthChange?.(convertToDate(prevDate));
     }
   };
@@ -45,9 +56,9 @@ function Header({
     let newDate = currentDate;
 
     if (option === EYearOption.month) {
-      newDate = dateFn(currentDate).month(value);
+      newDate = setMonth(currentDate, value);
     } else if (option === EYearOption.year) {
-      newDate = dateFn(currentDate).year(value);
+      newDate = setYear(currentDate, value);
     }
 
     dispatch({ type: "SET_DATE", payload: newDate });
@@ -80,7 +91,9 @@ function Header({
             <RightArrow />
           </button>
         </div>
-        <h2 className={styles.dateTitle}>{currentDate.format("MMMM YYYY")}</h2>
+        <h2 className={styles.dateTitle}>
+          {formatDate(currentDate, "MMMM YYYY")}
+        </h2>
       </div>
 
       <div className={styles.controls}>
@@ -88,7 +101,7 @@ function Header({
           className={styles.select}
           id={CALENDER_STRINGS.MONTH}
           name={CALENDER_STRINGS.MONTH}
-          value={currentDate.month()}
+          value={getMonth(currentDate)}
           onChange={(e) => onDropdownClick(e, EYearOption.month)}
         >
           {MONTH_LIST.map((month: MonthListType) => (
@@ -101,13 +114,13 @@ function Header({
           className={styles.select}
           id={CALENDER_STRINGS.YEAR}
           name={CALENDER_STRINGS.YEAR}
-          value={currentDate.year()}
+          value={getYear(currentDate)}
           onChange={(e) => onDropdownClick(e, EYearOption.year)}
         >
           {getYearList(
             pastYearLength,
             futureYearLength,
-            currentDate.year(),
+            getYear(currentDate),
           ).map((year: number) => (
             <option key={year} value={year}>
               {year}

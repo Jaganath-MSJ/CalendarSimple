@@ -9,7 +9,6 @@ import {
 import {
   dateFn,
   convertToDate,
-  convertToDayjs,
   DateType,
   generateCalendarGrid,
   calculateMaxEvents,
@@ -147,7 +146,7 @@ function Calendar(props: CalendarType = defaultCalenderProps) {
   const height = mainHeight - CALENDAR_CONSTANTS.HEADER_HEIGHT;
 
   const initialDate = useMemo(
-    () => (selectedDate ? convertToDayjs(selectedDate) : undefined),
+    () => (selectedDate ? dateFn(selectedDate) : undefined),
     [selectedDate],
   );
 

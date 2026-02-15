@@ -10,7 +10,23 @@
  */
 
 import calendarize from "calendarize";
-import { dateFn, checkIsToday, DateType } from "./date";
+import {
+  dateFn,
+  checkIsToday,
+  DateType,
+  getMonthStartingDay,
+  getStartOfDay,
+  getDiffDays,
+  getStartOfMonth,
+  setDate,
+  addDays,
+  isBeforeDate,
+  isAfterDate,
+  isSameDate,
+  formatDate,
+  subDays,
+  getDate,
+} from "./date";
 import { DataType, DataTypeList } from "../types";
 
 /**
@@ -55,9 +71,7 @@ export const generateCalendarGrid = (
 ): CalendarMatrix => {
   // Sort events
   const dataEvents = [...events].sort((a, b) => {
-    return dateFn(a.startDate)
-      .startOf("day")
-      .diff(dateFn(b.startDate).startOf("day"), "days");
+    return getDiffDays(getStartOfDay(a.startDate), getStartOfDay(b.startDate));
   });
 
   const calendarArray = calendarize(selectedDate.toDate());
@@ -74,22 +88,22 @@ export const generateCalendarGrid = (
       if (day === 0) {
         isCurrentMonth = false;
         if (weekIndex === 0) {
-          const startOfMonth = dateFn(selectedDate).startOf("month");
-          const startDayOfWeek = startOfMonth.day();
-          currentDate = startOfMonth.subtract(startDayOfWeek - dayIndex, "day");
-          displayDay = currentDate.date();
+          const startOfMonth = getStartOfMonth(selectedDate);
+          const startDayOfWeek = getMonthStartingDay(selectedDate);
+          currentDate = subDays(startOfMonth, startDayOfWeek - dayIndex);
+          displayDay = getDate(currentDate);
         } else {
-          const startOfMonth = dateFn(selectedDate).startOf("month");
-          const startDayOfWeek = startOfMonth.day();
+          const startOfMonth = getStartOfMonth(selectedDate);
+          const startDayOfWeek = getMonthStartingDay(selectedDate);
 
           const globalIndex = weekIndex * 7 + dayIndex;
           const daysFromStart = globalIndex - startDayOfWeek;
 
-          currentDate = startOfMonth.add(daysFromStart, "day");
-          displayDay = currentDate.date();
+          currentDate = addDays(startOfMonth, daysFromStart);
+          displayDay = getDate(currentDate);
         }
       } else {
-        currentDate = dateFn(selectedDate).date(day);
+        currentDate = setDate(selectedDate, day);
       }
       return { currentDate, isCurrentMonth, displayDay };
     });
@@ -97,16 +111,16 @@ export const generateCalendarGrid = (
     // -------------------------------------------------------------------------
     // 2. Event Identification: Identify all events overlapping with this week
     // -------------------------------------------------------------------------
-    const weekStart = processedWeek[0].currentDate.startOf("day");
-    const weekEnd = processedWeek[6].currentDate.startOf("day");
+    const weekStart = getStartOfDay(processedWeek[0].currentDate);
+    const weekEnd = getStartOfDay(processedWeek[6].currentDate);
 
     const weekEvents = dataEvents.filter((item) => {
-      const start = dateFn(item.startDate).startOf("day");
-      const end = item.endDate ? dateFn(item.endDate).startOf("day") : start;
+      const start = getStartOfDay(item.startDate);
+      const end = item.endDate ? getStartOfDay(item.endDate) : start;
       // Check overlap
       return (
-        start.isBefore(weekEnd.add(1, "day"), "day") &&
-        end.isAfter(weekStart.subtract(1, "day"), "day")
+        isBeforeDate(start, addDays(weekEnd, 1)) &&
+        isAfterDate(end, subDays(weekStart, 1))
       );
     });
 
@@ -119,16 +133,16 @@ export const generateCalendarGrid = (
     // that long-spanning events get stable top slots, reducing visual fragmentation.
     // -------------------------------------------------------------------------
     weekEvents.sort((a, b) => {
-      const startA = dateFn(a.startDate).startOf("day");
-      const startB = dateFn(b.startDate).startOf("day");
+      const startA = getStartOfDay(a.startDate);
+      const startB = getStartOfDay(b.startDate);
       // Primary sort: Start date (ascending)
-      if (!startA.isSame(startB, "day")) return startA.diff(startB);
+      if (!isSameDate(startA, startB)) return getDiffDays(startA, startB);
 
       // Secondary sort: Duration (descending)
-      const endA = a.endDate ? dateFn(a.endDate).startOf("day") : startA;
-      const endB = b.endDate ? dateFn(b.endDate).startOf("day") : startB;
-      const durA = endA.diff(startA, "day");
-      const durB = endB.diff(startB, "day");
+      const endA = a.endDate ? getStartOfDay(a.endDate) : startA;
+      const endB = b.endDate ? getStartOfDay(b.endDate) : startB;
+      const durA = getDiffDays(endA, startA);
+      const durB = getDiffDays(endB, startB);
       return durB - durA; // Longer events first
     });
 
@@ -156,11 +170,11 @@ export const generateCalendarGrid = (
       // Determine start/end indices in this week (0..6)
       // We clip the event's start/end to the current week's boundaries because
       // we are only rendering one week at a time in this loop.
-      const start = dateFn(event.startDate).startOf("day");
-      const end = event.endDate ? dateFn(event.endDate).startOf("day") : start;
+      const start = getStartOfDay(event.startDate);
+      const end = event.endDate ? getStartOfDay(event.endDate) : start;
 
-      let startIndex = start.diff(weekStart, "day");
-      let endIndex = end.diff(weekStart, "day");
+      let startIndex = getDiffDays(start, weekStart);
+      let endIndex = getDiffDays(end, weekStart);
 
       // Clip to week boundaries
       if (startIndex < 0) startIndex = 0;
@@ -205,13 +219,10 @@ export const generateCalendarGrid = (
 
       // Find events active on this day
       const activeEvents = weekEvents.filter((event) => {
-        const start = dateFn(event.startDate).startOf("day");
-        const end = event.endDate
-          ? dateFn(event.endDate).startOf("day")
-          : start;
+        const start = getStartOfDay(event.startDate);
+        const end = event.endDate ? getStartOfDay(event.endDate) : start;
         return (
-          !currentDate.isBefore(start, "day") &&
-          !currentDate.isAfter(end, "day")
+          !isBeforeDate(currentDate, start) && !isAfterDate(currentDate, end)
         );
       });
 
@@ -228,8 +239,8 @@ export const generateCalendarGrid = (
           (e) => eventSlots.get((e as any)._tempId) === s,
         );
         if (event) {
-          const itemStartDate = dateFn(event.startDate).startOf("day");
-          const isStart = itemStartDate.isSame(currentDate, "day");
+          const itemStartDate = getStartOfDay(event.startDate);
+          const isStart = isSameDate(itemStartDate, currentDate);
           const isWeekStart = dayIndex === 0;
 
           // If the event starts today (or earlier but this is the start of the week),
@@ -238,19 +249,19 @@ export const generateCalendarGrid = (
             // Ensure the visual end date doesn't exceed the end of the current week.
             // This is crucial for rendering the correct width for the event bar using CSS/col-span.
             const itemEndDate = event.endDate
-              ? dateFn(event.endDate).startOf("day")
-              : dateFn(event.startDate).startOf("day");
-            const endOfWeekDate = dateFn(currentDate).add(6 - dayIndex, "day");
+              ? getStartOfDay(event.endDate)
+              : getStartOfDay(event.startDate);
+            const endOfWeekDate = addDays(currentDate, 6 - dayIndex);
 
             let effectiveEndDate = itemEndDate;
-            if (itemEndDate.isAfter(endOfWeekDate, "date")) {
+            if (isAfterDate(itemEndDate, endOfWeekDate)) {
               effectiveEndDate = endOfWeekDate;
             }
 
             displayData.push({
               ...event,
-              startDateWeek: currentDate.format("YYYY-MM-DD"),
-              endDateWeek: effectiveEndDate.format("YYYY-MM-DD"),
+              startDateWeek: formatDate(currentDate, "YYYY-MM-DD"),
+              endDateWeek: formatDate(effectiveEndDate, "YYYY-MM-DD"),
             });
           } else {
             // Spacer: The event exists on this day but was started in a previous cell in this row.

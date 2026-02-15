@@ -7,7 +7,13 @@ import React, {
 } from "react";
 import cx from "classnames";
 import styles from "./Popover.module.css";
-import { dateFn, DateType } from "../utils";
+import {
+  DateType,
+  formatDate,
+  getStartOfDay,
+  isBeforeDate,
+  isAfterDate,
+} from "../utils";
 import { DataTypeList } from "../types";
 
 interface PopoverProps {
@@ -107,18 +113,18 @@ function Popover({
       onClick={(e) => e.stopPropagation()}
     >
       <div className={styles.popoverHeader}>
-        {dateFn(dateObj).format("ddd, D MMM")}
+        {formatDate(dateObj, "ddd, D MMM")}
       </div>
       <div className={styles.popoverContent}>
         {events.map((item, idx) => {
-          const dayStart = dateFn(dateObj).startOf("day");
-          const eventStart = dateFn(item.startDate).startOf("day");
+          const dayStart = getStartOfDay(dateObj);
+          const eventStart = getStartOfDay(item.startDate);
           const eventEnd = item.endDate
-            ? dateFn(item.endDate).startOf("day")
+            ? getStartOfDay(item.endDate)
             : eventStart;
 
-          const isStartBefore = eventStart.isBefore(dayStart, "day");
-          const isEndAfter = eventEnd.isAfter(dayStart, "day");
+          const isStartBefore = isBeforeDate(eventStart, dayStart);
+          const isEndAfter = isAfterDate(eventEnd, dayStart);
 
           return (
             <div
