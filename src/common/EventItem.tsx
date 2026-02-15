@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import cx from "classnames";
 import { DataTypeList, DateDataType } from "../types";
 import { dateFn } from "../utils";
@@ -25,7 +25,8 @@ function EventItem({
   onEventClick,
   totalEvents = 0,
 }: DateDataType) {
-  const [showPopover, setShowPopover] = React.useState(false);
+  const [showPopover, setShowPopover] = useState(false);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
 
   const styleSource = isSelected
     ? { ...defaultTheme.selected, ...theme?.selected }
@@ -110,6 +111,7 @@ function EventItem({
             {hiddenEventsCount > 0 && (
               <div className={styles.moreEventsContainer}>
                 <button
+                  ref={moreButtonRef}
                   className={styles.moreEvents}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -125,6 +127,7 @@ function EventItem({
                     events={allDayEvents}
                     onEventClick={onEventClick}
                     onClose={() => setShowPopover(false)}
+                    anchorEl={moreButtonRef.current}
                   />
                 )}
               </div>

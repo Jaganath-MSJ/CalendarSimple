@@ -1,4 +1,10 @@
-import React, { useRef, useEffect, useLayoutEffect, useState } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  CSSProperties,
+} from "react";
 import cx from "classnames";
 import styles from "./Popover.module.css";
 import { dateFn, DateType } from "../utils";
@@ -9,55 +15,73 @@ interface PopoverProps {
   events: DataTypeList[];
   onEventClick?: (data: DataTypeList) => void;
   onClose: () => void;
+  anchorEl: HTMLElement | null;
 }
 
-function Popover({ dateObj, events, onEventClick, onClose }: PopoverProps) {
+function Popover({
+  dateObj,
+  events,
+  onEventClick,
+  onClose,
+  anchorEl,
+}: PopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
-  const [stylePosition, setStylePosition] = useState<React.CSSProperties>({});
+  const [stylePosition, setStylePosition] = useState<CSSProperties>({
+    visibility: "hidden",
+  });
 
   useLayoutEffect(() => {
-    if (popoverRef.current) {
+    if (popoverRef.current && anchorEl) {
       const popoverRect = popoverRef.current.getBoundingClientRect();
-      const screenHeight = window.innerHeight;
-      const screenWidth = window.innerWidth;
-
-      const spaceAbove = popoverRect.top;
-      const spaceBelow = screenHeight - popoverRect.bottom;
-
+      const anchorRect = anchorEl.getBoundingClientRect();
       const PADDING = 10;
-      let newStyle: React.CSSProperties = {};
 
-      // Horizontal Check
-      // If the popover goes beyond the right edge of the screen
-      if (popoverRect.right > screenWidth - PADDING) {
-        newStyle.left = "auto";
-        newStyle.right = 0;
+      // Base position: bottom-left of the anchor
+      let top = anchorRect.bottom + 4; // 4px gap
+      let left = anchorRect.left;
+
+      // Available space in viewport
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+
+      const spaceBelow = viewportHeight - top;
+      const spaceAbove = anchorRect.top - PADDING;
+
+      let newStyle: CSSProperties = {
+        visibility: "visible",
+        position: "fixed",
+        top: `${top}px`,
+        left: `${left}px`,
+        width: "220px", // Fixed width to prevent resizing
+      };
+
+      // Horizontal Check (Viewport)
+      if (left + popoverRect.width > viewportWidth - PADDING) {
+        // Align to right edge of viewport if it overflows
+        left = viewportWidth - popoverRect.width - PADDING;
+        newStyle.left = `${left}px`;
       }
 
-      // Vertical Check
-      // Check if the popover overflows the bottom
-      if (popoverRect.bottom > screenHeight - PADDING) {
+      // Vertical Check (Viewport)
+      if (top + popoverRect.height > viewportHeight - PADDING) {
         const height = popoverRect.height;
 
-        // If (spaceBelow < popoverHeight) AND (spaceAbove > spaceBelow), then flip to top
+        // Flip to top if not enough space below but enough above
         if (spaceBelow < height && spaceAbove > spaceBelow) {
-          const maxHeight = Math.min(height, spaceAbove - PADDING);
+          const maxHeight = Math.min(height, spaceAbove);
           newStyle.top = "auto";
-          newStyle.bottom = "calc(100% + 4px)";
+          newStyle.bottom = `${viewportHeight - anchorRect.top + 4}px`;
           newStyle.maxHeight = `${maxHeight}px`;
         } else {
-          // Stick to bottom but cap the height
+          // Cap height at bottom
           const maxHeight = Math.min(height, spaceBelow - PADDING);
           newStyle.maxHeight = `${maxHeight}px`;
         }
       }
 
-      // Only update state if we have changes to avoid unnecessary re-renders
-      if (Object.keys(newStyle).length > 0) {
-        setStylePosition(newStyle);
-      }
+      setStylePosition(newStyle);
     }
-  }, []); // Run once on mount to position
+  }, [anchorEl]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
