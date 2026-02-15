@@ -57,11 +57,13 @@ export enum EDayType {
   halfName = "HALF",
 }
 
-export interface DataTypeList extends DataType {
-  startDateWeek?: string;
-  endDateWeek?: string;
-  isSpacer?: boolean;
-}
+export type DataTypeList =
+  | (DataType & {
+      startDateWeek: string;
+      endDateWeek?: string;
+      isSpacer?: false;
+    })
+  | (DataType & { isSpacer: true });
 
 export interface DateDataType {
   date: number;

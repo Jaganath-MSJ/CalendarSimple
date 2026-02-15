@@ -29,6 +29,10 @@ import {
 } from "./date";
 import { DataType, DataTypeList } from "../types";
 
+interface InternalDataType extends DataType {
+  _tempId?: string;
+}
+
 /**
  * Represents the information for a single day in the calendar grid.
  */
@@ -114,7 +118,7 @@ export const generateCalendarGrid = (
     const weekStart = getStartOfDay(processedWeek[0].currentDate);
     const weekEnd = getStartOfDay(processedWeek[6].currentDate);
 
-    const weekEvents = dataEvents.filter((item) => {
+    const weekEvents: InternalDataType[] = dataEvents.filter((item) => {
       const start = getStartOfDay(item.startDate);
       const end = item.endDate ? getStartOfDay(item.endDate) : start;
       // Check overlap
@@ -207,14 +211,14 @@ export const generateCalendarGrid = (
       }
 
       // Store the ID on the event object temporarily for step 5
-      (event as any)._tempId = eventId;
+      event._tempId = eventId;
     });
 
     // -------------------------------------------------------------------------
     // 5. Content Generation: Generate final display data for each day
     // Map the calculated slots back to individual day cells.
     // -------------------------------------------------------------------------
-    return processedWeek.map((dayObj: any, dayIndex: number) => {
+    return processedWeek.map((dayObj, dayIndex) => {
       const { currentDate, isCurrentMonth, displayDay } = dayObj;
 
       // Find events active on this day
@@ -230,13 +234,13 @@ export const generateCalendarGrid = (
 
       let maxDaySlot = -1;
       activeEvents.forEach((e) => {
-        const s = eventSlots.get((e as any)._tempId);
+        const s = eventSlots.get(e._tempId!);
         if (s !== undefined && s > maxDaySlot) maxDaySlot = s;
       });
 
       for (let s = 0; s <= maxDaySlot; s++) {
         const event = activeEvents.find(
-          (e) => eventSlots.get((e as any)._tempId) === s,
+          (e) => eventSlots.get(e._tempId!) === s,
         );
         if (event) {
           const itemStartDate = getStartOfDay(event.startDate);
@@ -262,6 +266,7 @@ export const generateCalendarGrid = (
               ...event,
               startDateWeek: formatDate(currentDate, "YYYY-MM-DD"),
               endDateWeek: formatDate(effectiveEndDate, "YYYY-MM-DD"),
+              isSpacer: false,
             });
           } else {
             // Spacer: The event exists on this day but was started in a previous cell in this row.

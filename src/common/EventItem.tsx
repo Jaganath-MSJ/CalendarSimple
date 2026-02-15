@@ -85,10 +85,7 @@ function EventItem({
               let tooltipText = formatDate(item.startDate, "YYYY-MM-DD");
               if (item.endDateWeek) {
                 diffDates =
-                  getDiffDays(
-                    item.endDateWeek,
-                    item.startDateWeek || item.startDate,
-                  ) + 1;
+                  getDiffDays(item.endDateWeek, item.startDateWeek) + 1;
               }
               if (item.endDate) {
                 tooltipText += ` to ${formatDate(item.endDate, "YYYY-MM-DD")}`;
