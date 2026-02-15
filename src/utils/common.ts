@@ -6,10 +6,7 @@ import { CALENDAR_CONSTANTS } from "../constants";
  * @param height - The total height of the calendar
  * @returns The maximum number of events to display
  */
-export const calculateMaxEvents = (
-  height: number,
-  rowsInView: number,
-): number => {
+export function calculateMaxEvents(height: number, rowsInView: number): number {
   const { DATE_LABEL_HEIGHT, CELL_PADDING, EVENT_HEIGHT } = CALENDAR_CONSTANTS;
 
   const cellHeight = height / rowsInView;
@@ -17,4 +14,4 @@ export const calculateMaxEvents = (
   const calculatedMax = Math.round(availableHeight / EVENT_HEIGHT) - 1; // -1 for "more" button
 
   return Math.max(0, calculatedMax);
-};
+}

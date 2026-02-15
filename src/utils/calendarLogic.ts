@@ -69,10 +69,10 @@ export type CalendarMatrix = CalendarDayInfo[][];
  * @param events - List of all events
  * @returns A structured matrix of weeks and days with assigned events
  */
-export const generateCalendarGrid = (
+export function generateCalendarGrid(
   selectedDate: DateType,
   events: DataType[],
-): CalendarMatrix => {
+): CalendarMatrix {
   // Sort events
   const dataEvents = [...events].sort((a, b) => {
     return getDiffDays(getStartOfDay(a.startDate), getStartOfDay(b.startDate));
@@ -289,4 +289,4 @@ export const generateCalendarGrid = (
       };
     });
   });
-};
+}
