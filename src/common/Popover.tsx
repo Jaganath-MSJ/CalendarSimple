@@ -14,12 +14,12 @@ import {
   isBeforeDate,
   isAfterDate,
 } from "../utils";
-import { DataTypeList } from "../types";
+import { CalendarType, DataTypeList, DateDataType } from "../types";
 
 interface PopoverProps {
   dateObj: DateType;
   events: DataTypeList[];
-  onEventClick?: (data: DataTypeList) => void;
+  onEventClick?: CalendarType["onEventClick"];
   onClose: () => void;
   anchorEl: HTMLElement | null;
 }

@@ -26,7 +26,6 @@ function CalendarContent({
   onDateClick,
   onEventClick,
   onMoreClick,
-  onMonthChange,
   isSelectDate,
   data: propsData, // Capture props data to sync
   ...restProps
@@ -81,7 +80,7 @@ function CalendarContent({
     >
       <Header
         headerClassName={restProps.headerClassName}
-        onMonthChange={onMonthChange}
+        onMonthChange={restProps.onMonthChange}
         pastYearLength={restProps.pastYearLength}
         futureYearLength={restProps.futureYearLength}
       />

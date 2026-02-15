@@ -1,6 +1,11 @@
 import React, { ChangeEvent } from "react";
 import cx from "classnames";
-import { EMonthOption, EYearOption, MonthListType } from "../types";
+import {
+  CalendarType,
+  EMonthOption,
+  EYearOption,
+  MonthListType,
+} from "../types";
 import { CALENDER_STRINGS, MONTH_LIST } from "../constants";
 import {
   dateFn,
@@ -19,13 +24,10 @@ import LeftArrow from "../assets/LeftArrow";
 import RightArrow from "../assets/RightArrow";
 import { useCalendar } from "../context/CalendarContext";
 
-interface HeaderProps {
-  headerClassName?: string;
-  pastYearLength?: number;
-  futureYearLength?: number;
-  // Optional callback for external listeners if needed
-  onMonthChange?: (date: Date) => void;
-}
+interface HeaderProps extends Pick<
+  CalendarType,
+  "headerClassName" | "pastYearLength" | "futureYearLength" | "onMonthChange"
+> {}
 
 function Header({
   headerClassName,
