@@ -18,7 +18,7 @@ export default defineConfig({
       external: ["react", "react-dom"],
       output: {
         // Provide global variables for IIFE/UMD builds
-        exports: 'named',
+        exports: "named",
         globals: {
           react: "React",
           "react-dom": "ReactDOM",
@@ -30,13 +30,16 @@ export default defineConfig({
     emptyOutDir: true, // Equivalent to tsup's clean: true
     target: "es2020",
     minify: "esbuild", // or 'terser'
+    chunkSizeWarningLimit: 2000,
   },
   plugins: [
     // Generates .d.ts files (equivalent to tsup's dts: true)
-    dts({
-      include: ["src"],
-      exclude: ["node_modules", "dist"],
-      rollupTypes: true,
-    }),
+    process.env.npm_lifecycle_event !== "build-storybook" &&
+      !process.env.STORYBOOK &&
+      dts({
+        include: ["src"],
+        exclude: ["node_modules", "dist"],
+        rollupTypes: true,
+      }),
   ],
 });

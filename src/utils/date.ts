@@ -1,33 +1,26 @@
 import dayjs, { Dayjs } from "dayjs";
 
 export type DateType = Dayjs;
+export type DateInputType = Date | DateType | string | number;
 export const dateFn = dayjs;
 
-export const getNoOfDays = (date: DateType): number => {
-  const noOfDates = dayjs(date).daysInMonth();
-  return noOfDates;
-};
+export function getNoOfDays(date: DateType): number {
+  return dayjs(date).daysInMonth();
+}
 
-export const getMonthStartingDay = (date: DateType): number => {
-  const monthStartingDay = Number(dayjs(date).startOf("month").format("d"));
-  return monthStartingDay;
-};
+export function getMonthStartingDay(date: DateType): number {
+  return Number(dayjs(date).startOf("month").format("d"));
+}
 
-export const convertToDate = (dayjsDate: DateType): Date => {
-  const date = dayjs(dayjsDate).toDate();
-  return date;
-};
+export function convertToDate(dayjsDate: DateType): Date {
+  return dayjs(dayjsDate).toDate();
+}
 
-export const convertToDayjs = (date: Date): DateType => {
-  const dayjsDate = dayjs(date);
-  return dayjsDate;
-};
-
-export const getYearList = (
+export function getYearList(
   pastLength: number,
   futureLength: number,
   selectedYear: number,
-): number[] => {
+): number[] {
   const yearLength = pastLength + futureLength;
   const yearStarting = dayjs().year() - pastLength;
   const yearList = Array.from(
@@ -43,14 +36,94 @@ export const getYearList = (
     }
   }
   return yearList;
-};
+}
 
-export const checkIsToday = (
-  selectedDate: DateType,
-  dates: number,
-): boolean => {
+export function checkIsToday(selectedDate: DateType, dates: number): boolean {
   const cloneSelectedDate = dayjs(selectedDate).date(dates);
 
   const isToday = dayjs().isSame(cloneSelectedDate, "day");
   return isToday;
-};
+}
+
+export function getStartOfDay(date: DateInputType): DateType {
+  return dayjs(date).startOf("day");
+}
+
+export function getEndOfDay(date: DateInputType): DateType {
+  return dayjs(date).endOf("day");
+}
+
+export function getStartOfMonth(date: DateType): DateType {
+  return dayjs(date).startOf("month");
+}
+
+export function getEndOfMonth(date: DateType): DateType {
+  return dayjs(date).endOf("month");
+}
+
+export function addDays(date: DateType, days: number): DateType {
+  return dayjs(date).add(days, "day");
+}
+
+export function subDays(date: DateType, days: number): DateType {
+  return dayjs(date).subtract(days, "day");
+}
+
+export function addMonths(date: DateType, months: number): DateType {
+  return dayjs(date).add(months, "month");
+}
+
+export function subMonths(date: DateType, months: number): DateType {
+  return dayjs(date).subtract(months, "month");
+}
+
+export function getDiffDays(
+  date1: DateInputType,
+  date2: DateInputType,
+): number {
+  return dayjs(date1).diff(dayjs(date2), "day");
+}
+
+export function isBeforeDate(date1: DateType, date2: DateType): boolean {
+  return dayjs(date1).isBefore(dayjs(date2), "day");
+}
+
+export function isAfterDate(date1: DateType, date2: DateType): boolean {
+  return dayjs(date1).isAfter(dayjs(date2), "day");
+}
+
+export function isSameDate(date1: DateType, date2: DateType): boolean {
+  return dayjs(date1).isSame(dayjs(date2), "day");
+}
+
+export function formatDate(date: DateInputType, format: string): string {
+  return dayjs(date).format(format);
+}
+
+export function setDate(date: DateType, day: number): DateType {
+  return dayjs(date).date(day);
+}
+
+export function setMonth(date: DateType, month: number): DateType {
+  return dayjs(date).month(month);
+}
+
+export function setYear(date: DateType, year: number): DateType {
+  return dayjs(date).year(year);
+}
+
+export function getDate(date: DateType): number {
+  return dayjs(date).date();
+}
+
+export function getMonth(date: DateType): number {
+  return dayjs(date).month();
+}
+
+export function getYear(date: DateType): number {
+  return dayjs(date).year();
+}
+
+export function getDay(date: DateType): number {
+  return dayjs(date).day();
+}

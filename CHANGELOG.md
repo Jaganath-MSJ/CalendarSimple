@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/Jaganath-MSJ/CalendarSimple/compare/v1.1.0...v1.1.1) (2026-02-11)
+
+
+### Bug Fixes
+
+* fix date selection logic and dependency arrays ([78aa7e7](https://github.com/Jaganath-MSJ/CalendarSimple/commit/78aa7e789d7122d628c409a640a896641411d4de))
+
 ## [1.1.1-beta.1](https://github.com/Jaganath-MSJ/CalendarSimple/compare/v1.1.0...v1.1.1-beta.1) (2026-02-11)
 
 

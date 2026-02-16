@@ -3,7 +3,9 @@
   position: relative;
   transition: background-color 0.15s ease;
   vertical-align: top;
-  height: calc(var(--calendar-height) / 6); /* Approx 6 rows usually */
+  height: calc(
+    var(--calendar-height) / var(--calendar-rows, 6)
+  ); /* Approx 6 rows usually */
   min-width: calc(var(--calendar-width) / 7);
   max-width: calc(var(--calendar-width) / 7);
   padding: 0.25rem;
