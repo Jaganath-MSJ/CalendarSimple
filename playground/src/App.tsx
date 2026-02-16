@@ -2,88 +2,142 @@ import Calendar, { type DataType } from "calendar-simple";
 import "calendar-simple/dist/styles.css";
 
 function App() {
-  const eventsList: DataType[] = [
-    {
-      startDate: "2026-01-01",
-      endDate: "2026-01-02",
-      value: "22",
-      color: "red",
-    },
-    {
-      startDate: "2026-01-02",
-      endDate: "2026-01-03",
-      value: "98392",
-    },
-    {
-      startDate: "2026-01-01",
-      endDate: "2026-01-02",
-      value: "3932329",
-    },
-    {
-      startDate: "2026-01-03",
-      endDate: "2026-01-04",
-      value: "92",
-    },
-    {
-      startDate: "2026-01-02",
-      endDate: "2026-01-03",
-      value: "39232",
-    },
-    { startDate: "2026-01-05", value: "55" },
-    {
-      startDate: "2026-01-06",
-      endDate: "2026-01-08",
-      value: "829",
-    },
-    {
-      startDate: "2026-01-09",
-      endDate: "2026-01-10",
-      value: "2810",
-    },
-    {
-      startDate: "2026-01-12",
-      endDate: "2026-01-13",
-      value: "28133220",
-    },
-    {
-      startDate: "2025-12-22",
-      endDate: "2026-01-02",
-      value: "Leave",
-      color: "blue",
-    },
-    {
-      startDate: "2026-01-10",
-      endDate: "2026-02-10",
-      value: "5678",
-      color: "green",
-    },
-    {
-      startDate: "2026-01-10",
-      endDate: "2026-01-26",
-      value: "939912",
-    },
-    {
-      startDate: "2026-01-01",
-      endDate: "2026-01-03",
-      value: "only 1-3 jan 2",
-    },
-    {
-      startDate: "2026-01-02",
-      value: "only sajasj 2",
-    },
-  ];
+  const generateLiveEvents = (): DataType[] => {
+    const today = new Date();
+    const formatDate = (d: Date) => d.toISOString().split("T")[0];
+
+    // Helper to add days
+    const addDays = (d: Date, days: number) => {
+      const result = new Date(d);
+      result.setDate(result.getDate() + days);
+      return result;
+    };
+
+    return [
+      // --- Current Month Events ---
+      {
+        startDate: formatDate(today),
+        endDate: formatDate(addDays(today, 1)),
+        value: "Today's Kickoff (2 days)",
+        color: "red",
+      },
+      {
+        startDate: formatDate(addDays(today, 1)),
+        endDate: formatDate(addDays(today, 2)),
+        value: "Follow-up (2 days)",
+      },
+      // Overlapping with "Today's Kickoff"
+      {
+        startDate: formatDate(today),
+        endDate: formatDate(addDays(today, 1)),
+        value: "Parallel Task (2 days)",
+      },
+      {
+        startDate: formatDate(addDays(today, 3)),
+        endDate: formatDate(addDays(today, 4)),
+        value: "Mid-week Sprint (2 days)",
+      },
+      // Overlapping with "Follow-up"
+      {
+        startDate: formatDate(addDays(today, 1)),
+        endDate: formatDate(addDays(today, 2)),
+        value: "Review Session (2 days)",
+      },
+      {
+        startDate: formatDate(addDays(today, 5)),
+        value: "Single Day Check-in",
+      },
+      {
+        startDate: formatDate(addDays(today, 6)),
+        endDate: formatDate(addDays(today, 8)),
+        value: "3-Day Workshop",
+      },
+      {
+        startDate: formatDate(addDays(today, 9)),
+        endDate: formatDate(addDays(today, 10)),
+        value: "Weekend Project",
+      },
+      {
+        startDate: formatDate(addDays(today, 12)),
+        endDate: formatDate(addDays(today, 13)),
+        value: "Client Meeting",
+      },
+      // Long spanning event (Cross-month potential depending on today's date)
+      {
+        startDate: formatDate(addDays(today, -5)),
+        endDate: formatDate(addDays(today, 5)),
+        value: "10-Day Challenge",
+        color: "blue",
+      },
+      // Long duration
+      {
+        startDate: formatDate(addDays(today, 10)),
+        endDate: formatDate(addDays(today, 40)),
+        value: "Long Project (30 days)",
+        color: "green",
+      },
+      {
+        startDate: formatDate(addDays(today, 10)),
+        endDate: formatDate(addDays(today, 26)),
+        value: "Medium Project (16 days)",
+      },
+      {
+        startDate: formatDate(today),
+        endDate: formatDate(addDays(today, 2)),
+        value: "Urgent Task",
+      },
+      {
+        startDate: formatDate(addDays(today, 1)),
+        value: "Quick Sync",
+      },
+
+      // --- Previous Month Events ---
+      {
+        startDate: formatDate(addDays(today, -30)),
+        endDate: formatDate(addDays(today, -28)),
+        value: "Last Month Review",
+        color: "red",
+      },
+      {
+        startDate: formatDate(addDays(today, -25)),
+        value: "Past Milestone",
+      },
+      {
+        startDate: formatDate(addDays(today, -40)),
+        endDate: formatDate(addDays(today, -10)),
+        value: "Previous Long Term Task",
+        color: "blue",
+      },
+
+      // --- Next Month Events ---
+      {
+        startDate: formatDate(addDays(today, 35)),
+        endDate: formatDate(addDays(today, 37)),
+        value: "Future Planning",
+        color: "green",
+      },
+      {
+        startDate: formatDate(addDays(today, 45)),
+        value: "Q4 Strategy",
+      },
+      {
+        startDate: formatDate(addDays(today, 30)),
+        endDate: formatDate(addDays(today, 60)),
+        value: "Next Quarter Roadmap",
+      },
+    ];
+  };
+
+  const eventsList: DataType[] = generateLiveEvents();
+
   return (
     <div
       style={{
-        width: "1400px",
-        height: "650px",
+        width: "calc(100vw - 100px)",
+        height: "calc(100vh - 100px)",
       }}
     >
-      <Calendar
-        data={eventsList}
-        selectedDate={new Date("2026-01-26")}
-        isSelectDate
-      />
+      <Calendar data={eventsList} selectedDate={new Date()} isSelectDate />
     </div>
   );
 }

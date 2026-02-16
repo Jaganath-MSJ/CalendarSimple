@@ -1,11 +1,14 @@
 import React, { useCallback, useMemo, memo, useEffect } from "react";
 import cx from "classnames";
 import { CalendarType, CalendarContentType } from "./types";
-import { DAY_LIST_NAME, defaultCalenderProps } from "./constants";
+import {
+  DAY_LIST_NAME,
+  defaultCalenderProps,
+  CALENDAR_CONSTANTS,
+} from "./constants";
 import {
   dateFn,
   convertToDate,
-  convertToDayjs,
   DateType,
   generateCalendarGrid,
   calculateMaxEvents,
@@ -23,7 +26,6 @@ function CalendarContent({
   onDateClick,
   onEventClick,
   onMoreClick,
-  onMonthChange,
   isSelectDate,
   data: propsData, // Capture props data to sync
   ...restProps
@@ -43,6 +45,16 @@ function CalendarContent({
     [selectedDate, data],
   );
 
+  const maxEvents = useMemo(
+    () =>
+      restProps.maxEvents ??
+      calculateMaxEvents(
+        height,
+        calendarGrid.length || CALENDAR_CONSTANTS.MIN_ROWS,
+      ),
+    [restProps.maxEvents, height, calendarGrid.length],
+  );
+
   const onClickDateHandler = useCallback(
     (dateInput: DateType) => {
       const newDate = dateFn(dateInput);
@@ -60,13 +72,15 @@ function CalendarContent({
         {
           "--calendar-width": `${width}px`,
           "--calendar-height": `${height}px`,
+          "--calendar-rows":
+            calendarGrid.length || CALENDAR_CONSTANTS.DEFAULT_ROWS,
         } as React.CSSProperties
       }
       className={cx(styles.calendar, restProps.className)}
     >
       <Header
         headerClassName={restProps.headerClassName}
-        onMonthChange={onMonthChange}
+        onMonthChange={restProps.onMonthChange}
         pastYearLength={restProps.pastYearLength}
         futureYearLength={restProps.futureYearLength}
       />
@@ -97,13 +111,13 @@ function CalendarContent({
                   date={dayInfo.displayDay}
                   dateObj={dayInfo.currentDate}
                   data={dayInfo.events}
-                  cellWidth={width / 7}
+                  cellWidth={width / CALENDAR_CONSTANTS.DAYS_IN_WEEK}
                   className={cx(styles.tableCell, restProps.tableDateClassName)}
                   dataClassName={restProps.dataClassName}
                   selectedClassName={restProps.selectedClassName}
                   todayClassName={restProps.todayClassName}
                   theme={restProps.theme}
-                  maxEvents={restProps.maxEvents}
+                  maxEvents={maxEvents}
                   totalEvents={dayInfo.totalEvents}
                   onEventClick={onEventClick}
                   onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
@@ -128,24 +142,17 @@ function Calendar(props: CalendarType = defaultCalenderProps) {
   // Use props if provided, otherwise use observed size
   const width = props.width ?? observedWidth ?? 0;
   const mainHeight = props.height ?? observedHeight ?? 0;
-  const height = mainHeight - 120;
+  const height = mainHeight - CALENDAR_CONSTANTS.HEADER_HEIGHT;
 
   const initialDate = useMemo(
-    () => (selectedDate ? convertToDayjs(selectedDate) : undefined),
+    () => (selectedDate ? dateFn(selectedDate) : undefined),
     [selectedDate],
   );
-
-  const maxEvents = allProps.maxEvents ?? calculateMaxEvents(height);
 
   return (
     <CalendarProvider initialEvents={data} initialDate={initialDate}>
       <div ref={containerRef} className={styles.calendarContainer}>
-        <CalendarContent
-          {...allProps}
-          width={width}
-          height={height}
-          maxEvents={maxEvents}
-        />
+        <CalendarContent {...allProps} width={width} height={height} />
       </div>
     </CalendarProvider>
   );

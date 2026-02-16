@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import cx from "classnames";
 import { DataTypeList, DateDataType } from "../types";
-import { dateFn } from "../utils";
+import { formatDate, getDiffDays } from "../utils";
 import styles from "./EventItem.module.css";
 import Popover from "./Popover";
-import { defaultTheme } from "../constants";
+import { CALENDAR_CONSTANTS, defaultTheme } from "../constants";
 
 function EventItem({
   date,
@@ -20,12 +20,13 @@ function EventItem({
   todayClassName,
   isCurrentMonth,
   theme,
-  maxEvents = 3, // Default limit
+  maxEvents,
   onMoreClick,
   onEventClick,
   totalEvents = 0,
 }: DateDataType) {
-  const [showPopover, setShowPopover] = React.useState(false);
+  const [showPopover, setShowPopover] = useState(false);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
 
   const styleSource = isSelected
     ? { ...defaultTheme.selected, ...theme?.selected }
@@ -81,14 +82,16 @@ function EventItem({
               }
 
               let diffDates = 1;
-              let tooltipText = dateFn(item.startDate).format("YYYY-MM-DD");
+              let tooltipText = formatDate(item.startDate, "YYYY-MM-DD");
               if (item.endDateWeek) {
                 diffDates =
-                  dateFn(item.endDateWeek).diff(item.startDateWeek, "days") + 1;
-                tooltipText += ` to ${dateFn(item.endDate).format("YYYY-MM-DD")}`;
+                  getDiffDays(item.endDateWeek, item.startDateWeek) + 1;
+              }
+              if (item.endDate) {
+                tooltipText += ` to ${formatDate(item.endDate, "YYYY-MM-DD")}`;
               }
               tooltipText += ` - ${item.value}`;
-              const width = `${cellWidth * diffDates - 16}px`;
+              const width = `${cellWidth * diffDates - CALENDAR_CONSTANTS.EVENT_ITEM_PADDING}px`;
 
               return (
                 <div
@@ -108,6 +111,7 @@ function EventItem({
             {hiddenEventsCount > 0 && (
               <div className={styles.moreEventsContainer}>
                 <button
+                  ref={moreButtonRef}
                   className={styles.moreEvents}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -123,6 +127,7 @@ function EventItem({
                     events={allDayEvents}
                     onEventClick={onEventClick}
                     onClose={() => setShowPopover(false)}
+                    anchorEl={moreButtonRef.current}
                   />
                 )}
               </div>
