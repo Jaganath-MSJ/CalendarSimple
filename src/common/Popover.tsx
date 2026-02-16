@@ -14,7 +14,7 @@ import {
   isBeforeDate,
   isAfterDate,
 } from "../utils";
-import { CalendarType, DataTypeList } from "../types";
+import { CalendarType, DataTypeList, DateDataType } from "../types";
 
 interface PopoverProps {
   dateObj: DateType;

@@ -6,18 +6,18 @@ import React, {
   useMemo,
 } from "react";
 import { dateFn, DateType } from "../utils";
-import { DataType, CalendarViewType } from "../types";
+import { DataType, CalendarView } from "../types";
 
 interface CalendarState {
   currentDate: DateType;
   selectedDate: DateType;
-  view: CalendarViewType;
+  view: CalendarView;
   events: DataType[];
 }
 
 type CalendarAction =
   | { type: "SET_DATE"; payload: DateType }
-  | { type: "SET_VIEW"; payload: CalendarViewType }
+  | { type: "SET_VIEW"; payload: CalendarView }
   | { type: "SET_EVENTS"; payload: DataType[] }
   | { type: "NEXT" }
   | { type: "PREV" }
@@ -82,21 +82,18 @@ interface CalendarProviderProps {
   children: ReactNode;
   initialEvents?: DataType[];
   initialDate?: DateType;
-  initialView?: CalendarViewType;
 }
 
 export function CalendarProvider({
   children,
   initialEvents = [],
   initialDate,
-  initialView = "month",
 }: CalendarProviderProps) {
   const [state, dispatch] = useReducer(calendarReducer, {
     ...initialState,
     events: initialEvents,
     currentDate: initialDate || initialState.currentDate,
     selectedDate: initialDate || initialState.selectedDate,
-    view: initialView,
   });
 
   const value = useMemo(() => ({ state, dispatch }), [state]);
@@ -108,10 +105,10 @@ export function CalendarProvider({
   );
 }
 
-export function useCalendar() {
+export const useCalendar = () => {
   const context = useContext(CalendarContext);
   if (context === undefined) {
     throw new Error("useCalendar must be used within a CalendarProvider");
   }
   return context;
-}
+};

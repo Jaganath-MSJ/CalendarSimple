@@ -101,17 +101,6 @@ function Header({
       <div className={styles.controls}>
         <select
           className={styles.select}
-          value={state.view}
-          onChange={(e) =>
-            dispatch({ type: "SET_VIEW", payload: e.target.value as any })
-          }
-        >
-          <option value="month">Month</option>
-          <option value="week">Week</option>
-          <option value="day">Day</option>
-        </select>
-        <select
-          className={styles.select}
           id={CALENDER_STRINGS.MONTH}
           name={CALENDER_STRINGS.MONTH}
           value={getMonth(currentDate)}
