@@ -1,0 +1,108 @@
+import React, { useCallback, useMemo } from "react";
+import cx from "classnames";
+import { CalendarContentType, DataType } from "../../types";
+import { DAY_LIST_NAME, CALENDAR_CONSTANTS } from "../../constants";
+import {
+  dateFn,
+  convertToDate,
+  DateType,
+  generateCalendarGrid,
+  calculateMaxEvents,
+} from "../../utils";
+import styles from "./MonthView.module.css";
+import EventItem from "../../common/EventItem";
+import { useCalendar } from "../../context/CalendarContext";
+
+interface MonthViewProps extends Omit<CalendarContentType, "data"> {
+  currentDate: DateType;
+  data: DataType[];
+}
+
+function MonthView({
+  dayType,
+  width,
+  height,
+  onDateClick,
+  onEventClick,
+  onMoreClick,
+  isSelectDate,
+  currentDate,
+  data,
+  ...restProps
+}: MonthViewProps) {
+  const { dispatch } = useCalendar();
+
+  const calendarGrid = useMemo(
+    () => generateCalendarGrid(currentDate, data),
+    [currentDate, data],
+  );
+
+  const maxEvents = useMemo(
+    () =>
+      restProps.maxEvents ??
+      calculateMaxEvents(
+        height,
+        calendarGrid.length || CALENDAR_CONSTANTS.MIN_ROWS,
+      ),
+    [restProps.maxEvents, height, calendarGrid.length],
+  );
+
+  const onClickDateHandler = useCallback(
+    (dateInput: DateType) => {
+      const newDate = dateFn(dateInput);
+      onDateClick?.(convertToDate(newDate));
+      if (isSelectDate && !newDate.isSame(currentDate, "day")) {
+        dispatch({ type: "SET_DATE", payload: newDate });
+      }
+    },
+    [currentDate, onDateClick, isSelectDate, dispatch],
+  );
+
+  return (
+    <table className={cx(styles.table, restProps.tableClassName)}>
+      <thead>
+        <tr>
+          {DAY_LIST_NAME[dayType].map((day: string) => (
+            <th key={day} className={styles.tableHeader}>
+              {day}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody className={styles.tableBody}>
+        {calendarGrid.map((week, weekIndex) => (
+          <tr key={weekIndex}>
+            {week.map((dayInfo, dayIndex) => (
+              <EventItem
+                key={`date_${weekIndex}_${dayIndex}`}
+                isSelected={
+                  isSelectDate &&
+                  dayInfo.isCurrentMonth &&
+                  dayInfo.displayDay === currentDate.date()
+                }
+                isToday={dayInfo.isToday}
+                isCurrentMonth={dayInfo.isCurrentMonth}
+                onClick={onClickDateHandler}
+                date={dayInfo.displayDay}
+                dateObj={dayInfo.currentDate}
+                data={dayInfo.events}
+                cellWidth={width / CALENDAR_CONSTANTS.DAYS_IN_WEEK}
+                className={cx(styles.tableCell, restProps.tableDateClassName)}
+                dataClassName={restProps.dataClassName}
+                selectedClassName={restProps.selectedClassName}
+                todayClassName={restProps.todayClassName}
+                theme={restProps.theme}
+                maxEvents={maxEvents}
+                totalEvents={dayInfo.totalEvents}
+                onEventClick={onEventClick}
+                onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
+              />
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+export default MonthView;

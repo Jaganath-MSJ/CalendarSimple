@@ -1,0 +1,43 @@
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+.tableHeader,
+.tableCell {
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tableHeader:last-child,
+.tableCell:last-child {
+  border-right: none;
+}
+
+.table tr:last-child .tableCell {
+  border-bottom: none;
+}
+
+.tableHeader {
+  height: 40px;
+  background-color: #f9fafb;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.tableBody {
+  height: var(--calendar-height);
+}
+
+.tableCell {
+  vertical-align: top;
+  height: calc(var(--calendar-height) / var(--calendar-rows));
+  width: calc(var(--calendar-width) / 7);
+  padding: 4px;
+}

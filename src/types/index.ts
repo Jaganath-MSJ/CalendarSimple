@@ -100,4 +100,30 @@ export enum EYearOption {
   year = "year",
 }
 
-export type CalendarView = "month" | "week" | "day";
+export type CalendarViewType = "month" | "week" | "day";
+
+export interface CalendarType {
+  view?: CalendarViewType;
+  dayType?: EDayType;
+  data?: DataType[];
+  width?: number;
+  height?: number;
+  selectedDate?: Date;
+  onDateClick?: (date: Date) => void;
+  onEventClick?: (event: DataType) => void;
+  onMoreClick?: (date: Date) => void;
+  onMonthChange?: (date: Date) => void;
+  onViewChange?: (view: CalendarViewType) => void;
+  isSelectDate?: boolean;
+  className?: string;
+  headerClassName?: string;
+  tableClassName?: string;
+  tableDateClassName?: string;
+  dataClassName?: string;
+  selectedClassName?: string;
+  todayClassName?: string;
+  pastYearLength?: number;
+  futureYearLength?: number;
+  theme?: CalendarTheme;
+  maxEvents?: number;
+}
