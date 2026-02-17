@@ -5,7 +5,7 @@ import { useEffect, useState, RefObject } from "react";
  * @param ref React ref object of the element to observe
  * @returns The width and height of the element
  */
-export const useResizeObserver = (ref: RefObject<HTMLElement | null>) => {
+export function useResizeObserver(ref: RefObject<HTMLElement | null>) {
   const [size, setSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
@@ -29,4 +29,4 @@ export const useResizeObserver = (ref: RefObject<HTMLElement | null>) => {
   }, [ref]);
 
   return size;
-};
+}
