@@ -1,3 +1,19 @@
+# [1.2.0](https://github.com/Jaganath-MSJ/CalendarSimple/compare/v1.1.1...v1.2.0) (2026-02-17)
+
+
+### Bug Fixes
+
+* add explicit type annotations to map callbacks ([fea1b24](https://github.com/Jaganath-MSJ/CalendarSimple/commit/fea1b24babb9ebf8767dd34f2a4658b77d3a54c9))
+* centralize calendar constants for consistency ([a7c8e02](https://github.com/Jaganath-MSJ/CalendarSimple/commit/a7c8e02406d20c78893fcf5d5cd456e95092b530))
+* **popover:** change positioning to fixed and anchor to button ([03a8413](https://github.com/Jaganath-MSJ/CalendarSimple/commit/03a841355022cc27100971ce96c34cd45f2c5369))
+* remove maxEvents from interface and make it dynamic ([b0d5495](https://github.com/Jaganath-MSJ/CalendarSimple/commit/b0d5495096316331a5f0f376ec4759dfb70a1351))
+
+
+### Features
+
+* add Storybook setup for component documentation and testing ([2ab6e12](https://github.com/Jaganath-MSJ/CalendarSimple/commit/2ab6e127005371f99c80212f96ec3053a07dcc36))
+* improve popover positioning and scrolling ([61ff399](https://github.com/Jaganath-MSJ/CalendarSimple/commit/61ff399a86cd3f810e47cd10c103ca8ac8ece5cd))
+
 ## [1.1.1](https://github.com/Jaganath-MSJ/CalendarSimple/compare/v1.1.0...v1.1.1) (2026-02-11)
 
 
