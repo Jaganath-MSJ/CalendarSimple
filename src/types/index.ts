@@ -19,6 +19,7 @@ export interface DataType {
 }
 
 export interface CalendarType {
+  view?: CalendarViewType;
   dayType?: EDayType;
   data?: DataType[];
   width?: number;
@@ -100,4 +101,4 @@ export enum EYearOption {
   year = "year",
 }
 
-export type CalendarView = "month" | "week" | "day";
+export type CalendarViewType = "month" | "week" | "day";
