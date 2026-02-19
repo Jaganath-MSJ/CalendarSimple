@@ -6,18 +6,18 @@ import React, {
   useMemo,
 } from "react";
 import { dateFn, DateType } from "../utils";
-import { DataType, CalendarViewType } from "../types";
+import { DataType, ECalendarViewType } from "../types";
 
 interface CalendarState {
   currentDate: DateType;
   selectedDate: DateType;
-  view: CalendarViewType;
+  view: ECalendarViewType;
   events: DataType[];
 }
 
 type CalendarAction =
   | { type: "SET_DATE"; payload: DateType }
-  | { type: "SET_VIEW"; payload: CalendarViewType }
+  | { type: "SET_VIEW"; payload: ECalendarViewType }
   | { type: "SET_EVENTS"; payload: DataType[] }
   | { type: "NEXT" }
   | { type: "PREV" }
@@ -82,7 +82,7 @@ interface CalendarProviderProps {
   children: ReactNode;
   initialEvents?: DataType[];
   initialDate?: DateType;
-  initialView?: CalendarViewType;
+  initialView?: ECalendarViewType;
 }
 
 export function CalendarProvider({

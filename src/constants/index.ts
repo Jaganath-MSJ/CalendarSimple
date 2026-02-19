@@ -1,4 +1,4 @@
-import { EDayType, MonthListType } from "../types";
+import { ECalendarViewType, EDayType, MonthListType } from "../types";
 
 const DAY_LIST = {
   SUNDAY: {
@@ -74,11 +74,6 @@ export const CALENDER_STRINGS = {
   YEAR: "yearDropdown",
 };
 
-export const DAY_TYPE = {
-  FULL_NAME: "FULL",
-  HALF_NAME: "HALF",
-};
-
 export const defaultTheme = {
   default: {
     color: "#000",
@@ -95,9 +90,9 @@ export const defaultTheme = {
 };
 
 export const defaultCalenderProps = {
+  view: ECalendarViewType.month,
   dayType: EDayType.halfName,
   events: [],
-  view: "month" as const,
   isSelectDate: false,
   pastYearLength: 5,
   futureYearLength: 5,

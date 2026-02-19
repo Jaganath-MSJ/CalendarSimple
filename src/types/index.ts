@@ -18,8 +18,24 @@ export interface DataType {
   color?: string;
 }
 
+export const ECalendarViewType = {
+  month: "month",
+  week: "week",
+  day: "day",
+} as const;
+
+export type ECalendarViewType =
+  (typeof ECalendarViewType)[keyof typeof ECalendarViewType];
+
+export const EDayType = {
+  fullName: "FULL",
+  halfName: "HALF",
+} as const;
+
+export type EDayType = (typeof EDayType)[keyof typeof EDayType];
+
 export interface CalendarType {
-  view?: CalendarViewType;
+  view?: ECalendarViewType;
   dayType?: EDayType;
   events?: DataType[];
   width?: number;
@@ -51,11 +67,6 @@ export interface CalendarContentType extends CalendarType {
   isSelectDate: boolean;
   pastYearLength: number;
   futureYearLength: number;
-}
-
-export enum EDayType {
-  fullName = "FULL",
-  halfName = "HALF",
 }
 
 export type DataTypeList =
@@ -100,5 +111,3 @@ export enum EYearOption {
   month = "month",
   year = "year",
 }
-
-export type CalendarViewType = "month" | "week" | "day";
