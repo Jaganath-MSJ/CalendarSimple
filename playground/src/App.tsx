@@ -1,10 +1,17 @@
-import Calendar, { type DataType } from "calendar-simple";
-import "calendar-simple/dist/styles.css";
+import Calendar, { ECalendarViewType, type DataType } from "../../src";
+// import "calendar-simple/dist/styles.css";
 
 function App() {
   const generateLiveEvents = (): DataType[] => {
     const today = new Date();
-    const formatDate = (d: Date) => d.toISOString().split("T")[0];
+    // Reset today to start of day for easier calculation, but keep it dynamic
+    const startOfToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
+
+    const formatDateTime = (d: Date) => d.toISOString();
 
     // Helper to add days
     const addDays = (d: Date, days: number) => {
@@ -13,117 +20,112 @@ function App() {
       return result;
     };
 
+    // Helper to set specific time
+    const setTime = (d: Date, hour: number, minute: number = 0) => {
+      const result = new Date(d);
+      result.setHours(hour, minute, 0, 0);
+      return result;
+    };
+
     return [
-      // --- Current Month Events ---
+      // --- TODAY'S EVENTS (Critical for Day/Week View) ---
       {
-        startDate: formatDate(today),
-        endDate: formatDate(addDays(today, 1)),
-        value: "Today's Kickoff (2 days)",
-        color: "red",
-      },
-      {
-        startDate: formatDate(addDays(today, 1)),
-        endDate: formatDate(addDays(today, 2)),
-        value: "Follow-up (2 days)",
-      },
-      // Overlapping with "Today's Kickoff"
-      {
-        startDate: formatDate(today),
-        endDate: formatDate(addDays(today, 1)),
-        value: "Parallel Task (2 days)",
-      },
-      {
-        startDate: formatDate(addDays(today, 3)),
-        endDate: formatDate(addDays(today, 4)),
-        value: "Mid-week Sprint (2 days)",
-      },
-      // Overlapping with "Follow-up"
-      {
-        startDate: formatDate(addDays(today, 1)),
-        endDate: formatDate(addDays(today, 2)),
-        value: "Review Session (2 days)",
-      },
-      {
-        startDate: formatDate(addDays(today, 5)),
-        value: "Single Day Check-in",
-      },
-      {
-        startDate: formatDate(addDays(today, 6)),
-        endDate: formatDate(addDays(today, 8)),
-        value: "3-Day Workshop",
-      },
-      {
-        startDate: formatDate(addDays(today, 9)),
-        endDate: formatDate(addDays(today, 10)),
-        value: "Weekend Project",
-      },
-      {
-        startDate: formatDate(addDays(today, 12)),
-        endDate: formatDate(addDays(today, 13)),
-        value: "Client Meeting",
-      },
-      // Long spanning event (Cross-month potential depending on today's date)
-      {
-        startDate: formatDate(addDays(today, -5)),
-        endDate: formatDate(addDays(today, 5)),
-        value: "10-Day Challenge",
+        startDate: formatDateTime(setTime(startOfToday, 9, 0)), // 9:00 AM
+        endDate: formatDateTime(setTime(startOfToday, 10, 0)), // 10:00 AM
+        value: "Daily Standup",
         color: "blue",
       },
-      // Long duration
       {
-        startDate: formatDate(addDays(today, 10)),
-        endDate: formatDate(addDays(today, 40)),
-        value: "Long Project (30 days)",
+        startDate: formatDateTime(setTime(startOfToday, 10, 30)), // 10:30 AM
+        endDate: formatDateTime(setTime(startOfToday, 12, 0)), // 12:00 PM
+        value: "Deep Work Session",
         color: "green",
       },
       {
-        startDate: formatDate(addDays(today, 10)),
-        endDate: formatDate(addDays(today, 26)),
-        value: "Medium Project (16 days)",
+        startDate: formatDateTime(setTime(startOfToday, 12, 0)), // 12:00 PM
+        endDate: formatDateTime(setTime(startOfToday, 13, 0)), // 1:00 PM
+        value: "Lunch Break",
+        color: "orange",
       },
+      // Overlapping Event 1
       {
-        startDate: formatDate(today),
-        endDate: formatDate(addDays(today, 2)),
-        value: "Urgent Task",
+        startDate: formatDateTime(setTime(startOfToday, 14, 0)), // 2:00 PM
+        endDate: formatDateTime(setTime(startOfToday, 15, 30)), // 3:30 PM
+        value: "Project Sync",
+        color: "purple",
       },
+      // Overlapping Event 2 (Starts during Project Sync)
       {
-        startDate: formatDate(addDays(today, 1)),
-        value: "Quick Sync",
-      },
-
-      // --- Previous Month Events ---
-      {
-        startDate: formatDate(addDays(today, -30)),
-        endDate: formatDate(addDays(today, -28)),
-        value: "Last Month Review",
+        startDate: formatDateTime(setTime(startOfToday, 14, 30)), // 2:30 PM
+        endDate: formatDateTime(setTime(startOfToday, 15, 0)), // 3:00 PM
+        value: "Quick Client Call",
         color: "red",
       },
       {
-        startDate: formatDate(addDays(today, -25)),
-        value: "Past Milestone",
-      },
-      {
-        startDate: formatDate(addDays(today, -40)),
-        endDate: formatDate(addDays(today, -10)),
-        value: "Previous Long Term Task",
-        color: "blue",
+        startDate: formatDateTime(setTime(startOfToday, 16, 0)), // 4:00 PM
+        endDate: formatDateTime(setTime(startOfToday, 17, 0)), // 5:00 PM
+        value: "Code Review",
       },
 
-      // --- Next Month Events ---
+      // --- TOMORROW'S EVENTS ---
       {
-        startDate: formatDate(addDays(today, 35)),
-        endDate: formatDate(addDays(today, 37)),
-        value: "Future Planning",
+        startDate: formatDateTime(setTime(addDays(startOfToday, 1), 10, 0)),
+        endDate: formatDateTime(setTime(addDays(startOfToday, 1), 11, 30)),
+        value: "Design Review",
+        color: "teal",
+      },
+      {
+        startDate: formatDateTime(setTime(addDays(startOfToday, 1), 13, 0)),
+        endDate: formatDateTime(setTime(addDays(startOfToday, 1), 14, 0)),
+        value: "Manager 1:1",
+      },
+
+      // --- MULTI-DAY EVENTS (Should show in All Day section or span days) ---
+      {
+        startDate: formatDateTime(setTime(addDays(startOfToday, 2), 9, 0)),
+        endDate: formatDateTime(setTime(addDays(startOfToday, 4), 17, 0)),
+        value: "Company Offsite",
+        color: "indigo",
+      },
+
+      // --- THIS WEEK EVENTS ---
+      {
+        startDate: formatDateTime(setTime(addDays(startOfToday, -1), 15, 0)), // Yesterday
+        endDate: formatDateTime(setTime(addDays(startOfToday, -1), 16, 30)),
+        value: "Yesterday's Retro",
+        color: "gray",
+      },
+      {
+        startDate: formatDateTime(setTime(addDays(startOfToday, 3), 11, 0)),
+        endDate: formatDateTime(setTime(addDays(startOfToday, 3), 12, 0)),
+        value: "Feature Planning",
+      },
+
+      // --- LONG TERM / MONTH VIEW EVENTS ---
+      {
+        startDate: formatDateTime(addDays(startOfToday, 10)),
+        endDate: formatDateTime(addDays(startOfToday, 15)),
+        value: "Sprint 25",
+        color: "blue",
+      },
+      {
+        startDate: formatDateTime(addDays(startOfToday, 12)),
+        value: "Milestone Due",
+        color: "red",
+      },
+      {
+        startDate: formatDateTime(addDays(startOfToday, 20)),
+        endDate: formatDateTime(addDays(startOfToday, 22)),
+        value: "Training Workshop",
         color: "green",
       },
+
+      // --- PAST EVENTS ---
       {
-        startDate: formatDate(addDays(today, 45)),
-        value: "Q4 Strategy",
-      },
-      {
-        startDate: formatDate(addDays(today, 30)),
-        endDate: formatDate(addDays(today, 60)),
-        value: "Next Quarter Roadmap",
+        startDate: formatDateTime(addDays(startOfToday, -10)),
+        endDate: formatDateTime(addDays(startOfToday, -8)),
+        value: "Past Conference",
+        color: "gray",
       },
     ];
   };
@@ -137,7 +139,12 @@ function App() {
         height: "calc(100vh - 100px)",
       }}
     >
-      <Calendar data={eventsList} selectedDate={new Date()} isSelectDate />
+      <Calendar
+        events={eventsList}
+        selectedDate={new Date()}
+        isSelectDate
+        view={ECalendarViewType.day}
+      />
     </div>
   );
 }
