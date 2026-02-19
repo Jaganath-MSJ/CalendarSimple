@@ -13,9 +13,9 @@ import styles from "./MonthView.module.css";
 import EventItem from "../../common/EventItem";
 import { useCalendar } from "../../context/CalendarContext";
 
-interface MonthViewProps extends Omit<CalendarContentType, "data"> {
+interface MonthViewProps extends Omit<CalendarContentType, "events"> {
   currentDate: DateType;
-  data: DataType[];
+  events: DataType[];
 }
 
 function MonthView({
@@ -27,14 +27,14 @@ function MonthView({
   onMoreClick,
   isSelectDate,
   currentDate,
-  data,
+  events,
   ...restProps
 }: MonthViewProps) {
   const { dispatch } = useCalendar();
 
   const calendarGrid = useMemo(
-    () => generateCalendarGrid(currentDate, data),
-    [currentDate, data],
+    () => generateCalendarGrid(currentDate, events),
+    [currentDate, events],
   );
 
   const maxEvents = useMemo(
@@ -59,7 +59,14 @@ function MonthView({
   );
 
   return (
-    <table className={cx(styles.table, restProps.tableClassName)}>
+    <table
+      className={cx(styles.table, restProps.tableClassName)}
+      style={
+        {
+          "--calendar-rows": calendarGrid.length,
+        } as React.CSSProperties
+      }
+    >
       <thead>
         <tr>
           {DAY_LIST_NAME[dayType].map((day: string) => (

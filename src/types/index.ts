@@ -21,7 +21,7 @@ export interface DataType {
 export interface CalendarType {
   view?: CalendarViewType;
   dayType?: EDayType;
-  data?: DataType[];
+  events?: DataType[];
   width?: number;
   height?: number;
   selectedDate?: Date;
@@ -45,7 +45,7 @@ export interface CalendarType {
 
 export interface CalendarContentType extends CalendarType {
   dayType: EDayType;
-  data: DataType[];
+  events: DataType[];
   width: number;
   height: number;
   isSelectDate: boolean;

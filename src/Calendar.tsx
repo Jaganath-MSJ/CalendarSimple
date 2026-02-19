@@ -17,7 +17,6 @@ function CalendarContent({
   onEventClick,
   onMoreClick,
   isSelectDate,
-  data: propsData, // Capture props data to sync
   ...restProps
 }: CalendarContentType) {
   const { state, dispatch } = useCalendar();
@@ -25,10 +24,17 @@ function CalendarContent({
 
   // Sync data from props to context
   useEffect(() => {
-    if (propsData) {
-      dispatch({ type: "SET_EVENTS", payload: propsData });
+    if (restProps.events) {
+      dispatch({ type: "SET_EVENTS", payload: restProps.events });
     }
-  }, [propsData]);
+  }, [restProps.events]);
+
+  // Sync view from props to context
+  useEffect(() => {
+    if (restProps.view) {
+      dispatch({ type: "SET_VIEW", payload: restProps.view });
+    }
+  }, [restProps.view]);
 
   return (
     <section
@@ -49,14 +55,14 @@ function CalendarContent({
       {view === "day" ? (
         <DayView
           currentDate={selectedDate}
-          data={data}
+          events={data}
           onEventClick={onEventClick}
         />
       ) : (
         <MonthView
-          currentDate={selectedDate}
-          data={data}
           {...restProps}
+          currentDate={selectedDate}
+          events={data}
           dayType={dayType}
           width={width}
           height={height}
@@ -76,7 +82,7 @@ function Calendar(props: CalendarType = defaultCalenderProps) {
     useResizeObserver(containerRef);
 
   const allProps = { ...defaultCalenderProps, ...props };
-  const { data, selectedDate } = allProps;
+  const { events, selectedDate } = allProps;
 
   // Use props if provided, otherwise use observed size
   const width = props.width ?? observedWidth ?? 0;
@@ -90,7 +96,7 @@ function Calendar(props: CalendarType = defaultCalenderProps) {
 
   return (
     <CalendarProvider
-      initialEvents={data}
+      initialEvents={events}
       initialDate={initialDate}
       initialView={props.view}
     >

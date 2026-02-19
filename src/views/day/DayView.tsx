@@ -6,20 +6,20 @@ import styles from "./DayView.module.css";
 
 interface DayViewProps {
   currentDate: DateType;
-  data: DataType[];
+  events: DataType[];
   onEventClick?: (event: DataType) => void;
 }
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
-function DayView({ currentDate, data, onEventClick }: DayViewProps) {
+function DayView({ currentDate, events, onEventClick }: DayViewProps) {
   const dayEvents = useMemo(() => {
-    return data.filter((event) => {
+    return events.filter((event) => {
       const eventDate = dateFn(event.startDate).startOf("day");
       const currentDay = dateFn(currentDate).startOf("day");
       return eventDate.isSame(currentDay);
     });
-  }, [data, currentDate]);
+  }, [events, currentDate]);
 
   const getEventStyle = (event: DataType) => {
     const start = dateFn(event.startDate);

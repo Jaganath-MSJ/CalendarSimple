@@ -96,7 +96,8 @@ export const defaultTheme = {
 
 export const defaultCalenderProps = {
   dayType: EDayType.halfName,
-  data: [],
+  events: [],
+  view: "month" as const,
   isSelectDate: false,
   pastYearLength: 5,
   futureYearLength: 5,
