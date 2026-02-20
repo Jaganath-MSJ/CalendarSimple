@@ -1,8 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import dayjs from "dayjs";
-import Calendar from "./";
-import { EDayType } from "./types";
+import Calendar, { EDayType } from "./";
 
 const meta: Meta<typeof Calendar> = {
   title: "Calendar",
@@ -252,4 +251,39 @@ export const Interactive: Story = {
       <Calendar {...args} />
     </div>
   ),
+};
+
+export const DayViewOverlaps: Story = {
+  args: {
+    view: "day",
+    selectedDate: new Date(),
+    width: 600,
+    height: 800,
+    data: [
+      {
+        startDate: dayjs().hour(9).minute(0).format("YYYY-MM-DDTHH:mm:00"),
+        endDate: dayjs().hour(10).minute(0).format("YYYY-MM-DDTHH:mm:00"),
+        value: "Morning Meeting",
+        color: "#EF4444",
+      },
+      {
+        startDate: dayjs().hour(9).minute(30).format("YYYY-MM-DDTHH:mm:00"),
+        endDate: dayjs().hour(10).minute(30).format("YYYY-MM-DDTHH:mm:00"),
+        value: "Overlap A",
+        color: "#3B82F6",
+      },
+      {
+        startDate: dayjs().hour(9).minute(45).format("YYYY-MM-DDTHH:mm:00"),
+        endDate: dayjs().hour(10).minute(45).format("YYYY-MM-DDTHH:mm:00"),
+        value: "Overlap B",
+        color: "#10B981",
+      },
+      {
+        startDate: dayjs().hour(11).minute(0).format("YYYY-MM-DDTHH:mm:00"),
+        endDate: dayjs().hour(12).minute(0).format("YYYY-MM-DDTHH:mm:00"),
+        value: "Luther's Lunch",
+        color: "#F59E0B",
+      },
+    ],
+  },
 };
