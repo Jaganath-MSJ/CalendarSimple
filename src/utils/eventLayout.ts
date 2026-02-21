@@ -12,14 +12,23 @@ export interface DayEventLayout {
   height: number;
   left: number;
   width: number;
+  zIndex: number;
+  columnIndex: number;
+  totalColumns: number;
+  clusterSize: number;
 }
 
 interface ProcessedEvent {
-  original: DataType;
+  id: string;
   start: number;
   end: number;
   duration: number;
-  id: string; // generated ID for internal tracking
+  original: DataType;
+  _columnIndex?: number;
+  _totalColumns?: number;
+  _left?: number;
+  _width?: number;
+  _expandCols?: number;
 }
 
 export function calculateEventLayout(
@@ -41,93 +50,132 @@ export function calculateEventLayout(
     return d.hour() * 60 + d.minute();
   };
 
-  // 2. Process and sort events
+  // 2. Process events
   const processedEvents: ProcessedEvent[] = eventsForDay.map((event, index) => {
     const start = getMinutes(event.startDate);
     let end = event.endDate ? getMinutes(event.endDate) : start + 60;
+
+    // Edge Case: Zero-duration event treated as 1 minute logically
+    if (end === start) end = start + 1;
 
     // Clamp end to 1440 (24h) if needed, simplified
     if (end < start) end = 1440;
 
     return {
-      original: event,
+      id: `${index}-${event.value}`,
       start,
       end,
       duration: end - start,
-      id: `${index}-${event.value}`,
+      original: event,
+      _columnIndex: undefined,
+      _totalColumns: undefined,
+      _expandCols: undefined,
+      _left: undefined,
+      _width: undefined,
     };
   });
 
-  // Sort by start time, then duration
+  // Phase 1 - Sort by start time, then duration descending
   processedEvents.sort((a, b) => {
     if (a.start === b.start) return b.duration - a.duration;
     return a.start - b.start;
   });
 
-  // 3. Group into clusters
+  // Phase 2 - Group into overlap clusters using sweep-line max-end approach
   const clusters: ProcessedEvent[][] = [];
   let currentCluster: ProcessedEvent[] = [];
+  let clusterMaxEnd = -Infinity;
 
-  processedEvents.forEach((event) => {
-    if (currentCluster.length === 0) {
-      currentCluster.push(event);
-    } else {
-      const clusterEnd = Math.max(...currentCluster.map((e) => e.end));
-      // Overlap if start < clusterEnd
-      if (event.start < clusterEnd) {
-        currentCluster.push(event);
-      } else {
-        clusters.push(currentCluster);
-        currentCluster = [event];
-      }
+  for (const event of processedEvents) {
+    if (currentCluster.length > 0 && event.start >= clusterMaxEnd) {
+      clusters.push(currentCluster);
+      currentCluster = [];
+      clusterMaxEnd = -Infinity;
     }
-  });
+    currentCluster.push(event);
+    clusterMaxEnd = Math.max(clusterMaxEnd, event.end);
+  }
   if (currentCluster.length > 0) clusters.push(currentCluster);
 
-  // 4. Assign columns and calculate layout
-  const finalEvents: DayEventLayout[] = [];
+  // Phases 3–5 - Assign columns and calculate widths per cluster
+  for (const cluster of clusters) {
+    // Phase 3 - Greedy column assignment
+    const columns: ProcessedEvent[][] = [];
 
-  clusters.forEach((cluster) => {
-    const columns: ProcessedEvent[] = [];
-    const eventColumns = new Map<ProcessedEvent, number>();
-
-    cluster.forEach((event) => {
+    for (const event of cluster) {
       let placed = false;
-      for (let i = 0; i < columns.length; i++) {
-        const lastEventInColumn = columns[i];
-        if (lastEventInColumn.end <= event.start) {
-          columns[i] = event;
-          eventColumns.set(event, i);
+      for (let c = 0; c < columns.length; c++) {
+        const lastEvent = columns[c][columns[c].length - 1];
+        if (lastEvent.end <= event.start) {
+          columns[c].push(event);
+          event._columnIndex = c;
           placed = true;
           break;
         }
       }
 
       if (!placed) {
-        columns.push(event);
-        eventColumns.set(event, columns.length - 1);
+        event._columnIndex = columns.length;
+        columns.push([event]);
       }
-    });
+    }
 
-    const numColumns = columns.length;
+    const totalCols = columns.length;
+    for (const event of cluster) {
+      event._totalColumns = totalCols;
+    }
 
-    cluster.forEach((event) => {
-      const colIndex = eventColumns.get(event) ?? 0;
-      // Cascading layout: shift right by fixed percentage per column
-      const left = colIndex * 7;
-      // Take up remaining width, or at least a good chunk.
-      // Google Calendar style: extend to right edge (approx).
-      const width = 100 - left;
+    // Phase 4 - Initialise left and width
+    for (const event of cluster) {
+      event._left = event._columnIndex! / totalCols;
+      event._width = 1 / totalCols;
+    }
 
-      finalEvents.push({
-        event: event.original,
-        top: (event.start / 60) * 60,
-        height: (event.duration / 60) * 60,
-        left: left,
-        width: width,
-      });
-    });
-  });
+    // Phase 5 - Expand to fill free adjacent columns
+    const colMap: Map<number, ProcessedEvent[]> = new Map();
+    for (const event of cluster) {
+      const c = event._columnIndex!;
+      if (!colMap.has(c)) colMap.set(c, []);
+      colMap.get(c)!.push(event);
+    }
 
-  return finalEvents;
+    for (const event of cluster) {
+      let expandCols = 1;
+
+      for (let c = event._columnIndex! + 1; c < totalCols; c++) {
+        const colEvents = colMap.get(c) ?? [];
+        const blocked = colEvents.some(
+          (other) => other.start < event.end && event.start < other.end,
+        );
+        if (blocked) break;
+        expandCols++;
+      }
+
+      const maxPossibleCols = totalCols - event._columnIndex!;
+      event._expandCols = Math.min(expandCols, maxPossibleCols);
+      event._width = event._expandCols / totalCols;
+    }
+  }
+
+  function toLayout(
+    event: ProcessedEvent,
+    clusterSize: number,
+  ): DayEventLayout {
+    const rawHeight = event.end - event.start;
+    return {
+      event: event.original,
+      top: event.start,
+      height: Math.max(rawHeight, 15),
+      left: parseFloat((event._left! * 100).toFixed(4)),
+      width: parseFloat((event._width! * 100).toFixed(4)),
+      zIndex: event._columnIndex! + 1,
+      columnIndex: event._columnIndex!,
+      totalColumns: event._totalColumns!,
+      clusterSize,
+    };
+  }
+
+  return clusters.flatMap((cluster) =>
+    cluster.map((event) => toLayout(event, cluster.length)),
+  );
 }

@@ -55,4 +55,6 @@
   font-size: 12px;
   overflow: hidden;
   cursor: pointer;
+  box-sizing: border-box;
+  width: calc(var(--event-width) - 2px);
 }

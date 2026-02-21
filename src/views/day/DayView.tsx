@@ -40,27 +40,34 @@ function DayView({ currentDate, events, onEventClick }: DayViewProps) {
           {HOURS.map((hour) => (
             <div key={hour} className={styles.eventSlot} />
           ))}
-          {dayEvents.map((item, index) => (
-            <div
-              key={index}
-              className={styles.eventItem}
-              style={{
-                top: `${item.top}px`,
-                height: `${item.height}px`,
-                left: `${item.left}%`,
-                width: `${item.width}%`,
-                backgroundColor: item.event.color,
-                position: "absolute", // Ensure it's absolute
-              }}
-              onClick={() => onEventClick?.(item.event)}
-              title={`${item.event.value} (${formatDate(item.event.startDate, "HH:mm")} - ${item.event.endDate ? formatDate(item.event.endDate, "HH:mm") : ""})`}
-            >
-              <div className={styles.eventTitle}>{item.event.value}</div>
-              <div className={styles.eventTime}>
-                {formatDate(item.event.startDate, "HH:mm")}
+          {dayEvents.map((item, index) => {
+            const eventColor = item.event.color || "#3b82f6";
+
+            return (
+              <div
+                key={index}
+                className={styles.eventItem}
+                style={
+                  {
+                    top: `${item.top}px`,
+                    height: `${item.height}px`,
+                    left: `${item.left}%`,
+                    zIndex: item.zIndex,
+                    "--event-width": `${item.width}%`,
+                    backgroundColor: eventColor,
+                    position: "absolute", // Ensure it's absolute
+                  } as React.CSSProperties
+                }
+                onClick={() => onEventClick?.(item.event)}
+                title={`${item.event.value} (${formatDate(item.event.startDate, "HH:mm")} - ${item.event.endDate ? formatDate(item.event.endDate, "HH:mm") : ""})`}
+              >
+                <div className={styles.eventTitle}>{item.event.value}</div>
+                <div className={styles.eventTime}>
+                  {formatDate(item.event.startDate, "HH:mm")}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
