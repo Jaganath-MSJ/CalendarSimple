@@ -2,6 +2,7 @@ import React, { ChangeEvent } from "react";
 import cx from "classnames";
 import {
   CalendarType,
+  ECalendarViewType,
   EMonthOption,
   EYearOption,
   MonthListType,
@@ -13,6 +14,8 @@ import {
   convertToDate,
   addMonths,
   subMonths,
+  addDays,
+  subDays,
   setMonth,
   setYear,
   formatDate,
@@ -39,15 +42,27 @@ function Header({
   const { currentDate } = state;
 
   const onMonthArrowClick = (option: EMonthOption) => {
+    let predictiveDate = currentDate;
+
     if (option === EMonthOption.add) {
       dispatch({ type: "NEXT" });
-      const nextDate = addMonths(currentDate, 1); // predictive for callback
-      onMonthChange?.(convertToDate(nextDate));
+      if (state.view === ECalendarViewType.month)
+        predictiveDate = addMonths(currentDate, 1);
+      else if (state.view === ECalendarViewType.week)
+        predictiveDate = addDays(currentDate, 7);
+      else if (state.view === ECalendarViewType.day)
+        predictiveDate = addDays(currentDate, 1);
     } else if (option === EMonthOption.sub) {
       dispatch({ type: "PREV" });
-      const prevDate = subMonths(currentDate, 1); // predictive for callback
-      onMonthChange?.(convertToDate(prevDate));
+      if (state.view === ECalendarViewType.month)
+        predictiveDate = subMonths(currentDate, 1);
+      else if (state.view === ECalendarViewType.week)
+        predictiveDate = subDays(currentDate, 7);
+      else if (state.view === ECalendarViewType.day)
+        predictiveDate = subDays(currentDate, 1);
     }
+
+    onMonthChange?.(convertToDate(predictiveDate));
   };
 
   const onDropdownClick = (

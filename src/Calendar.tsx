@@ -1,11 +1,12 @@
 import React, { useMemo, memo, useEffect } from "react";
 import cx from "classnames";
-import { CalendarType, CalendarContentType } from "./types";
+import { CalendarType, CalendarContentType, ECalendarViewType } from "./types";
 import { defaultCalenderProps, CALENDAR_CONSTANTS } from "./constants";
 import { dateFn, useResizeObserver } from "./utils";
 import styles from "./Calendar.module.css";
 import Header from "./layout/Header";
 import DayView from "./views/day/DayView";
+import WeekView from "./views/week/WeekView";
 import MonthView from "./views/month/MonthView";
 import { CalendarProvider, useCalendar } from "./context/CalendarContext";
 
@@ -36,6 +37,45 @@ function CalendarContent({
     }
   }, [restProps.view]);
 
+  const getViewComponent = (view: ECalendarViewType) => {
+    switch (view) {
+      case ECalendarViewType.day:
+        return (
+          <DayView
+            currentDate={selectedDate}
+            events={data}
+            onEventClick={onEventClick}
+          />
+        );
+      case ECalendarViewType.week:
+        return (
+          <WeekView
+            currentDate={selectedDate}
+            events={data}
+            onEventClick={onEventClick}
+            dayType={dayType}
+          />
+        );
+      case ECalendarViewType.month:
+        return (
+          <MonthView
+            {...restProps}
+            currentDate={selectedDate}
+            events={data}
+            onEventClick={onEventClick}
+            dayType={dayType}
+            width={width}
+            height={height}
+            onDateClick={onDateClick}
+            onMoreClick={onMoreClick}
+            isSelectDate={isSelectDate}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <section
       style={
@@ -52,26 +92,7 @@ function CalendarContent({
         pastYearLength={restProps.pastYearLength}
         futureYearLength={restProps.futureYearLength}
       />
-      {view === "day" ? (
-        <DayView
-          currentDate={selectedDate}
-          events={data}
-          onEventClick={onEventClick}
-        />
-      ) : (
-        <MonthView
-          {...restProps}
-          currentDate={selectedDate}
-          events={data}
-          dayType={dayType}
-          width={width}
-          height={height}
-          onEventClick={onEventClick}
-          onDateClick={onDateClick}
-          onMoreClick={onMoreClick}
-          isSelectDate={isSelectDate}
-        />
-      )}
+      {getViewComponent(view)}
     </section>
   );
 }
