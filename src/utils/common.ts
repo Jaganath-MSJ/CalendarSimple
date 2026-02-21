@@ -1,4 +1,4 @@
-import { CALENDAR_CONSTANTS } from "../constants";
+import { CALENDAR_CONSTANTS, DATE_FORMATS } from "../constants";
 import { DataType, ECalendarViewType } from "../types";
 import { formatDate } from "./date";
 
@@ -26,18 +26,18 @@ export function generateTooltipText(
   viewType: ECalendarViewType,
 ): string {
   if (viewType === ECalendarViewType.month) {
-    let tooltipText = formatDate(event.startDate, "YYYY-MM-DD");
+    let tooltipText = formatDate(event.startDate, DATE_FORMATS.DATE);
     if (event.endDate) {
-      tooltipText += ` to ${formatDate(event.endDate, "YYYY-MM-DD")}`;
+      tooltipText += ` to ${formatDate(event.endDate, DATE_FORMATS.DATE)}`;
     }
     tooltipText += ` - ${event.value}`;
     return tooltipText;
   }
 
   // Day or Week view format
-  let tooltipText = `${event.value} (${formatDate(event.startDate, "HH:mm")}`;
+  let tooltipText = `${event.value} (${formatDate(event.startDate, DATE_FORMATS.TIME)}`;
   if (event.endDate) {
-    tooltipText += ` - ${formatDate(event.endDate, "HH:mm")}`;
+    tooltipText += ` - ${formatDate(event.endDate, DATE_FORMATS.TIME)}`;
   }
   tooltipText += `)`;
   return tooltipText;

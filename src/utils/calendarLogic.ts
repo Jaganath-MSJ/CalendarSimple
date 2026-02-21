@@ -28,6 +28,7 @@ import {
   getDate,
 } from "./date";
 import { DataType, DataTypeList } from "../types";
+import { DATE_FORMATS } from "../constants";
 
 interface InternalDataType extends DataType {
   _tempId?: string;
@@ -264,8 +265,8 @@ export function generateCalendarGrid(
 
             displayData.push({
               ...event,
-              startDateWeek: formatDate(currentDate, "YYYY-MM-DD"),
-              endDateWeek: formatDate(effectiveEndDate, "YYYY-MM-DD"),
+              startDateWeek: formatDate(currentDate, DATE_FORMATS.DATE),
+              endDateWeek: formatDate(effectiveEndDate, DATE_FORMATS.DATE),
               isSpacer: false,
             });
           } else {

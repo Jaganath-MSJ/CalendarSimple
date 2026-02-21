@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { dateFn, DateType } from "../utils";
 import { DataType, ECalendarViewType } from "../types";
+import { CALENDAR_ACTIONS } from "../constants";
 
 interface CalendarState {
   currentDate: DateType;
@@ -15,16 +16,16 @@ interface CalendarState {
 }
 
 type CalendarAction =
-  | { type: "SET_DATE"; payload: DateType }
-  | { type: "SET_VIEW"; payload: ECalendarViewType }
-  | { type: "NEXT" }
-  | { type: "PREV" }
-  | { type: "TODAY" };
+  | { type: typeof CALENDAR_ACTIONS.SET_DATE; payload: DateType }
+  | { type: typeof CALENDAR_ACTIONS.SET_VIEW; payload: ECalendarViewType }
+  | { type: typeof CALENDAR_ACTIONS.NEXT }
+  | { type: typeof CALENDAR_ACTIONS.PREV }
+  | { type: typeof CALENDAR_ACTIONS.TODAY };
 
 const initialState: CalendarState = {
   currentDate: dateFn(),
   selectedDate: dateFn(),
-  view: "month",
+  view: ECalendarViewType.month,
 };
 
 const CalendarContext = createContext<
@@ -40,22 +41,22 @@ function calendarReducer(
   action: CalendarAction,
 ): CalendarState {
   switch (action.type) {
-    case "SET_DATE":
+    case CALENDAR_ACTIONS.SET_DATE:
       return {
         ...state,
         currentDate: action.payload,
         selectedDate: action.payload,
       };
-    case "SET_VIEW":
+    case CALENDAR_ACTIONS.SET_VIEW:
       return { ...state, view: action.payload };
-    case "NEXT":
+    case CALENDAR_ACTIONS.NEXT:
       return { ...state, currentDate: state.currentDate.add(1, state.view) };
-    case "PREV":
+    case CALENDAR_ACTIONS.PREV:
       return {
         ...state,
         currentDate: state.currentDate.subtract(1, state.view),
       };
-    case "TODAY":
+    case CALENDAR_ACTIONS.TODAY:
       return {
         ...state,
         currentDate: dateFn(),
@@ -76,7 +77,7 @@ interface CalendarProviderProps {
 export function CalendarProvider({
   children,
   initialDate,
-  initialView = "month",
+  initialView = ECalendarViewType.month,
 }: CalendarProviderProps) {
   const [state, dispatch] = useReducer(calendarReducer, {
     ...initialState,

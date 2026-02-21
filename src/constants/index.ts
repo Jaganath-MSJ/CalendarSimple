@@ -108,4 +108,22 @@ export const CALENDAR_CONSTANTS = {
   MIN_ROWS: 4,
   DAYS_IN_WEEK: 7,
   EVENT_ITEM_PADDING: 16, // used in width calculation
+  SMALL_EVENT_HEIGHT: 40,
+  TINY_EVENT_HEIGHT: 20,
+  DEFAULT_EVENT_COLOR: "#3b82f6",
 };
+
+export const DATE_FORMATS = {
+  DATE: "YYYY-MM-DD",
+  TIME: "HH:mm",
+  MONTH_YEAR: "MMMM YYYY",
+  DAY_INDEX: "d",
+};
+
+export const CALENDAR_ACTIONS = {
+  SET_DATE: "SET_DATE",
+  SET_VIEW: "SET_VIEW",
+  NEXT: "NEXT",
+  PREV: "PREV",
+  TODAY: "TODAY",
+} as const;

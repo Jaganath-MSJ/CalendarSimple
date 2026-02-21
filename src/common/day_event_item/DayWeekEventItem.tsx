@@ -3,6 +3,7 @@ import cx from "classnames";
 import { formatDate, generateTooltipText } from "../../utils";
 import { DataType } from "../../types";
 import { DayEventLayout } from "../../utils/eventLayout";
+import { CALENDAR_CONSTANTS, DATE_FORMATS } from "../../constants";
 import styles from "./DayWeekEventItem.module.css";
 
 interface DayWeekEventItemProps {
@@ -14,11 +15,13 @@ export function DayWeekEventItem({
   item,
   onEventClick,
 }: DayWeekEventItemProps) {
-  const eventColor = item.event.color || "#3b82f6";
+  const eventColor = item.event.color || CALENDAR_CONSTANTS.DEFAULT_EVENT_COLOR;
   const tooltipText = generateTooltipText(item.event, "day");
 
-  const isSmall = item.height < 40 && item.height >= 20;
-  const isTiny = item.height < 20;
+  const isSmall =
+    item.height < CALENDAR_CONSTANTS.SMALL_EVENT_HEIGHT &&
+    item.height >= CALENDAR_CONSTANTS.TINY_EVENT_HEIGHT;
+  const isTiny = item.height < CALENDAR_CONSTANTS.TINY_EVENT_HEIGHT;
 
   return (
     <div
@@ -42,7 +45,7 @@ export function DayWeekEventItem({
     >
       <div className={styles.eventTitle}>{item.event.value}</div>
       <div className={styles.eventTime}>
-        {formatDate(item.event.startDate, "HH:mm")}
+        {formatDate(item.event.startDate, DATE_FORMATS.TIME)}
       </div>
     </div>
   );

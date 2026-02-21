@@ -7,7 +7,12 @@ import {
   EYearOption,
   MonthListType,
 } from "../types";
-import { CALENDER_STRINGS, MONTH_LIST } from "../constants";
+import {
+  CALENDER_STRINGS,
+  MONTH_LIST,
+  DATE_FORMATS,
+  CALENDAR_ACTIONS,
+} from "../constants";
 import {
   dateFn,
   getYearList,
@@ -44,7 +49,7 @@ function Header({
 
   const onMonthArrowClick = (option: EMonthOption) => {
     const isAdd = option === EMonthOption.add;
-    dispatch({ type: isAdd ? "NEXT" : "PREV" });
+    dispatch({ type: isAdd ? CALENDAR_ACTIONS.NEXT : CALENDAR_ACTIONS.PREV });
 
     const predictiveDate = isAdd
       ? currentDate.add(1, view)
@@ -66,13 +71,13 @@ function Header({
       newDate = setYear(currentDate, value);
     }
 
-    dispatch({ type: "SET_DATE", payload: newDate });
+    dispatch({ type: CALENDAR_ACTIONS.SET_DATE, payload: newDate });
     onMonthChange?.(convertToDate(newDate));
   };
 
   const onViewDropdownClick = (e: ChangeEvent<HTMLSelectElement>) => {
     const newView = e.target.value as ECalendarViewType;
-    dispatch({ type: "SET_VIEW", payload: newView });
+    dispatch({ type: CALENDAR_ACTIONS.SET_VIEW, payload: newView });
     onViewChange?.(newView);
   };
 
@@ -82,7 +87,7 @@ function Header({
         <button
           className={styles.todayButton}
           onClick={() => {
-            dispatch({ type: "TODAY" });
+            dispatch({ type: CALENDAR_ACTIONS.TODAY });
             onMonthChange?.(convertToDate(dateFn()));
           }}
         >
@@ -103,7 +108,7 @@ function Header({
           </button>
         </div>
         <h2 className={styles.dateTitle}>
-          {formatDate(currentDate, "MMMM YYYY")}
+          {formatDate(currentDate, DATE_FORMATS.MONTH_YEAR)}
         </h2>
       </div>
 
@@ -113,9 +118,9 @@ function Header({
           value={view}
           onChange={onViewDropdownClick}
         >
-          <option value="month">Month</option>
-          <option value="week">Week</option>
-          <option value="day">Day</option>
+          <option value={ECalendarViewType.month}>Month</option>
+          <option value={ECalendarViewType.week}>Week</option>
+          <option value={ECalendarViewType.day}>Day</option>
         </select>
         <select
           className={styles.select}

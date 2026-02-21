@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import cx from "classnames";
-import { DataTypeList, DateDataType } from "../../types";
+import { DataTypeList, DateDataType, ECalendarViewType } from "../../types";
 import { formatDate, getDiffDays, generateTooltipText } from "../../utils";
 import styles from "./MonthEventItem.module.css";
 import Popover from "../popover/Popover";
@@ -86,7 +86,10 @@ function MonthEventItem({
                 diffDates =
                   getDiffDays(item.endDateWeek, item.startDateWeek) + 1;
               }
-              const tooltipText = generateTooltipText(item, "month");
+              const tooltipText = generateTooltipText(
+                item,
+                ECalendarViewType.month,
+              );
               const width = `${cellWidth * diffDates - CALENDAR_CONSTANTS.EVENT_ITEM_PADDING}px`;
 
               return (
