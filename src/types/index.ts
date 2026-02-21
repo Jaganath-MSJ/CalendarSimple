@@ -45,6 +45,7 @@ export interface CalendarType {
   onEventClick?: (event: DataType) => void;
   onMoreClick?: (date: Date) => void;
   onMonthChange?: (date: Date) => void;
+  onViewChange?: (view: ECalendarViewType) => void;
   isSelectDate?: boolean;
   className?: string;
   headerClassName?: string;

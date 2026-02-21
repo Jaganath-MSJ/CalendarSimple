@@ -12,13 +12,11 @@ interface CalendarState {
   currentDate: DateType;
   selectedDate: DateType;
   view: ECalendarViewType;
-  events: DataType[];
 }
 
 type CalendarAction =
   | { type: "SET_DATE"; payload: DateType }
   | { type: "SET_VIEW"; payload: ECalendarViewType }
-  | { type: "SET_EVENTS"; payload: DataType[] }
   | { type: "NEXT" }
   | { type: "PREV" }
   | { type: "TODAY" };
@@ -27,7 +25,6 @@ const initialState: CalendarState = {
   currentDate: dateFn(),
   selectedDate: dateFn(),
   view: "month",
-  events: [],
 };
 
 const CalendarContext = createContext<
@@ -51,22 +48,13 @@ function calendarReducer(
       };
     case "SET_VIEW":
       return { ...state, view: action.payload };
-    case "SET_EVENTS":
-      return { ...state, events: action.payload };
-    case "NEXT": {
-      let nextDate = state.currentDate;
-      if (state.view === "month") nextDate = nextDate.add(1, "month");
-      else if (state.view === "week") nextDate = nextDate.add(1, "week");
-      else if (state.view === "day") nextDate = nextDate.add(1, "day");
-      return { ...state, currentDate: nextDate };
-    }
-    case "PREV": {
-      let prevDate = state.currentDate;
-      if (state.view === "month") prevDate = prevDate.subtract(1, "month");
-      else if (state.view === "week") prevDate = prevDate.subtract(1, "week");
-      else if (state.view === "day") prevDate = prevDate.subtract(1, "day");
-      return { ...state, currentDate: prevDate };
-    }
+    case "NEXT":
+      return { ...state, currentDate: state.currentDate.add(1, state.view) };
+    case "PREV":
+      return {
+        ...state,
+        currentDate: state.currentDate.subtract(1, state.view),
+      };
     case "TODAY":
       return {
         ...state,
@@ -87,13 +75,11 @@ interface CalendarProviderProps {
 
 export function CalendarProvider({
   children,
-  initialEvents = [],
   initialDate,
   initialView = "month",
 }: CalendarProviderProps) {
   const [state, dispatch] = useReducer(calendarReducer, {
     ...initialState,
-    events: initialEvents,
     currentDate: initialDate || initialState.currentDate,
     selectedDate: initialDate || initialState.selectedDate,
     view: initialView,

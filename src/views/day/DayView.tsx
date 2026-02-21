@@ -8,16 +8,18 @@ import {
 } from "../../utils";
 import { DataType } from "../../types";
 import styles from "./DayView.module.css";
+import { useCalendar } from "../../context/CalendarContext";
 
 interface DayViewProps {
-  currentDate: DateType;
   events: DataType[];
   onEventClick?: (event: DataType) => void;
 }
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
-function DayView({ currentDate, events, onEventClick }: DayViewProps) {
+function DayView({ events, onEventClick }: DayViewProps) {
+  const { state } = useCalendar();
+  const { currentDate } = state;
   const dayEvents = useMemo(
     () => calculateEventLayout(events, currentDate),
     [events, currentDate],

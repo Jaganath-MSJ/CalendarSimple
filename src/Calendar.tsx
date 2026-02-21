@@ -18,17 +18,13 @@ function CalendarContent({
   onEventClick,
   onMoreClick,
   isSelectDate,
+  events,
   ...restProps
 }: CalendarContentType) {
-  const { state, dispatch } = useCalendar();
-  const { currentDate: selectedDate, events: data, view } = state;
-
-  // Sync data from props to context
-  useEffect(() => {
-    if (restProps.events) {
-      dispatch({ type: "SET_EVENTS", payload: restProps.events });
-    }
-  }, [restProps.events]);
+  const {
+    state: { view },
+    dispatch,
+  } = useCalendar();
 
   // Sync view from props to context
   useEffect(() => {
@@ -40,18 +36,11 @@ function CalendarContent({
   const getViewComponent = (view: ECalendarViewType) => {
     switch (view) {
       case ECalendarViewType.day:
-        return (
-          <DayView
-            currentDate={selectedDate}
-            events={data}
-            onEventClick={onEventClick}
-          />
-        );
+        return <DayView events={events} onEventClick={onEventClick} />;
       case ECalendarViewType.week:
         return (
           <WeekView
-            currentDate={selectedDate}
-            events={data}
+            events={events}
             onEventClick={onEventClick}
             dayType={dayType}
           />
@@ -60,8 +49,7 @@ function CalendarContent({
         return (
           <MonthView
             {...restProps}
-            currentDate={selectedDate}
-            events={data}
+            events={events}
             onEventClick={onEventClick}
             dayType={dayType}
             width={width}
@@ -89,6 +77,7 @@ function CalendarContent({
       <Header
         headerClassName={restProps.headerClassName}
         onMonthChange={restProps.onMonthChange}
+        onViewChange={restProps.onViewChange}
         pastYearLength={restProps.pastYearLength}
         futureYearLength={restProps.futureYearLength}
       />
@@ -103,7 +92,7 @@ function Calendar(props: CalendarType = defaultCalenderProps) {
     useResizeObserver(containerRef);
 
   const allProps = { ...defaultCalenderProps, ...props };
-  const { events, selectedDate } = allProps;
+  const { selectedDate } = allProps;
 
   // Use props if provided, otherwise use observed size
   const width = props.width ?? observedWidth ?? 0;
@@ -116,11 +105,7 @@ function Calendar(props: CalendarType = defaultCalenderProps) {
   );
 
   return (
-    <CalendarProvider
-      initialEvents={events}
-      initialDate={initialDate}
-      initialView={props.view}
-    >
+    <CalendarProvider initialDate={initialDate} initialView={props.view}>
       <div ref={containerRef} className={styles.calendarContainer}>
         <CalendarContent {...allProps} width={width} height={height} />
       </div>

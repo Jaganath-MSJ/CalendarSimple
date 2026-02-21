@@ -12,10 +12,6 @@ import {
   dateFn,
   getYearList,
   convertToDate,
-  addMonths,
-  subMonths,
-  addDays,
-  subDays,
   setMonth,
   setYear,
   formatDate,
@@ -29,7 +25,11 @@ import { useCalendar } from "../context/CalendarContext";
 
 interface HeaderProps extends Pick<
   CalendarType,
-  "headerClassName" | "pastYearLength" | "futureYearLength" | "onMonthChange"
+  | "headerClassName"
+  | "pastYearLength"
+  | "futureYearLength"
+  | "onMonthChange"
+  | "onViewChange"
 > {}
 
 function Header({
@@ -37,30 +37,18 @@ function Header({
   pastYearLength = 5,
   futureYearLength = 5,
   onMonthChange,
+  onViewChange,
 }: HeaderProps) {
   const { state, dispatch } = useCalendar();
-  const { currentDate } = state;
+  const { currentDate, view } = state;
 
   const onMonthArrowClick = (option: EMonthOption) => {
-    let predictiveDate = currentDate;
+    const isAdd = option === EMonthOption.add;
+    dispatch({ type: isAdd ? "NEXT" : "PREV" });
 
-    if (option === EMonthOption.add) {
-      dispatch({ type: "NEXT" });
-      if (state.view === ECalendarViewType.month)
-        predictiveDate = addMonths(currentDate, 1);
-      else if (state.view === ECalendarViewType.week)
-        predictiveDate = addDays(currentDate, 7);
-      else if (state.view === ECalendarViewType.day)
-        predictiveDate = addDays(currentDate, 1);
-    } else if (option === EMonthOption.sub) {
-      dispatch({ type: "PREV" });
-      if (state.view === ECalendarViewType.month)
-        predictiveDate = subMonths(currentDate, 1);
-      else if (state.view === ECalendarViewType.week)
-        predictiveDate = subDays(currentDate, 7);
-      else if (state.view === ECalendarViewType.day)
-        predictiveDate = subDays(currentDate, 1);
-    }
+    const predictiveDate = isAdd
+      ? currentDate.add(1, view)
+      : currentDate.subtract(1, view);
 
     onMonthChange?.(convertToDate(predictiveDate));
   };
@@ -80,6 +68,12 @@ function Header({
 
     dispatch({ type: "SET_DATE", payload: newDate });
     onMonthChange?.(convertToDate(newDate));
+  };
+
+  const onViewDropdownClick = (e: ChangeEvent<HTMLSelectElement>) => {
+    const newView = e.target.value as ECalendarViewType;
+    dispatch({ type: "SET_VIEW", payload: newView });
+    onViewChange?.(newView);
   };
 
   return (
@@ -116,10 +110,8 @@ function Header({
       <div className={styles.controls}>
         <select
           className={styles.select}
-          value={state.view}
-          onChange={(e) =>
-            dispatch({ type: "SET_VIEW", payload: e.target.value as any })
-          }
+          value={view}
+          onChange={onViewDropdownClick}
         >
           <option value="month">Month</option>
           <option value="week">Week</option>

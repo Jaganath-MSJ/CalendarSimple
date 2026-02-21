@@ -9,9 +9,9 @@ import {
 import { DataType, EDayType } from "../../types";
 import { DAY_LIST_NAME } from "../../constants";
 import styles from "./WeekView.module.css";
+import { useCalendar } from "../../context/CalendarContext";
 
 interface WeekViewProps {
-  currentDate: DateType;
   events: DataType[];
   onEventClick?: (event: DataType) => void;
   dayType?: EDayType;
@@ -19,12 +19,9 @@ interface WeekViewProps {
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
-function WeekView({
-  currentDate,
-  events,
-  onEventClick,
-  dayType = "HALF",
-}: WeekViewProps) {
+function WeekView({ events, onEventClick, dayType = "HALF" }: WeekViewProps) {
+  const { state } = useCalendar();
+  const { currentDate } = state;
   const startOfWeek = useMemo(() => currentDate.startOf("week"), [currentDate]);
 
   const weekDays = useMemo(() => {

@@ -13,10 +13,7 @@ import styles from "./MonthView.module.css";
 import EventItem from "../../common/event_item/EventItem";
 import { useCalendar } from "../../context/CalendarContext";
 
-interface MonthViewProps extends Omit<CalendarContentType, "events"> {
-  currentDate: DateType;
-  events: DataType[];
-}
+interface MonthViewProps extends Omit<CalendarContentType, "selectedDate"> {}
 
 function MonthView({
   dayType,
@@ -26,11 +23,11 @@ function MonthView({
   onEventClick,
   onMoreClick,
   isSelectDate,
-  currentDate,
   events,
   ...restProps
 }: MonthViewProps) {
-  const { dispatch } = useCalendar();
+  const { state, dispatch } = useCalendar();
+  const { currentDate } = state;
 
   const calendarGrid = useMemo(
     () => generateCalendarGrid(currentDate, events),
