@@ -19,6 +19,7 @@ function CalendarContent({
   onMoreClick,
   isSelectDate,
   events,
+  is12Hour,
   ...restProps
 }: CalendarContentType) {
   const {
@@ -36,13 +37,20 @@ function CalendarContent({
   const getViewComponent = (view: ECalendarViewType) => {
     switch (view) {
       case ECalendarViewType.day:
-        return <DayView events={events} onEventClick={onEventClick} />;
+        return (
+          <DayView
+            events={events}
+            onEventClick={onEventClick}
+            is12Hour={is12Hour}
+          />
+        );
       case ECalendarViewType.week:
         return (
           <WeekView
             events={events}
             onEventClick={onEventClick}
             dayType={dayType}
+            is12Hour={is12Hour}
           />
         );
       case ECalendarViewType.month:
@@ -57,6 +65,7 @@ function CalendarContent({
             onDateClick={onDateClick}
             onMoreClick={onMoreClick}
             isSelectDate={isSelectDate}
+            is12Hour={is12Hour}
           />
         );
       default:

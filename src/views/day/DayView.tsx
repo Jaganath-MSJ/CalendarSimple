@@ -9,9 +9,10 @@ import DayColumn from "../../common/day_column/DayColumn";
 interface DayViewProps {
   events: DataType[];
   onEventClick?: (event: DataType) => void;
+  is12Hour?: boolean;
 }
 
-function DayView({ events, onEventClick }: DayViewProps) {
+function DayView({ events, onEventClick, is12Hour }: DayViewProps) {
   const { state } = useCalendar();
   const { currentDate } = state;
   const dayEvents = useMemo(
@@ -25,9 +26,13 @@ function DayView({ events, onEventClick }: DayViewProps) {
         {formatDate(currentDate, "dddd, MMMM D, YYYY")}
       </div>
       <div className={styles.timeGrid}>
-        <TimeColumn />
+        <TimeColumn is12Hour={is12Hour} />
         <div className={styles.eventsColumn}>
-          <DayColumn dayEvents={dayEvents} onEventClick={onEventClick} />
+          <DayColumn
+            dayEvents={dayEvents}
+            onEventClick={onEventClick}
+            is12Hour={is12Hour}
+          />
         </div>
       </div>
     </div>

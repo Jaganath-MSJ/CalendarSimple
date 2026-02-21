@@ -12,9 +12,15 @@ interface WeekViewProps {
   events: DataType[];
   onEventClick?: (event: DataType) => void;
   dayType?: EDayType;
+  is12Hour?: boolean;
 }
 
-function WeekView({ events, onEventClick, dayType = "HALF" }: WeekViewProps) {
+function WeekView({
+  events,
+  onEventClick,
+  dayType = "HALF",
+  is12Hour,
+}: WeekViewProps) {
   const { state } = useCalendar();
   const { currentDate } = state;
   const startOfWeek = useMemo(() => currentDate.startOf("week"), [currentDate]);
@@ -48,13 +54,14 @@ function WeekView({ events, onEventClick, dayType = "HALF" }: WeekViewProps) {
         ))}
       </div>
       <div className={styles.timeGrid}>
-        <TimeColumn />
+        <TimeColumn is12Hour={is12Hour} />
         <div className={styles.eventsGrid}>
           {weekDays.map((date, dayIndex) => (
             <div key={dayIndex} className={styles.dayColumn}>
               <DayColumn
                 dayEvents={weekEvents[dayIndex]}
                 onEventClick={onEventClick}
+                is12Hour={is12Hour}
               />
             </div>
           ))}

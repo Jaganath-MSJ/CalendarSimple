@@ -9,14 +9,16 @@ import styles from "./DayWeekEventItem.module.css";
 interface DayWeekEventItemProps {
   item: DayEventLayout;
   onEventClick?: (event: DataType) => void;
+  is12Hour?: boolean;
 }
 
 export function DayWeekEventItem({
   item,
   onEventClick,
+  is12Hour,
 }: DayWeekEventItemProps) {
   const eventColor = item.event.color || CALENDAR_CONSTANTS.DEFAULT_EVENT_COLOR;
-  const tooltipText = generateTooltipText(item.event, "day");
+  const tooltipText = generateTooltipText(item.event, "day", is12Hour);
 
   const isSmall =
     item.height < CALENDAR_CONSTANTS.SMALL_EVENT_HEIGHT &&
@@ -45,7 +47,10 @@ export function DayWeekEventItem({
     >
       <div className={styles.eventTitle}>{item.event.value}</div>
       <div className={styles.eventTime}>
-        {formatDate(item.event.startDate, DATE_FORMATS.TIME)}
+        {formatDate(
+          item.event.startDate,
+          is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME,
+        )}
       </div>
     </div>
   );

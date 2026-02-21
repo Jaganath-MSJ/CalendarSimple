@@ -24,6 +24,7 @@ function MonthEventItem({
   onMoreClick,
   onEventClick,
   totalEvents = 0,
+  is12Hour,
 }: DateDataType) {
   const [showPopover, setShowPopover] = useState(false);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
@@ -89,6 +90,7 @@ function MonthEventItem({
               const tooltipText = generateTooltipText(
                 item,
                 ECalendarViewType.month,
+                is12Hour,
               );
               const width = `${cellWidth * diffDates - CALENDAR_CONSTANTS.EVENT_ITEM_PADDING}px`;
 

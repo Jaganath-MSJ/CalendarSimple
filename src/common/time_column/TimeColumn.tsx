@@ -5,14 +5,21 @@ import styles from "./TimeColumn.module.css";
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
-function TimeColumn() {
+interface TimeColumnProps {
+  is12Hour?: boolean;
+}
+
+function TimeColumn({ is12Hour }: TimeColumnProps) {
   return (
     <div className={styles.timeColumn}>
-      {HOURS.map((hour) => (
-        <div key={hour} className={styles.timeSlot}>
-          {formatDate(dateFn().hour(hour).minute(0), DATE_FORMATS.TIME)}
-        </div>
-      ))}
+      {HOURS.map((hour) => {
+        const timeFormat = is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME;
+        return (
+          <div key={hour} className={styles.timeSlot}>
+            {formatDate(dateFn().hour(hour).minute(0), timeFormat)}
+          </div>
+        );
+      })}
     </div>
   );
 }

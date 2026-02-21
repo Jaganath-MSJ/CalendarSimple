@@ -24,21 +24,17 @@ export function calculateMaxEvents(height: number, rowsInView: number): number {
 export function generateTooltipText(
   event: DataType,
   viewType: ECalendarViewType,
+  is12Hour?: boolean,
 ): string {
-  if (viewType === ECalendarViewType.month) {
-    let tooltipText = formatDate(event.startDate, DATE_FORMATS.DATE);
-    if (event.endDate) {
-      tooltipText += ` to ${formatDate(event.endDate, DATE_FORMATS.DATE)}`;
-    }
-    tooltipText += ` - ${event.value}`;
-    return tooltipText;
-  }
+  const timeFormat = is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME;
+  const formatStr =
+    viewType === ECalendarViewType.month ? DATE_FORMATS.DATE : timeFormat;
 
-  // Day or Week view format
-  let tooltipText = `${event.value} (${formatDate(event.startDate, DATE_FORMATS.TIME)}`;
+  let tooltipText = `${event.value} (${formatDate(event.startDate, formatStr)}`;
   if (event.endDate) {
-    tooltipText += ` - ${formatDate(event.endDate, DATE_FORMATS.TIME)}`;
+    tooltipText += ` - ${formatDate(event.endDate, formatStr)}`;
   }
   tooltipText += `)`;
+
   return tooltipText;
 }

@@ -24,6 +24,7 @@ function MonthView({
   onMoreClick,
   isSelectDate,
   events,
+  is12Hour,
   ...restProps
 }: MonthViewProps) {
   const { state, dispatch } = useCalendar();
@@ -98,6 +99,7 @@ function MonthView({
                 theme={restProps.theme}
                 maxEvents={maxEvents}
                 totalEvents={dayInfo.totalEvents}
+                is12Hour={is12Hour}
                 onEventClick={onEventClick}
                 onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
               />

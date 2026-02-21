@@ -58,6 +58,7 @@ export interface CalendarType {
   futureYearLength?: number;
   theme?: CalendarTheme;
   maxEvents?: number;
+  is12Hour?: boolean;
 }
 
 export interface CalendarContentType extends CalendarType {
@@ -68,6 +69,7 @@ export interface CalendarContentType extends CalendarType {
   isSelectDate: boolean;
   pastYearLength: number;
   futureYearLength: number;
+  is12Hour?: boolean;
 }
 
 export type DataTypeList =
@@ -96,6 +98,7 @@ export interface DateDataType {
   theme?: CalendarTheme;
   maxEvents: number;
   totalEvents?: number;
+  is12Hour?: boolean;
 }
 
 export interface MonthListType {
