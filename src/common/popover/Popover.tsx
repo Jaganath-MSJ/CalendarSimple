@@ -13,8 +13,8 @@ import {
   getStartOfDay,
   isBeforeDate,
   isAfterDate,
-} from "../utils";
-import { CalendarType, DataTypeList } from "../types";
+} from "../../utils";
+import { CalendarType, DataTypeList } from "../../types";
 
 interface PopoverProps {
   dateObj: DateType;

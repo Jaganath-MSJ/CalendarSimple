@@ -10,7 +10,7 @@ import {
   calculateMaxEvents,
 } from "../../utils";
 import styles from "./MonthView.module.css";
-import EventItem from "../../common/EventItem";
+import EventItem from "../../common/event_item/EventItem";
 import { useCalendar } from "../../context/CalendarContext";
 
 interface MonthViewProps extends Omit<CalendarContentType, "events"> {

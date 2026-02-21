@@ -1,10 +1,10 @@
 import React, { useState, useRef } from "react";
 import cx from "classnames";
-import { DataTypeList, DateDataType } from "../types";
-import { formatDate, getDiffDays } from "../utils";
+import { DataTypeList, DateDataType } from "../../types";
+import { formatDate, getDiffDays } from "../../utils";
 import styles from "./EventItem.module.css";
-import Popover from "./Popover";
-import { CALENDAR_CONSTANTS, defaultTheme } from "../constants";
+import Popover from "../popover/Popover";
+import { CALENDAR_CONSTANTS, defaultTheme } from "../../constants";
 
 function EventItem({
   date,
