@@ -1,8 +1,3 @@
-// Adjust import path if needed, DataType is in types/index.ts usually?
-// Actually DataType in index.ts imports DateType from utils.
-// Let's check where DataType is defined. It is in `src/types/index.ts`.
-// And `dateFn` is in `src/utils/date.ts`.
-
 import { DataType } from "../types";
 import { dateFn, DateType } from "./date";
 
@@ -13,9 +8,6 @@ export interface DayEventLayout {
   left: number;
   width: number;
   zIndex: number;
-  columnIndex: number;
-  totalColumns: number;
-  clusterSize: number;
 }
 
 interface ProcessedEvent {
@@ -24,11 +16,10 @@ interface ProcessedEvent {
   end: number;
   duration: number;
   original: DataType;
-  _columnIndex?: number;
-  _totalColumns?: number;
-  _left?: number;
-  _width?: number;
-  _expandCols?: number;
+  columnIndex?: number;
+  left?: number;
+  width?: number;
+  expandCols?: number;
 }
 
 export function calculateEventLayout(
@@ -67,11 +58,6 @@ export function calculateEventLayout(
       end,
       duration: end - start,
       original: event,
-      _columnIndex: undefined,
-      _totalColumns: undefined,
-      _expandCols: undefined,
-      _left: undefined,
-      _width: undefined,
     };
   });
 
@@ -108,33 +94,30 @@ export function calculateEventLayout(
         const lastEvent = columns[c][columns[c].length - 1];
         if (lastEvent.end <= event.start) {
           columns[c].push(event);
-          event._columnIndex = c;
+          event.columnIndex = c;
           placed = true;
           break;
         }
       }
 
       if (!placed) {
-        event._columnIndex = columns.length;
+        event.columnIndex = columns.length;
         columns.push([event]);
       }
     }
 
     const totalCols = columns.length;
-    for (const event of cluster) {
-      event._totalColumns = totalCols;
-    }
 
     // Phase 4 - Initialise left and width
     for (const event of cluster) {
-      event._left = event._columnIndex! / totalCols;
-      event._width = 1 / totalCols;
+      event.left = event.columnIndex! / totalCols;
+      event.width = 1 / totalCols;
     }
 
     // Phase 5 - Expand to fill free adjacent columns
     const colMap: Map<number, ProcessedEvent[]> = new Map();
     for (const event of cluster) {
-      const c = event._columnIndex!;
+      const c = event.columnIndex!;
       if (!colMap.has(c)) colMap.set(c, []);
       colMap.get(c)!.push(event);
     }
@@ -142,7 +125,7 @@ export function calculateEventLayout(
     for (const event of cluster) {
       let expandCols = 1;
 
-      for (let c = event._columnIndex! + 1; c < totalCols; c++) {
+      for (let c = event.columnIndex! + 1; c < totalCols; c++) {
         const colEvents = colMap.get(c) ?? [];
         const blocked = colEvents.some(
           (other) => other.start < event.end && event.start < other.end,
@@ -151,31 +134,23 @@ export function calculateEventLayout(
         expandCols++;
       }
 
-      const maxPossibleCols = totalCols - event._columnIndex!;
-      event._expandCols = Math.min(expandCols, maxPossibleCols);
-      event._width = event._expandCols / totalCols;
+      const maxPossibleCols = totalCols - event.columnIndex!;
+      event.expandCols = Math.min(expandCols, maxPossibleCols);
+      event.width = event.expandCols / totalCols;
     }
   }
 
-  function toLayout(
-    event: ProcessedEvent,
-    clusterSize: number,
-  ): DayEventLayout {
+  function toLayout(event: ProcessedEvent): DayEventLayout {
     const rawHeight = event.end - event.start;
     return {
       event: event.original,
       top: event.start,
       height: Math.max(rawHeight, 15),
-      left: parseFloat((event._left! * 100).toFixed(4)),
-      width: parseFloat((event._width! * 100).toFixed(4)),
-      zIndex: event._columnIndex! + 1,
-      columnIndex: event._columnIndex!,
-      totalColumns: event._totalColumns!,
-      clusterSize,
+      left: parseFloat((event.left! * 100).toFixed(4)),
+      width: parseFloat((event.width! * 100).toFixed(4)),
+      zIndex: event.columnIndex! + 1,
     };
   }
 
-  return clusters.flatMap((cluster) =>
-    cluster.map((event) => toLayout(event, cluster.length)),
-  );
+  return clusters.flatMap((cluster) => cluster.map(toLayout));
 }

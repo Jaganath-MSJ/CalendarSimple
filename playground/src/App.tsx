@@ -49,42 +49,23 @@ function App() {
       },
       // Overlapping Event 1
       {
-        startDate: formatDateTime(setTime(startOfToday, 14, 15)), // 2:00 PM
-        endDate: formatDateTime(setTime(startOfToday, 16, 15)), // 3:30 PM
+        startDate: formatDateTime(setTime(startOfToday, 14, 0)), // 2:00 PM
+        endDate: formatDateTime(setTime(startOfToday, 15, 30)), // 3:30 PM
         value: "Project Sync",
         color: "purple",
       },
       // Overlapping Event 2 (Starts during Project Sync)
       {
-        startDate: formatDateTime(setTime(startOfToday, 15, 30)), // 2:30 PM
-        endDate: formatDateTime(setTime(startOfToday, 17, 30)), // 3:00 PM
+        startDate: formatDateTime(setTime(startOfToday, 14, 30)), // 2:30 PM
+        endDate: formatDateTime(setTime(startOfToday, 15, 0)), // 3:00 PM
         value: "Quick Client Call",
         color: "red",
       },
       {
-        startDate: formatDateTime(setTime(startOfToday, 15, 30)), // 2:00 PM
-        endDate: formatDateTime(setTime(startOfToday, 16, 30)), // 3:30 PM
-        value: "Projec292t Sync",
-        color: "orange",
-      },
-      // {
-      //   startDate: formatDateTime(setTime(startOfToday, 16, 0)), // 2:00 PM
-      //   endDate: formatDateTime(setTime(startOfToday, 17, 0)), // 3:30 PM
-      //   value: "Project Sync 292",
-      //   color: "green",
-      // },
-      // {
-      //   startDate: formatDateTime(setTime(startOfToday, 16, 0)), // 2:00 PM
-      //   endDate: formatDateTime(setTime(startOfToday, 17, 0)), // 3:30 PM
-      //   value: "Project Syn 2ii9c",
-      // },
-      {
         startDate: formatDateTime(setTime(startOfToday, 16, 0)), // 4:00 PM
         endDate: formatDateTime(setTime(startOfToday, 17, 0)), // 5:00 PM
         value: "Code Review",
-        color: "blue",
       },
-
       // --- TOMORROW'S EVENTS ---
       {
         startDate: formatDateTime(setTime(addDays(startOfToday, 1), 10, 0)),
