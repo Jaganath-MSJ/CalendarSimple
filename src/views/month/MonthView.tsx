@@ -10,7 +10,7 @@ import {
   calculateMaxEvents,
 } from "../../utils";
 import styles from "./MonthView.module.css";
-import EventItem from "../../common/event_item/EventItem";
+import MonthEventItem from "../../common/month_event_item/MonthEventItem";
 import { useCalendar } from "../../context/CalendarContext";
 
 interface MonthViewProps extends Omit<CalendarContentType, "selectedDate"> {}
@@ -77,7 +77,7 @@ function MonthView({
         {calendarGrid.map((week, weekIndex) => (
           <tr key={weekIndex}>
             {week.map((dayInfo, dayIndex) => (
-              <EventItem
+              <MonthEventItem
                 key={`date_${weekIndex}_${dayIndex}`}
                 isSelected={
                   isSelectDate &&

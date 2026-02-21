@@ -1,0 +1,15 @@
+.timeColumn {
+  width: 60px;
+  flex-shrink: 0;
+  border-right: 1px solid #e0e0e0;
+}
+
+.timeSlot {
+  height: 60px; /* 1 hour height */
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #666;
+}

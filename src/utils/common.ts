@@ -1,4 +1,6 @@
 import { CALENDAR_CONSTANTS } from "../constants";
+import { DataType, ECalendarViewType } from "../types";
+import { formatDate } from "./date";
 
 /**
  * Calculates the maximum number of events that can be displayed in a cell based on the calendar height.
@@ -14,4 +16,29 @@ export function calculateMaxEvents(height: number, rowsInView: number): number {
   const calculatedMax = Math.round(availableHeight / EVENT_HEIGHT) - 1; // -1 for "more" button
 
   return Math.max(0, calculatedMax);
+}
+
+/**
+ * Generates the tooltip text for an event based on the view type.
+ */
+export function generateTooltipText(
+  event: DataType,
+  viewType: ECalendarViewType,
+): string {
+  if (viewType === ECalendarViewType.month) {
+    let tooltipText = formatDate(event.startDate, "YYYY-MM-DD");
+    if (event.endDate) {
+      tooltipText += ` to ${formatDate(event.endDate, "YYYY-MM-DD")}`;
+    }
+    tooltipText += ` - ${event.value}`;
+    return tooltipText;
+  }
+
+  // Day or Week view format
+  let tooltipText = `${event.value} (${formatDate(event.startDate, "HH:mm")}`;
+  if (event.endDate) {
+    tooltipText += ` - ${formatDate(event.endDate, "HH:mm")}`;
+  }
+  tooltipText += `)`;
+  return tooltipText;
 }

@@ -1,12 +1,12 @@
 import React, { useState, useRef } from "react";
 import cx from "classnames";
 import { DataTypeList, DateDataType } from "../../types";
-import { formatDate, getDiffDays } from "../../utils";
-import styles from "./EventItem.module.css";
+import { formatDate, getDiffDays, generateTooltipText } from "../../utils";
+import styles from "./MonthEventItem.module.css";
 import Popover from "../popover/Popover";
 import { CALENDAR_CONSTANTS, defaultTheme } from "../../constants";
 
-function EventItem({
+function MonthEventItem({
   date,
   dateObj,
   data,
@@ -82,15 +82,11 @@ function EventItem({
               }
 
               let diffDates = 1;
-              let tooltipText = formatDate(item.startDate, "YYYY-MM-DD");
               if (item.endDateWeek) {
                 diffDates =
                   getDiffDays(item.endDateWeek, item.startDateWeek) + 1;
               }
-              if (item.endDate) {
-                tooltipText += ` to ${formatDate(item.endDate, "YYYY-MM-DD")}`;
-              }
-              tooltipText += ` - ${item.value}`;
+              const tooltipText = generateTooltipText(item, "month");
               const width = `${cellWidth * diffDates - CALENDAR_CONSTANTS.EVENT_ITEM_PADDING}px`;
 
               return (
@@ -139,4 +135,4 @@ function EventItem({
   );
 }
 
-export default EventItem;
+export default MonthEventItem;
