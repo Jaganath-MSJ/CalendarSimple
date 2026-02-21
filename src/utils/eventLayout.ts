@@ -44,7 +44,7 @@ export function calculateEventLayout(
   // 2. Process events
   const processedEvents: ProcessedEvent[] = eventsForDay.map((event, index) => {
     const start = getMinutes(event.startDate);
-    let end = event.endDate ? getMinutes(event.endDate) : start + 60;
+    let end = event.endDate ? getMinutes(event.endDate) : start + 1;
 
     // Edge Case: Zero-duration event treated as 1 minute logically
     if (end === start) end = start + 1;

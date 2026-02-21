@@ -42,11 +42,20 @@ function DayView({ currentDate, events, onEventClick }: DayViewProps) {
           ))}
           {dayEvents.map((item, index) => {
             const eventColor = item.event.color || "#3b82f6";
+            let tooltipText = `${item.event.value} (${formatDate(item.event.startDate, "HH:mm")}`;
+            if (item.event.endDate) {
+              tooltipText += ` - ${formatDate(item.event.endDate, "HH:mm")}`;
+            }
+            tooltipText += `)`;
 
             return (
               <div
                 key={index}
-                className={styles.eventItem}
+                className={cx(styles.eventItem, {
+                  [styles.eventItemSmall]:
+                    item.height < 40 && item.height >= 20,
+                  [styles.eventItemTiny]: item.height < 20,
+                })}
                 style={
                   {
                     top: `${item.top}px`,
@@ -59,7 +68,7 @@ function DayView({ currentDate, events, onEventClick }: DayViewProps) {
                   } as React.CSSProperties
                 }
                 onClick={() => onEventClick?.(item.event)}
-                title={`${item.event.value} (${formatDate(item.event.startDate, "HH:mm")} - ${item.event.endDate ? formatDate(item.event.endDate, "HH:mm") : ""})`}
+                title={tooltipText}
               >
                 <div className={styles.eventTitle}>{item.event.value}</div>
                 <div className={styles.eventTime}>
