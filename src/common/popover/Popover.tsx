@@ -128,11 +128,12 @@ function Popover({
 
           return (
             <div
-              key={`pop-${idx}`}
+              key={item.id || `pop-${idx}`}
               className={cx(styles.popoverItem, {
                 [styles.startBefore]: isStartBefore,
                 [styles.endAfter]: isEndAfter,
               })}
+              id={item.id}
               style={{ backgroundColor: item.color }}
               onClick={(e) => {
                 e.stopPropagation();

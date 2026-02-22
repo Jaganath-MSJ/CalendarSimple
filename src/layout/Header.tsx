@@ -12,6 +12,7 @@ import {
   MONTH_LIST,
   DATE_FORMATS,
   CALENDAR_ACTIONS,
+  VIEW_OPTIONS,
 } from "../constants";
 import {
   dateFn,
@@ -118,9 +119,11 @@ function Header({
           value={view}
           onChange={onViewDropdownClick}
         >
-          <option value={ECalendarViewType.month}>Month</option>
-          <option value={ECalendarViewType.week}>Week</option>
-          <option value={ECalendarViewType.day}>Day</option>
+          {VIEW_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
         <select
           className={styles.select}

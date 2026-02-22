@@ -20,7 +20,7 @@ function DayColumn({ dayEvents, onEventClick, is12Hour }: DayColumnProps) {
       ))}
       {dayEvents.map((item, index) => (
         <DayWeekEventItem
-          key={index}
+          key={item.event.id || index}
           item={item}
           onEventClick={onEventClick}
           is12Hour={is12Hour}

@@ -96,8 +96,9 @@ function MonthEventItem({
 
               return (
                 <div
-                  key={`${item.startDate}-${index}`}
+                  key={item.id || `${item.startDate}-${index}`}
                   className={styles.eventItem}
+                  id={item.id}
                   style={{ width, backgroundColor: item.color }}
                   title={tooltipText}
                   onClick={(e) => {

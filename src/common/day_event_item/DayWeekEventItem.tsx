@@ -42,6 +42,7 @@ export function DayWeekEventItem({
           position: "absolute",
         } as React.CSSProperties
       }
+      id={item.event.id}
       onClick={() => onEventClick?.(item.event)}
       title={tooltipText}
     >

@@ -12,6 +12,7 @@ export interface CalendarTheme {
 }
 
 export interface DataType {
+  id?: string;
   startDate: string;
   endDate?: string;
   value: string;

@@ -74,6 +74,12 @@ export const CALENDER_STRINGS = {
   YEAR: "yearDropdown",
 };
 
+export const VIEW_OPTIONS = [
+  { label: "Day", value: ECalendarViewType.day },
+  { label: "Week", value: ECalendarViewType.week },
+  { label: "Month", value: ECalendarViewType.month },
+];
+
 export const defaultTheme = {
   default: {
     color: "#000",

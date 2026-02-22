@@ -30,12 +30,14 @@ function App() {
     return [
       // --- TODAY'S EVENTS (Critical for Day/Week View) ---
       {
+        id: "E101",
         startDate: formatDateTime(setTime(startOfToday, 9, 0)), // 9:00 AM
         endDate: formatDateTime(setTime(startOfToday, 10, 0)), // 10:00 AM
         value: "Daily Standup",
         color: "blue",
       },
       {
+        id: "E102",
         startDate: formatDateTime(setTime(startOfToday, 10, 30)), // 10:30 AM
         endDate: formatDateTime(setTime(startOfToday, 12, 0)), // 12:00 PM
         value: "Deep Work Session",
@@ -68,6 +70,7 @@ function App() {
       },
       // --- TOMORROW'S EVENTS ---
       {
+        id: "E201",
         startDate: formatDateTime(setTime(addDays(startOfToday, 1), 10, 0)),
         endDate: formatDateTime(setTime(addDays(startOfToday, 1), 11, 30)),
         value: "Design Review",
@@ -143,6 +146,7 @@ function App() {
         selectedDate={new Date()}
         isSelectDate
         view={ECalendarViewType.day}
+        is12Hour
       />
     </div>
   );
