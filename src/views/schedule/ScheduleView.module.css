@@ -1,0 +1,128 @@
+.scheduleView {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px;
+  background-color: var(--calendar-bg, #fff);
+  color: #3c4043;
+  display: flex;
+  flex-direction: column;
+}
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #70757a;
+  font-size: 14px;
+}
+
+.dateGroup {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #dadce0;
+}
+
+.dateGroup:last-child {
+  border-bottom: none;
+}
+
+.eventItemContainer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 0;
+  position: relative;
+}
+
+.dateInfoColumn {
+  width: 70px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding-top: 4px;
+}
+
+.dateNumber {
+  font-size: 20px;
+  font-weight: 500;
+  color: #202124;
+  min-width: 28px;
+  text-align: right;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 28px;
+  width: 28px;
+  border-radius: 50%;
+  padding-bottom: 2px;
+  padding-left: 1px;
+}
+
+.dateNumber.today {
+  background-color: #1a73e8;
+  color: #fff;
+}
+
+.dateSubInfo {
+  font-size: 11px;
+  color: #70757a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-top: 5px;
+}
+
+.dotTimeColumn {
+  width: 140px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.eventDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #1a73e8;
+  flex-shrink: 0;
+}
+
+.eventTime {
+  font-size: 13px;
+  color: #3c4043;
+}
+
+.eventTitleColumn {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #202124;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.currentTimeLine {
+  position: absolute;
+  left: 70px;
+  right: 0;
+  height: 2px;
+  background-color: #ea4335;
+  top: -1px;
+  z-index: 1;
+}
+
+.currentTimeLine::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ea4335;
+}

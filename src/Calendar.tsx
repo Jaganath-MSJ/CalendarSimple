@@ -8,6 +8,7 @@ import Header from "./layout/Header";
 import DayView from "./views/day/DayView";
 import WeekView from "./views/week/WeekView";
 import MonthView from "./views/month/MonthView";
+import ScheduleView from "./views/schedule/ScheduleView";
 import { CalendarProvider, useCalendar } from "./context/CalendarContext";
 
 function CalendarContent({
@@ -65,6 +66,14 @@ function CalendarContent({
             onDateClick={onDateClick}
             onMoreClick={onMoreClick}
             isSelectDate={isSelectDate}
+            is12Hour={is12Hour}
+          />
+        );
+      case ECalendarViewType.schedule:
+        return (
+          <ScheduleView
+            events={events}
+            onEventClick={onEventClick}
             is12Hour={is12Hour}
           />
         );

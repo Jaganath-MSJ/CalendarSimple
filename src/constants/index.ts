@@ -78,6 +78,7 @@ export const VIEW_OPTIONS = [
   { label: "Day", value: ECalendarViewType.day },
   { label: "Week", value: ECalendarViewType.week },
   { label: "Month", value: ECalendarViewType.month },
+  { label: "Schedule", value: ECalendarViewType.schedule },
 ];
 
 export const defaultTheme = {

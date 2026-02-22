@@ -145,7 +145,7 @@ function App() {
         events={eventsList}
         selectedDate={new Date()}
         isSelectDate
-        view={ECalendarViewType.day}
+        view={ECalendarViewType.month}
         is12Hour
       />
     </div>

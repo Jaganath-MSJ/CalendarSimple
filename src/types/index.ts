@@ -23,6 +23,7 @@ export const ECalendarViewType = {
   month: "month",
   week: "week",
   day: "day",
+  schedule: "schedule",
 } as const;
 
 export type ECalendarViewType =
