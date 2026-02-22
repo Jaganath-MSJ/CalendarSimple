@@ -1,13 +1,14 @@
 import React from "react";
-import { DataType } from "../../types";
+import { CalendarContentType } from "../../types";
 import { DayEventLayout } from "../../utils/eventLayout";
 import { DayWeekEventItem } from "../day_event_item/DayWeekEventItem";
 import styles from "./DayColumn.module.css";
 
-interface DayColumnProps {
+interface DayColumnProps extends Pick<
+  CalendarContentType,
+  "onEventClick" | "is12Hour"
+> {
   dayEvents: DayEventLayout[];
-  onEventClick?: (event: DataType) => void;
-  is12Hour?: boolean;
 }
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);

@@ -1,7 +1,7 @@
 import React, { ChangeEvent } from "react";
 import cx from "classnames";
 import {
-  CalendarType,
+  CalendarContentType,
   ECalendarViewType,
   EMonthOption,
   EYearOption,
@@ -31,20 +31,22 @@ import RightArrow from "../assets/RightArrow";
 import { useCalendar } from "../context/CalendarContext";
 
 interface HeaderProps extends Pick<
-  CalendarType,
+  CalendarContentType,
   | "headerClassName"
   | "pastYearLength"
   | "futureYearLength"
   | "onMonthChange"
   | "onViewChange"
+  | "events"
 > {}
 
 function Header({
   headerClassName,
-  pastYearLength = 5,
-  futureYearLength = 5,
+  pastYearLength,
+  futureYearLength,
   onMonthChange,
   onViewChange,
+  events,
 }: HeaderProps) {
   const { state, dispatch } = useCalendar();
   const { currentDate, view } = state;
@@ -86,6 +88,47 @@ function Header({
     onViewChange?.(newView);
   };
 
+  const getHeaderTitle = () => {
+    if (view === ECalendarViewType.day) {
+      return formatDate(currentDate, DATE_FORMATS.MONTH_DAY_YEAR);
+    }
+    if (view === ECalendarViewType.week) {
+      const startOfWeek = currentDate.startOf("week");
+      const endOfWeek = currentDate.endOf("week");
+      if (startOfWeek.month() !== endOfWeek.month()) {
+        if (startOfWeek.year() !== endOfWeek.year()) {
+          return `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR)}`;
+        }
+        return `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR)}`;
+      }
+    }
+    if (view === ECalendarViewType.schedule) {
+      if (events && events.length > 0) {
+        let minDate = dateFn(events[0].startDate);
+        let maxDate = minDate;
+
+        events.forEach((event) => {
+          const sd = dateFn(event.startDate);
+          const ed = event.endDate ? dateFn(event.endDate) : sd;
+          if (sd.isBefore(minDate)) minDate = sd;
+          if (ed.isAfter(maxDate)) maxDate = ed;
+        });
+
+        if (
+          minDate.month() !== maxDate.month() ||
+          minDate.year() !== maxDate.year()
+        ) {
+          if (minDate.year() !== maxDate.year()) {
+            return `${formatDate(minDate, DATE_FORMATS.SHORT_MONTH_YEAR)} - ${formatDate(maxDate, DATE_FORMATS.SHORT_MONTH_YEAR)}`;
+          }
+          return `${formatDate(minDate, DATE_FORMATS.SHORT_MONTH)} - ${formatDate(maxDate, DATE_FORMATS.SHORT_MONTH_YEAR)}`;
+        }
+        return formatDate(minDate, DATE_FORMATS.SHORT_MONTH_YEAR);
+      }
+    }
+    return formatDate(currentDate, DATE_FORMATS.MONTH_YEAR);
+  };
+
   return (
     <div className={cx(styles.header, headerClassName)}>
       <div className={styles.navigation}>
@@ -112,9 +155,7 @@ function Header({
             <RightArrow />
           </button>
         </div>
-        <h2 className={styles.dateTitle}>
-          {formatDate(currentDate, DATE_FORMATS.MONTH_YEAR)}
-        </h2>
+        <h2 className={styles.dateTitle}>{getHeaderTitle()}</h2>
       </div>
 
       <div className={styles.controls}>

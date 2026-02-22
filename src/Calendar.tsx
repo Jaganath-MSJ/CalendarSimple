@@ -42,6 +42,7 @@ function CalendarContent({
           <DayView
             events={events}
             onEventClick={onEventClick}
+            dayType={dayType}
             is12Hour={is12Hour}
           />
         );
@@ -94,6 +95,7 @@ function CalendarContent({
     >
       <Header
         headerClassName={restProps.headerClassName}
+        events={events}
         onMonthChange={restProps.onMonthChange}
         onViewChange={restProps.onViewChange}
         pastYearLength={restProps.pastYearLength}
