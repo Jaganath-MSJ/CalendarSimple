@@ -1,15 +1,16 @@
 import React from "react";
 import cx from "classnames";
 import { formatDate, generateTooltipText } from "../../utils";
-import { DataType } from "../../types";
+import { CalendarContentType } from "../../types";
 import { DayEventLayout } from "../../utils/eventLayout";
 import { CALENDAR_CONSTANTS, DATE_FORMATS } from "../../constants";
 import styles from "./DayWeekEventItem.module.css";
 
-interface DayWeekEventItemProps {
+interface DayWeekEventItemProps extends Pick<
+  CalendarContentType,
+  "onEventClick" | "is12Hour"
+> {
   item: DayEventLayout;
-  onEventClick?: (event: DataType) => void;
-  is12Hour?: boolean;
 }
 
 export function DayWeekEventItem({

@@ -1,10 +1,37 @@
 import React, { useState, useRef } from "react";
 import cx from "classnames";
-import { DataTypeList, DateDataType, ECalendarViewType } from "../../types";
-import { getDiffDays, generateTooltipText } from "../../utils";
+import {
+  CalendarContentType,
+  DataTypeList,
+  ECalendarViewType,
+} from "../../types";
+import { getDiffDays, generateTooltipText, DateType } from "../../utils";
 import styles from "./MonthEventItem.module.css";
 import Popover from "../popover/Popover";
 import { CALENDAR_CONSTANTS, defaultTheme } from "../../constants";
+
+export interface DateDataTypeProps extends Pick<
+  CalendarContentType,
+  | "onEventClick"
+  | "dataClassName"
+  | "selectedClassName"
+  | "todayClassName"
+  | "theme"
+  | "maxEvents"
+  | "is12Hour"
+> {
+  date: number;
+  dateObj: DateType;
+  data: (DataTypeList | null)[];
+  cellWidth: number;
+  className?: string;
+  isSelected: boolean;
+  isToday: boolean;
+  isCurrentMonth: boolean;
+  onClick?: (date: DateType) => void;
+  onMoreClick?: (date: DateType) => void;
+  totalEvents?: number;
+}
 
 function MonthEventItem({
   date,
@@ -25,7 +52,7 @@ function MonthEventItem({
   onEventClick,
   totalEvents = 0,
   is12Hour,
-}: DateDataType) {
+}: DateDataTypeProps) {
   const [showPopover, setShowPopover] = useState(false);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
 

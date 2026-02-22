@@ -13,7 +13,25 @@ import styles from "./MonthView.module.css";
 import MonthEventItem from "../../common/month_event_item/MonthEventItem";
 import { useCalendar } from "../../context/CalendarContext";
 
-interface MonthViewProps extends Omit<CalendarContentType, "selectedDate"> {}
+interface MonthViewProps extends Pick<
+  CalendarContentType,
+  | "dayType"
+  | "width"
+  | "height"
+  | "onDateClick"
+  | "onEventClick"
+  | "onMoreClick"
+  | "isSelectDate"
+  | "events"
+  | "is12Hour"
+  | "maxEvents"
+  | "tableClassName"
+  | "tableDateClassName"
+  | "dataClassName"
+  | "selectedClassName"
+  | "todayClassName"
+  | "theme"
+> {}
 
 function MonthView({
   dayType,

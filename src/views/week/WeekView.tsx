@@ -1,26 +1,19 @@
 import React, { useMemo } from "react";
 import cx from "classnames";
 import { dateFn, formatDate, calculateEventLayout } from "../../utils";
-import { DataType, EDayType } from "../../types";
-import { DAY_LIST_NAME } from "../../constants";
+import { CalendarContentType } from "../../types";
+import { DAY_LIST_NAME, DATE_FORMATS } from "../../constants";
 import styles from "./WeekView.module.css";
 import { useCalendar } from "../../context/CalendarContext";
 import TimeColumn from "../../common/time_column/TimeColumn";
 import DayColumn from "../../common/day_column/DayColumn";
 
-interface WeekViewProps {
-  events: DataType[];
-  onEventClick?: (event: DataType) => void;
-  dayType?: EDayType;
-  is12Hour?: boolean;
-}
+interface WeekViewProps extends Pick<
+  CalendarContentType,
+  "events" | "onEventClick" | "dayType" | "is12Hour"
+> {}
 
-function WeekView({
-  events,
-  onEventClick,
-  dayType = "HALF",
-  is12Hour,
-}: WeekViewProps) {
+function WeekView({ events, onEventClick, dayType, is12Hour }: WeekViewProps) {
   const { state } = useCalendar();
   const { currentDate } = state;
   const startOfWeek = useMemo(() => currentDate.startOf("week"), [currentDate]);
@@ -48,7 +41,7 @@ function WeekView({
                 [styles.today]: dateFn().isSame(date, "day"),
               })}
             >
-              {formatDate(date, "D")}
+              {formatDate(date, DATE_FORMATS.DAY_NUMBER)}
             </div>
           </div>
         ))}

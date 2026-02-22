@@ -103,6 +103,7 @@ export const defaultCalenderProps = {
   isSelectDate: false,
   pastYearLength: 5,
   futureYearLength: 5,
+  is12Hour: false,
   theme: defaultTheme,
 };
 
@@ -126,6 +127,13 @@ export const DATE_FORMATS = {
   TIME_12H: "hh:mm A",
   MONTH_YEAR: "MMMM YYYY",
   DAY_INDEX: "d",
+  DAY_NUMBER: "D",
+  FULL_DATE: "dddd, MMMM D, YYYY",
+  MONTH_DAY_YEAR: "MMMM D, YYYY",
+  SHORT_MONTH_YEAR: "MMM YYYY",
+  SHORT_MONTH: "MMM",
+  SHORT_DAY: "ddd",
+  DAY_DATE_SHORT_MONTH: "ddd, D MMM",
 };
 
 export const CALENDAR_ACTIONS = {

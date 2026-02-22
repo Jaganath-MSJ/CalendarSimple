@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import cx from "classnames";
-import { DataType } from "../../types";
+import { CalendarContentType, DataType } from "../../types";
 import {
   formatDate,
   dateFn,
@@ -11,11 +11,10 @@ import {
 import { DATE_FORMATS, CALENDAR_CONSTANTS } from "../../constants";
 import styles from "./ScheduleView.module.css";
 
-interface ScheduleViewProps {
-  events: DataType[];
-  onEventClick?: (event: DataType) => void;
-  is12Hour?: boolean;
-}
+interface ScheduleViewProps extends Pick<
+  CalendarContentType,
+  "events" | "onEventClick" | "is12Hour"
+> {}
 
 export default function ScheduleView({
   events,
@@ -117,11 +116,18 @@ export default function ScheduleView({
                               [styles.today]: isToday,
                             })}
                           >
-                            {formatDate(dateObj, "D")}
+                            {formatDate(dateObj, DATE_FORMATS.DAY_NUMBER)}
                           </div>
                           <div className={styles.dateSubInfo}>
-                            {formatDate(dateObj, "MMM").toUpperCase()},{" "}
-                            {formatDate(dateObj, "ddd").toUpperCase()}
+                            {formatDate(
+                              dateObj,
+                              DATE_FORMATS.SHORT_MONTH,
+                            ).toUpperCase()}
+                            ,{" "}
+                            {formatDate(
+                              dateObj,
+                              DATE_FORMATS.SHORT_DAY,
+                            ).toUpperCase()}
                           </div>
                         </>
                       )}

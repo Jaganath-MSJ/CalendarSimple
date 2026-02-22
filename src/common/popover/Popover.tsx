@@ -14,12 +14,12 @@ import {
   isBeforeDate,
   isAfterDate,
 } from "../../utils";
-import { CalendarType, DataTypeList } from "../../types";
+import { CalendarContentType, DataTypeList } from "../../types";
+import { DATE_FORMATS } from "../../constants";
 
-interface PopoverProps {
+interface PopoverProps extends Pick<CalendarContentType, "onEventClick"> {
   dateObj: DateType;
   events: DataTypeList[];
-  onEventClick?: CalendarType["onEventClick"];
   onClose: () => void;
   anchorEl: HTMLElement | null;
 }
@@ -113,7 +113,7 @@ function Popover({
       onClick={(e) => e.stopPropagation()}
     >
       <div className={styles.popoverHeader}>
-        {formatDate(dateObj, "ddd, D MMM")}
+        {formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH)}
       </div>
       <div className={styles.popoverContent}>
         {events.map((item, idx) => {

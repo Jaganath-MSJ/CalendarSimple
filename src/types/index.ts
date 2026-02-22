@@ -64,6 +64,7 @@ export interface CalendarType {
 }
 
 export interface CalendarContentType extends CalendarType {
+  view: ECalendarViewType;
   dayType: EDayType;
   events: DataType[];
   width: number;
@@ -71,7 +72,8 @@ export interface CalendarContentType extends CalendarType {
   isSelectDate: boolean;
   pastYearLength: number;
   futureYearLength: number;
-  is12Hour?: boolean;
+  is12Hour: boolean;
+  theme: CalendarTheme;
 }
 
 export type DataTypeList =
