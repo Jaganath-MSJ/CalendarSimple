@@ -1,11 +1,11 @@
 import React from "react";
-import { CalendarContentType } from "../../types";
+import { CalendarContentProps } from "../../types";
 import { DayEventLayout } from "../../utils/eventLayout";
 import { DayWeekEventItem } from "../day_event_item/DayWeekEventItem";
 import styles from "./DayColumn.module.css";
 
 interface DayColumnProps extends Pick<
-  CalendarContentType,
+  CalendarContentProps,
   "onEventClick" | "is12Hour"
 > {
   dayEvents: DayEventLayout[];

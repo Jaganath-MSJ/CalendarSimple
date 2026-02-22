@@ -1,8 +1,8 @@
-import { DataType } from "../types";
+import { CalendarEvent } from "../types";
 import { dateFn, DateType } from "./date";
 
 export interface DayEventLayout {
-  event: DataType;
+  event: CalendarEvent;
   top: number;
   height: number;
   left: number;
@@ -15,7 +15,7 @@ interface ProcessedEvent {
   start: number;
   end: number;
   duration: number;
-  original: DataType;
+  original: CalendarEvent;
   columnIndex?: number;
   left?: number;
   width?: number;
@@ -23,7 +23,7 @@ interface ProcessedEvent {
 }
 
 export function calculateEventLayout(
-  events: DataType[],
+  events: CalendarEvent[],
   currentDate: DateType,
 ): DayEventLayout[] {
   // 1. Filter events for the current day
@@ -53,7 +53,7 @@ export function calculateEventLayout(
     if (end < start) end = 1440;
 
     return {
-      id: `${index}-${event.value}`,
+      id: `${index}-${event.title}`,
       start,
       end,
       duration: end - start,

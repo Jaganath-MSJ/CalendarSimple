@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import cx from "classnames";
-import { CalendarContentType, DataType } from "../../types";
+import { CalendarContentProps, CalendarEvent } from "../../types";
 import {
   formatDate,
   dateFn,
@@ -12,8 +12,8 @@ import { DATE_FORMATS, CALENDAR_CONSTANTS } from "../../constants";
 import styles from "./ScheduleView.module.css";
 
 interface ScheduleViewProps extends Pick<
-  CalendarContentType,
-  "events" | "onEventClick" | "is12Hour"
+  CalendarContentProps,
+  "events" | "is12Hour" | "dayType" | "onEventClick" | "theme" | "classNames"
 > {}
 
 export default function ScheduleView({
@@ -27,7 +27,7 @@ export default function ScheduleView({
       (a, b) => dateFn(a.startDate).valueOf() - dateFn(b.startDate).valueOf(),
     );
 
-    const groups: Record<string, DataType[]> = {};
+    const groups: Record<string, CalendarEvent[]> = {};
     sorted.forEach((event) => {
       // Group by date string (e.g. "2023-10-25")
       const dateKey = formatDate(event.startDate, DATE_FORMATS.DATE);
@@ -40,7 +40,7 @@ export default function ScheduleView({
     return groups;
   }, [events]);
 
-  const renderEventTime = (event: DataType) => {
+  const renderEventTime = (event: CalendarEvent) => {
     // If the event spans multiple days
     if (
       event.endDate &&
@@ -66,7 +66,7 @@ export default function ScheduleView({
     return formatTime(startStr);
   };
 
-  const renderEventTitle = (event: DataType) => {
+  const renderEventTitle = (event: CalendarEvent) => {
     if (
       event.endDate &&
       !isSameDate(dateFn(event.startDate), dateFn(event.endDate))
@@ -77,9 +77,9 @@ export default function ScheduleView({
       // they are flattened out. Given the current grouping, they appear once.
       // We will add a simplistic "(Multi-day)" label to mirror the requirement.
       const totalDays = getDiffDays(event.endDate, event.startDate) + 1;
-      return `${event.value} (Day 1/${totalDays})`;
+      return `${event.title} (Day 1/${totalDays})`;
     }
-    return event.value;
+    return event.title;
   };
 
   return (

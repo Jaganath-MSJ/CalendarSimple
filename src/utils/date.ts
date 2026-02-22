@@ -5,10 +5,6 @@ export type DateType = Dayjs;
 export type DateInputType = Date | DateType | string | number;
 export const dateFn = dayjs;
 
-export function getNoOfDays(date: DateType): number {
-  return dayjs(date).daysInMonth();
-}
-
 export function getMonthStartingDay(date: DateType): number {
   return Number(dayjs(date).startOf("month").format("d"));
 }
@@ -50,16 +46,8 @@ export function getStartOfDay(date: DateInputType): DateType {
   return dayjs(date).startOf("day");
 }
 
-export function getEndOfDay(date: DateInputType): DateType {
-  return dayjs(date).endOf("day");
-}
-
 export function getStartOfMonth(date: DateType): DateType {
   return dayjs(date).startOf("month");
-}
-
-export function getEndOfMonth(date: DateType): DateType {
-  return dayjs(date).endOf("month");
 }
 
 export function addDays(date: DateType, days: number): DateType {
@@ -68,14 +56,6 @@ export function addDays(date: DateType, days: number): DateType {
 
 export function subDays(date: DateType, days: number): DateType {
   return dayjs(date).subtract(days, "day");
-}
-
-export function addMonths(date: DateType, months: number): DateType {
-  return dayjs(date).add(months, "month");
-}
-
-export function subMonths(date: DateType, months: number): DateType {
-  return dayjs(date).subtract(months, "month");
 }
 
 export function getDiffDays(
@@ -123,8 +103,4 @@ export function getMonth(date: DateType): number {
 
 export function getYear(date: DateType): number {
   return dayjs(date).year();
-}
-
-export function getDay(date: DateType): number {
-  return dayjs(date).day();
 }

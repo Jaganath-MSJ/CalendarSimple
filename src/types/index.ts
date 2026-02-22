@@ -1,22 +1,33 @@
-import { DateType } from "../utils";
+type RequiredSome<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
-export interface ThemeStyle {
+export interface CalendarEvent {
+  id?: string;
+  startDate: string;
+  endDate?: string;
+  title: string;
+  color?: string;
+  [key: string]: unknown;
+}
+
+interface CalendarClassNames {
+  root?: string;
+  header?: string;
+  table?: string;
+  tableDate?: string;
+  event?: string;
+  selected?: string;
+  today?: string;
+}
+
+interface ThemeStyle {
   color?: string;
   bgColor?: string;
 }
 
-export interface CalendarTheme {
+interface CalendarTheme {
   default?: ThemeStyle;
   selected?: ThemeStyle;
   today?: ThemeStyle;
-}
-
-export interface DataType {
-  id?: string;
-  startDate: string;
-  endDate?: string;
-  value: string;
-  color?: string;
 }
 
 export const ECalendarViewType = {
@@ -36,86 +47,60 @@ export const EDayType = {
 
 export type EDayType = (typeof EDayType)[keyof typeof EDayType];
 
-export interface CalendarType {
-  view?: ECalendarViewType;
-  dayType?: EDayType;
-  events?: DataType[];
-  width?: number;
-  height?: number;
+export interface CalendarProps {
+  // --- Data & State ---
+  events?: CalendarEvent[];
   selectedDate?: Date;
-  onDateClick?: (date: Date) => void;
-  onEventClick?: (event: DataType) => void;
-  onMoreClick?: (date: Date) => void;
-  onMonthChange?: (date: Date) => void;
-  onViewChange?: (view: ECalendarViewType) => void;
-  isSelectDate?: boolean;
-  className?: string;
-  headerClassName?: string;
-  tableClassName?: string;
-  tableDateClassName?: string;
-  dataClassName?: string;
-  selectedClassName?: string;
-  todayClassName?: string;
+  view?: ECalendarViewType;
+
+  // --- Configuration ---
+  is12Hour?: boolean;
+  selectable?: boolean;
+  maxEvents?: number;
+  dayType?: EDayType;
   pastYearLength?: number;
   futureYearLength?: number;
+
+  // --- Layout ---
+  width?: number | string;
+  height?: number | string;
+
+  // --- Event Callbacks ---
+  onDateClick?: (date: Date) => void;
+  onEventClick?: (event: CalendarEvent) => void;
+  onMoreClick?: (date: Date, hiddenEvents?: CalendarEvent[]) => void;
+  onNavigate?: (date: Date) => void;
+  onViewChange?: (view: ECalendarViewType) => void;
+
+  // --- Appearance ---
   theme?: CalendarTheme;
-  maxEvents?: number;
-  is12Hour?: boolean;
+  classNames?: CalendarClassNames;
 }
 
-export interface CalendarContentType extends CalendarType {
-  view: ECalendarViewType;
-  dayType: EDayType;
-  events: DataType[];
-  width: number;
-  height: number;
-  isSelectDate: boolean;
-  pastYearLength: number;
-  futureYearLength: number;
-  is12Hour: boolean;
-  theme: CalendarTheme;
-}
+export interface CalendarContentProps extends RequiredSome<
+  Omit<CalendarProps, "selectedDate">,
+  | "events"
+  | "view"
+  | "is12Hour"
+  | "selectable"
+  | "dayType"
+  | "pastYearLength"
+  | "futureYearLength"
+  | "width"
+  | "height"
+  | "theme"
+  | "classNames"
+> {}
 
-export type DataTypeList =
-  | (DataType & {
+export type EventListType =
+  | (CalendarEvent & {
       startDateWeek: string;
       endDateWeek?: string;
       isSpacer?: false;
     })
-  | (DataType & { isSpacer: true });
-
-export interface DateDataType {
-  date: number;
-  dateObj: DateType;
-  data: (DataTypeList | null)[];
-  cellWidth: number;
-  className?: string;
-  dataClassName?: string;
-  isSelected: boolean;
-  isToday: boolean;
-  isCurrentMonth: boolean;
-  onClick?: (date: DateType) => void;
-  onEventClick?: (event: DataType) => void;
-  onMoreClick?: (date: DateType) => void;
-  selectedClassName?: string;
-  todayClassName?: string;
-  theme?: CalendarTheme;
-  maxEvents: number;
-  totalEvents?: number;
-  is12Hour?: boolean;
-}
+  | (CalendarEvent & { isSpacer: true });
 
 export interface MonthListType {
   label: string;
   value: number;
-}
-
-export enum EMonthOption {
-  add = "add",
-  sub = "sub",
-}
-
-export enum EYearOption {
-  month = "month",
-  year = "year",
 }

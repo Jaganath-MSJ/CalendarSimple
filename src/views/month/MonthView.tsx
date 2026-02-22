@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from "react";
 import cx from "classnames";
-import { CalendarContentType } from "../../types";
+import { CalendarContentProps } from "../../types";
 import { DAY_LIST_NAME, CALENDAR_CONSTANTS } from "../../constants";
 import {
   dateFn,
@@ -14,23 +14,19 @@ import MonthEventItem from "../../common/month_event_item/MonthEventItem";
 import { useCalendar } from "../../context/CalendarContext";
 
 interface MonthViewProps extends Pick<
-  CalendarContentType,
+  CalendarContentProps,
+  | "events"
+  | "is12Hour"
+  | "selectable"
+  | "maxEvents"
   | "dayType"
   | "width"
   | "height"
   | "onDateClick"
   | "onEventClick"
   | "onMoreClick"
-  | "isSelectDate"
-  | "events"
-  | "is12Hour"
-  | "maxEvents"
-  | "tableClassName"
-  | "tableDateClassName"
-  | "dataClassName"
-  | "selectedClassName"
-  | "todayClassName"
   | "theme"
+  | "classNames"
 > {}
 
 function MonthView({
@@ -40,24 +36,24 @@ function MonthView({
   onDateClick,
   onEventClick,
   onMoreClick,
-  isSelectDate,
+  selectable,
   events,
   is12Hour,
   ...restProps
 }: MonthViewProps) {
   const { state, dispatch } = useCalendar();
-  const { currentDate } = state;
+  const { selectedDate } = state;
 
   const calendarGrid = useMemo(
-    () => generateCalendarGrid(currentDate, events),
-    [currentDate, events],
+    () => generateCalendarGrid(selectedDate, events),
+    [selectedDate, events],
   );
 
   const maxEvents = useMemo(
     () =>
       restProps.maxEvents ??
       calculateMaxEvents(
-        height,
+        typeof height === "number" ? height : 0,
         calendarGrid.length || CALENDAR_CONSTANTS.MIN_ROWS,
       ),
     [restProps.maxEvents, height, calendarGrid.length],
@@ -67,16 +63,16 @@ function MonthView({
     (dateInput: DateType) => {
       const newDate = dateFn(dateInput);
       onDateClick?.(convertToDate(newDate));
-      if (isSelectDate && !newDate.isSame(currentDate, "day")) {
+      if (selectable && !newDate.isSame(selectedDate, "day")) {
         dispatch({ type: "SET_DATE", payload: newDate });
       }
     },
-    [currentDate, onDateClick, isSelectDate, dispatch],
+    [selectedDate, onDateClick, selectable, dispatch],
   );
 
   return (
     <table
-      className={cx(styles.table, restProps.tableClassName)}
+      className={cx(styles.table, restProps.classNames?.table)}
       style={
         {
           "--calendar-rows": calendarGrid.length,
@@ -99,9 +95,9 @@ function MonthView({
               <MonthEventItem
                 key={`date_${weekIndex}_${dayIndex}`}
                 isSelected={
-                  isSelectDate &&
+                  selectable &&
                   dayInfo.isCurrentMonth &&
-                  dayInfo.displayDay === currentDate.date()
+                  dayInfo.displayDay === selectedDate.date()
                 }
                 isToday={dayInfo.isToday}
                 isCurrentMonth={dayInfo.isCurrentMonth}
@@ -109,11 +105,17 @@ function MonthView({
                 date={dayInfo.displayDay}
                 dateObj={dayInfo.currentDate}
                 data={dayInfo.events}
-                cellWidth={width / CALENDAR_CONSTANTS.DAYS_IN_WEEK}
-                className={cx(styles.tableCell, restProps.tableDateClassName)}
-                dataClassName={restProps.dataClassName}
-                selectedClassName={restProps.selectedClassName}
-                todayClassName={restProps.todayClassName}
+                cellWidth={
+                  (typeof width === "number" ? width : 0) /
+                  CALENDAR_CONSTANTS.DAYS_IN_WEEK
+                }
+                className={cx(
+                  styles.tableCell,
+                  restProps.classNames?.tableDate,
+                )}
+                dataClassName={restProps.classNames?.event}
+                selectedClassName={restProps.classNames?.selected}
+                todayClassName={restProps.classNames?.today}
                 theme={restProps.theme}
                 maxEvents={maxEvents}
                 totalEvents={dayInfo.totalEvents}

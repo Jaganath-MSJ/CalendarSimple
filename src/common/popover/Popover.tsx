@@ -13,13 +13,21 @@ import {
   getStartOfDay,
   isBeforeDate,
   isAfterDate,
+  generateTooltipText,
 } from "../../utils";
-import { CalendarContentType, DataTypeList } from "../../types";
+import {
+  CalendarContentProps,
+  ECalendarViewType,
+  EventListType,
+} from "../../types";
 import { DATE_FORMATS } from "../../constants";
 
-interface PopoverProps extends Pick<CalendarContentType, "onEventClick"> {
+interface PopoverProps extends Pick<
+  CalendarContentProps,
+  "onEventClick" | "is12Hour"
+> {
   dateObj: DateType;
-  events: DataTypeList[];
+  events: EventListType[];
   onClose: () => void;
   anchorEl: HTMLElement | null;
 }
@@ -30,6 +38,7 @@ function Popover({
   onEventClick,
   onClose,
   anchorEl,
+  is12Hour,
 }: PopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const [stylePosition, setStylePosition] = useState<CSSProperties>({
@@ -125,6 +134,11 @@ function Popover({
 
           const isStartBefore = isBeforeDate(eventStart, dayStart);
           const isEndAfter = isAfterDate(eventEnd, dayStart);
+          const tooltipText = generateTooltipText(
+            item,
+            ECalendarViewType.month,
+            is12Hour,
+          );
 
           return (
             <div
@@ -140,9 +154,9 @@ function Popover({
                 onEventClick?.(item);
                 onClose();
               }}
-              title={item.value}
+              title={tooltipText}
             >
-              {item.value}
+              {item.title}
             </div>
           );
         })}

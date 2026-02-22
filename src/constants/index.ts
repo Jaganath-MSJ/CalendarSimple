@@ -97,14 +97,15 @@ export const defaultTheme = {
 };
 
 export const defaultCalenderProps = {
-  view: ECalendarViewType.month,
-  dayType: EDayType.halfName,
   events: [],
-  isSelectDate: false,
+  view: ECalendarViewType.month,
+  is12Hour: false,
+  selectable: false,
+  dayType: EDayType.halfName,
   pastYearLength: 5,
   futureYearLength: 5,
-  is12Hour: false,
   theme: defaultTheme,
+  classNames: {},
 };
 
 export const CALENDAR_CONSTANTS = {

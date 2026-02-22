@@ -1,12 +1,20 @@
 import React, { ChangeEvent } from "react";
 import cx from "classnames";
 import {
-  CalendarContentType,
+  CalendarContentProps,
   ECalendarViewType,
-  EMonthOption,
-  EYearOption,
   MonthListType,
 } from "../types";
+
+enum EMonthOption {
+  add = "add",
+  sub = "sub",
+}
+
+enum EYearOption {
+  month = "month",
+  year = "year",
+}
 import {
   CALENDER_STRINGS,
   MONTH_LIST,
@@ -31,25 +39,26 @@ import RightArrow from "../assets/RightArrow";
 import { useCalendar } from "../context/CalendarContext";
 
 interface HeaderProps extends Pick<
-  CalendarContentType,
-  | "headerClassName"
+  CalendarContentProps,
   | "pastYearLength"
   | "futureYearLength"
-  | "onMonthChange"
+  | "onNavigate"
   | "onViewChange"
   | "events"
-> {}
+> {
+  headerClassName?: string;
+}
 
 function Header({
   headerClassName,
   pastYearLength,
   futureYearLength,
-  onMonthChange,
+  onNavigate,
   onViewChange,
   events,
 }: HeaderProps) {
   const { state, dispatch } = useCalendar();
-  const { currentDate, view } = state;
+  const { selectedDate, view } = state;
 
   const onMonthArrowClick = (option: EMonthOption) => {
     const isAdd = option === EMonthOption.add;
@@ -59,10 +68,10 @@ function Header({
       view === ECalendarViewType.schedule ? "month" : view
     ) as ManipulateType;
     const predictiveDate = isAdd
-      ? currentDate.add(1, unit)
-      : currentDate.subtract(1, unit);
+      ? selectedDate.add(1, unit)
+      : selectedDate.subtract(1, unit);
 
-    onMonthChange?.(convertToDate(predictiveDate));
+    onNavigate?.(convertToDate(predictiveDate));
   };
 
   const onDropdownClick = (
@@ -70,16 +79,16 @@ function Header({
     option: EYearOption,
   ) => {
     const value = Number(event.target.value);
-    let newDate = currentDate;
+    let newDate = selectedDate;
 
     if (option === EYearOption.month) {
-      newDate = setMonth(currentDate, value);
+      newDate = setMonth(selectedDate, value);
     } else if (option === EYearOption.year) {
-      newDate = setYear(currentDate, value);
+      newDate = setYear(selectedDate, value);
     }
 
     dispatch({ type: CALENDAR_ACTIONS.SET_DATE, payload: newDate });
-    onMonthChange?.(convertToDate(newDate));
+    onNavigate?.(convertToDate(newDate));
   };
 
   const onViewDropdownClick = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -90,11 +99,11 @@ function Header({
 
   const getHeaderTitle = () => {
     if (view === ECalendarViewType.day) {
-      return formatDate(currentDate, DATE_FORMATS.MONTH_DAY_YEAR);
+      return formatDate(selectedDate, DATE_FORMATS.MONTH_DAY_YEAR);
     }
     if (view === ECalendarViewType.week) {
-      const startOfWeek = currentDate.startOf("week");
-      const endOfWeek = currentDate.endOf("week");
+      const startOfWeek = selectedDate.startOf("week");
+      const endOfWeek = selectedDate.endOf("week");
       if (startOfWeek.month() !== endOfWeek.month()) {
         if (startOfWeek.year() !== endOfWeek.year()) {
           return `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR)}`;
@@ -126,7 +135,7 @@ function Header({
         return formatDate(minDate, DATE_FORMATS.SHORT_MONTH_YEAR);
       }
     }
-    return formatDate(currentDate, DATE_FORMATS.MONTH_YEAR);
+    return formatDate(selectedDate, DATE_FORMATS.MONTH_YEAR);
   };
 
   return (
@@ -136,7 +145,7 @@ function Header({
           className={styles.todayButton}
           onClick={() => {
             dispatch({ type: CALENDAR_ACTIONS.TODAY });
-            onMonthChange?.(convertToDate(dateFn()));
+            onNavigate?.(convertToDate(dateFn()));
           }}
         >
           Today
@@ -174,7 +183,7 @@ function Header({
           className={styles.select}
           id={CALENDER_STRINGS.MONTH}
           name={CALENDER_STRINGS.MONTH}
-          value={getMonth(currentDate)}
+          value={getMonth(selectedDate)}
           onChange={(e) => onDropdownClick(e, EYearOption.month)}
         >
           {MONTH_LIST.map((month: MonthListType) => (
@@ -187,13 +196,13 @@ function Header({
           className={styles.select}
           id={CALENDER_STRINGS.YEAR}
           name={CALENDER_STRINGS.YEAR}
-          value={getYear(currentDate)}
+          value={getYear(selectedDate)}
           onChange={(e) => onDropdownClick(e, EYearOption.year)}
         >
           {getYearList(
             pastYearLength,
             futureYearLength,
-            getYear(currentDate),
+            getYear(selectedDate),
           ).map((year: number) => (
             <option key={year} value={year}>
               {year}

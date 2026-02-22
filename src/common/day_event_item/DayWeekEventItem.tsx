@@ -1,13 +1,13 @@
 import React from "react";
 import cx from "classnames";
 import { formatDate, generateTooltipText } from "../../utils";
-import { CalendarContentType } from "../../types";
+import { CalendarContentProps } from "../../types";
 import { DayEventLayout } from "../../utils/eventLayout";
 import { CALENDAR_CONSTANTS, DATE_FORMATS } from "../../constants";
 import styles from "./DayWeekEventItem.module.css";
 
 interface DayWeekEventItemProps extends Pick<
-  CalendarContentType,
+  CalendarContentProps,
   "onEventClick" | "is12Hour"
 > {
   item: DayEventLayout;
@@ -47,7 +47,7 @@ export function DayWeekEventItem({
       onClick={() => onEventClick?.(item.event)}
       title={tooltipText}
     >
-      <div className={styles.eventTitle}>{item.event.value}</div>
+      <div className={styles.eventTitle}>{item.event.title}</div>
       <div className={styles.eventTime}>
         {formatDate(
           item.event.startDate,

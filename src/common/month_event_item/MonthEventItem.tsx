@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react";
 import cx from "classnames";
 import {
-  CalendarContentType,
-  DataTypeList,
+  CalendarContentProps,
+  EventListType,
   ECalendarViewType,
 } from "../../types";
 import { getDiffDays, generateTooltipText, DateType } from "../../utils";
@@ -10,19 +10,16 @@ import styles from "./MonthEventItem.module.css";
 import Popover from "../popover/Popover";
 import { CALENDAR_CONSTANTS, defaultTheme } from "../../constants";
 
-export interface DateDataTypeProps extends Pick<
-  CalendarContentType,
-  | "onEventClick"
-  | "dataClassName"
-  | "selectedClassName"
-  | "todayClassName"
-  | "theme"
-  | "maxEvents"
-  | "is12Hour"
+interface MonthEventItemProps extends Pick<
+  CalendarContentProps,
+  "onEventClick" | "theme" | "maxEvents" | "is12Hour"
 > {
+  dataClassName?: string;
+  selectedClassName?: string;
+  todayClassName?: string;
   date: number;
   dateObj: DateType;
-  data: (DataTypeList | null)[];
+  data: (EventListType | null)[];
   cellWidth: number;
   className?: string;
   isSelected: boolean;
@@ -52,7 +49,7 @@ function MonthEventItem({
   onEventClick,
   totalEvents = 0,
   is12Hour,
-}: DateDataTypeProps) {
+}: MonthEventItemProps) {
   const [showPopover, setShowPopover] = useState(false);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -84,8 +81,8 @@ function MonthEventItem({
     hiddenEventsCount = totalEvents - visibleRealEventsCount;
   }
 
-  const allDayEvents: DataTypeList[] =
-    data?.filter((e): e is DataTypeList => e !== null) || [];
+  const allDayEvents: EventListType[] =
+    data?.filter((e): e is EventListType => e !== null) || [];
 
   return (
     <td
@@ -133,7 +130,7 @@ function MonthEventItem({
                     onEventClick?.(item);
                   }}
                 >
-                  {item.value}
+                  {item.title}
                 </div>
               );
             })}
@@ -157,6 +154,7 @@ function MonthEventItem({
                     onEventClick={onEventClick}
                     onClose={() => setShowPopover(false)}
                     anchorEl={moreButtonRef.current}
+                    is12Hour={is12Hour}
                   />
                 )}
               </div>

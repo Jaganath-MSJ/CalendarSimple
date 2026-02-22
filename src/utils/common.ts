@@ -1,5 +1,5 @@
 import { CALENDAR_CONSTANTS, DATE_FORMATS } from "../constants";
-import { DataType, ECalendarViewType } from "../types";
+import { CalendarEvent, ECalendarViewType } from "../types";
 import { formatDate } from "./date";
 
 /**
@@ -22,7 +22,7 @@ export function calculateMaxEvents(height: number, rowsInView: number): number {
  * Generates the tooltip text for an event based on the view type.
  */
 export function generateTooltipText(
-  event: DataType,
+  event: CalendarEvent,
   viewType: ECalendarViewType,
   is12Hour?: boolean,
 ): string {
@@ -30,7 +30,7 @@ export function generateTooltipText(
   const formatStr =
     viewType === ECalendarViewType.month ? DATE_FORMATS.DATE : timeFormat;
 
-  let tooltipText = `${event.value} (${formatDate(event.startDate, formatStr)}`;
+  let tooltipText = `${event.title} (${formatDate(event.startDate, formatStr)}`;
   if (event.endDate) {
     tooltipText += ` - ${formatDate(event.endDate, formatStr)}`;
   }

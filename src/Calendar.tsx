@@ -1,6 +1,10 @@
 import React, { useMemo, memo, useEffect } from "react";
 import cx from "classnames";
-import { CalendarType, CalendarContentType, ECalendarViewType } from "./types";
+import {
+  CalendarProps,
+  CalendarContentProps,
+  ECalendarViewType,
+} from "./types";
 import { defaultCalenderProps, CALENDAR_CONSTANTS } from "./constants";
 import { dateFn, useResizeObserver } from "./utils";
 import styles from "./Calendar.module.css";
@@ -12,17 +16,20 @@ import ScheduleView from "./views/schedule/ScheduleView";
 import { CalendarProvider, useCalendar } from "./context/CalendarContext";
 
 function CalendarContent({
-  dayType,
-  width,
-  height,
-  onDateClick,
-  onEventClick,
-  onMoreClick,
-  isSelectDate,
   events,
   is12Hour,
+  dayType,
+  pastYearLength,
+  futureYearLength,
+  width,
+  height,
+  onEventClick,
+  onNavigate,
+  onViewChange,
+  theme,
+  classNames,
   ...restProps
-}: CalendarContentType) {
+}: CalendarContentProps) {
   const {
     state: { view },
     dispatch,
@@ -36,48 +43,30 @@ function CalendarContent({
   }, [restProps.view]);
 
   const getViewComponent = (view: ECalendarViewType) => {
+    const commonProps = {
+      events,
+      is12Hour,
+      dayType,
+      onEventClick,
+      theme,
+      classNames,
+    };
     switch (view) {
       case ECalendarViewType.day:
-        return (
-          <DayView
-            events={events}
-            onEventClick={onEventClick}
-            dayType={dayType}
-            is12Hour={is12Hour}
-          />
-        );
+        return <DayView {...commonProps} />;
       case ECalendarViewType.week:
-        return (
-          <WeekView
-            events={events}
-            onEventClick={onEventClick}
-            dayType={dayType}
-            is12Hour={is12Hour}
-          />
-        );
+        return <WeekView {...commonProps} />;
       case ECalendarViewType.month:
         return (
           <MonthView
+            {...commonProps}
             {...restProps}
-            events={events}
-            onEventClick={onEventClick}
-            dayType={dayType}
             width={width}
             height={height}
-            onDateClick={onDateClick}
-            onMoreClick={onMoreClick}
-            isSelectDate={isSelectDate}
-            is12Hour={is12Hour}
           />
         );
       case ECalendarViewType.schedule:
-        return (
-          <ScheduleView
-            events={events}
-            onEventClick={onEventClick}
-            is12Hour={is12Hour}
-          />
-        );
+        return <ScheduleView {...commonProps} />;
       default:
         return null;
     }
@@ -91,41 +80,42 @@ function CalendarContent({
           "--calendar-height": `${height}px`,
         } as React.CSSProperties
       }
-      className={cx(styles.calendar, restProps.className)}
+      className={cx(styles.calendar, classNames?.root)}
     >
       <Header
-        headerClassName={restProps.headerClassName}
+        headerClassName={classNames?.header}
         events={events}
-        onMonthChange={restProps.onMonthChange}
-        onViewChange={restProps.onViewChange}
-        pastYearLength={restProps.pastYearLength}
-        futureYearLength={restProps.futureYearLength}
+        onNavigate={onNavigate}
+        onViewChange={onViewChange}
+        pastYearLength={pastYearLength}
+        futureYearLength={futureYearLength}
       />
       {getViewComponent(view)}
     </section>
   );
 }
 
-function Calendar(props: CalendarType = defaultCalenderProps) {
+function Calendar({
+  selectedDate,
+  ...props
+}: CalendarProps = defaultCalenderProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const { width: observedWidth, height: observedHeight } =
     useResizeObserver(containerRef);
 
   const allProps = { ...defaultCalenderProps, ...props };
-  const { selectedDate } = allProps;
 
   // Use props if provided, otherwise use observed size
-  const width = props.width ?? observedWidth ?? 0;
-  const mainHeight = props.height ?? observedHeight ?? 0;
-  const height = mainHeight - CALENDAR_CONSTANTS.HEADER_HEIGHT;
+  const width = allProps.width ?? observedWidth ?? 0;
+  const mainHeight = allProps.height ?? observedHeight ?? 0;
+  const height =
+    (typeof mainHeight === "number" ? mainHeight : 0) -
+    CALENDAR_CONSTANTS.HEADER_HEIGHT;
 
-  const initialDate = useMemo(
-    () => (selectedDate ? dateFn(selectedDate) : undefined),
-    [selectedDate],
-  );
+  const initialDate = useMemo(() => dateFn(selectedDate), [selectedDate]);
 
   return (
-    <CalendarProvider initialDate={initialDate} initialView={props.view}>
+    <CalendarProvider initialDate={initialDate} initialView={allProps.view}>
       <div ref={containerRef} className={styles.calendarContainer}>
         <CalendarContent {...allProps} width={width} height={height} />
       </div>

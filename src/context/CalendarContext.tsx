@@ -6,11 +6,11 @@ import React, {
   useMemo,
 } from "react";
 import { dateFn, DateType, ManipulateType } from "../utils";
-import { DataType, ECalendarViewType } from "../types";
+import { ECalendarViewType } from "../types";
 import { CALENDAR_ACTIONS } from "../constants";
 
 interface CalendarState {
-  currentDate: DateType;
+  // currentDate: DateType;
   selectedDate: DateType;
   view: ECalendarViewType;
 }
@@ -21,12 +21,6 @@ type CalendarAction =
   | { type: typeof CALENDAR_ACTIONS.NEXT }
   | { type: typeof CALENDAR_ACTIONS.PREV }
   | { type: typeof CALENDAR_ACTIONS.TODAY };
-
-const initialState: CalendarState = {
-  currentDate: dateFn(),
-  selectedDate: dateFn(),
-  view: ECalendarViewType.month,
-};
 
 const CalendarContext = createContext<
   | {
@@ -44,7 +38,7 @@ function calendarReducer(
     case CALENDAR_ACTIONS.SET_DATE:
       return {
         ...state,
-        currentDate: action.payload,
+        // currentDate: action.payload,
         selectedDate: action.payload,
       };
     case CALENDAR_ACTIONS.SET_VIEW:
@@ -53,7 +47,7 @@ function calendarReducer(
       const unit = (
         state.view === ECalendarViewType.schedule ? "month" : state.view
       ) as ManipulateType;
-      return { ...state, currentDate: state.currentDate.add(1, unit) };
+      return { ...state, selectedDate: state.selectedDate.add(1, unit) };
     }
     case CALENDAR_ACTIONS.PREV: {
       const unit = (
@@ -61,13 +55,13 @@ function calendarReducer(
       ) as ManipulateType;
       return {
         ...state,
-        currentDate: state.currentDate.subtract(1, unit),
+        selectedDate: state.selectedDate.subtract(1, unit),
       };
     }
     case CALENDAR_ACTIONS.TODAY:
       return {
         ...state,
-        currentDate: dateFn(),
+        // currentDate: dateFn(),
         selectedDate: dateFn(),
       };
     default:
@@ -77,20 +71,18 @@ function calendarReducer(
 
 interface CalendarProviderProps {
   children: ReactNode;
-  initialEvents?: DataType[];
-  initialDate?: DateType;
-  initialView?: ECalendarViewType;
+  initialDate: DateType;
+  initialView: ECalendarViewType;
 }
 
 export function CalendarProvider({
   children,
   initialDate,
-  initialView = ECalendarViewType.month,
+  initialView,
 }: CalendarProviderProps) {
   const [state, dispatch] = useReducer(calendarReducer, {
-    ...initialState,
-    currentDate: initialDate || initialState.currentDate,
-    selectedDate: initialDate || initialState.selectedDate,
+    // currentDate: initialDate,
+    selectedDate: initialDate,
     view: initialView,
   });
 

@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import cx from "classnames";
 import { dateFn, formatDate, calculateEventLayout } from "../../utils";
-import { CalendarContentType } from "../../types";
+import { CalendarContentProps } from "../../types";
 import { DAY_LIST_NAME, DATE_FORMATS } from "../../constants";
 import styles from "./WeekView.module.css";
 import { useCalendar } from "../../context/CalendarContext";
@@ -9,14 +9,17 @@ import TimeColumn from "../../common/time_column/TimeColumn";
 import DayColumn from "../../common/day_column/DayColumn";
 
 interface WeekViewProps extends Pick<
-  CalendarContentType,
-  "events" | "onEventClick" | "dayType" | "is12Hour"
+  CalendarContentProps,
+  "events" | "onEventClick" | "dayType" | "is12Hour" | "theme" | "classNames"
 > {}
 
 function WeekView({ events, onEventClick, dayType, is12Hour }: WeekViewProps) {
   const { state } = useCalendar();
-  const { currentDate } = state;
-  const startOfWeek = useMemo(() => currentDate.startOf("week"), [currentDate]);
+  const { selectedDate } = state;
+  const startOfWeek = useMemo(
+    () => selectedDate.startOf("week"),
+    [selectedDate],
+  );
 
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, "day"));

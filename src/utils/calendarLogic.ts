@@ -27,17 +27,17 @@ import {
   subDays,
   getDate,
 } from "./date";
-import { DataType, DataTypeList } from "../types";
+import { CalendarEvent, EventListType } from "../types";
 import { DATE_FORMATS } from "../constants";
 
-interface InternalDataType extends DataType {
+interface InternalCalendarEvent extends CalendarEvent {
   _tempId?: string;
 }
 
 /**
  * Represents the information for a single day in the calendar grid.
  */
-export interface CalendarDayInfo {
+interface CalendarDayInfo {
   /** The full date object */
   currentDate: DateType;
   /** Whether the day belongs to the currently selected month (for styling) */
@@ -45,7 +45,7 @@ export interface CalendarDayInfo {
   /** The day number to display (1-31) */
   displayDay: number;
   /** List of events or spacers for this day's slots */
-  events: (DataTypeList | null)[];
+  events: (EventListType | null)[];
   /** Total number of events on this day (including hidden ones) */
   totalEvents: number;
   /** Whether this day is today */
@@ -55,7 +55,7 @@ export interface CalendarDayInfo {
 /**
  * 2D array representing the calendar grid: [week][day]
  */
-export type CalendarMatrix = CalendarDayInfo[][];
+type CalendarMatrix = CalendarDayInfo[][];
 
 /**
  * Generates the grid of days and events for the monthly view.
@@ -72,7 +72,7 @@ export type CalendarMatrix = CalendarDayInfo[][];
  */
 export function generateCalendarGrid(
   selectedDate: DateType,
-  events: DataType[],
+  events: CalendarEvent[],
 ): CalendarMatrix {
   // Sort events
   const dataEvents = [...events].sort((a, b) => {
@@ -119,7 +119,7 @@ export function generateCalendarGrid(
     const weekStart = getStartOfDay(processedWeek[0].currentDate);
     const weekEnd = getStartOfDay(processedWeek[6].currentDate);
 
-    const weekEvents: InternalDataType[] = dataEvents.filter((item) => {
+    const weekEvents: InternalCalendarEvent[] = dataEvents.filter((item) => {
       const start = getStartOfDay(item.startDate);
       const end = item.endDate ? getStartOfDay(item.endDate) : start;
       // Check overlap
@@ -203,7 +203,7 @@ export function generateCalendarGrid(
       // Assign the found slot
       // We create a unique temporary ID because the raw event data might not have one,
       // or we might be processing split segments of the same logical event.
-      const eventId = event.startDate + event.value + index;
+      const eventId = event.startDate + event.title + index;
       eventSlots.set(eventId, slotIndex);
 
       // Mark the slots as occupied
@@ -231,7 +231,7 @@ export function generateCalendarGrid(
         );
       });
 
-      const displayData: (DataTypeList | null)[] = [];
+      const displayData: (EventListType | null)[] = [];
 
       let maxDaySlot = -1;
       activeEvents.forEach((e) => {

@@ -2,11 +2,11 @@ import React from "react";
 import { dateFn, formatDate } from "../../utils";
 import { DATE_FORMATS } from "../../constants";
 import styles from "./TimeColumn.module.css";
-import { CalendarContentType } from "../../types";
+import { CalendarContentProps } from "../../types";
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
-interface TimeColumnProps extends Pick<CalendarContentType, "is12Hour"> {}
+interface TimeColumnProps extends Pick<CalendarContentProps, "is12Hour"> {}
 
 function TimeColumn({ is12Hour }: TimeColumnProps) {
   return (
