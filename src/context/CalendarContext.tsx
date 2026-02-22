@@ -5,7 +5,7 @@ import React, {
   ReactNode,
   useMemo,
 } from "react";
-import { dateFn, DateType } from "../utils";
+import { dateFn, DateType, ManipulateType } from "../utils";
 import { DataType, ECalendarViewType } from "../types";
 import { CALENDAR_ACTIONS } from "../constants";
 
@@ -49,13 +49,21 @@ function calendarReducer(
       };
     case CALENDAR_ACTIONS.SET_VIEW:
       return { ...state, view: action.payload };
-    case CALENDAR_ACTIONS.NEXT:
-      return { ...state, currentDate: state.currentDate.add(1, state.view) };
-    case CALENDAR_ACTIONS.PREV:
+    case CALENDAR_ACTIONS.NEXT: {
+      const unit = (
+        state.view === ECalendarViewType.schedule ? "month" : state.view
+      ) as ManipulateType;
+      return { ...state, currentDate: state.currentDate.add(1, unit) };
+    }
+    case CALENDAR_ACTIONS.PREV: {
+      const unit = (
+        state.view === ECalendarViewType.schedule ? "month" : state.view
+      ) as ManipulateType;
       return {
         ...state,
-        currentDate: state.currentDate.subtract(1, state.view),
+        currentDate: state.currentDate.subtract(1, unit),
       };
+    }
     case CALENDAR_ACTIONS.TODAY:
       return {
         ...state,

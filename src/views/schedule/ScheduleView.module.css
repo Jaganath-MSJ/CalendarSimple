@@ -105,24 +105,3 @@
   text-overflow: ellipsis;
   cursor: pointer;
 }
-
-.currentTimeLine {
-  position: absolute;
-  left: 70px;
-  right: 0;
-  height: 2px;
-  background-color: #ea4335;
-  top: -1px;
-  z-index: 1;
-}
-
-.currentTimeLine::before {
-  content: "";
-  position: absolute;
-  left: -4px;
-  top: -3px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #ea4335;
-}

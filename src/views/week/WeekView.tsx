@@ -56,7 +56,7 @@ function WeekView({
       <div className={styles.timeGrid}>
         <TimeColumn is12Hour={is12Hour} />
         <div className={styles.eventsGrid}>
-          {weekDays.map((date, dayIndex) => (
+          {weekDays.map((_, dayIndex) => (
             <div key={dayIndex} className={styles.dayColumn}>
               <DayColumn
                 dayEvents={weekEvents[dayIndex]}

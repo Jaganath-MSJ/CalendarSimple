@@ -23,6 +23,7 @@ import {
   formatDate,
   getMonth,
   getYear,
+  ManipulateType,
 } from "../utils";
 import styles from "./Header.module.css";
 import LeftArrow from "../assets/LeftArrow";
@@ -52,9 +53,12 @@ function Header({
     const isAdd = option === EMonthOption.add;
     dispatch({ type: isAdd ? CALENDAR_ACTIONS.NEXT : CALENDAR_ACTIONS.PREV });
 
+    const unit = (
+      view === ECalendarViewType.schedule ? "month" : view
+    ) as ManipulateType;
     const predictiveDate = isAdd
-      ? currentDate.add(1, view)
-      : currentDate.subtract(1, view);
+      ? currentDate.add(1, unit)
+      : currentDate.subtract(1, unit);
 
     onMonthChange?.(convertToDate(predictiveDate));
   };

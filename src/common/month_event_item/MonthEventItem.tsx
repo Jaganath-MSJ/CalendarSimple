@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import cx from "classnames";
 import { DataTypeList, DateDataType, ECalendarViewType } from "../../types";
-import { formatDate, getDiffDays, generateTooltipText } from "../../utils";
+import { getDiffDays, generateTooltipText } from "../../utils";
 import styles from "./MonthEventItem.module.css";
 import Popover from "../popover/Popover";
 import { CALENDAR_CONSTANTS, defaultTheme } from "../../constants";

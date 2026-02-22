@@ -83,13 +83,6 @@ export default function ScheduleView({
     return event.value;
   };
 
-  // simplistic way to show a current timeline on today's events list
-  // The actual google calendar only shows the line if the time matches.
-  // We'll just show it statically for visual demonstration of "today"
-  const _renderCurrentTimeLine = () => {
-    return <div className={styles.currentTimeLine} />;
-  };
-
   return (
     <div className={styles.scheduleView}>
       {Object.keys(groupedEvents).length === 0 ? (

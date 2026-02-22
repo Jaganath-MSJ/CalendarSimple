@@ -1,5 +1,6 @@
-import dayjs, { Dayjs } from "dayjs";
+import dayjs, { Dayjs, ManipulateType } from "dayjs";
 
+export type { ManipulateType };
 export type DateType = Dayjs;
 export type DateInputType = Date | DateType | string | number;
 export const dateFn = dayjs;

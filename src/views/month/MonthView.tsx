@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from "react";
 import cx from "classnames";
-import { CalendarContentType, DataType } from "../../types";
+import { CalendarContentType } from "../../types";
 import { DAY_LIST_NAME, CALENDAR_CONSTANTS } from "../../constants";
 import {
   dateFn,
