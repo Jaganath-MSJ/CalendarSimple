@@ -19,6 +19,7 @@ function DayView({
   dayType,
   is12Hour,
   theme,
+  classNames,
 }: DayViewProps) {
   const { state } = useCalendar();
   const { selectedDate } = state;
@@ -40,12 +41,12 @@ function DayView({
     <div className={styles.dayView}>
       <div className={styles.dayHeaderContainer}>
         <div className={styles.timeHeaderSpacer} />
-        <div className={styles.dayHeader}>
-          <div className={styles.dayName}>
+        <div className={cx(styles.dayHeader, classNames?.dayHeader)}>
+          <div className={cx(styles.dayName, classNames?.dayName)}>
             {DAY_LIST_NAME[dayType][selectedDate.day()]}
           </div>
           <div
-            className={cx(styles.dayNumber, {
+            className={cx(styles.dayNumber, classNames?.dayNumber, {
               [styles.today]: isToday,
             })}
             style={todayStyle}
@@ -55,12 +56,13 @@ function DayView({
         </div>
       </div>
       <div className={styles.timeGrid}>
-        <TimeColumn is12Hour={is12Hour} />
-        <div className={styles.eventsColumn}>
+        <TimeColumn is12Hour={is12Hour} classNames={classNames} />
+        <div className={cx(styles.eventsColumn, classNames?.dayColumn)}>
           <DayColumn
             dayEvents={dayEvents}
             onEventClick={onEventClick}
             is12Hour={is12Hour}
+            classNames={classNames}
           />
         </div>
       </div>

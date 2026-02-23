@@ -19,6 +19,7 @@ function WeekView({
   dayType,
   is12Hour,
   theme,
+  classNames,
 }: WeekViewProps) {
   const { state } = useCalendar();
   const { selectedDate } = state;
@@ -50,12 +51,15 @@ function WeekView({
             : undefined;
 
           return (
-            <div key={index} className={styles.dayHeader}>
-              <div className={styles.dayName}>
+            <div
+              key={index}
+              className={cx(styles.dayHeader, classNames?.dayHeader)}
+            >
+              <div className={cx(styles.dayName, classNames?.dayName)}>
                 {DAY_LIST_NAME[dayType][index]}
               </div>
               <div
-                className={cx(styles.dayNumber, {
+                className={cx(styles.dayNumber, classNames?.dayNumber, {
                   [styles.today]: isToday,
                 })}
                 style={todayStyle}
@@ -67,14 +71,18 @@ function WeekView({
         })}
       </div>
       <div className={styles.timeGrid}>
-        <TimeColumn is12Hour={is12Hour} />
+        <TimeColumn is12Hour={is12Hour} classNames={classNames} />
         <div className={styles.eventsGrid}>
           {weekDays.map((_, dayIndex) => (
-            <div key={dayIndex} className={styles.dayColumn}>
+            <div
+              key={dayIndex}
+              className={cx(styles.dayColumn, classNames?.dayColumn)}
+            >
               <DayColumn
                 dayEvents={weekEvents[dayIndex]}
                 onEventClick={onEventClick}
                 is12Hour={is12Hour}
+                classNames={classNames}
               />
             </div>
           ))}

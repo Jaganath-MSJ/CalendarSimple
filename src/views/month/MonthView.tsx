@@ -39,6 +39,7 @@ function MonthView({
   selectable,
   events,
   is12Hour,
+  classNames,
   ...restProps
 }: MonthViewProps) {
   const { state, dispatch } = useCalendar();
@@ -72,7 +73,7 @@ function MonthView({
 
   return (
     <table
-      className={cx(styles.table, restProps.classNames?.table)}
+      className={cx(styles.table, classNames?.table)}
       style={
         {
           "--calendar-rows": calendarGrid.length,
@@ -82,7 +83,10 @@ function MonthView({
       <thead>
         <tr>
           {DAY_LIST_NAME[dayType].map((day: string) => (
-            <th key={day} className={styles.tableHeader}>
+            <th
+              key={day}
+              className={cx(styles.tableHeader, classNames?.tableHeader)}
+            >
               {day}
             </th>
           ))}
@@ -109,13 +113,10 @@ function MonthView({
                   (typeof width === "number" ? width : 0) /
                   CALENDAR_CONSTANTS.DAYS_IN_WEEK
                 }
-                className={cx(
-                  styles.tableCell,
-                  restProps.classNames?.tableDate,
-                )}
-                dataClassName={restProps.classNames?.event}
-                selectedClassName={restProps.classNames?.selected}
-                todayClassName={restProps.classNames?.today}
+                className={cx(styles.tableCell, classNames?.tableDate)}
+                dataClassName={classNames?.event}
+                selectedClassName={classNames?.selected}
+                todayClassName={classNames?.today}
                 theme={restProps.theme}
                 maxEvents={maxEvents}
                 totalEvents={dayInfo.totalEvents}

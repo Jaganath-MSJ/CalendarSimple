@@ -21,6 +21,7 @@ export default function ScheduleView({
   onEventClick,
   is12Hour,
   theme,
+  classNames,
 }: ScheduleViewProps) {
   const groupedEvents = useMemo(() => {
     // Sort events by start date
@@ -101,7 +102,10 @@ export default function ScheduleView({
             : undefined;
 
           return (
-            <div key={dateKey} className={styles.dateGroup}>
+            <div
+              key={dateKey}
+              className={cx(styles.dateGroup, classNames?.scheduleDateGroup)}
+            >
               {dayEvents.map((event, index) => {
                 const eventColor =
                   event.color || CALENDAR_CONSTANTS.DEFAULT_EVENT_COLOR;
@@ -111,7 +115,7 @@ export default function ScheduleView({
                 return (
                   <div
                     key={event.id || index}
-                    className={styles.eventItemContainer}
+                    className={cx(styles.eventItemContainer, classNames?.event)}
                     onClick={() => onEventClick?.(event)}
                   >
                     {/* Column 1: Date Info (only shown on the first event of the day) */}
@@ -119,14 +123,23 @@ export default function ScheduleView({
                       {isFirstEventOfDay && (
                         <>
                           <div
-                            className={cx(styles.dateNumber, {
-                              [styles.today]: isToday,
-                            })}
+                            className={cx(
+                              styles.dateNumber,
+                              classNames?.scheduleDateNumber,
+                              {
+                                [styles.today]: isToday,
+                              },
+                            )}
                             style={todayStyle}
                           >
                             {formatDate(dateObj, DATE_FORMATS.DAY_NUMBER)}
                           </div>
-                          <div className={styles.dateSubInfo}>
+                          <div
+                            className={cx(
+                              styles.dateSubInfo,
+                              classNames?.scheduleDateSubInfo,
+                            )}
+                          >
                             {formatDate(
                               dateObj,
                               DATE_FORMATS.SHORT_MONTH,
@@ -147,13 +160,23 @@ export default function ScheduleView({
                         className={styles.eventDot}
                         style={{ backgroundColor: eventColor }}
                       />
-                      <div className={styles.eventTime}>
+                      <div
+                        className={cx(
+                          styles.eventTime,
+                          classNames?.scheduleTime,
+                        )}
+                      >
                         {renderEventTime(event)}
                       </div>
                     </div>
 
                     {/* Column 3: Title */}
-                    <div className={styles.eventTitleColumn}>
+                    <div
+                      className={cx(
+                        styles.eventTitleColumn,
+                        classNames?.scheduleTitle,
+                      )}
+                    >
                       {renderEventTitle(event)}
                     </div>
                   </div>
