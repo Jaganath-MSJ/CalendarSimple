@@ -104,7 +104,7 @@ export const defaultCalenderProps = {
   dayType: EDayType.halfName,
   pastYearLength: 5,
   futureYearLength: 5,
-  theme: defaultTheme,
+  theme: {},
   classNames: {},
 };
 

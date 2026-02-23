@@ -20,6 +20,7 @@ export default function ScheduleView({
   events,
   onEventClick,
   is12Hour,
+  theme,
 }: ScheduleViewProps) {
   const groupedEvents = useMemo(() => {
     // Sort events by start date
@@ -92,6 +93,12 @@ export default function ScheduleView({
           const dateObj = dateFn(dateKey);
 
           const isToday = checkIsToday(dateObj, dateObj.date());
+          const todayStyle = isToday
+            ? {
+                color: theme?.today?.color,
+                backgroundColor: theme?.today?.bgColor,
+              }
+            : undefined;
 
           return (
             <div key={dateKey} className={styles.dateGroup}>
@@ -115,6 +122,7 @@ export default function ScheduleView({
                             className={cx(styles.dateNumber, {
                               [styles.today]: isToday,
                             })}
+                            style={todayStyle}
                           >
                             {formatDate(dateObj, DATE_FORMATS.DAY_NUMBER)}
                           </div>

@@ -10,16 +10,31 @@ import DayColumn from "../../common/day_column/DayColumn";
 
 interface DayViewProps extends Pick<
   CalendarContentProps,
-  "events" | "onEventClick" | "dayType" | "is12Hour" | "theme" | "classNames"
+  "events" | "is12Hour" | "dayType" | "onEventClick" | "theme" | "classNames"
 > {}
 
-function DayView({ events, onEventClick, dayType, is12Hour }: DayViewProps) {
+function DayView({
+  events,
+  onEventClick,
+  dayType,
+  is12Hour,
+  theme,
+}: DayViewProps) {
   const { state } = useCalendar();
   const { selectedDate } = state;
   const dayEvents = useMemo(
     () => calculateEventLayout(events, selectedDate),
     [events, selectedDate],
   );
+
+  const isToday = dateFn().isSame(selectedDate, "day");
+
+  const todayStyle = isToday
+    ? {
+        color: theme?.today?.color,
+        backgroundColor: theme?.today?.bgColor,
+      }
+    : undefined;
 
   return (
     <div className={styles.dayView}>
@@ -31,8 +46,9 @@ function DayView({ events, onEventClick, dayType, is12Hour }: DayViewProps) {
           </div>
           <div
             className={cx(styles.dayNumber, {
-              [styles.today]: dateFn().isSame(selectedDate, "day"),
+              [styles.today]: isToday,
             })}
+            style={todayStyle}
           >
             {formatDate(selectedDate, DATE_FORMATS.DAY_NUMBER)}
           </div>

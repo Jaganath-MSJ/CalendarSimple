@@ -10,10 +10,16 @@ import DayColumn from "../../common/day_column/DayColumn";
 
 interface WeekViewProps extends Pick<
   CalendarContentProps,
-  "events" | "onEventClick" | "dayType" | "is12Hour" | "theme" | "classNames"
+  "events" | "is12Hour" | "dayType" | "onEventClick" | "theme" | "classNames"
 > {}
 
-function WeekView({ events, onEventClick, dayType, is12Hour }: WeekViewProps) {
+function WeekView({
+  events,
+  onEventClick,
+  dayType,
+  is12Hour,
+  theme,
+}: WeekViewProps) {
   const { state } = useCalendar();
   const { selectedDate } = state;
   const startOfWeek = useMemo(
@@ -34,20 +40,31 @@ function WeekView({ events, onEventClick, dayType, is12Hour }: WeekViewProps) {
     <div className={styles.weekView}>
       <div className={styles.weekHeader}>
         <div className={styles.timeHeaderSpacer} />
-        {weekDays.map((date, index) => (
-          <div key={index} className={styles.dayHeader}>
-            <div className={styles.dayName}>
-              {DAY_LIST_NAME[dayType][index]}
+        {weekDays.map((date, index) => {
+          const isToday = dateFn().isSame(date, "day");
+          const todayStyle = isToday
+            ? {
+                color: theme?.today?.color,
+                backgroundColor: theme?.today?.bgColor,
+              }
+            : undefined;
+
+          return (
+            <div key={index} className={styles.dayHeader}>
+              <div className={styles.dayName}>
+                {DAY_LIST_NAME[dayType][index]}
+              </div>
+              <div
+                className={cx(styles.dayNumber, {
+                  [styles.today]: isToday,
+                })}
+                style={todayStyle}
+              >
+                {formatDate(date, DATE_FORMATS.DAY_NUMBER)}
+              </div>
             </div>
-            <div
-              className={cx(styles.dayNumber, {
-                [styles.today]: dateFn().isSame(date, "day"),
-              })}
-            >
-              {formatDate(date, DATE_FORMATS.DAY_NUMBER)}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <div className={styles.timeGrid}>
         <TimeColumn is12Hour={is12Hour} />

@@ -65,7 +65,7 @@ function Header({
     dispatch({ type: isAdd ? CALENDAR_ACTIONS.NEXT : CALENDAR_ACTIONS.PREV });
 
     const unit = (
-      view === ECalendarViewType.schedule ? "month" : view
+      view === ECalendarViewType.schedule ? "day" : view
     ) as ManipulateType;
     const predictiveDate = isAdd
       ? selectedDate.add(1, unit)

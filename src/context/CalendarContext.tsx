@@ -10,7 +10,6 @@ import { ECalendarViewType } from "../types";
 import { CALENDAR_ACTIONS } from "../constants";
 
 interface CalendarState {
-  // currentDate: DateType;
   selectedDate: DateType;
   view: ECalendarViewType;
 }
@@ -38,20 +37,19 @@ function calendarReducer(
     case CALENDAR_ACTIONS.SET_DATE:
       return {
         ...state,
-        // currentDate: action.payload,
         selectedDate: action.payload,
       };
     case CALENDAR_ACTIONS.SET_VIEW:
       return { ...state, view: action.payload };
     case CALENDAR_ACTIONS.NEXT: {
       const unit = (
-        state.view === ECalendarViewType.schedule ? "month" : state.view
+        state.view === ECalendarViewType.schedule ? "day" : state.view
       ) as ManipulateType;
       return { ...state, selectedDate: state.selectedDate.add(1, unit) };
     }
     case CALENDAR_ACTIONS.PREV: {
       const unit = (
-        state.view === ECalendarViewType.schedule ? "month" : state.view
+        state.view === ECalendarViewType.schedule ? "day" : state.view
       ) as ManipulateType;
       return {
         ...state,
@@ -61,7 +59,6 @@ function calendarReducer(
     case CALENDAR_ACTIONS.TODAY:
       return {
         ...state,
-        // currentDate: dateFn(),
         selectedDate: dateFn(),
       };
     default:
@@ -81,7 +78,6 @@ export function CalendarProvider({
   initialView,
 }: CalendarProviderProps) {
   const [state, dispatch] = useReducer(calendarReducer, {
-    // currentDate: initialDate,
     selectedDate: initialDate,
     view: initialView,
   });
