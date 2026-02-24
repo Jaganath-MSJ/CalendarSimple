@@ -61,8 +61,8 @@ export type ECalendarViewType =
   (typeof ECalendarViewType)[keyof typeof ECalendarViewType];
 
 export const EDayType = {
-  fullName: "FULL",
-  halfName: "HALF",
+  full: "full",
+  half: "half",
 } as const;
 
 export type EDayType = (typeof EDayType)[keyof typeof EDayType];

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { CSSProperties } from "react";
 import cx from "classnames";
 import { formatDate, generateTooltipText } from "../../utils";
 import { CalendarContentProps } from "../../types";
@@ -42,7 +42,7 @@ export function DayWeekEventItem({
           "--event-width": `${item.width}%`,
           backgroundColor: eventColor,
           position: "absolute",
-        } as React.CSSProperties
+        } as CSSProperties
       }
       id={item.event.id}
       onClick={() => onEventClick?.(item.event)}

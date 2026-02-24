@@ -4,6 +4,7 @@ import React, {
   useReducer,
   ReactNode,
   useMemo,
+  Dispatch,
 } from "react";
 import { dateFn, DateType, ManipulateType } from "../utils";
 import { ECalendarViewType } from "../types";
@@ -24,7 +25,7 @@ type CalendarAction =
 const CalendarContext = createContext<
   | {
       state: CalendarState;
-      dispatch: React.Dispatch<CalendarAction>;
+      dispatch: Dispatch<CalendarAction>;
     }
   | undefined
 >(undefined);

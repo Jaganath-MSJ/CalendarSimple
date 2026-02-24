@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { CSSProperties, useCallback, useMemo } from "react";
 import cx from "classnames";
 import { CalendarContentProps } from "../../types";
 import { DAY_LIST_NAME, CALENDAR_CONSTANTS } from "../../constants";
@@ -77,7 +77,7 @@ function MonthView({
       style={
         {
           "--calendar-rows": calendarGrid.length,
-        } as React.CSSProperties
+        } as CSSProperties
       }
     >
       <thead>

@@ -32,7 +32,7 @@ const DAY_LIST = {
 };
 
 export const DAY_LIST_NAME = {
-  FULL: [
+  [EDayType.full]: [
     DAY_LIST.SUNDAY.FULL,
     DAY_LIST.MONDAY.FULL,
     DAY_LIST.TUESDAY.FULL,
@@ -41,7 +41,7 @@ export const DAY_LIST_NAME = {
     DAY_LIST.FRIDAY.FULL,
     DAY_LIST.SATURDAY.FULL,
   ],
-  HALF: [
+  [EDayType.half]: [
     DAY_LIST.SUNDAY.HALF,
     DAY_LIST.MONDAY.HALF,
     DAY_LIST.TUESDAY.HALF,
@@ -101,7 +101,7 @@ export const defaultCalenderProps = {
   view: ECalendarViewType.month,
   is12Hour: false,
   selectable: false,
-  dayType: EDayType.halfName,
+  dayType: EDayType.half,
   pastYearLength: 5,
   futureYearLength: 5,
   theme: {},

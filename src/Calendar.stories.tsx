@@ -180,7 +180,7 @@ export const CustomDateFormats: Story = {
     selectedDate: new Date(),
     width: 800,
     height: 600,
-    dayType: EDayType.fullName, // Show full day names like "Monday"
+    dayType: EDayType.full, // Show full day names like "Monday"
   },
 };
 
