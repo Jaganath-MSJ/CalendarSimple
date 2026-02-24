@@ -5,10 +5,14 @@ import { useEffect, useState, RefObject } from "react";
  * @param ref React ref object of the element to observe
  * @returns The width and height of the element
  */
-export function useResizeObserver(ref: RefObject<HTMLElement | null>) {
+export function useResizeObserver(
+  ref: RefObject<HTMLElement | null>,
+  notNeeded?: boolean,
+) {
   const [size, setSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
+    if (notNeeded) return;
     const element = ref.current;
     if (!element) return;
 
@@ -26,7 +30,7 @@ export function useResizeObserver(ref: RefObject<HTMLElement | null>) {
     return () => {
       resizeObserver.disconnect();
     };
-  }, [ref]);
+  }, [ref, notNeeded]);
 
   return size;
 }

@@ -1,4 +1,4 @@
-import React, { useMemo, memo, useEffect } from "react";
+import React, { useMemo, memo, useEffect, CSSProperties, useRef } from "react";
 import cx from "classnames";
 import {
   CalendarProps,
@@ -78,7 +78,7 @@ function CalendarContent({
         {
           "--calendar-width": `${width}px`,
           "--calendar-height": `${height}px`,
-        } as React.CSSProperties
+        } as CSSProperties
       }
       className={cx(styles.calendar, classNames?.root)}
     >
@@ -99,11 +99,13 @@ function Calendar({
   selectedDate,
   ...props
 }: CalendarProps = defaultCalenderProps) {
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const { width: observedWidth, height: observedHeight } =
-    useResizeObserver(containerRef);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const allProps = { ...defaultCalenderProps, ...props };
+  const { width: observedWidth, height: observedHeight } = useResizeObserver(
+    containerRef,
+    !!allProps.width && !!allProps.height,
+  );
 
   // Use props if provided, otherwise use observed size
   const width = allProps.width ?? observedWidth ?? 0;
@@ -116,7 +118,13 @@ function Calendar({
 
   return (
     <CalendarProvider initialDate={initialDate} initialView={allProps.view}>
-      <div ref={containerRef} className={styles.calendarContainer}>
+      <div
+        ref={containerRef}
+        style={{
+          width: allProps.width ?? "100%",
+          height: allProps.height ?? "100%",
+        }}
+      >
         <CalendarContent {...allProps} width={width} height={height} />
       </div>
     </CalendarProvider>
