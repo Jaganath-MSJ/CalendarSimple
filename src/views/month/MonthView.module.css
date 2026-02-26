@@ -1,13 +1,25 @@
+.monthView {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
 .table {
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse;
   width: 100%;
+  /* min-width: 500px; */
+  flex: 1;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .tableHeader,
 .tableCell {
   border-right: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
+  box-sizing: border-box;
 }
 
 .tableHeader:last-child,
@@ -22,6 +34,9 @@
 .tableHeader {
   height: 40px;
   background-color: #f9fafb;
+  position: sticky;
+  top: 0;
+  z-index: 10;
   color: var(--text-secondary);
   font-weight: 600;
   font-size: 0.875rem;
@@ -32,12 +47,12 @@
 }
 
 .tableBody {
-  height: var(--calendar-height);
+  /* Let flex/table handle the fill naturally instead of strict pixel height */
 }
 
 .tableCell {
   vertical-align: top;
-  height: calc(var(--calendar-height) / var(--calendar-rows));
-  width: calc(var(--calendar-width) / 7);
+  height: calc(100% / var(--calendar-rows));
+  width: calc(100% / 7);
   padding: 4px;
 }

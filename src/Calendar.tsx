@@ -123,6 +123,9 @@ function Calendar({
         style={{
           width: allProps.width ?? "100%",
           height: allProps.height ?? "100%",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
         }}
       >
         <CalendarContent {...allProps} width={width} height={height} />

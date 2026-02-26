@@ -72,63 +72,65 @@ function MonthView({
   );
 
   return (
-    <table
-      className={cx(styles.table, classNames?.table)}
-      style={
-        {
-          "--calendar-rows": calendarGrid.length,
-        } as CSSProperties
-      }
-    >
-      <thead>
-        <tr>
-          {DAY_LIST_NAME[dayType].map((day: string) => (
-            <th
-              key={day}
-              className={cx(styles.tableHeader, classNames?.tableHeader)}
-            >
-              {day}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody className={styles.tableBody}>
-        {calendarGrid.map((week, weekIndex) => (
-          <tr key={weekIndex}>
-            {week.map((dayInfo, dayIndex) => (
-              <MonthEventItem
-                key={`date_${weekIndex}_${dayIndex}`}
-                isSelected={
-                  selectable &&
-                  dayInfo.isCurrentMonth &&
-                  dayInfo.displayDay === selectedDate.date()
-                }
-                isToday={dayInfo.isToday}
-                isCurrentMonth={dayInfo.isCurrentMonth}
-                onClick={onClickDateHandler}
-                date={dayInfo.displayDay}
-                dateObj={dayInfo.currentDate}
-                data={dayInfo.events}
-                cellWidth={
-                  (typeof width === "number" ? width : 0) /
-                  CALENDAR_CONSTANTS.DAYS_IN_WEEK
-                }
-                className={cx(styles.tableCell, classNames?.tableDate)}
-                dataClassName={classNames?.event}
-                selectedClassName={classNames?.selected}
-                todayClassName={classNames?.today}
-                theme={restProps.theme}
-                maxEvents={maxEvents}
-                totalEvents={dayInfo.totalEvents}
-                is12Hour={is12Hour}
-                onEventClick={onEventClick}
-                onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
-              />
+    <div className={styles.monthView}>
+      <table
+        className={cx(styles.table, classNames?.table)}
+        style={
+          {
+            "--calendar-rows": calendarGrid.length,
+          } as CSSProperties
+        }
+      >
+        <thead>
+          <tr>
+            {DAY_LIST_NAME[dayType].map((day: string) => (
+              <th
+                key={day}
+                className={cx(styles.tableHeader, classNames?.tableHeader)}
+              >
+                {day}
+              </th>
             ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody className={styles.tableBody}>
+          {calendarGrid.map((week, weekIndex) => (
+            <tr key={weekIndex}>
+              {week.map((dayInfo, dayIndex) => (
+                <MonthEventItem
+                  key={`date_${weekIndex}_${dayIndex}`}
+                  isSelected={
+                    selectable &&
+                    dayInfo.isCurrentMonth &&
+                    dayInfo.displayDay === selectedDate.date()
+                  }
+                  isToday={dayInfo.isToday}
+                  isCurrentMonth={dayInfo.isCurrentMonth}
+                  onClick={onClickDateHandler}
+                  date={dayInfo.displayDay}
+                  dateObj={dayInfo.currentDate}
+                  data={dayInfo.events}
+                  cellWidth={
+                    (typeof width === "number" ? width : 0) /
+                    CALENDAR_CONSTANTS.DAYS_IN_WEEK
+                  }
+                  className={cx(styles.tableCell, classNames?.tableDate)}
+                  dataClassName={classNames?.event}
+                  selectedClassName={classNames?.selected}
+                  todayClassName={classNames?.today}
+                  theme={restProps.theme}
+                  maxEvents={maxEvents}
+                  totalEvents={dayInfo.totalEvents}
+                  is12Hour={is12Hour}
+                  onEventClick={onEventClick}
+                  onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
+                />
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
