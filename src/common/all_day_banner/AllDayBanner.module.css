@@ -1,0 +1,80 @@
+.bannerContainer {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 4px;
+  min-height: 28px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.bannerRow {
+  position: relative;
+  height: 22px;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.bannerChip {
+  position: absolute;
+  height: 20px;
+  top: 1px;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #fff;
+  background-color: #1a73e8;
+  border-radius: 4px;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.bannerChip.clippedLeft {
+  clip-path: polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%);
+  padding-left: 14px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.bannerChip.clippedRight {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 50%,
+    calc(100% - 10px) 100%,
+    0 100%
+  );
+  padding-right: 14px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.bannerChip.clippedLeft.clippedRight {
+  clip-path: polygon(
+    10px 0,
+    calc(100% - 10px) 0,
+    100% 50%,
+    calc(100% - 10px) 100%,
+    10px 100%,
+    0 50%
+  );
+  padding-left: 14px;
+  padding-right: 14px;
+  border-radius: 0;
+}
+
+.title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-grow: 1;
+}

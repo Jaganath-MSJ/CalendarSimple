@@ -7,6 +7,7 @@ import styles from "./DayView.module.css";
 import { useCalendar } from "../../context/CalendarContext";
 import TimeColumn from "../../common/time_column/TimeColumn";
 import DayColumn from "../../common/day_column/DayColumn";
+import AllDayBanner from "../../common/all_day_banner/AllDayBanner";
 
 interface DayViewProps extends Pick<
   CalendarContentProps,
@@ -55,6 +56,12 @@ function DayView({
           </div>
         </div>
       </div>
+      <AllDayBanner
+        days={[selectedDate]}
+        events={events || []}
+        onEventClick={onEventClick}
+        classNames={classNames}
+      />
       <div className={styles.timeGrid}>
         <TimeColumn is12Hour={is12Hour} classNames={classNames} />
         <div className={cx(styles.eventsColumn, classNames?.dayColumn)}>

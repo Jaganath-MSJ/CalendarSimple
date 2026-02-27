@@ -1,6 +1,13 @@
 import { CalendarEvent } from "../types";
 import { dateFn, DateType } from "./date";
 
+export function isMultiDay(event: CalendarEvent): boolean {
+  if (!event.endDate) return false;
+  const start = dateFn(event.startDate).startOf("day");
+  const end = dateFn(event.endDate).startOf("day");
+  return !start.isSame(end);
+}
+
 export interface DayEventLayout {
   event: CalendarEvent;
   top: number;
@@ -30,7 +37,7 @@ export function calculateEventLayout(
   const eventsForDay = events.filter((event) => {
     const eventDate = dateFn(event.startDate).startOf("day");
     const currentDay = dateFn(currentDate).startOf("day");
-    return eventDate.isSame(currentDay);
+    return eventDate.isSame(currentDay) && !isMultiDay(event);
   });
 
   if (eventsForDay.length === 0) return [];
