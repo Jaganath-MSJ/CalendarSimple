@@ -1,6 +1,7 @@
 import { dateFn, DateType } from "./date";
 import { isMultiDay } from "./eventLayout";
 import { CalendarEvent } from "../types";
+import { isAllDayEvent } from "./common";
 
 export interface BannerLayoutEvent {
   event: CalendarEvent;
@@ -33,15 +34,15 @@ export function getBannerViewState(
   const viewStart = dateFn(days[0]).startOf("day");
   const viewEnd = dateFn(days[days.length - 1]).startOf("day");
 
-  // 1. Filter multi-day events
-  const multiDayEvents = events.filter((e) => isMultiDay(e));
+  // 1. Filter multi-day events and all-day events
+  const multiDayEvents = events.filter(
+    (e) => isMultiDay(e) || isAllDayEvent(e),
+  );
 
   // 2. Filter events intersecting this view
   const intersectingEvents = multiDayEvents.filter((e) => {
     const eStart = dateFn(e.startDate).startOf("day");
-    const eEnd = e.endDate
-      ? dateFn(e.endDate).startOf("day")
-      : dateFn(e.startDate).startOf("day");
+    const eEnd = e.endDate ? dateFn(e.endDate).startOf("day") : eStart;
     // Intersects if start is before viewEnd AND end is after viewStart
     return (
       (eStart.isBefore(viewEnd) || eStart.isSame(viewEnd)) &&
@@ -66,9 +67,7 @@ export function getBannerViewState(
 
   intersectingEvents.forEach((event) => {
     const eStart = dateFn(event.startDate).startOf("day");
-    const eEnd = event.endDate
-      ? dateFn(event.endDate).startOf("day")
-      : dateFn(event.startDate).startOf("day");
+    const eEnd = event.endDate ? dateFn(event.endDate).startOf("day") : eStart;
 
     // Calculate indices for the current view
     let startIndex = days.findIndex((d) =>

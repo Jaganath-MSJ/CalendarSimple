@@ -19,6 +19,25 @@ export function calculateMaxEvents(height: number, rowsInView: number): number {
 }
 
 /**
+ * Helper to determine if an event is an all-day event (date only, no time).
+ */
+export function isAllDayEvent(event: CalendarEvent): boolean {
+  const isDateOnly = (dateStr: string) => {
+    return !dateStr.includes("T") && !dateStr.includes(" ");
+  };
+
+  if (!isDateOnly(event.startDate)) {
+    return false;
+  }
+
+  if (event.endDate && !isDateOnly(event.endDate)) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
  * Generates the tooltip text for an event based on the view type.
  */
 export function generateTooltipText(
@@ -29,10 +48,11 @@ export function generateTooltipText(
   const timeFormat = is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME;
   const isMulti =
     event.endDate && !dateFn(event.startDate).isSame(event.endDate, "day");
+  const isAllDay = isAllDayEvent(event);
 
   let formatStr = timeFormat;
 
-  if (viewType === ECalendarViewType.month) {
+  if (viewType === ECalendarViewType.month || isAllDay) {
     formatStr = DATE_FORMATS.DATE;
   } else if (isMulti) {
     // Include both date and time for multi-day events in day/week/schedule views
