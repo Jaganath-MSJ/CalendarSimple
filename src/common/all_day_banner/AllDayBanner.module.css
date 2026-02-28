@@ -1,10 +1,60 @@
+.bannerWrapper {
+  display: flex;
+  width: 100%;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.timeHeaderSpacer {
+  width: 60px;
+  flex-shrink: 0;
+  border-right: 1px solid #e0e0e0;
+  position: sticky;
+  left: 0;
+  z-index: 15;
+  background-color: var(--bg-color, #fff);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0 2px 0;
+}
+
+.timezoneLabel {
+  font-size: 10px;
+  font-weight: 500;
+  color: #70757a; /* Standard Google gray for labels */
+  text-align: center;
+  margin-top: 4px; /* Slight bump down from top edge */
+}
+
+.expandIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #5f6368;
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
+}
+
+.expandIcon:hover {
+  background-color: #f1f3f4;
+}
+
+.expandIcon.expanded {
+  transform: rotate(180deg);
+}
+
 .bannerContainer {
   position: relative;
-  width: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  border-bottom: 1px solid #e0e0e0;
   padding-bottom: 4px;
   min-height: 28px;
   overflow: hidden;

@@ -135,10 +135,17 @@ export default function AllDayBanner({
     return { layoutEvents, rowCount: rows.length };
   }, [events, days, viewStart, viewEnd]);
 
+  // If showing "+ 1 more" takes up the same space as just showing the max + 1 row,
+  // we can simply allow 1 more row to be visible and avoid the chip entirely.
+  const effectiveMaxRows =
+    bannerEvents.rowCount === MAX_VISIBLE_ROWS + 1
+      ? MAX_VISIBLE_ROWS + 1
+      : MAX_VISIBLE_ROWS;
+
   const hiddenCounts = useMemo(() => {
     const counts = new Array(days.length).fill(0);
     bannerEvents.layoutEvents.forEach((ev) => {
-      if (ev.row >= MAX_VISIBLE_ROWS) {
+      if (ev.row >= effectiveMaxRows) {
         for (
           let i = Math.max(0, ev.startIndex);
           i <= Math.min(days.length - 1, ev.endIndex);
@@ -149,93 +156,130 @@ export default function AllDayBanner({
       }
     });
     return counts;
-  }, [bannerEvents.layoutEvents, days.length]);
+  }, [bannerEvents.layoutEvents, days.length, effectiveMaxRows]);
 
   const hasHiddenEvents = hiddenCounts.some((count) => count > 0);
 
   const visibleLayoutEvents = isExpanded
     ? bannerEvents.layoutEvents
-    : bannerEvents.layoutEvents.filter((ev) => ev.row < MAX_VISIBLE_ROWS);
+    : bannerEvents.layoutEvents.filter((ev) => ev.row < effectiveMaxRows);
 
   if (bannerEvents.layoutEvents.length === 0) {
     return (
-      <div
-        className={styles.bannerContainer}
-        style={{ minHeight: 0, paddingBottom: 0, borderBottom: "none" }}
-      />
+      <div className={styles.bannerWrapper} style={{ borderBottom: "none" }}>
+        <div className={styles.timeHeaderSpacer} />
+        <div
+          className={styles.bannerContainer}
+          style={{ minHeight: 0, paddingBottom: 0, borderBottom: "none" }}
+        />
+      </div>
     );
   }
 
   const containerHeight = isExpanded
     ? Math.max(bannerEvents.rowCount * 24 + 4, 28)
     : hasHiddenEvents
-      ? Math.max((MAX_VISIBLE_ROWS + 1) * 24 + 4, 28)
+      ? Math.max((effectiveMaxRows + 1) * 24 + 4, 28)
       : Math.max(bannerEvents.rowCount * 24 + 4, 28);
 
   const totalCols = days.length;
 
+  const showExpandCollapse = hasHiddenEvents || isExpanded;
+
   return (
-    <div className={styles.bannerContainer} style={{ height: containerHeight }}>
-      {visibleLayoutEvents.map((layoutEvent, idx) => {
-        const {
-          event,
-          row,
-          startIndex,
-          endIndex,
-          isClippedLeft,
-          isClippedRight,
-        } = layoutEvent;
-
-        const leftPct = (startIndex / totalCols) * 100;
-        const widthPct = ((endIndex - startIndex + 1) / totalCols) * 100;
-        const topPx = row * 24 + 2;
-
-        const bgColor = event.color || "#1a73e8"; // Default Google Blue
-
-        return (
+    <div className={styles.bannerWrapper}>
+      <div className={styles.timeHeaderSpacer}>
+        <span className={styles.timezoneLabel}>GMT+00</span>
+        {showExpandCollapse && (
           <div
-            key={event.id || `banner-evt-${idx}`}
-            className={cx(styles.bannerChip, classNames?.event, {
-              [styles.clippedLeft]: isClippedLeft,
-              [styles.clippedRight]: isClippedRight,
+            className={cx(styles.expandIcon, {
+              [styles.expanded]: isExpanded,
             })}
-            style={{
-              top: `${topPx}px`,
-              left: `${leftPct}%`,
-              width: `calc(${widthPct}% - 4px)`,
-              backgroundColor: bgColor,
-              // Lighter background with darker border for pastel look as per docs
-              // We'll approximate this by just using opacity on background or keeping it solid depending on design.
-              // For simplicity, using solid color for now as per minimal requirements:
-            }}
-            onClick={() => onEventClick?.(event)}
+            onClick={() => setIsExpanded(!isExpanded)}
+            title={
+              isExpanded ? "Collapse all day events" : "Expand all day events"
+            }
           >
-            <span className={styles.title}>{event.title}</span>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
           </div>
-        );
-      })}
-      {!isExpanded &&
-        hiddenCounts.map((count, idx) => {
-          if (count === 0) return null;
-          const leftPct = (idx / totalCols) * 100;
-          const widthPct = (1 / totalCols) * 100;
-          const topPx = MAX_VISIBLE_ROWS * 24 + 2;
+        )}
+      </div>
+      <div
+        className={styles.bannerContainer}
+        style={{ height: containerHeight }}
+      >
+        {visibleLayoutEvents.map((layoutEvent, idx) => {
+          const {
+            event,
+            row,
+            startIndex,
+            endIndex,
+            isClippedLeft,
+            isClippedRight,
+          } = layoutEvent;
+
+          const leftPct = (startIndex / totalCols) * 100;
+          const widthPct = ((endIndex - startIndex + 1) / totalCols) * 100;
+          const topPx = row * 24 + 2;
+
+          const bgColor = event.color || "#1a73e8"; // Default Google Blue
 
           return (
             <div
-              key={`more-${idx}`}
-              className={styles.moreChip}
+              key={event.id || `banner-evt-${idx}`}
+              className={cx(styles.bannerChip, classNames?.event, {
+                [styles.clippedLeft]: isClippedLeft,
+                [styles.clippedRight]: isClippedRight,
+              })}
               style={{
                 top: `${topPx}px`,
                 left: `${leftPct}%`,
                 width: `calc(${widthPct}% - 4px)`,
+                backgroundColor: bgColor,
+                // Lighter background with darker border for pastel look as per docs
+                // We'll approximate this by just using opacity on background or keeping it solid depending on design.
+                // For simplicity, using solid color for now as per minimal requirements:
               }}
-              onClick={() => setIsExpanded(true)}
+              onClick={() => onEventClick?.(event)}
             >
-              + {count} more
+              <span className={styles.title}>{event.title}</span>
             </div>
           );
         })}
+        {!isExpanded &&
+          hiddenCounts.map((count, idx) => {
+            if (count < 2) return null; // Only show '+ X more' if there are 2 or more hidden events
+            const leftPct = (idx / totalCols) * 100;
+            const widthPct = (1 / totalCols) * 100;
+            const topPx = effectiveMaxRows * 24 + 2;
+
+            return (
+              <div
+                key={`more-${idx}`}
+                className={styles.moreChip}
+                style={{
+                  top: `${topPx}px`,
+                  left: `${leftPct}%`,
+                  width: `calc(${widthPct}% - 4px)`,
+                }}
+                onClick={() => setIsExpanded(true)}
+              >
+                + {count} more
+              </div>
+            );
+          })}
+      </div>
     </div>
   );
 }
