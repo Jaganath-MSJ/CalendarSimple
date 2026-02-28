@@ -8,14 +8,20 @@
   border-radius: 8px;
 }
 
+.stickyTopContainer {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: var(--bg-color, #ffffff);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
 .weekHeader {
   display: flex;
   border-bottom: 1px solid #e0e0e0;
   background-color: #f9f9f9;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  /* min-width: 600px; */
 }
 
 .timeHeaderSpacer {

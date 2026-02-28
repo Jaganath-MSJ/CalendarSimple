@@ -40,28 +40,30 @@ function DayView({
 
   return (
     <div className={styles.dayView}>
-      <div className={styles.dayHeaderContainer}>
-        <div className={styles.timeHeaderSpacer} />
-        <div className={cx(styles.dayHeader, classNames?.dayHeader)}>
-          <div className={cx(styles.dayName, classNames?.dayName)}>
-            {DAY_LIST_NAME[dayType][selectedDate.day()]}
-          </div>
-          <div
-            className={cx(styles.dayNumber, classNames?.dayNumber, {
-              [styles.today]: isToday,
-            })}
-            style={todayStyle}
-          >
-            {formatDate(selectedDate, DATE_FORMATS.DAY_NUMBER)}
+      <div className={styles.stickyTopContainer}>
+        <div className={styles.dayHeaderContainer}>
+          <div className={styles.timeHeaderSpacer} />
+          <div className={cx(styles.dayHeader, classNames?.dayHeader)}>
+            <div className={cx(styles.dayName, classNames?.dayName)}>
+              {DAY_LIST_NAME[dayType][selectedDate.day()]}
+            </div>
+            <div
+              className={cx(styles.dayNumber, classNames?.dayNumber, {
+                [styles.today]: isToday,
+              })}
+              style={todayStyle}
+            >
+              {formatDate(selectedDate, DATE_FORMATS.DAY_NUMBER)}
+            </div>
           </div>
         </div>
+        <AllDayBanner
+          days={[selectedDate]}
+          events={events || []}
+          onEventClick={onEventClick}
+          classNames={classNames}
+        />
       </div>
-      <AllDayBanner
-        days={[selectedDate]}
-        events={events || []}
-        onEventClick={onEventClick}
-        classNames={classNames}
-      />
       <div className={styles.timeGrid}>
         <TimeColumn is12Hour={is12Hour} classNames={classNames} />
         <div className={cx(styles.eventsColumn, classNames?.dayColumn)}>

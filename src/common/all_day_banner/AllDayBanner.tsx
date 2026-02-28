@@ -57,16 +57,36 @@ export default function AllDayBanner({
     ? bannerEvents.layoutEvents
     : bannerEvents.layoutEvents.filter((ev) => ev.row < effectiveMaxRows);
 
+  const renderGridBg = () => (
+    <div className={styles.bannerGridBg}>
+      {days.map((_, idx) => (
+        <div key={idx} className={styles.bannerGridCell} />
+      ))}
+    </div>
+  );
+
+  const getGmtOffset = () => {
+    const offset = new Date().getTimezoneOffset();
+    const sign = offset > 0 ? "-" : "+"; // timeZoneOffset returns negative if ahead of UTC
+    const absOffset = Math.abs(offset);
+    const hours = Math.floor(absOffset / 60);
+    const minutes = absOffset % 60;
+
+    if (minutes === 0) {
+      return `GMT${sign}${hours.toString().padStart(2, "0")}`;
+    }
+    return `GMT${sign}${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+  };
+
+  const gmtLabel = getGmtOffset();
+
   if (bannerEvents.layoutEvents.length === 0) {
     return (
-      <div className={styles.bannerWrapper} style={{ borderBottom: "none" }}>
+      <div className={styles.bannerWrapper}>
         <div className={styles.timeHeaderSpacer}>
-          <span className={styles.timezoneLabel}>GMT+00</span>
+          <span className={styles.timezoneLabel}>{gmtLabel}</span>
         </div>
-        <div
-          className={styles.bannerContainer}
-          style={{ minHeight: 0, paddingBottom: 0, borderBottom: "none" }}
-        />
+        <div className={styles.bannerContainer}>{renderGridBg()}</div>
       </div>
     );
   }
@@ -84,7 +104,7 @@ export default function AllDayBanner({
   return (
     <div className={styles.bannerWrapper}>
       <div className={styles.timeHeaderSpacer}>
-        <span className={styles.timezoneLabel}>GMT+00</span>
+        <span className={styles.timezoneLabel}>{gmtLabel}</span>
         {showExpandCollapse && (
           <div
             className={cx(styles.expandIcon, {
@@ -114,6 +134,7 @@ export default function AllDayBanner({
         className={styles.bannerContainer}
         style={{ height: containerHeight }}
       >
+        {renderGridBg()}
         {visibleLayoutEvents.map((layoutEvent, idx) => {
           const {
             event,

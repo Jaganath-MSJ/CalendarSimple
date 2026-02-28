@@ -40,43 +40,45 @@ function WeekView({
 
   return (
     <div className={styles.weekView}>
-      <div className={styles.weekHeader}>
-        <div className={styles.timeHeaderSpacer} />
-        {weekDays.map((date, index) => {
-          const isToday = dateFn().isSame(date, "day");
-          const todayStyle = isToday
-            ? {
-                color: theme?.today?.color,
-                backgroundColor: theme?.today?.bgColor,
-              }
-            : undefined;
+      <div className={styles.stickyTopContainer}>
+        <div className={styles.weekHeader}>
+          <div className={styles.timeHeaderSpacer} />
+          {weekDays.map((date, index) => {
+            const isToday = dateFn().isSame(date, "day");
+            const todayStyle = isToday
+              ? {
+                  color: theme?.today?.color,
+                  backgroundColor: theme?.today?.bgColor,
+                }
+              : undefined;
 
-          return (
-            <div
-              key={index}
-              className={cx(styles.dayHeader, classNames?.dayHeader)}
-            >
-              <div className={cx(styles.dayName, classNames?.dayName)}>
-                {DAY_LIST_NAME[dayType][index]}
-              </div>
+            return (
               <div
-                className={cx(styles.dayNumber, classNames?.dayNumber, {
-                  [styles.today]: isToday,
-                })}
-                style={todayStyle}
+                key={index}
+                className={cx(styles.dayHeader, classNames?.dayHeader)}
               >
-                {formatDate(date, DATE_FORMATS.DAY_NUMBER)}
+                <div className={cx(styles.dayName, classNames?.dayName)}>
+                  {DAY_LIST_NAME[dayType][index]}
+                </div>
+                <div
+                  className={cx(styles.dayNumber, classNames?.dayNumber, {
+                    [styles.today]: isToday,
+                  })}
+                  style={todayStyle}
+                >
+                  {formatDate(date, DATE_FORMATS.DAY_NUMBER)}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+        <AllDayBanner
+          days={weekDays}
+          events={events || []}
+          onEventClick={onEventClick}
+          classNames={classNames}
+        />
       </div>
-      <AllDayBanner
-        days={weekDays}
-        events={events || []}
-        onEventClick={onEventClick}
-        classNames={classNames}
-      />
       <div className={styles.timeGrid}>
         <TimeColumn is12Hour={is12Hour} classNames={classNames} />
         <div className={styles.eventsGrid}>
