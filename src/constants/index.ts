@@ -125,7 +125,8 @@ export const CALENDAR_CONSTANTS = {
 export const DATE_FORMATS = {
   DATE: "YYYY-MM-DD",
   TIME: "HH:mm",
-  TIME_12H: "hh A",
+  TIME_12H: "hh:mm A",
+  HOUR_12H: "hh A",
   MONTH_YEAR: "MMMM YYYY",
   DAY_INDEX: "d",
   DAY_NUMBER: "D",

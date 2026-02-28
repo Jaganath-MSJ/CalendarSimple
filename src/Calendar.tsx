@@ -28,6 +28,7 @@ function CalendarContent({
   onViewChange,
   theme,
   classNames,
+  showCurrentTime,
   ...restProps
 }: CalendarContentProps) {
   const {
@@ -50,6 +51,7 @@ function CalendarContent({
       onEventClick,
       theme,
       classNames,
+      showCurrentTime,
     };
     switch (view) {
       case ECalendarViewType.day:

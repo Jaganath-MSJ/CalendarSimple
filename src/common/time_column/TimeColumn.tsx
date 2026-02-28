@@ -16,7 +16,7 @@ function TimeColumn({ is12Hour, classNames }: TimeColumnProps) {
   return (
     <div className={cx(styles.timeColumn, classNames?.timeColumn)}>
       {HOURS.map((hour) => {
-        const timeFormat = is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME;
+        const timeFormat = is12Hour ? DATE_FORMATS.HOUR_12H : DATE_FORMATS.TIME;
         return (
           <div key={hour} className={cx(styles.timeSlot, classNames?.timeSlot)}>
             {formatDate(dateFn().hour(hour).minute(0), timeFormat)}

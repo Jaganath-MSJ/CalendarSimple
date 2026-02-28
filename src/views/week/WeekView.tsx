@@ -11,7 +11,13 @@ import AllDayBanner from "../../common/all_day_banner/AllDayBanner";
 
 interface WeekViewProps extends Pick<
   CalendarContentProps,
-  "events" | "is12Hour" | "dayType" | "onEventClick" | "theme" | "classNames"
+  | "events"
+  | "is12Hour"
+  | "dayType"
+  | "onEventClick"
+  | "theme"
+  | "classNames"
+  | "showCurrentTime"
 > {}
 
 function WeekView({
@@ -21,6 +27,7 @@ function WeekView({
   is12Hour,
   theme,
   classNames,
+  showCurrentTime,
 }: WeekViewProps) {
   const { state } = useCalendar();
   const { selectedDate } = state;
@@ -82,19 +89,24 @@ function WeekView({
       <div className={styles.timeGrid}>
         <TimeColumn is12Hour={is12Hour} classNames={classNames} />
         <div className={styles.eventsGrid}>
-          {weekDays.map((_, dayIndex) => (
-            <div
-              key={dayIndex}
-              className={cx(styles.dayColumn, classNames?.dayColumn)}
-            >
-              <DayColumn
-                dayEvents={weekEvents[dayIndex]}
-                onEventClick={onEventClick}
-                is12Hour={is12Hour}
-                classNames={classNames}
-              />
-            </div>
-          ))}
+          {weekDays.map((date, dayIndex) => {
+            const isToday = dateFn().isSame(date, "day");
+            return (
+              <div
+                key={dayIndex}
+                className={cx(styles.dayColumn, classNames?.dayColumn)}
+              >
+                <DayColumn
+                  dayEvents={weekEvents[dayIndex]}
+                  onEventClick={onEventClick}
+                  is12Hour={is12Hour}
+                  classNames={classNames}
+                  isToday={isToday}
+                  showCurrentTime={showCurrentTime}
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

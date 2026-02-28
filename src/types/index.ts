@@ -80,6 +80,7 @@ export interface CalendarProps {
   dayType?: EDayType;
   pastYearLength?: number;
   futureYearLength?: number;
+  showCurrentTime?: boolean;
 
   // --- Layout ---
   width?: number | string;

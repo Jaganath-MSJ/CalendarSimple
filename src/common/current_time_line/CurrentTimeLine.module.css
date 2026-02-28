@@ -1,0 +1,25 @@
+.currentTimeLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.circle {
+  width: 12px;
+  height: 12px;
+  background-color: #ea4335;
+  border-radius: 50%;
+  position: absolute;
+  left: -6px; /* center it on the left edge */
+}
+
+.line {
+  height: 2px;
+  width: 100%;
+  background-color: #ea4335;
+}

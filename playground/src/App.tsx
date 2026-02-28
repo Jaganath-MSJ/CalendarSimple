@@ -139,14 +139,20 @@ function App() {
       style={{
         width: "calc(100vw - 100px)",
         height: "calc(100vh - 100px)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
       }}
     >
       <Calendar
         events={eventsList}
         selectedDate={new Date()}
         selectable
-        view={ECalendarViewType.month}
+        view={ECalendarViewType.week}
         is12Hour
+        showCurrentTime
+        // width={400}
+        // height={400}
       />
     </div>
   );

@@ -11,7 +11,13 @@ import AllDayBanner from "../../common/all_day_banner/AllDayBanner";
 
 interface DayViewProps extends Pick<
   CalendarContentProps,
-  "events" | "is12Hour" | "dayType" | "onEventClick" | "theme" | "classNames"
+  | "events"
+  | "is12Hour"
+  | "dayType"
+  | "onEventClick"
+  | "theme"
+  | "classNames"
+  | "showCurrentTime"
 > {}
 
 function DayView({
@@ -21,6 +27,7 @@ function DayView({
   is12Hour,
   theme,
   classNames,
+  showCurrentTime,
 }: DayViewProps) {
   const { state } = useCalendar();
   const { selectedDate } = state;
@@ -72,6 +79,8 @@ function DayView({
             onEventClick={onEventClick}
             is12Hour={is12Hour}
             classNames={classNames}
+            isToday={isToday}
+            showCurrentTime={showCurrentTime}
           />
         </div>
       </div>
