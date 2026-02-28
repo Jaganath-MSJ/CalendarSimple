@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import cx from "classnames";
 import { dateFn, DateType } from "../../utils";
 import { isMultiDay } from "../../utils/eventLayout";
@@ -27,6 +27,13 @@ export default function AllDayBanner({
   onEventClick,
   classNames,
 }: AllDayBannerProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const MAX_VISIBLE_ROWS = 3;
+
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [days]);
+
   const viewStart = useMemo(() => dateFn(days[0]).startOf("day"), [days]);
   const viewEnd = useMemo(
     () => dateFn(days[days.length - 1]).startOf("day"),
@@ -128,6 +135,28 @@ export default function AllDayBanner({
     return { layoutEvents, rowCount: rows.length };
   }, [events, days, viewStart, viewEnd]);
 
+  const hiddenCounts = useMemo(() => {
+    const counts = new Array(days.length).fill(0);
+    bannerEvents.layoutEvents.forEach((ev) => {
+      if (ev.row >= MAX_VISIBLE_ROWS) {
+        for (
+          let i = Math.max(0, ev.startIndex);
+          i <= Math.min(days.length - 1, ev.endIndex);
+          i++
+        ) {
+          counts[i]++;
+        }
+      }
+    });
+    return counts;
+  }, [bannerEvents.layoutEvents, days.length]);
+
+  const hasHiddenEvents = hiddenCounts.some((count) => count > 0);
+
+  const visibleLayoutEvents = isExpanded
+    ? bannerEvents.layoutEvents
+    : bannerEvents.layoutEvents.filter((ev) => ev.row < MAX_VISIBLE_ROWS);
+
   if (bannerEvents.layoutEvents.length === 0) {
     return (
       <div
@@ -137,12 +166,17 @@ export default function AllDayBanner({
     );
   }
 
-  const containerHeight = Math.max(bannerEvents.rowCount * 24 + 4, 28);
+  const containerHeight = isExpanded
+    ? Math.max(bannerEvents.rowCount * 24 + 4, 28)
+    : hasHiddenEvents
+      ? Math.max((MAX_VISIBLE_ROWS + 1) * 24 + 4, 28)
+      : Math.max(bannerEvents.rowCount * 24 + 4, 28);
+
   const totalCols = days.length;
 
   return (
     <div className={styles.bannerContainer} style={{ height: containerHeight }}>
-      {bannerEvents.layoutEvents.map((layoutEvent, idx) => {
+      {visibleLayoutEvents.map((layoutEvent, idx) => {
         const {
           event,
           row,
@@ -180,6 +214,28 @@ export default function AllDayBanner({
           </div>
         );
       })}
+      {!isExpanded &&
+        hiddenCounts.map((count, idx) => {
+          if (count === 0) return null;
+          const leftPct = (idx / totalCols) * 100;
+          const widthPct = (1 / totalCols) * 100;
+          const topPx = MAX_VISIBLE_ROWS * 24 + 2;
+
+          return (
+            <div
+              key={`more-${idx}`}
+              className={styles.moreChip}
+              style={{
+                top: `${topPx}px`,
+                left: `${leftPct}%`,
+                width: `calc(${widthPct}% - 4px)`,
+              }}
+              onClick={() => setIsExpanded(true)}
+            >
+              + {count} more
+            </div>
+          );
+        })}
     </div>
   );
 }
