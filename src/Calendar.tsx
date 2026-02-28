@@ -29,6 +29,7 @@ function CalendarContent({
   theme,
   classNames,
   showCurrentTime,
+  maxEvents,
   ...restProps
 }: CalendarContentProps) {
   const {
@@ -52,6 +53,7 @@ function CalendarContent({
       theme,
       classNames,
       showCurrentTime,
+      maxEvents,
     };
     switch (view) {
       case ECalendarViewType.day:

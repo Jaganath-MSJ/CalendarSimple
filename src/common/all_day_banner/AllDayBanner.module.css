@@ -22,9 +22,9 @@
 .timezoneLabel {
   font-size: 10px;
   font-weight: 500;
-  color: #70757a; /* Standard Google gray for labels */
+  color: #70757a;
   text-align: center;
-  margin-top: 4px; /* Slight bump down from top edge */
+  margin-top: 4px;
 }
 
 .expandIcon {

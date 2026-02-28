@@ -2,7 +2,7 @@ import { dateFn, DateType } from "./date";
 import { isMultiDay } from "./eventLayout";
 import { CalendarEvent } from "../types";
 
-interface BannerLayoutEvent {
+export interface BannerLayoutEvent {
   event: CalendarEvent;
   startIndex: number;
   endIndex: number;
@@ -11,12 +11,23 @@ interface BannerLayoutEvent {
   row: number;
 }
 
-export function getAllDayBannerLayout(
+export function getBannerViewState(
   days: DateType[],
   events: CalendarEvent[],
-): { layoutEvents: BannerLayoutEvent[]; rowCount: number } {
+  isExpanded: boolean,
+  maxVisibleRows: number = 3,
+) {
   if (days.length === 0) {
-    return { layoutEvents: [], rowCount: 0 };
+    return {
+      layoutEvents: [],
+      rowCount: 0,
+      effectiveMaxRows: maxVisibleRows,
+      hiddenCounts: [],
+      hasHiddenEvents: false,
+      visibleLayoutEvents: [],
+      containerHeight: 28,
+      showExpandCollapse: false,
+    };
   }
 
   const viewStart = dateFn(days[0]).startOf("day");
@@ -111,5 +122,59 @@ export function getAllDayBannerLayout(
     layoutEvents.push(layoutEvent);
   });
 
-  return { layoutEvents, rowCount: rows.length };
+  const rowCount = rows.length;
+
+  const effectiveMaxRows =
+    rowCount === maxVisibleRows + 1 ? maxVisibleRows + 1 : maxVisibleRows;
+
+  const hiddenCounts = new Array(days.length).fill(0);
+  layoutEvents.forEach((ev) => {
+    if (ev.row >= effectiveMaxRows) {
+      for (
+        let i = Math.max(0, ev.startIndex);
+        i <= Math.min(days.length - 1, ev.endIndex);
+        i++
+      ) {
+        hiddenCounts[i]++;
+      }
+    }
+  });
+
+  const hasHiddenEvents = hiddenCounts.some((count) => count > 0);
+
+  const visibleLayoutEvents = isExpanded
+    ? layoutEvents
+    : layoutEvents.filter((ev) => ev.row < effectiveMaxRows);
+
+  const containerHeight = isExpanded
+    ? Math.max(rowCount * 24 + 4, 28)
+    : hasHiddenEvents
+      ? Math.max((effectiveMaxRows + 1) * 24 + 4, 28)
+      : Math.max(rowCount * 24 + 4, 28);
+
+  const showExpandCollapse = hasHiddenEvents || isExpanded;
+
+  return {
+    layoutEvents,
+    rowCount,
+    effectiveMaxRows,
+    hiddenCounts,
+    hasHiddenEvents,
+    visibleLayoutEvents,
+    containerHeight,
+    showExpandCollapse,
+  };
+}
+
+export function getGmtOffset() {
+  const offset = new Date().getTimezoneOffset();
+  const sign = offset > 0 ? "-" : "+"; // timeZoneOffset returns negative if ahead of UTC
+  const absOffset = Math.abs(offset);
+  const hours = Math.floor(absOffset / 60);
+  const minutes = absOffset % 60;
+
+  if (minutes === 0) {
+    return `GMT${sign}${hours.toString().padStart(2, "0")}`;
+  }
+  return `GMT${sign}${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
 }

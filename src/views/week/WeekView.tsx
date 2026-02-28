@@ -18,6 +18,7 @@ interface WeekViewProps extends Pick<
   | "theme"
   | "classNames"
   | "showCurrentTime"
+  | "maxEvents"
 > {}
 
 function WeekView({
@@ -28,6 +29,7 @@ function WeekView({
   theme,
   classNames,
   showCurrentTime,
+  maxEvents,
 }: WeekViewProps) {
   const { state } = useCalendar();
   const { selectedDate } = state;
@@ -82,8 +84,10 @@ function WeekView({
         <AllDayBanner
           days={weekDays}
           events={events || []}
+          maxEvents={maxEvents}
           onEventClick={onEventClick}
           classNames={classNames}
+          is12Hour={is12Hour}
         />
       </div>
       <div className={styles.timeGrid}>

@@ -1,6 +1,6 @@
 import { CALENDAR_CONSTANTS, DATE_FORMATS } from "../constants";
 import { CalendarEvent, ECalendarViewType } from "../types";
-import { formatDate } from "./date";
+import { formatDate, dateFn } from "./date";
 
 /**
  * Calculates the maximum number of events that can be displayed in a cell based on the calendar height.
@@ -27,8 +27,17 @@ export function generateTooltipText(
   is12Hour?: boolean,
 ): string {
   const timeFormat = is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME;
-  const formatStr =
-    viewType === ECalendarViewType.month ? DATE_FORMATS.DATE : timeFormat;
+  const isMulti =
+    event.endDate && !dateFn(event.startDate).isSame(event.endDate, "day");
+
+  let formatStr = timeFormat;
+
+  if (viewType === ECalendarViewType.month) {
+    formatStr = DATE_FORMATS.DATE;
+  } else if (isMulti) {
+    // Include both date and time for multi-day events in day/week/schedule views
+    formatStr = `${DATE_FORMATS.DATE} ${timeFormat}`;
+  }
 
   let tooltipText = `${event.title} (${formatDate(event.startDate, formatStr)}`;
   if (event.endDate) {

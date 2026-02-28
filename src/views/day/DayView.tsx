@@ -18,6 +18,7 @@ interface DayViewProps extends Pick<
   | "theme"
   | "classNames"
   | "showCurrentTime"
+  | "maxEvents"
 > {}
 
 function DayView({
@@ -28,6 +29,7 @@ function DayView({
   theme,
   classNames,
   showCurrentTime,
+  maxEvents,
 }: DayViewProps) {
   const { state } = useCalendar();
   const { selectedDate } = state;
@@ -67,8 +69,10 @@ function DayView({
         <AllDayBanner
           days={[selectedDate]}
           events={events || []}
+          maxEvents={maxEvents}
           onEventClick={onEventClick}
           classNames={classNames}
+          is12Hour={is12Hour}
         />
       </div>
       <div className={styles.timeGrid}>

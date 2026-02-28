@@ -1,12 +1,17 @@
 import React, { useMemo } from "react";
 import cx from "classnames";
-import { CalendarContentProps, CalendarEvent } from "../../types";
+import {
+  CalendarContentProps,
+  CalendarEvent,
+  ECalendarViewType,
+} from "../../types";
 import {
   formatDate,
   dateFn,
   isSameDate,
   getDiffDays,
   checkIsToday,
+  generateTooltipText,
 } from "../../utils";
 import { DATE_FORMATS, CALENDAR_CONSTANTS } from "../../constants";
 import styles from "./ScheduleView.module.css";
@@ -53,16 +58,12 @@ export default function ScheduleView({
 
     // Normal time range
     const timeFormat = is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME;
-    const startStr = formatDate(event.startDate, timeFormat).toLowerCase();
-    const endStr = event.endDate
-      ? formatDate(event.endDate, timeFormat).toLowerCase()
-      : "";
+    const startStr = formatDate(event.startDate, timeFormat);
 
-    // Clean up formats like "09:00 am" to "9am" for Google style matching (optional detail but nice to have)
-    const formatTime = (t: string) =>
-      t.replace(/^0/, "").replace(":00", "").replace(" ", "");
+    const formatTime = (t: string) => t.replace(/^0/, "").replace(":00", " ");
 
-    if (endStr) {
+    if (event.endDate) {
+      const endStr = formatDate(event.endDate, timeFormat);
       return `${formatTime(startStr)} – ${formatTime(endStr)}`;
     }
     return formatTime(startStr);
@@ -117,6 +118,11 @@ export default function ScheduleView({
                     key={event.id || index}
                     className={cx(styles.eventItemContainer, classNames?.event)}
                     onClick={() => onEventClick?.(event)}
+                    title={generateTooltipText(
+                      event,
+                      ECalendarViewType.schedule,
+                      is12Hour,
+                    )}
                   >
                     {/* Column 1: Date Info (only shown on the first event of the day) */}
                     <div className={styles.dateInfoColumn}>

@@ -1,61 +1,51 @@
 import React, { useMemo, useState, useEffect } from "react";
 import cx from "classnames";
-import { DateType, getAllDayBannerLayout } from "../../utils";
-import { CalendarEvent, CalendarContentProps } from "../../types";
+import {
+  DateType,
+  getBannerViewState,
+  getGmtOffset,
+  generateTooltipText,
+} from "../../utils";
+import {
+  CalendarEvent,
+  CalendarContentProps,
+  ECalendarViewType,
+} from "../../types";
 import styles from "./AllDayBanner.module.css";
 
-interface AllDayBannerProps {
+interface AllDayBannerProps extends Pick<
+  CalendarContentProps,
+  "maxEvents" | "onEventClick" | "classNames" | "is12Hour"
+> {
   days: DateType[];
   events: CalendarEvent[];
-  onEventClick?: CalendarContentProps["onEventClick"];
-  classNames?: CalendarContentProps["classNames"];
 }
 
 export default function AllDayBanner({
   days,
   events,
+  maxEvents,
   onEventClick,
   classNames,
+  is12Hour,
 }: AllDayBannerProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const MAX_VISIBLE_ROWS = 3;
+  const MAX_VISIBLE_ROWS = maxEvents ?? 3;
 
   useEffect(() => {
     setIsExpanded(false);
   }, [days]);
 
-  const bannerEvents = useMemo(() => {
-    return getAllDayBannerLayout(days, events);
-  }, [events, days]);
-
-  // If showing "+ 1 more" takes up the same space as just showing the max + 1 row,
-  // we can simply allow 1 more row to be visible and avoid the chip entirely.
-  const effectiveMaxRows =
-    bannerEvents.rowCount === MAX_VISIBLE_ROWS + 1
-      ? MAX_VISIBLE_ROWS + 1
-      : MAX_VISIBLE_ROWS;
-
-  const hiddenCounts = useMemo(() => {
-    const counts = new Array(days.length).fill(0);
-    bannerEvents.layoutEvents.forEach((ev) => {
-      if (ev.row >= effectiveMaxRows) {
-        for (
-          let i = Math.max(0, ev.startIndex);
-          i <= Math.min(days.length - 1, ev.endIndex);
-          i++
-        ) {
-          counts[i]++;
-        }
-      }
-    });
-    return counts;
-  }, [bannerEvents.layoutEvents, days.length, effectiveMaxRows]);
-
-  const hasHiddenEvents = hiddenCounts.some((count) => count > 0);
-
-  const visibleLayoutEvents = isExpanded
-    ? bannerEvents.layoutEvents
-    : bannerEvents.layoutEvents.filter((ev) => ev.row < effectiveMaxRows);
+  const {
+    layoutEvents,
+    effectiveMaxRows,
+    hiddenCounts,
+    visibleLayoutEvents,
+    containerHeight,
+    showExpandCollapse,
+  } = useMemo(() => {
+    return getBannerViewState(days, events, isExpanded, MAX_VISIBLE_ROWS);
+  }, [days, events, isExpanded]);
 
   const renderGridBg = () => (
     <div className={styles.bannerGridBg}>
@@ -65,22 +55,9 @@ export default function AllDayBanner({
     </div>
   );
 
-  const getGmtOffset = () => {
-    const offset = new Date().getTimezoneOffset();
-    const sign = offset > 0 ? "-" : "+"; // timeZoneOffset returns negative if ahead of UTC
-    const absOffset = Math.abs(offset);
-    const hours = Math.floor(absOffset / 60);
-    const minutes = absOffset % 60;
-
-    if (minutes === 0) {
-      return `GMT${sign}${hours.toString().padStart(2, "0")}`;
-    }
-    return `GMT${sign}${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-  };
-
   const gmtLabel = getGmtOffset();
 
-  if (bannerEvents.layoutEvents.length === 0) {
+  if (layoutEvents.length === 0) {
     return (
       <div className={styles.bannerWrapper}>
         <div className={styles.timeHeaderSpacer}>
@@ -91,15 +68,7 @@ export default function AllDayBanner({
     );
   }
 
-  const containerHeight = isExpanded
-    ? Math.max(bannerEvents.rowCount * 24 + 4, 28)
-    : hasHiddenEvents
-      ? Math.max((effectiveMaxRows + 1) * 24 + 4, 28)
-      : Math.max(bannerEvents.rowCount * 24 + 4, 28);
-
   const totalCols = days.length;
-
-  const showExpandCollapse = hasHiddenEvents || isExpanded;
 
   return (
     <div className={styles.bannerWrapper}>
@@ -149,7 +118,7 @@ export default function AllDayBanner({
           const widthPct = ((endIndex - startIndex + 1) / totalCols) * 100;
           const topPx = row * 24 + 2;
 
-          const bgColor = event.color || "#1a73e8"; // Default Google Blue
+          const bgColor = event.color || "#1a73e8";
 
           return (
             <div
@@ -168,6 +137,11 @@ export default function AllDayBanner({
                 // For simplicity, using solid color for now as per minimal requirements:
               }}
               onClick={() => onEventClick?.(event)}
+              title={generateTooltipText(
+                event,
+                ECalendarViewType.week,
+                is12Hour,
+              )}
             >
               <span className={styles.title}>{event.title}</span>
             </div>
@@ -175,7 +149,7 @@ export default function AllDayBanner({
         })}
         {!isExpanded &&
           hiddenCounts.map((count, idx) => {
-            if (count < 2) return null; // Only show '+ X more' if there are 2 or more hidden events
+            if (count === 0) return null;
             const leftPct = (idx / totalCols) * 100;
             const widthPct = (1 / totalCols) * 100;
             const topPx = effectiveMaxRows * 24 + 2;
