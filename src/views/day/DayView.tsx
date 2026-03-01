@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useRef } from "react";
 import cx from "classnames";
 import { dateFn, formatDate, calculateEventLayout } from "../../utils";
 import { CalendarContentProps } from "../../types";
@@ -19,6 +19,7 @@ interface DayViewProps extends Pick<
   | "classNames"
   | "showCurrentTime"
   | "maxEvents"
+  | "autoScrollToCurrentTime"
 > {}
 
 function DayView({
@@ -30,7 +31,9 @@ function DayView({
   classNames,
   showCurrentTime,
   maxEvents,
+  autoScrollToCurrentTime,
 }: DayViewProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useCalendar();
   const { selectedDate } = state;
   const dayEvents = useMemo(
@@ -47,8 +50,25 @@ function DayView({
       }
     : undefined;
 
+  useEffect(() => {
+    if (autoScrollToCurrentTime && containerRef.current && isToday) {
+      const now = dateFn();
+      const hours = now.hour();
+      const minutes = now.minute();
+      const totalMinutes = hours * 60 + minutes;
+
+      const container = containerRef.current;
+      const targetScroll = Math.max(
+        0,
+        totalMinutes - container.clientHeight / 2,
+      );
+
+      container.scrollTo({ top: targetScroll, behavior: "smooth" });
+    }
+  }, [autoScrollToCurrentTime, isToday]);
+
   return (
-    <div className={styles.dayView}>
+    <div className={styles.dayView} ref={containerRef}>
       <div className={styles.stickyTopContainer}>
         <div className={styles.dayHeaderContainer}>
           <div className={styles.timeHeaderSpacer} />

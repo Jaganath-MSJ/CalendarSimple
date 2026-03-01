@@ -81,6 +81,7 @@ export interface CalendarProps {
   pastYearLength?: number;
   futureYearLength?: number;
   showCurrentTime?: boolean;
+  autoScrollToCurrentTime?: boolean;
 
   // --- Layout ---
   width?: number | string;

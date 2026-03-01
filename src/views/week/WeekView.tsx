@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useRef } from "react";
 import cx from "classnames";
 import { dateFn, formatDate, calculateEventLayout } from "../../utils";
 import { CalendarContentProps } from "../../types";
@@ -19,6 +19,7 @@ interface WeekViewProps extends Pick<
   | "classNames"
   | "showCurrentTime"
   | "maxEvents"
+  | "autoScrollToCurrentTime"
 > {}
 
 function WeekView({
@@ -30,7 +31,9 @@ function WeekView({
   classNames,
   showCurrentTime,
   maxEvents,
+  autoScrollToCurrentTime,
 }: WeekViewProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useCalendar();
   const { selectedDate } = state;
   const startOfWeek = useMemo(
@@ -47,8 +50,30 @@ function WeekView({
     return weekDays.map((dayDate) => calculateEventLayout(events, dayDate));
   }, [events, weekDays]);
 
+  const isCurrentWeek = useMemo(() => {
+    const now = dateFn();
+    return weekDays.some((day) => now.isSame(day, "day"));
+  }, [weekDays]);
+
+  useEffect(() => {
+    if (autoScrollToCurrentTime && containerRef.current && isCurrentWeek) {
+      const now = dateFn();
+      const hours = now.hour();
+      const minutes = now.minute();
+      const totalMinutes = hours * 60 + minutes;
+
+      const container = containerRef.current;
+      const targetScroll = Math.max(
+        0,
+        totalMinutes - container.clientHeight / 2,
+      );
+
+      container.scrollTo({ top: targetScroll, behavior: "smooth" });
+    }
+  }, [autoScrollToCurrentTime, isCurrentWeek]);
+
   return (
-    <div className={styles.weekView}>
+    <div className={styles.weekView} ref={containerRef}>
       <div className={styles.stickyTopContainer}>
         <div className={styles.weekHeader}>
           <div className={styles.timeHeaderSpacer} />

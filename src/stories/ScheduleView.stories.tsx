@@ -122,3 +122,11 @@ export const CustomTheme: Story = {
     },
   },
 };
+
+export const AutoScrollToCurrentTime: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toDate(),
+    autoScrollToCurrentTime: true,
+  },
+};

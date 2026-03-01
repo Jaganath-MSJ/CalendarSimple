@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useRef } from "react";
 import cx from "classnames";
 import {
   CalendarContentProps,
@@ -19,7 +19,13 @@ import styles from "./ScheduleView.module.css";
 
 interface ScheduleViewProps extends Pick<
   CalendarContentProps,
-  "events" | "is12Hour" | "dayType" | "onEventClick" | "theme" | "classNames"
+  | "events"
+  | "is12Hour"
+  | "dayType"
+  | "onEventClick"
+  | "theme"
+  | "classNames"
+  | "autoScrollToCurrentTime"
 > {}
 
 export default function ScheduleView({
@@ -28,7 +34,10 @@ export default function ScheduleView({
   is12Hour,
   theme,
   classNames,
+  autoScrollToCurrentTime,
 }: ScheduleViewProps) {
+  const todayRef = useRef<HTMLDivElement>(null);
+
   const groupedEvents = useMemo(() => {
     // Sort events by start date
     const sorted = [...events].sort(
@@ -55,6 +64,12 @@ export default function ScheduleView({
 
     return groups;
   }, [events]);
+
+  useEffect(() => {
+    if (autoScrollToCurrentTime && todayRef.current) {
+      todayRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [autoScrollToCurrentTime, groupedEvents]);
 
   const renderEventTime = (event: CalendarEvent, dateKey: string) => {
     if (isAllDayEvent(event)) {
@@ -138,6 +153,7 @@ export default function ScheduleView({
             return (
               <div
                 key={dateKey}
+                ref={isToday ? todayRef : undefined}
                 className={cx(styles.dateGroup, classNames?.scheduleDateGroup)}
               >
                 {dayEvents.map((event, index) => {

@@ -112,3 +112,11 @@ export const FullDayNames: Story = {
     dayType: EDayType.full,
   },
 };
+
+export const AutoScrollToCurrentTime: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toDate(),
+    autoScrollToCurrentTime: true,
+  },
+};

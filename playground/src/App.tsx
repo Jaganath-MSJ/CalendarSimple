@@ -13,10 +13,14 @@ function App() {
 
     const formatDateTime = (d: Date) => d.toISOString();
 
+    const formatDate = (d: Date) =>
+      new Date(d.setHours(5, 30, 0, 0)).toISOString().split("T")[0];
+
     // Helper to add days
     const addDays = (d: Date, days: number) => {
       const result = new Date(d);
       result.setDate(result.getDate() + days);
+      result.setHours(0, 0, 0, 0);
       return result;
     };
 
@@ -151,6 +155,7 @@ function App() {
         view={ECalendarViewType.week}
         is12Hour
         showCurrentTime
+        autoScrollToCurrentTime
         // width={400}
         // height={400}
       />

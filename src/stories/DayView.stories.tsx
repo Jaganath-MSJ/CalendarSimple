@@ -88,3 +88,11 @@ export const Format12Hour: Story = {
     is12Hour: true,
   },
 };
+
+export const AutoScrollToCurrentTime: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toDate(),
+    autoScrollToCurrentTime: true,
+  },
+};
