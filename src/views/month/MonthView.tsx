@@ -63,8 +63,8 @@ function MonthView({
   const onClickDateHandler = useCallback(
     (dateInput: DateType) => {
       const newDate = dateFn(dateInput);
-      onDateClick?.(convertToDate(newDate));
       if (selectable && !newDate.isSame(selectedDate, "day")) {
+        onDateClick?.(convertToDate(newDate));
         dispatch({ type: "SET_DATE", payload: newDate });
       }
     },
