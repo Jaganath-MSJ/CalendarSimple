@@ -133,6 +133,34 @@ function App() {
         title: "Past Conference",
         color: "gray",
       },
+
+      // --- DATE ONLY & MISSING END DATE EVENTS ---
+      {
+        id: "TC11",
+        startDate: formatDate(addDays(startOfToday, 3)),
+        endDate: formatDate(addDays(startOfToday, 5)),
+        title: "Multi-Day Date Only",
+        color: "fuchsia",
+      },
+      {
+        id: "TC12",
+        startDate: formatDate(addDays(startOfToday, 1)),
+        endDate: formatDate(addDays(startOfToday, 1)),
+        title: "Single-Day Date Only",
+        color: "magenta",
+      },
+      {
+        id: "TC13",
+        startDate: formatDate(addDays(startOfToday, -1)),
+        title: "Missing End Date (Date Only)",
+        color: "lime",
+      },
+      {
+        id: "TC10",
+        startDate: formatDateTime(setTime(startOfToday, 8, 0)),
+        title: "Missing End Time (Datetime)",
+        color: "violet",
+      },
     ];
   };
 
