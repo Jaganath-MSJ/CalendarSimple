@@ -104,6 +104,8 @@ export const defaultCalenderProps = {
   dayType: EDayType.half,
   pastYearLength: 5,
   futureYearLength: 5,
+  showCurrentTime: false,
+  autoScrollToCurrentTime: false,
   theme: {},
   classNames: {},
 };

@@ -108,6 +108,8 @@ export interface CalendarContentProps extends RequiredSome<
   | "dayType"
   | "pastYearLength"
   | "futureYearLength"
+  | "showCurrentTime"
+  | "autoScrollToCurrentTime"
   | "width"
   | "height"
   | "theme"

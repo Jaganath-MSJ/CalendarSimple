@@ -122,6 +122,14 @@ function Calendar({
 
   const initialDate = useMemo(() => dateFn(selectedDate), [selectedDate]);
 
+  // Filter out events where the end date is before the start date
+  const validEvents = useMemo(() => {
+    return allProps.events.filter((event) => {
+      if (!event.endDate) return true;
+      return !dateFn(event.endDate).isBefore(dateFn(event.startDate));
+    });
+  }, [allProps.events]);
+
   return (
     <CalendarProvider initialDate={initialDate} initialView={allProps.view}>
       <div
@@ -134,7 +142,12 @@ function Calendar({
           overflow: "hidden",
         }}
       >
-        <CalendarContent {...allProps} width={width} height={height} />
+        <CalendarContent
+          {...allProps}
+          width={width}
+          height={height}
+          events={validEvents}
+        />
       </div>
     </CalendarProvider>
   );
