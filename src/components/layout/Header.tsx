@@ -5,16 +5,6 @@ import {
   ECalendarViewType,
   MonthListType,
 } from "../../types";
-
-enum EMonthOption {
-  add = "add",
-  sub = "sub",
-}
-
-enum EYearOption {
-  month = "month",
-  year = "year",
-}
 import {
   CALENDER_STRINGS,
   MONTH_LIST,
@@ -37,6 +27,16 @@ import styles from "./Header.module.css";
 import LeftArrow from "../../assets/LeftArrow";
 import RightArrow from "../../assets/RightArrow";
 import { useCalendar } from "../../context/CalendarContext";
+
+enum EMonthOption {
+  add = "add",
+  sub = "sub",
+}
+
+enum EYearOption {
+  month = "month",
+  year = "year",
+}
 
 interface HeaderProps extends Pick<
   CalendarContentProps,

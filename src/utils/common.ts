@@ -1,6 +1,6 @@
-import { CALENDAR_CONSTANTS, DATE_FORMATS } from "../constants";
-import { CalendarEvent, ECalendarViewType } from "../types";
-import { formatDate, dateFn } from "./date";
+import { CALENDAR_CONSTANTS } from "../constants";
+import { CalendarEvent } from "../types";
+import { dateFn } from "./date";
 
 /**
  * Calculates the maximum number of events that can be displayed in a cell based on the calendar height.

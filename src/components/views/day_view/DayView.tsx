@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import cx from "classnames";
 import { dateFn, formatDate } from "../../../utils";
 import useDayEventLayout, {

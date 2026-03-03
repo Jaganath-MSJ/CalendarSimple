@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import cx from "classnames";
 import { DateType, getGmtOffset, generateTooltipText } from "../../../utils";
 import {
