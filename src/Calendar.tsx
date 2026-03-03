@@ -6,13 +6,15 @@ import {
   ECalendarViewType,
 } from "./types";
 import { defaultCalenderProps, CALENDAR_CONSTANTS } from "./constants";
-import { dateFn, useResizeObserver } from "./utils";
+import { dateFn } from "./utils";
+import useResizeObserver from "./hooks/useResizeObserver";
+import useEvents from "./hooks/useEvents";
 import styles from "./Calendar.module.css";
-import Header from "./layout/Header";
-import DayView from "./views/day/DayView";
-import WeekView from "./views/week/WeekView";
-import MonthView from "./views/month/MonthView";
-import ScheduleView from "./views/schedule/ScheduleView";
+import Header from "./components/layout/Header";
+import DayView from "./components/views/day_view/DayView";
+import WeekView from "./components/views/week_view/WeekView";
+import MonthView from "./components/views/month_view/MonthView";
+import ScheduleView from "./components/views/schedule_view/ScheduleView";
 import { CalendarProvider, useCalendar } from "./context/CalendarContext";
 
 function CalendarContent({
@@ -67,6 +69,8 @@ function CalendarContent({
           <MonthView
             {...commonProps}
             {...restProps}
+            onDateClick={restProps.onDateClick!}
+            onMoreClick={restProps.onMoreClick!}
             width={width}
             height={height}
           />
@@ -123,12 +127,7 @@ function Calendar({
   const initialDate = useMemo(() => dateFn(selectedDate), [selectedDate]);
 
   // Filter out events where the end date is before the start date
-  const validEvents = useMemo(() => {
-    return allProps.events.filter((event) => {
-      if (!event.endDate) return true;
-      return !dateFn(event.endDate).isBefore(dateFn(event.startDate));
-    });
-  }, [allProps.events]);
+  const validEvents = useEvents(allProps.events);
 
   return (
     <CalendarProvider initialDate={initialDate} initialView={allProps.view}>

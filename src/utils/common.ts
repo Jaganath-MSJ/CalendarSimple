@@ -37,33 +37,9 @@ export function isAllDayEvent(event: CalendarEvent): boolean {
   return true;
 }
 
-/**
- * Generates the tooltip text for an event based on the view type.
- */
-export function generateTooltipText(
-  event: CalendarEvent,
-  viewType: ECalendarViewType,
-  is12Hour?: boolean,
-): string {
-  const timeFormat = is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME;
-  const isMulti =
-    event.endDate && !dateFn(event.startDate).isSame(event.endDate, "day");
-  const isAllDay = isAllDayEvent(event);
-
-  let formatStr = timeFormat;
-
-  if (viewType === ECalendarViewType.month || isAllDay) {
-    formatStr = DATE_FORMATS.DATE;
-  } else if (isMulti) {
-    // Include both date and time for multi-day events in day/week/schedule views
-    formatStr = `${DATE_FORMATS.DATE} ${timeFormat}`;
-  }
-
-  let tooltipText = `${event.title} (${formatDate(event.startDate, formatStr)}`;
-  if (event.endDate) {
-    tooltipText += ` - ${formatDate(event.endDate, formatStr)}`;
-  }
-  tooltipText += `)`;
-
-  return tooltipText;
+export function isMultiDay(event: CalendarEvent): boolean {
+  if (!event.endDate) return false;
+  const start = dateFn(event.startDate).startOf("day");
+  const end = dateFn(event.endDate).startOf("day");
+  return !start.isSame(end);
 }
