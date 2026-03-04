@@ -1,3 +1,14 @@
+/**
+ * @file useScheduleView.ts
+ * @description Hook to manage and format data for the 'Schedule' (agenda) layout view.
+ *
+ * This hook handles:
+ * 1. Sorting events broadly by start date.
+ * 2. Grouping events into discrete days (replicating events that span multiple days).
+ * 3. Formatting specific time displays and titles accommodating multi-day spans.
+ * 4. Handling auto-scrolling to the current day indicator.
+ */
+
 import { useMemo, useEffect, useRef } from "react";
 import { CalendarEvent } from "../types";
 import {
@@ -9,12 +20,21 @@ import {
 } from "../utils";
 import { DATE_FORMATS } from "../constants";
 
+/**
+ * Properties for configuring the schedule view hook.
+ */
 interface UseScheduleViewProps {
   events: CalendarEvent[];
   autoScrollToCurrentTime?: boolean;
   is12Hour?: boolean;
 }
 
+/**
+ * Hook to process calendar events into grouped daily lists for the Schedule agenda.
+ *
+ * @param props - Configuration properties { events, autoScrollToCurrentTime, is12Hour }
+ * @returns Object with a ref to attach to "today", the grouped event map, and formatters.
+ */
 export default function useScheduleView({
   events,
   autoScrollToCurrentTime,
@@ -23,12 +43,19 @@ export default function useScheduleView({
   const todayRef = useRef<HTMLDivElement>(null);
 
   const groupedEvents = useMemo(() => {
+    // -------------------------------------------------------------------------
+    // 1. Initial Sorting
+    // -------------------------------------------------------------------------
     // Sort events by start date
     const sorted = [...events].sort(
       (a, b) => dateFn(a.startDate).valueOf() - dateFn(b.startDate).valueOf(),
     );
 
     const groups: Record<string, CalendarEvent[]> = {};
+
+    // -------------------------------------------------------------------------
+    // 2. Multi-day span resolution and Grouping
+    // -------------------------------------------------------------------------
     sorted.forEach((event) => {
       // Group by every date the event spans
       let current = dateFn(event.startDate).startOf("day");
@@ -55,6 +82,15 @@ export default function useScheduleView({
     }
   }, [autoScrollToCurrentTime, groupedEvents]);
 
+  // ---------------------------------------------------------------------------
+  // 3. Presentation formatting helpers
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Formats the time range string for an event on a specific day.
+   * Modifies display smartly if it's a multi-day event continuing from a prior day
+   * or ending on a subsequent day (e.g. "All day", "Until 10PM").
+   */
   const renderEventTime = (event: CalendarEvent, dateKey: string) => {
     if (isAllDayEvent(event)) {
       return "All day";
@@ -101,6 +137,10 @@ export default function useScheduleView({
     return formatTime(startStr);
   };
 
+  /**
+   * Formats the title of an event. Appends descriptive text if the event
+   * spans multiple days (e.g., "Event Name (Day 2/3)").
+   */
   const renderEventTitle = (event: CalendarEvent, dateKey: string) => {
     if (
       event.endDate &&

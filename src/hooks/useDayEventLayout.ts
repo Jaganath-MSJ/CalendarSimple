@@ -1,8 +1,24 @@
+/**
+ * @file useDayEventLayout.ts
+ * @description Core logic for calculating the visual layout of timed events in a day/week view.
+ *
+ * This utility computes the positioning (top, left, width, height) of events
+ * so that they are displayed chronologically, and visually stacked/wrapped
+ * when overlapping. It employs:
+ * 1. Filtering out all-day and multi-day events.
+ * 2. Sweep-line algorithm to group overlapping events into "clusters".
+ * 3. Greedy slot assignment to place events in columns without overlapping.
+ * 4. Width expansion to let events take up available empty space dynamically.
+ */
+
 import { CalendarEvent } from "../types";
 import { useMemo } from "react";
 import { dateFn, DateType } from "../utils/date";
 import { isAllDayEvent, isMultiDay } from "../utils/common";
 
+/**
+ * Represents the final calculated CSS positioning for an event in the day view.
+ */
 export interface DayEventLayout {
   event: CalendarEvent;
   top: number;
@@ -12,6 +28,10 @@ export interface DayEventLayout {
   zIndex: number;
 }
 
+/**
+ * Internal representation of an event being processed during the layout algorithm.
+ * Tracks temporary states like starting minute, ending minute, and assigned column.
+ */
 interface ProcessedEvent {
   id: string;
   start: number;
@@ -24,6 +44,13 @@ interface ProcessedEvent {
   expandCols?: number;
 }
 
+/**
+ * Hook to calculate layout and positioning for timed events in a day or week view.
+ *
+ * @param events - The complete array of calendar events.
+ * @param currentDateOrDates - A single date (for Day view) or array of dates (for Week view) to render.
+ * @returns A layout array (for a single day) or a nested array of layouts (for multiple days).
+ */
 export default function useDayEventLayout(
   events: CalendarEvent[],
   currentDateOrDates: DateType | DateType[],
@@ -34,7 +61,9 @@ export default function useDayEventLayout(
       : [currentDateOrDates];
 
     const generateLayoutForDate = (currentDate: DateType) => {
-      // 1. Filter events for the current day
+      // -------------------------------------------------------------------------
+      // 1. Initial Filtering: Only process timed events for this specific day
+      // -------------------------------------------------------------------------
       const eventsForDay = events.filter((event) => {
         const eventDate = dateFn(event.startDate).startOf("day");
         const currentDay = dateFn(currentDate).startOf("day");
@@ -53,7 +82,9 @@ export default function useDayEventLayout(
         return d.hour() * 60 + d.minute();
       };
 
-      // 2. Process events
+      // -------------------------------------------------------------------------
+      // 2. Data Preparation: Convert dates to minutes from start of day
+      // -------------------------------------------------------------------------
       const processedEvents: ProcessedEvent[] = eventsForDay.map(
         (event, index) => {
           const start = getMinutes(event.startDate);
@@ -75,13 +106,21 @@ export default function useDayEventLayout(
         },
       );
 
-      // Phase 1 - Sort by start time, then duration descending
+      // -------------------------------------------------------------------------
+      // Phase 1 - Sorting: Start time asc, then Duration desc
+      // -------------------------------------------------------------------------
       processedEvents.sort((a, b) => {
         if (a.start === b.start) return b.duration - a.duration;
         return a.start - b.start;
       });
 
-      // Phase 2 - Group into overlap clusters using sweep-line max-end approach
+      // -------------------------------------------------------------------------
+      // Phase 2 - Sweep-line Clustering: Group overlapping events
+      //
+      // Iterates through sorted events and groups them into "clusters".
+      // Two events are in the same cluster if they overlap in time. A cluster
+      // ends when the next event's start time is >= the maximum end time seen so far.
+      // -------------------------------------------------------------------------
       const clusters: ProcessedEvent[][] = [];
       let currentCluster: ProcessedEvent[] = [];
       let clusterMaxEnd = -Infinity;
@@ -97,9 +136,13 @@ export default function useDayEventLayout(
       }
       if (currentCluster.length > 0) clusters.push(currentCluster);
 
-      // Phases 3–5 - Assign columns and calculate widths per cluster
+      // -------------------------------------------------------------------------
+      // Phases 3–5: Calculate relative layout per cluster
+      // -------------------------------------------------------------------------
       for (const cluster of clusters) {
-        // Phase 3 - Greedy column assignment
+        // Phase 3 - Greedy Column Assignment
+        // Assign each event to the first column where it does not overlap with the
+        // last event in that column. If it doesn't fit in any, add a new column.
         const columns: ProcessedEvent[][] = [];
 
         for (const event of cluster) {
@@ -122,13 +165,16 @@ export default function useDayEventLayout(
 
         const totalCols = columns.length;
 
-        // Phase 4 - Initialise left and width
+        // Phase 4 - Initialise default dimensions
+        // Initially, assign equal width (1/totalCols) to every event.
         for (const event of cluster) {
           event.left = event.columnIndex! / totalCols;
           event.width = 1 / totalCols;
         }
 
-        // Phase 5 - Expand to fill free adjacent columns
+        // Phase 5 - Width Expansion
+        // Allow events to expand horizontally and occupy adjacent empty columns
+        // if those columns have no competing events at that exact time slice.
         const colMap: Map<number, ProcessedEvent[]> = new Map();
         for (const event of cluster) {
           const c = event.columnIndex!;
