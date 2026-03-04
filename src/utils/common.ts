@@ -1,3 +1,11 @@
+/**
+ * @file common.ts
+ * @description Common utility functions used across the calendar components.
+ *
+ * Provides generalized helpers for event-type checking (all-day, multi-day)
+ * and spatial calculations like the maximum number of viewable events per cell.
+ */
+
 import { CALENDAR_CONSTANTS } from "../constants";
 import { CalendarEvent } from "../types";
 import { dateFn } from "./date";
@@ -19,7 +27,12 @@ export function calculateMaxEvents(height: number, rowsInView: number): number {
 }
 
 /**
- * Helper to determine if an event is an all-day event (date only, no time).
+ * Helper to determine if an event is an all-day event.
+ * An event is considered "all-day" if its start and end date strings
+ * contain only a date (e.g. YYYY-MM-DD) and no time component (no 'T' or space).
+ *
+ * @param event - The calendar event to check.
+ * @returns True if the event has no time payload.
  */
 export function isAllDayEvent(event: CalendarEvent): boolean {
   const isDateOnly = (dateStr: string) => {
@@ -37,6 +50,13 @@ export function isAllDayEvent(event: CalendarEvent): boolean {
   return true;
 }
 
+/**
+ * Helper to determine if an event spans across multiple distinct calendar days.
+ * Compares the start of the day for both startDate and endDate.
+ *
+ * @param event - The calendar event to check.
+ * @returns True if the event starts and ends on different days.
+ */
 export function isMultiDay(event: CalendarEvent): boolean {
   if (!event.endDate) return false;
   const start = dateFn(event.startDate).startOf("day");

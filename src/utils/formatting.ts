@@ -1,10 +1,25 @@
-﻿import { DATE_FORMATS } from "../constants";
+﻿/**
+ * @file formatting.ts
+ * @description Utilities to format data for user interface presentation.
+ *
+ * Includes logic to generate contextual strings based on current calendar views,
+ * such as tooltip strings and dynamic GMT offsets.
+ */
+
+import { DATE_FORMATS } from "../constants";
 import { CalendarEvent, ECalendarViewType } from "../types";
 import { formatDate, dateFn } from "./date";
 import { isAllDayEvent } from "./common";
 
 /**
  * Generates the tooltip text for an event based on the view type.
+ * Adapts the formatting (whether to include explicit dates, times, or both)
+ * dynamically based on if it's month/week view, or all-day vs timed.
+ *
+ * @param event - The calendar event hovering over.
+ * @param viewType - The current enum view mode of the calendar.
+ * @param is12Hour - Boolean indicating if the user is employing a 12-hour clock.
+ * @returns A formatted string ready for tooltip display.
  */
 export function generateTooltipText(
   event: CalendarEvent,
@@ -34,6 +49,12 @@ export function generateTooltipText(
   return tooltipText;
 }
 
+/**
+ * Returns a formatted GMT offset string based on the user's local timezone.
+ * Useful for displaying timezone indicators on the calendar grid.
+ *
+ * @returns A formatted string like "GMT+05:30" or "GMT-08".
+ */
 export function getGmtOffset() {
   const offset = new Date().getTimezoneOffset();
   const sign = offset > 0 ? "-" : "+"; // timeZoneOffset returns negative if ahead of UTC
