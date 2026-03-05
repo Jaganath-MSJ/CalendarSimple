@@ -1,7 +1,7 @@
 # Calendar Simple
 
 ![npm](https://img.shields.io/npm/v/calendar-simple)
-![npm bundle size](https://img.shields.io/bundlephobia/minzip/calendar-simple)
+![npm unpacked size](https://img.shields.io/npm/unpacked-size/calendar-simple)
 ![npm downloads](https://img.shields.io/npm/dm/calendar-simple)
 ![license](https://img.shields.io/npm/l/calendar-simple)
 
@@ -11,11 +11,13 @@ A lightweight, customizable, and responsive calendar component for React applica
 
 ## Features
 
-- **📅 Month View**: Intuitive navigation through monthly views.
+- **🗓️ Multiple Views**: Support for Month, Week, Day, and Schedule views, giving users different perspectives of their events.
 - **✨ Event Handling**: Built-in support for displaying and managing events with custom colors.
 - **📱 Responsive**: Automatically adjusts layout based on container dimensions.
-- **🎨 Theming**: Fully customizable colors for selected dates, current day, and general theme.
-- **👆 Interactive**: granular control with click handlers for dates, specific events, and "more" indicators.
+- **🎨 Theming & Customization**: Fully customizable colors via the `theme` prop and individual element styling via `classNames`.
+- **🕒 Time Formatting**: Options for 12-hour (AM/PM) and 24-hour time formats.
+- **👆 Interactive**: Granular control with click handlers for dates, specific events, view changes, and "more" indicators.
+- **🕒 Current Time & Timezone**: Display a real-time indicator with automatic local timezone GMT offset, and optionally auto-scroll to the current time on load.
 - **🛡️ TypeScript**: Written in TypeScript for robust type safety and developer experience.
 
 ## Installation
@@ -38,7 +40,7 @@ Import the component and its styles to get started:
 
 ```tsx
 import React, { useState } from "react";
-import Calendar, { CalendarType } from "calendar-simple";
+import Calendar from "calendar-simple";
 import "calendar-simple/dist/styles.css";
 
 const App = () => {
@@ -49,101 +51,184 @@ const App = () => {
       <Calendar
         selectedDate={selectedDate}
         onDateClick={setSelectedDate}
-        isSelectDate
+        selectable
       />
     </div>
   );
 };
 ```
 
-### Advanced Usage with Events & Theme
+### Advanced Usage with Events & Views
 
 ```tsx
 import React, { useState } from "react";
-import Calendar, { DataType } from "calendar-simple";
+import Calendar, { CalendarEvent, ECalendarViewType } from "calendar-simple";
 import "calendar-simple/dist/styles.css";
 
 const MyCalendar = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [view, setView] = useState<ECalendarViewType>("month");
 
-  const events: DataType[] = [
+  const events: CalendarEvent[] = [
     {
+      id: "1",
       startDate: "2024-02-14",
-      value: "Valentine's Day",
+      title: "Valentine's Day",
       color: "#ffcccc",
     },
     {
+      id: "2",
       startDate: "2024-02-20",
       endDate: "2024-02-22",
-      value: "Tech Conference",
+      title: "Tech Conference",
       color: "#e6f7ff",
+    },
+    {
+      id: "3",
+      startDate: "2024-02-21T10:00:00",
+      endDate: "2024-02-21T12:00:00",
+      title: "Team Meeting",
+      color: "#cce5ff",
     },
   ];
 
   return (
     <Calendar
+      events={events}
       selectedDate={selectedDate}
+      view={view}
       onDateClick={setSelectedDate}
-      isSelectDate
-      data={events}
-      width={800}
-      height={600}
+      onViewChange={setView}
+      selectable
+      is12Hour
+      showCurrentTime
+      autoScrollToCurrentTime
       theme={{
         selected: { color: "#fff", bgColor: "#007bff" },
         today: { color: "#007bff", bgColor: "#e6f2ff" },
       }}
-      onEventClick={(event) => alert(`Clicked: ${event.value}`)}
+      onEventClick={(event) => alert(`Clicked: ${event.title}`)}
     />
   );
 };
+```
+
+### Schedule View Example
+
+The Schedule view displays a continuous scrollable list of events, grouped by date.
+
+```tsx
+import React from "react";
+import Calendar, { CalendarEvent } from "calendar-simple";
+
+const upcomingEvents: CalendarEvent[] = [
+  // ... your events ...
+];
+
+const ScheduleApp = () => (
+  <Calendar events={upcomingEvents} view="schedule" is12Hour={true} />
+);
 ```
 
 ## API Reference
 
 ### Props
 
-| Prop               | Type                        | Description                                                | Default         |
-| ------------------ | --------------------------- | ---------------------------------------------------------- | --------------- |
-| `data`             | `DataType[]`                | Array of event data objects to display.                    | `[]`            |
-| `selectedDate`     | `Date`                      | The currently selected date object.                        | `undefined`     |
-| `onDateClick`      | `(date: Date) => void`      | Callback function fired when a date is clicked.            | `undefined`     |
-| `onEventClick`     | `(event: DataType) => void` | Callback function fired when an event is clicked.          | `undefined`     |
-| `onMoreClick`      | `(date: Date) => void`      | Callback fired when the "+X more" indicator is clicked.    | `undefined`     |
-| `onMonthChange`    | `(date: Date) => void`      | Callback fired when the visible month is changed.          | `undefined`     |
-| `width`            | `number`                    | Width of the calendar container in pixels.                 | `400`           |
-| `height`           | `number`                    | Height of the calendar container in pixels.                | `400`           |
-| `theme`            | `CalendarTheme`             | Configuration object for custom colors.                    | `Default Theme` |
-| `dayType`          | `EDayType`                  | Format for day names: `"FULL"` (Monday) or `"HALF"` (Mon). | `HALF`          |
-| `isSelectDate`     | `boolean`                   | Enables visual selection state.                            | `false`         |
-| `pastYearLength`   | `number`                    | Number of past years to show in the year dropdown.         | `5`             |
-| `futureYearLength` | `number`                    | Number of future years to show in the year dropdown.       | `5`             |
-| `maxEvents`        | `number`                    | Maximum events to show per day cell before collapsing.     | Auto-calc       |
+| Prop                      | Type                                                   | Description                                                                       | Default           |
+| ------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------- | ----------------- |
+| `events`                  | `CalendarEvent[]`                                      | Array of event data objects to display.                                           | `[]`              |
+| `selectedDate`            | `Date`                                                 | The currently selected date object.                                               | `undefined`       |
+| `view`                    | `ECalendarViewType`                                    | The current view: `"month"`, `"week"`, `"day"`, or `"schedule"`.                  | `"month"`         |
+| `selectable`              | `boolean`                                              | Enables visual selection state.                                                   | `false`           |
+| `is12Hour`                | `boolean`                                              | Display time in 12-hour AM/PM format instead of 24-hour format.                   | `false`           |
+| `onDateClick`             | `(date: Date) => void`                                 | Callback function fired when a date is clicked.                                   | `undefined`       |
+| `onEventClick`            | `(event: CalendarEvent) => void`                       | Callback function fired when an event is clicked.                                 | `undefined`       |
+| `onMoreClick`             | `(date: Date, hiddenEvents?: CalendarEvent[]) => void` | Callback fired when the "+X more" indicator is clicked.                           | `undefined`       |
+| `onNavigate`              | `(date: Date) => void`                                 | Callback fired when the calendar date range is changed (e.g. next month).         | `undefined`       |
+| `onViewChange`            | `(view: ECalendarViewType) => void`                    | Callback fired when the calendar view is changed via header buttons.              | `undefined`       |
+| `width`                   | `number \| string`                                     | Width of the calendar container.                                                  | `auto-calculated` |
+| `height`                  | `number \| string`                                     | Height of the calendar container.                                                 | `auto-calculated` |
+| `theme`                   | `CalendarTheme`                                        | Configuration object for custom colors.                                           | `{}`              |
+| `classNames`              | `CalendarClassNames`                                   | Custom CSS classes for various internal elements.                                 | `{}`              |
+| `dayType`                 | `EDayType`                                             | Format for day names: `"full"` (Monday) or `"half"` (Mon).                        | `"half"`          |
+| `pastYearLength`          | `number`                                               | Number of past years to show in the year dropdown.                                | `5`               |
+| `futureYearLength`        | `number`                                               | Number of future years to show in the year dropdown.                              | `5`               |
+| `maxEvents`               | `number`                                               | Maximum events to show per day cell before collapsing.                            | Auto-calc         |
+| `showCurrentTime`         | `boolean`                                              | Displays a line indicating the current time in day and week views.                | `false`           |
+| `autoScrollToCurrentTime` | `boolean`                                              | Automatically scrolls to the current time line when the view is initially loaded. | `false`           |
 
 ### Types
 
-#### `DataType`
+#### `CalendarEvent`
 
 ```typescript
-interface DataType {
-  startDate: string; // Format: YYYY-MM-DD
-  endDate?: string; // Format: YYYY-MM-DD
-  value: string; // Event title or description
+interface CalendarEvent {
+  id?: string;
+  startDate: string; // Format: YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss
+  endDate?: string; // Format: YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss
+  title: string; // Event title or description
   color?: string; // CSS color string for event background
+  [key: string]: unknown; // Allow any custom metadata fields
 }
+```
+
+#### `ECalendarViewType` & `EDayType`
+
+```typescript
+type ECalendarViewType = "month" | "week" | "day" | "schedule";
+type EDayType = "full" | "half";
 ```
 
 #### `CalendarTheme`
 
 ```typescript
 interface CalendarTheme {
+  default?: {
+    color?: string;
+    bgColor?: string;
+  };
   selected?: {
-    color?: string; // Text color for selected date
-    bgColor?: string; // Background color for selected date
+    color?: string;
+    bgColor?: string;
   };
   today?: {
-    color?: string; // Text color for today's date
-    bgColor?: string; // Background color for today's date
+    color?: string;
+    bgColor?: string;
   };
+}
+```
+
+#### `CalendarClassNames`
+
+```typescript
+interface CalendarClassNames {
+  root?: string;
+  header?: string;
+
+  // Month view
+  table?: string;
+  tableHeader?: string;
+  tableDate?: string;
+
+  // Shared events
+  event?: string;
+  selected?: string;
+  today?: string;
+
+  // Week & Day view
+  dayHeader?: string;
+  dayName?: string;
+  dayNumber?: string;
+  timeColumn?: string;
+  timeSlot?: string;
+  dayColumn?: string;
+
+  // Schedule view
+  scheduleDateGroup?: string;
+  scheduleDateNumber?: string;
+  scheduleDateSubInfo?: string;
+  scheduleTime?: string;
+  scheduleTitle?: string;
 }
 ```
 
