@@ -1,70 +1,86 @@
-import React, { useCallback, useMemo, memo, useEffect } from "react";
+import React, { useMemo, memo, useEffect, CSSProperties, useRef } from "react";
 import cx from "classnames";
-import { CalendarType, CalendarContentType } from "./types";
 import {
-  DAY_LIST_NAME,
-  defaultCalenderProps,
-  CALENDAR_CONSTANTS,
-} from "./constants";
-import {
-  dateFn,
-  convertToDate,
-  DateType,
-  generateCalendarGrid,
-  calculateMaxEvents,
-  useResizeObserver,
-} from "./utils";
+  CalendarProps,
+  CalendarContentProps,
+  ECalendarViewType,
+} from "./types";
+import { defaultCalenderProps, CALENDAR_CONSTANTS } from "./constants";
+import { dateFn } from "./utils";
+import useResizeObserver from "./hooks/useResizeObserver";
+import useEvents from "./hooks/useEvents";
 import styles from "./Calendar.module.css";
-import EventItem from "./common/EventItem";
-import Header from "./layout/Header";
+import Header from "./components/layout/Header";
+import DayView from "./components/views/day_view/DayView";
+import WeekView from "./components/views/week_view/WeekView";
+import MonthView from "./components/views/month_view/MonthView";
+import ScheduleView from "./components/views/schedule_view/ScheduleView";
 import { CalendarProvider, useCalendar } from "./context/CalendarContext";
 
 function CalendarContent({
+  events,
+  is12Hour,
   dayType,
+  pastYearLength,
+  futureYearLength,
   width,
   height,
-  onDateClick,
   onEventClick,
-  onMoreClick,
-  isSelectDate,
-  data: propsData, // Capture props data to sync
+  onNavigate,
+  onViewChange,
+  theme,
+  classNames,
+  showCurrentTime,
+  maxEvents,
+  autoScrollToCurrentTime,
   ...restProps
-}: CalendarContentType) {
-  const { state, dispatch } = useCalendar();
-  const { currentDate: selectedDate, events: data } = state;
+}: CalendarContentProps) {
+  const {
+    state: { view },
+    dispatch,
+  } = useCalendar();
 
-  // Sync data from props to context
+  // Sync view from props to context
   useEffect(() => {
-    if (propsData) {
-      dispatch({ type: "SET_EVENTS", payload: propsData });
+    if (restProps.view) {
+      dispatch({ type: "SET_VIEW", payload: restProps.view });
     }
-  }, [propsData]);
+  }, [restProps.view]);
 
-  const calendarGrid = useMemo(
-    () => generateCalendarGrid(selectedDate, data),
-    [selectedDate, data],
-  );
-
-  const maxEvents = useMemo(
-    () =>
-      restProps.maxEvents ??
-      calculateMaxEvents(
-        height,
-        calendarGrid.length || CALENDAR_CONSTANTS.MIN_ROWS,
-      ),
-    [restProps.maxEvents, height, calendarGrid.length],
-  );
-
-  const onClickDateHandler = useCallback(
-    (dateInput: DateType) => {
-      const newDate = dateFn(dateInput);
-      onDateClick?.(convertToDate(newDate));
-      if (isSelectDate && !newDate.isSame(selectedDate, "day")) {
-        dispatch({ type: "SET_DATE", payload: newDate });
-      }
-    },
-    [selectedDate, onDateClick],
-  );
+  const getViewComponent = (view: ECalendarViewType) => {
+    const commonProps = {
+      events,
+      is12Hour,
+      dayType,
+      onEventClick,
+      theme,
+      classNames,
+      showCurrentTime,
+      maxEvents,
+      autoScrollToCurrentTime,
+    };
+    switch (view) {
+      case ECalendarViewType.day:
+        return <DayView {...commonProps} />;
+      case ECalendarViewType.week:
+        return <WeekView {...commonProps} />;
+      case ECalendarViewType.month:
+        return (
+          <MonthView
+            {...commonProps}
+            {...restProps}
+            onDateClick={restProps.onDateClick!}
+            onMoreClick={restProps.onMoreClick!}
+            width={width}
+            height={height}
+          />
+        );
+      case ECalendarViewType.schedule:
+        return <ScheduleView {...commonProps} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <section
@@ -72,87 +88,65 @@ function CalendarContent({
         {
           "--calendar-width": `${width}px`,
           "--calendar-height": `${height}px`,
-          "--calendar-rows":
-            calendarGrid.length || CALENDAR_CONSTANTS.DEFAULT_ROWS,
-        } as React.CSSProperties
+        } as CSSProperties
       }
-      className={cx(styles.calendar, restProps.className)}
+      className={cx(styles.calendar, classNames?.root)}
     >
       <Header
-        headerClassName={restProps.headerClassName}
-        onMonthChange={restProps.onMonthChange}
-        pastYearLength={restProps.pastYearLength}
-        futureYearLength={restProps.futureYearLength}
+        headerClassName={classNames?.header}
+        events={events}
+        onNavigate={onNavigate}
+        onViewChange={onViewChange}
+        pastYearLength={pastYearLength}
+        futureYearLength={futureYearLength}
       />
-      <table className={cx(styles.table, restProps.tableClassName)}>
-        <thead>
-          <tr>
-            {DAY_LIST_NAME[dayType].map((day: string) => (
-              <th key={day} className={styles.tableHeader}>
-                {day}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className={styles.tableBody}>
-          {calendarGrid.map((week, weekIndex) => (
-            <tr key={weekIndex}>
-              {week.map((dayInfo, dayIndex) => (
-                <EventItem
-                  key={`date_${weekIndex}_${dayIndex}`}
-                  isSelected={
-                    isSelectDate &&
-                    dayInfo.isCurrentMonth &&
-                    dayInfo.displayDay === selectedDate.date()
-                  }
-                  isToday={dayInfo.isToday}
-                  isCurrentMonth={dayInfo.isCurrentMonth}
-                  onClick={onClickDateHandler}
-                  date={dayInfo.displayDay}
-                  dateObj={dayInfo.currentDate}
-                  data={dayInfo.events}
-                  cellWidth={width / CALENDAR_CONSTANTS.DAYS_IN_WEEK}
-                  className={cx(styles.tableCell, restProps.tableDateClassName)}
-                  dataClassName={restProps.dataClassName}
-                  selectedClassName={restProps.selectedClassName}
-                  todayClassName={restProps.todayClassName}
-                  theme={restProps.theme}
-                  maxEvents={maxEvents}
-                  totalEvents={dayInfo.totalEvents}
-                  onEventClick={onEventClick}
-                  onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
-                />
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {getViewComponent(view)}
     </section>
   );
 }
 
-function Calendar(props: CalendarType = defaultCalenderProps) {
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const { width: observedWidth, height: observedHeight } =
-    useResizeObserver(containerRef);
+function Calendar({
+  selectedDate,
+  ...props
+}: CalendarProps = defaultCalenderProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const allProps = { ...defaultCalenderProps, ...props };
-  const { data, selectedDate } = allProps;
-
-  // Use props if provided, otherwise use observed size
-  const width = props.width ?? observedWidth ?? 0;
-  const mainHeight = props.height ?? observedHeight ?? 0;
-  const height = mainHeight - CALENDAR_CONSTANTS.HEADER_HEIGHT;
-
-  const initialDate = useMemo(
-    () => (selectedDate ? dateFn(selectedDate) : undefined),
-    [selectedDate],
+  const { width: observedWidth, height: observedHeight } = useResizeObserver(
+    containerRef,
+    !!allProps.width && !!allProps.height,
   );
 
+  // Use props if provided, otherwise use observed size
+  const width = allProps.width ?? observedWidth ?? 0;
+  const mainHeight = allProps.height ?? observedHeight ?? 0;
+  const height =
+    (typeof mainHeight === "number" ? mainHeight : 0) -
+    CALENDAR_CONSTANTS.HEADER_HEIGHT;
+
+  const initialDate = useMemo(() => dateFn(selectedDate), [selectedDate]);
+
+  // Filter out events where the end date is before the start date
+  const validEvents = useEvents(allProps.events);
+
   return (
-    <CalendarProvider initialEvents={data} initialDate={initialDate}>
-      <div ref={containerRef} className={styles.calendarContainer}>
-        <CalendarContent {...allProps} width={width} height={height} />
+    <CalendarProvider initialDate={initialDate} initialView={allProps.view}>
+      <div
+        ref={containerRef}
+        style={{
+          width: allProps.width ?? "100%",
+          height: allProps.height ?? "100%",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
+        <CalendarContent
+          {...allProps}
+          width={width}
+          height={height}
+          events={validEvents}
+        />
       </div>
     </CalendarProvider>
   );

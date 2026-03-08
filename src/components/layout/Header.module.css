@@ -6,6 +6,8 @@
   background-color: transparent;
   width: 100%;
   box-sizing: border-box;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .navigation {

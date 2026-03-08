@@ -13,13 +13,21 @@ import {
   getStartOfDay,
   isBeforeDate,
   isAfterDate,
-} from "../utils";
-import { CalendarType, DataTypeList, DateDataType } from "../types";
+  generateTooltipText,
+} from "../../../utils";
+import {
+  CalendarContentProps,
+  ECalendarViewType,
+  EventListType,
+} from "../../../types";
+import { DATE_FORMATS } from "../../../constants";
 
-interface PopoverProps {
+interface PopoverProps extends Pick<
+  CalendarContentProps,
+  "onEventClick" | "is12Hour"
+> {
   dateObj: DateType;
-  events: DataTypeList[];
-  onEventClick?: CalendarType["onEventClick"];
+  events: EventListType[];
   onClose: () => void;
   anchorEl: HTMLElement | null;
 }
@@ -30,6 +38,7 @@ function Popover({
   onEventClick,
   onClose,
   anchorEl,
+  is12Hour,
 }: PopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const [stylePosition, setStylePosition] = useState<CSSProperties>({
@@ -113,7 +122,7 @@ function Popover({
       onClick={(e) => e.stopPropagation()}
     >
       <div className={styles.popoverHeader}>
-        {formatDate(dateObj, "ddd, D MMM")}
+        {formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH)}
       </div>
       <div className={styles.popoverContent}>
         {events.map((item, idx) => {
@@ -125,23 +134,29 @@ function Popover({
 
           const isStartBefore = isBeforeDate(eventStart, dayStart);
           const isEndAfter = isAfterDate(eventEnd, dayStart);
+          const tooltipText = generateTooltipText(
+            item,
+            ECalendarViewType.month,
+            is12Hour,
+          );
 
           return (
             <div
-              key={`pop-${idx}`}
+              key={item.id || `pop-${idx}`}
               className={cx(styles.popoverItem, {
                 [styles.startBefore]: isStartBefore,
                 [styles.endAfter]: isEndAfter,
               })}
+              id={item.id}
               style={{ backgroundColor: item.color }}
               onClick={(e) => {
                 e.stopPropagation();
                 onEventClick?.(item);
                 onClose();
               }}
-              title={item.value}
+              title={tooltipText}
             >
-              {item.value}
+              {item.title}
             </div>
           );
         })}

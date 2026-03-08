@@ -1,7 +1,7 @@
 import Calendar from "./Calendar";
-import { EDayType } from "./types";
-import type { CalendarType, DataType } from "./types";
-import { DAY_TYPE } from "./constants";
+import "./styles/variables.css";
+import { EDayType, ECalendarViewType } from "./types";
+import type { CalendarProps, CalendarEvent } from "./types";
 
-export { EDayType, CalendarType, DataType, DAY_TYPE };
+export { EDayType, ECalendarViewType, CalendarProps, CalendarEvent };
 export default Calendar;

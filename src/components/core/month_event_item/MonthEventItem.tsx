@@ -1,12 +1,36 @@
 import React, { useState, useRef } from "react";
 import cx from "classnames";
-import { DataTypeList, DateDataType } from "../types";
-import { formatDate, getDiffDays } from "../utils";
-import styles from "./EventItem.module.css";
-import Popover from "./Popover";
-import { CALENDAR_CONSTANTS, defaultTheme } from "../constants";
+import {
+  CalendarContentProps,
+  EventListType,
+  ECalendarViewType,
+} from "../../../types";
+import { getDiffDays, generateTooltipText, DateType } from "../../../utils";
+import styles from "./MonthEventItem.module.css";
+import Popover from "../../ui/popover/Popover";
+import { CALENDAR_CONSTANTS, defaultTheme } from "../../../constants";
 
-function EventItem({
+interface MonthEventItemProps extends Pick<
+  CalendarContentProps,
+  "onEventClick" | "theme" | "maxEvents" | "is12Hour"
+> {
+  dataClassName?: string;
+  selectedClassName?: string;
+  todayClassName?: string;
+  date: number;
+  dateObj: DateType;
+  data: (EventListType | null)[];
+  cellWidth: number;
+  className?: string;
+  isSelected: boolean;
+  isToday: boolean;
+  isCurrentMonth: boolean;
+  onClick?: (date: DateType) => void;
+  onMoreClick?: (date: DateType) => void;
+  totalEvents?: number;
+}
+
+function MonthEventItem({
   date,
   dateObj,
   data,
@@ -24,7 +48,8 @@ function EventItem({
   onMoreClick,
   onEventClick,
   totalEvents = 0,
-}: DateDataType) {
+  is12Hour,
+}: MonthEventItemProps) {
   const [showPopover, setShowPopover] = useState(false);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -56,8 +81,8 @@ function EventItem({
     hiddenEventsCount = totalEvents - visibleRealEventsCount;
   }
 
-  const allDayEvents: DataTypeList[] =
-    data?.filter((e): e is DataTypeList => e !== null) || [];
+  const allDayEvents: EventListType[] =
+    data?.filter((e): e is EventListType => e !== null) || [];
 
   return (
     <td
@@ -82,21 +107,22 @@ function EventItem({
               }
 
               let diffDates = 1;
-              let tooltipText = formatDate(item.startDate, "YYYY-MM-DD");
               if (item.endDateWeek) {
                 diffDates =
                   getDiffDays(item.endDateWeek, item.startDateWeek) + 1;
               }
-              if (item.endDate) {
-                tooltipText += ` to ${formatDate(item.endDate, "YYYY-MM-DD")}`;
-              }
-              tooltipText += ` - ${item.value}`;
+              const tooltipText = generateTooltipText(
+                item,
+                ECalendarViewType.month,
+                is12Hour,
+              );
               const width = `${cellWidth * diffDates - CALENDAR_CONSTANTS.EVENT_ITEM_PADDING}px`;
 
               return (
                 <div
-                  key={`${item.startDate}-${index}`}
+                  key={item.id || `${item.startDate}-${index}`}
                   className={styles.eventItem}
+                  id={item.id}
                   style={{ width, backgroundColor: item.color }}
                   title={tooltipText}
                   onClick={(e) => {
@@ -104,7 +130,7 @@ function EventItem({
                     onEventClick?.(item);
                   }}
                 >
-                  {item.value}
+                  {item.title}
                 </div>
               );
             })}
@@ -128,6 +154,7 @@ function EventItem({
                     onEventClick={onEventClick}
                     onClose={() => setShowPopover(false)}
                     anchorEl={moreButtonRef.current}
+                    is12Hour={is12Hour}
                   />
                 )}
               </div>
@@ -139,4 +166,4 @@ function EventItem({
   );
 }
 
-export default EventItem;
+export default MonthEventItem;
