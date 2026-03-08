@@ -4,36 +4,28 @@ import React, {
   useReducer,
   ReactNode,
   useMemo,
+  Dispatch,
 } from "react";
-import { dateFn, DateType } from "../utils";
-import { DataType, CalendarView } from "../types";
+import { dateFn, DateType, ManipulateType } from "../utils";
+import { ECalendarViewType } from "../types";
+import { CALENDAR_ACTIONS } from "../constants";
 
 interface CalendarState {
-  currentDate: DateType;
   selectedDate: DateType;
-  view: CalendarView;
-  events: DataType[];
+  view: ECalendarViewType;
 }
 
 type CalendarAction =
-  | { type: "SET_DATE"; payload: DateType }
-  | { type: "SET_VIEW"; payload: CalendarView }
-  | { type: "SET_EVENTS"; payload: DataType[] }
-  | { type: "NEXT" }
-  | { type: "PREV" }
-  | { type: "TODAY" };
-
-const initialState: CalendarState = {
-  currentDate: dateFn(),
-  selectedDate: dateFn(),
-  view: "month",
-  events: [],
-};
+  | { type: typeof CALENDAR_ACTIONS.SET_DATE; payload: DateType }
+  | { type: typeof CALENDAR_ACTIONS.SET_VIEW; payload: ECalendarViewType }
+  | { type: typeof CALENDAR_ACTIONS.NEXT }
+  | { type: typeof CALENDAR_ACTIONS.PREV }
+  | { type: typeof CALENDAR_ACTIONS.TODAY };
 
 const CalendarContext = createContext<
   | {
       state: CalendarState;
-      dispatch: React.Dispatch<CalendarAction>;
+      dispatch: Dispatch<CalendarAction>;
     }
   | undefined
 >(undefined);
@@ -43,34 +35,31 @@ function calendarReducer(
   action: CalendarAction,
 ): CalendarState {
   switch (action.type) {
-    case "SET_DATE":
+    case CALENDAR_ACTIONS.SET_DATE:
       return {
         ...state,
-        currentDate: action.payload,
         selectedDate: action.payload,
       };
-    case "SET_VIEW":
+    case CALENDAR_ACTIONS.SET_VIEW:
       return { ...state, view: action.payload };
-    case "SET_EVENTS":
-      return { ...state, events: action.payload };
-    case "NEXT": {
-      let nextDate = state.currentDate;
-      if (state.view === "month") nextDate = nextDate.add(1, "month");
-      else if (state.view === "week") nextDate = nextDate.add(1, "week");
-      else if (state.view === "day") nextDate = nextDate.add(1, "day");
-      return { ...state, currentDate: nextDate };
+    case CALENDAR_ACTIONS.NEXT: {
+      const unit = (
+        state.view === ECalendarViewType.schedule ? "day" : state.view
+      ) as ManipulateType;
+      return { ...state, selectedDate: state.selectedDate.add(1, unit) };
     }
-    case "PREV": {
-      let prevDate = state.currentDate;
-      if (state.view === "month") prevDate = prevDate.subtract(1, "month");
-      else if (state.view === "week") prevDate = prevDate.subtract(1, "week");
-      else if (state.view === "day") prevDate = prevDate.subtract(1, "day");
-      return { ...state, currentDate: prevDate };
-    }
-    case "TODAY":
+    case CALENDAR_ACTIONS.PREV: {
+      const unit = (
+        state.view === ECalendarViewType.schedule ? "day" : state.view
+      ) as ManipulateType;
       return {
         ...state,
-        currentDate: dateFn(),
+        selectedDate: state.selectedDate.subtract(1, unit),
+      };
+    }
+    case CALENDAR_ACTIONS.TODAY:
+      return {
+        ...state,
         selectedDate: dateFn(),
       };
     default:
@@ -80,20 +69,18 @@ function calendarReducer(
 
 interface CalendarProviderProps {
   children: ReactNode;
-  initialEvents?: DataType[];
-  initialDate?: DateType;
+  initialDate: DateType;
+  initialView: ECalendarViewType;
 }
 
 export function CalendarProvider({
   children,
-  initialEvents = [],
   initialDate,
+  initialView,
 }: CalendarProviderProps) {
   const [state, dispatch] = useReducer(calendarReducer, {
-    ...initialState,
-    events: initialEvents,
-    currentDate: initialDate || initialState.currentDate,
-    selectedDate: initialDate || initialState.selectedDate,
+    selectedDate: initialDate,
+    view: initialView,
   });
 
   const value = useMemo(() => ({ state, dispatch }), [state]);
@@ -105,10 +92,10 @@ export function CalendarProvider({
   );
 }
 
-export const useCalendar = () => {
+export function useCalendar() {
   const context = useContext(CalendarContext);
   if (context === undefined) {
     throw new Error("useCalendar must be used within a CalendarProvider");
   }
   return context;
-};
+}

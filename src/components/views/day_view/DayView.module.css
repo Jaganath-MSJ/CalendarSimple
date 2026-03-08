@@ -1,0 +1,69 @@
+.dayView {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 68px);
+  overflow-y: auto;
+  overflow-x: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.stickyTopContainer {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: var(--bg-color, #ffffff);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+.dayHeaderContainer {
+  display: flex;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+}
+
+.timeHeaderSpacer {
+  width: 60px;
+  flex-shrink: 0;
+  border-right: 1px solid #e0e0e0;
+  position: sticky;
+  left: 0;
+  z-index: 15;
+  background-color: #f9f9f9;
+}
+
+.dayHeader {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.dayName {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.dayNumber {
+  font-size: 20px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.dayNumber.today {
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+.timeGrid {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  flex: 1;
+  /* min-width: 300px; */
+}
+
+.eventsColumn {
+  position: relative;
+}

@@ -1,143 +1,213 @@
-import Calendar, { type DataType } from "calendar-simple";
-import "calendar-simple/dist/styles.css";
+import Calendar, { ECalendarViewType, type CalendarEvent } from "../../src";
+// import "calendar-simple/dist/styles.css";
 
 function App() {
-  const generateLiveEvents = (): DataType[] => {
+  const generateLiveEvents = (): CalendarEvent[] => {
     const today = new Date();
-    const formatDate = (d: Date) => d.toISOString().split("T")[0];
+    const startOfToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
 
-    // Helper to add days
+    const formatDateTime = (d: Date) => d.toISOString();
+    const formatDate = (d: Date) => {
+      const timezoneOffset = d.getTimezoneOffset() * 60000;
+      return new Date(d.getTime() - timezoneOffset).toISOString().split("T")[0];
+    };
+
     const addDays = (d: Date, days: number) => {
       const result = new Date(d);
       result.setDate(result.getDate() + days);
       return result;
     };
 
+    const setTime = (d: Date, hour: number, minute: number = 0) => {
+      const result = new Date(d);
+      result.setHours(hour, minute, 0, 0);
+      return result;
+    };
+
     return [
-      // --- Current Month Events ---
+      // 1. Standard Event
       {
-        startDate: formatDate(today),
-        endDate: formatDate(addDays(today, 1)),
-        value: "Today's Kickoff (2 days)",
+        id: "TC1",
+        startDate: formatDateTime(setTime(startOfToday, 9, 0)),
+        endDate: formatDateTime(setTime(startOfToday, 10, 0)),
+        title: "Standard Event",
+        color: "blue",
+      },
+
+      // 2. Zero Duration Event
+      {
+        id: "TC2",
+        startDate: formatDateTime(setTime(startOfToday, 10, 30)),
+        endDate: formatDateTime(setTime(startOfToday, 10, 30)),
+        title: "Zero Duration",
         color: "red",
       },
+
+      // 3. Negative Duration (should be handled gracefully)
       {
-        startDate: formatDate(addDays(today, 1)),
-        endDate: formatDate(addDays(today, 2)),
-        value: "Follow-up (2 days)",
+        id: "TC3",
+        startDate: formatDateTime(setTime(startOfToday, 12, 0)),
+        endDate: formatDateTime(setTime(startOfToday, 11, 0)),
+        title: "Negative Duration",
+        color: "orange",
       },
-      // Overlapping with "Today's Kickoff"
+
+      // 4. Overlapping - Completely Overlapping
       {
-        startDate: formatDate(today),
-        endDate: formatDate(addDays(today, 1)),
-        value: "Parallel Task (2 days)",
-      },
-      {
-        startDate: formatDate(addDays(today, 3)),
-        endDate: formatDate(addDays(today, 4)),
-        value: "Mid-week Sprint (2 days)",
-      },
-      // Overlapping with "Follow-up"
-      {
-        startDate: formatDate(addDays(today, 1)),
-        endDate: formatDate(addDays(today, 2)),
-        value: "Review Session (2 days)",
+        id: "TC4a",
+        startDate: formatDateTime(setTime(startOfToday, 13, 0)),
+        endDate: formatDateTime(setTime(startOfToday, 14, 0)),
+        title: "Completely Overlapping A",
+        color: "green",
       },
       {
-        startDate: formatDate(addDays(today, 5)),
-        value: "Single Day Check-in",
+        id: "TC4b",
+        startDate: formatDateTime(setTime(startOfToday, 13, 0)),
+        endDate: formatDateTime(setTime(startOfToday, 14, 0)),
+        title: "Completely Overlapping B",
+        color: "teal",
+      },
+
+      // 5. Overlapping - Partially Overlapping
+      {
+        id: "TC5a",
+        startDate: formatDateTime(setTime(startOfToday, 14, 30)),
+        endDate: formatDateTime(setTime(startOfToday, 15, 30)),
+        title: "Partially Overlapping A",
+        color: "purple",
       },
       {
-        startDate: formatDate(addDays(today, 6)),
-        endDate: formatDate(addDays(today, 8)),
-        value: "3-Day Workshop",
+        id: "TC5b",
+        startDate: formatDateTime(setTime(startOfToday, 15, 0)),
+        endDate: formatDateTime(setTime(startOfToday, 16, 0)),
+        title: "Partially Overlapping B",
+        color: "indigo",
+      },
+
+      // 6. Overlapping - Nested
+      {
+        id: "TC6a",
+        startDate: formatDateTime(setTime(startOfToday, 16, 0)),
+        endDate: formatDateTime(setTime(startOfToday, 18, 0)),
+        title: "Outer Event",
+        color: "pink",
       },
       {
-        startDate: formatDate(addDays(today, 9)),
+        id: "TC6b",
+        startDate: formatDateTime(setTime(startOfToday, 16, 30)),
+        endDate: formatDateTime(setTime(startOfToday, 17, 30)),
+        title: "Inner Event",
+        color: "rose",
+      },
+
+      // 7. Many short events at same time (stress test)
+      ...Array.from({ length: 5 }).map((_, i) => ({
+        id: `TC7-${i}`,
+        startDate: formatDateTime(setTime(addDays(startOfToday, 1), 9, 0)),
+        endDate: formatDateTime(setTime(addDays(startOfToday, 1), 9, 30)),
+        title: `Short Event ${i + 1}`,
+        color: "gray",
+      })),
+
+      // 8. Multi-day Event (Datetime)
+      {
+        id: "TC8",
+        startDate: formatDateTime(setTime(addDays(startOfToday, 1), 22, 0)),
+        endDate: formatDateTime(setTime(addDays(startOfToday, 2), 2, 0)),
+        title: "Overnight Event (Datetime)",
+        color: "cyan",
+      },
+
+      // 9. Cross-midnight exactly
+      {
+        id: "TC9",
+        startDate: formatDateTime(setTime(addDays(startOfToday, 2), 23, 0)),
+        endDate: formatDateTime(setTime(addDays(startOfToday, 3), 1, 0)),
+        title: "Cross Midnight",
+        color: "sky",
+      },
+
+      // 10. Only Start Date (Datetime) - Missing End Date
+      {
+        id: "TC10",
+        startDate: formatDateTime(setTime(startOfToday, 8, 0)),
+        title: "Missing End Time",
+        color: "violet",
+      },
+
+      // 11. Multi-day Date-only String (YYYY-MM-DD)
+      {
+        id: "TC11",
+        startDate: formatDate(addDays(startOfToday, 3)),
+        endDate: formatDate(addDays(startOfToday, 5)),
+        title: "Multi-Day Date Only",
+        color: "fuchsia",
+      },
+
+      // 12. Single-day Date-only String (YYYY-MM-DD)
+      {
+        id: "TC12",
+        startDate: formatDate(addDays(startOfToday, 1)),
+        endDate: formatDate(addDays(startOfToday, 1)),
+        title: "Single-Day Date Only",
+        color: "magenta",
+      },
+
+      // 13. Only Start Date (Date-only String)
+      {
+        id: "TC13",
+        startDate: formatDate(addDays(startOfToday, -1)),
+        title: "Missing End Date (Date Only)",
+        color: "lime",
+      },
+
+      // 14. Very Long Event
+      {
+        id: "TC14",
+        startDate: formatDate(addDays(today, -10)),
         endDate: formatDate(addDays(today, 10)),
-        value: "Weekend Project",
-      },
-      {
-        startDate: formatDate(addDays(today, 12)),
-        endDate: formatDate(addDays(today, 13)),
-        value: "Client Meeting",
-      },
-      // Long spanning event (Cross-month potential depending on today's date)
-      {
-        startDate: formatDate(addDays(today, -5)),
-        endDate: formatDate(addDays(today, 5)),
-        value: "10-Day Challenge",
-        color: "blue",
-      },
-      // Long duration
-      {
-        startDate: formatDate(addDays(today, 10)),
-        endDate: formatDate(addDays(today, 40)),
-        value: "Long Project (30 days)",
-        color: "green",
-      },
-      {
-        startDate: formatDate(addDays(today, 10)),
-        endDate: formatDate(addDays(today, 26)),
-        value: "Medium Project (16 days)",
-      },
-      {
-        startDate: formatDate(today),
-        endDate: formatDate(addDays(today, 2)),
-        value: "Urgent Task",
-      },
-      {
-        startDate: formatDate(addDays(today, 1)),
-        value: "Quick Sync",
+        title: "Very Long Event (20 Days)",
+        color: "slate",
       },
 
-      // --- Previous Month Events ---
+      // 15. Spanning entire day (Datetime)
       {
-        startDate: formatDate(addDays(today, -30)),
-        endDate: formatDate(addDays(today, -28)),
-        value: "Last Month Review",
-        color: "red",
-      },
-      {
-        startDate: formatDate(addDays(today, -25)),
-        value: "Past Milestone",
-      },
-      {
-        startDate: formatDate(addDays(today, -40)),
-        endDate: formatDate(addDays(today, -10)),
-        value: "Previous Long Term Task",
-        color: "blue",
-      },
-
-      // --- Next Month Events ---
-      {
-        startDate: formatDate(addDays(today, 35)),
-        endDate: formatDate(addDays(today, 37)),
-        value: "Future Planning",
-        color: "green",
-      },
-      {
-        startDate: formatDate(addDays(today, 45)),
-        value: "Q4 Strategy",
-      },
-      {
-        startDate: formatDate(addDays(today, 30)),
-        endDate: formatDate(addDays(today, 60)),
-        value: "Next Quarter Roadmap",
+        id: "TC15",
+        startDate: formatDateTime(setTime(addDays(startOfToday, 4), 0, 0)),
+        endDate: formatDateTime(setTime(addDays(startOfToday, 4), 23, 59)),
+        title: "Full Day (Datetime)",
+        color: "emerald",
       },
     ];
   };
 
-  const eventsList: DataType[] = generateLiveEvents();
+  const eventsList = generateLiveEvents();
 
   return (
     <div
       style={{
         width: "calc(100vw - 100px)",
         height: "calc(100vh - 100px)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
       }}
     >
-      <Calendar data={eventsList} selectedDate={new Date()} isSelectDate />
+      <Calendar
+        events={eventsList}
+        selectedDate={new Date()}
+        selectable
+        view={ECalendarViewType.week}
+        is12Hour
+        showCurrentTime
+        autoScrollToCurrentTime
+        // width={400}
+        // height={400}
+      />
     </div>
   );
 }
