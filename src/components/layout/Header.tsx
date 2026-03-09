@@ -116,7 +116,7 @@ function Header({
         let minDate = dateFn(events[0].startDate);
         let maxDate = minDate;
 
-        events.forEach((event: any) => {
+        events.forEach((event) => {
           const sd = dateFn(event.startDate);
           const ed = event.endDate ? dateFn(event.endDate) : sd;
           if (sd.isBefore(minDate)) minDate = sd;
@@ -173,7 +173,7 @@ function Header({
           value={view}
           onChange={onViewDropdownClick}
         >
-          {VIEW_OPTIONS.map((option: any) => (
+          {VIEW_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>

@@ -52,7 +52,7 @@ function Popover({
       const PADDING = 10;
 
       // Base position: bottom-left of the anchor
-      let top = anchorRect.bottom + 4; // 4px gap
+      const top = anchorRect.bottom + 4; // 4px gap
       let left = anchorRect.left;
 
       // Available space in viewport
@@ -62,7 +62,7 @@ function Popover({
       const spaceBelow = viewportHeight - top;
       const spaceAbove = anchorRect.top - PADDING;
 
-      let newStyle: CSSProperties = {
+      const newStyle: CSSProperties = {
         visibility: "visible",
         position: "fixed",
         top: `${top}px`,

@@ -91,9 +91,9 @@ function MonthView({
           </tr>
         </thead>
         <tbody className={styles.tableBody}>
-          {calendarGrid.map((week: any[], weekIndex: number) => (
+          {calendarGrid.map((week, weekIndex) => (
             <tr key={weekIndex}>
-              {week.map((dayInfo: any, dayIndex: number) => (
+              {week.map((dayInfo, dayIndex) => (
                 <MonthEventItem
                   key={`date_${weekIndex}_${dayIndex}`}
                   isSelected={

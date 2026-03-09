@@ -12,7 +12,6 @@
 import { useMemo } from "react";
 import calendarize from "calendarize";
 import {
-  dateFn,
   checkIsToday,
   DateType,
   getMonthStartingDay,
@@ -91,7 +90,7 @@ export default function useMonthGrid(
       // 1. Grid Generation: Calculate dates for the entire week first
       // -------------------------------------------------------------------------
       const processedWeek = week.map((day: number, dayIndex: number) => {
-        let currentDate = dateFn(selectedDate);
+        let currentDate: DateType;
         let isCurrentMonth = true;
         let displayDay = day;
 

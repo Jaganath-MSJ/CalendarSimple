@@ -45,7 +45,7 @@ function CalendarContent({
     if (restProps.view) {
       dispatch({ type: "SET_VIEW", payload: restProps.view });
     }
-  }, [restProps.view]);
+  }, [restProps.view, dispatch]);
 
   const getViewComponent = (view: ECalendarViewType) => {
     const commonProps = {

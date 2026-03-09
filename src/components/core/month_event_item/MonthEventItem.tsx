@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import cx from "classnames";
 import {
   CalendarContentProps,
@@ -51,7 +51,7 @@ function MonthEventItem({
   is12Hour,
 }: MonthEventItemProps) {
   const [showPopover, setShowPopover] = useState(false);
-  const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const styleSource = isSelected
     ? { ...defaultTheme.selected, ...theme?.selected }
@@ -137,23 +137,25 @@ function MonthEventItem({
             {hiddenEventsCount > 0 && (
               <div className={styles.moreEventsContainer}>
                 <button
-                  ref={moreButtonRef}
                   className={styles.moreEvents}
                   onClick={(e) => {
                     e.stopPropagation();
-                    !showPopover && setShowPopover(true);
+                    if (!showPopover) {
+                      setAnchorEl(e.currentTarget);
+                      setShowPopover(true);
+                    }
                     onMoreClick?.(dateObj);
                   }}
                 >
                   + {hiddenEventsCount} more
                 </button>
-                {showPopover && (
+                {showPopover && anchorEl && (
                   <Popover
                     dateObj={dateObj}
                     events={allDayEvents}
                     onEventClick={onEventClick}
                     onClose={() => setShowPopover(false)}
-                    anchorEl={moreButtonRef.current}
+                    anchorEl={anchorEl}
                     is12Hour={is12Hour}
                   />
                 )}
