@@ -1,4 +1,4 @@
-﻿import { ECalendarViewType, EDayType, MonthListType } from "../types";
+import { ECalendarViewType, EDayType, MonthListType } from "../types";
 
 export const DAY_LIST = {
   SUNDAY: { FULL: "Sunday", HALF: "Sun" },
@@ -70,6 +70,8 @@ export const defaultCalenderProps = {
   futureYearLength: 5,
   showCurrentTime: false,
   autoScrollToCurrentTime: false,
+  weekStartsOn: 0,
+  weekEndsOn: 6,
   theme: {},
   classNames: {},
 };

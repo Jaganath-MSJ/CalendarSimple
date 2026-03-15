@@ -1,4 +1,4 @@
-﻿import { CalendarEvent } from "./events";
+import { CalendarEvent } from "./events";
 
 export type RequiredSome<T, K extends keyof T> = Omit<T, K> &
   Required<Pick<T, K>>;
@@ -76,6 +76,8 @@ export interface CalendarProps {
   futureYearLength?: number;
   showCurrentTime?: boolean;
   autoScrollToCurrentTime?: boolean;
+  weekStartsOn?: number; // 0 (Sunday) to 6 (Saturday)
+  weekEndsOn?: number; // 0 to 6
 
   // --- Layout ---
   width?: number | string;
@@ -104,6 +106,8 @@ export interface CalendarContentProps extends RequiredSome<
   | "futureYearLength"
   | "showCurrentTime"
   | "autoScrollToCurrentTime"
+  | "weekStartsOn"
+  | "weekEndsOn"
   | "width"
   | "height"
   | "theme"

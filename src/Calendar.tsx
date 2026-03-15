@@ -33,6 +33,8 @@ function CalendarContent({
   showCurrentTime,
   maxEvents,
   autoScrollToCurrentTime,
+  weekStartsOn,
+  weekEndsOn,
   ...restProps
 }: CalendarContentProps) {
   const {
@@ -58,6 +60,8 @@ function CalendarContent({
       showCurrentTime,
       maxEvents,
       autoScrollToCurrentTime,
+      weekStartsOn,
+      weekEndsOn,
     };
     switch (view) {
       case ECalendarViewType.day:

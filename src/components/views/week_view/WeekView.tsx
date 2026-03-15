@@ -23,6 +23,8 @@ interface WeekViewProps extends Pick<
   | "showCurrentTime"
   | "maxEvents"
   | "autoScrollToCurrentTime"
+  | "weekStartsOn"
+  | "weekEndsOn"
 > {}
 
 function WeekView({
@@ -35,18 +37,26 @@ function WeekView({
   showCurrentTime,
   maxEvents,
   autoScrollToCurrentTime,
+  weekStartsOn,
+  weekEndsOn,
 }: WeekViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useCalendar();
   const { selectedDate } = state;
-  const startOfWeek = useMemo(
-    () => selectedDate.startOf("week"),
-    [selectedDate],
-  );
+  const startOfWeek = useMemo(() => {
+    const currentDay = selectedDate.day();
+    const diff =
+      currentDay >= weekStartsOn
+        ? weekStartsOn - currentDay
+        : weekStartsOn - currentDay - 7;
+    return selectedDate.add(diff, "day").startOf("day");
+  }, [selectedDate, weekStartsOn]);
 
   const weekDays = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, "day"));
-  }, [startOfWeek]);
+    let length = weekEndsOn - weekStartsOn + 1;
+    if (length <= 0) length += 7;
+    return Array.from({ length }, (_, i) => startOfWeek.add(i, "day"));
+  }, [startOfWeek, weekStartsOn, weekEndsOn]);
 
   // Calculate events for each day of the week
   // The hook resolves the layout computation for all 7 days efficiently
@@ -94,7 +104,7 @@ function WeekView({
                 className={cx(styles.dayHeader, classNames?.dayHeader)}
               >
                 <div className={cx(styles.dayName, classNames?.dayName)}>
-                  {DAY_LIST_NAME[dayType][index]}
+                  {DAY_LIST_NAME[dayType][date.day()]}
                 </div>
                 <div
                   className={cx(styles.dayNumber, classNames?.dayNumber, {

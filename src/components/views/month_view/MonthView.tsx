@@ -27,6 +27,8 @@ interface MonthViewProps extends Pick<
   | "onMoreClick"
   | "theme"
   | "classNames"
+  | "weekStartsOn"
+  | "weekEndsOn"
 > {}
 
 function MonthView({
@@ -40,12 +42,19 @@ function MonthView({
   events,
   is12Hour,
   classNames,
+  weekStartsOn,
+  weekEndsOn,
   ...restProps
 }: MonthViewProps) {
   const { state, dispatch } = useCalendar();
   const { selectedDate } = state;
 
-  const calendarGrid = useMonthGrid(selectedDate, events);
+  const calendarGrid = useMonthGrid(
+    selectedDate,
+    events,
+    weekStartsOn,
+    weekEndsOn,
+  );
 
   const maxEvents = useMemo(
     () =>
@@ -68,6 +77,12 @@ function MonthView({
     [selectedDate, onDateClick, selectable, dispatch],
   );
 
+  const headerDays = useMemo(() => {
+    const list = DAY_LIST_NAME[dayType];
+    const length = ((weekEndsOn - weekStartsOn + 7) % 7) + 1;
+    return Array.from({ length }, (_, i) => list[(weekStartsOn + i) % 7]);
+  }, [dayType, weekStartsOn, weekEndsOn]);
+
   return (
     <div className={styles.monthView}>
       <table
@@ -80,7 +95,7 @@ function MonthView({
       >
         <thead>
           <tr>
-            {DAY_LIST_NAME[dayType].map((day: string) => (
+            {headerDays.map((day: string) => (
               <th
                 key={day}
                 className={cx(styles.tableHeader, classNames?.tableHeader)}
@@ -108,8 +123,7 @@ function MonthView({
                   dateObj={dayInfo.currentDate}
                   data={dayInfo.events}
                   cellWidth={
-                    (typeof width === "number" ? width : 0) /
-                    CALENDAR_CONSTANTS.DAYS_IN_WEEK
+                    (typeof width === "number" ? width : 0) / headerDays.length
                   }
                   className={cx(styles.tableCell, classNames?.tableDate)}
                   dataClassName={classNames?.event}
