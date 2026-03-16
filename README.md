@@ -156,6 +156,10 @@ const ScheduleApp = () => (
 | `maxEvents`               | `number`                                               | Maximum events to show per day cell before collapsing.                            | Auto-calc         |
 | `showCurrentTime`         | `boolean`                                              | Displays a line indicating the current time in day and week views.                | `false`           |
 | `autoScrollToCurrentTime` | `boolean`                                              | Automatically scrolls to the current time line when the view is initially loaded. | `false`           |
+| `minHour`                 | `number`                                               | Minimum hour (0-24) to display in day and week view time grids.                   | `0`               |
+| `maxHour`                 | `number`                                               | Maximum hour (0-24) to display in day and week view time grids.                   | `24`              |
+| `weekStartsOn`            | `number`                                               | Start day of the week (0 = Sunday, 1 = Monday, etc.).                             | `0`               |
+| `weekEndsOn`              | `number`                                               | End day of the week (0 = Sunday, 1 = Monday, etc.).                               | `6`               |
 
 ### Types
 

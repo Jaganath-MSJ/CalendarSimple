@@ -96,3 +96,12 @@ export const AutoScrollToCurrentTime: Story = {
     autoScrollToCurrentTime: true,
   },
 };
+
+export const WithTimeLimits: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toDate(),
+    minHour: 8,
+    maxHour: 18,
+  },
+};

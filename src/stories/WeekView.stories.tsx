@@ -120,3 +120,21 @@ export const AutoScrollToCurrentTime: Story = {
     autoScrollToCurrentTime: true,
   },
 };
+
+export const WithTimeLimits: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toDate(),
+    minHour: 8,
+    maxHour: 18,
+  },
+};
+
+export const CustomWeekStartEnd: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toDate(),
+    weekStartsOn: 1, // Monday
+    weekEndsOn: 5, // Friday
+  },
+};

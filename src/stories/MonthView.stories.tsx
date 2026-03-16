@@ -99,3 +99,12 @@ export const FullDayNames: Story = {
     dayType: EDayType.full,
   },
 };
+
+export const CustomWeekStartEnd: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toDate(),
+    weekStartsOn: 1, // Monday
+    weekEndsOn: 5, // Friday
+  },
+};

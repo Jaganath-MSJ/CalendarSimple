@@ -6,8 +6,8 @@ This document provides a comprehensive breakdown of the features available in th
 
 The calendar is designed to provide users with multiple perspectives of their schedule. You can switch between these views using the `view` prop (`ECalendarViewType`).
 
-- **Month View (`"month"`)**: The default view, displaying a traditional grid of the entire month. Events are stacked on each day, and if there are too many events to fit, a customizable "+X more" button appears.
-- **Week View (`"week"`)**: Displays a 7-day column layout with a time grid. Events are rendered as blocks spanning their respective time slots, making it easy to identify overlapping schedules and free time.
+- **Month View (`"month"`)**: The default view, displaying a traditional grid of the entire month. Events are stacked on each day, and if there are too many events to fit, a customizable "+X more" button appears. You can configure which days of the week begin and end the layout (e.g., standard Monday-Friday work week) via `weekStartsOn` and `weekEndsOn`.
+- **Week View (`"week"`)**: Displays a 7-day column layout (or custom range using `weekStartsOn`/`weekEndsOn`) with a time grid. Events are rendered as blocks spanning their respective time slots, making it easy to identify overlapping schedules and free time.
 - **Day View (`"day"`)**: Similar to the Week View but focused entirely on a single day. This is perfect for detailed daily planning and provides maximum horizontal space for event details.
 - **Schedule View (`"schedule"`)**: A chronological list of upcoming events grouped by date. This view is highly optimized for mobile devices or sidebars where space is limited and users just need to see "what's next."
 
@@ -43,6 +43,7 @@ Global applications require flexible time display options.
 
 - **12-Hour vs 24-Hour**: By default, time is shown in the 24-hour format (e.g., `14:00`). By passing the `is12Hour={true}` prop, all time indicators across the Week, Day, and Schedule views, as well as event tooltips, will automatically switch to the 12-hour AM/PM format (e.g., `02:00 PM`).
 - **Day Name Formatting**: Use the `dayType` prop to dictate how the days of the week are displayed in the headers. Choose between `"full"` (Monday, Tuesday) or `"half"` (Mon, Tue).
+- **Time Range Limits**: Use `minHour` and `maxHour` (values 0-24) to constrain the visible time lines in Day and Week views, removing unnecessary empty hours.
 - **Current Time Indicator**: Display a line indicating the current time in the Day and Week views by passing `showCurrentTime={true}`. You can also automatically scroll to this time when the view loads by passing `autoScrollToCurrentTime={true}`.
 
 ## 👆 Interactive Callbacks
