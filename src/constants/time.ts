@@ -70,6 +70,8 @@ export const defaultCalenderProps = {
   futureYearLength: 5,
   showCurrentTime: false,
   autoScrollToCurrentTime: false,
+  minHour: 0,
+  maxHour: 24,
   weekStartsOn: 0,
   weekEndsOn: 6,
   theme: {},

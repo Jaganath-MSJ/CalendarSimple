@@ -76,6 +76,8 @@ export interface CalendarProps {
   futureYearLength?: number;
   showCurrentTime?: boolean;
   autoScrollToCurrentTime?: boolean;
+  minHour?: number;
+  maxHour?: number;
   weekStartsOn?: number; // 0 (Sunday) to 6 (Saturday)
   weekEndsOn?: number; // 0 to 6
 
@@ -106,6 +108,8 @@ export interface CalendarContentProps extends RequiredSome<
   | "futureYearLength"
   | "showCurrentTime"
   | "autoScrollToCurrentTime"
+  | "minHour"
+  | "maxHour"
   | "weekStartsOn"
   | "weekEndsOn"
   | "width"

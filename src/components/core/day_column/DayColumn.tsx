@@ -8,13 +8,16 @@ import styles from "./DayColumn.module.css";
 
 interface DayColumnProps extends Pick<
   CalendarContentProps,
-  "onEventClick" | "is12Hour" | "classNames" | "showCurrentTime"
+  | "onEventClick"
+  | "is12Hour"
+  | "classNames"
+  | "showCurrentTime"
+  | "minHour"
+  | "maxHour"
 > {
   dayEvents: DayEventLayout[];
   isToday?: boolean;
 }
-
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 function DayColumn({
   dayEvents,
@@ -23,10 +26,17 @@ function DayColumn({
   classNames,
   isToday,
   showCurrentTime,
+  minHour,
+  maxHour,
 }: DayColumnProps) {
+  const hours = Array.from(
+    { length: maxHour - minHour },
+    (_, i) => i + minHour,
+  );
+
   return (
     <>
-      {HOURS.map((hour) => (
+      {hours.map((hour) => (
         <div
           key={hour}
           className={cx(styles.eventSlot, classNames?.timeSlot)}
@@ -41,7 +51,9 @@ function DayColumn({
           classNames={classNames}
         />
       ))}
-      {isToday && showCurrentTime && <CurrentTimeLine />}
+      {isToday && showCurrentTime && (
+        <CurrentTimeLine minHour={minHour} maxHour={maxHour} />
+      )}
     </>
   );
 }

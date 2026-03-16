@@ -23,6 +23,8 @@ interface DayViewProps extends Pick<
   | "showCurrentTime"
   | "maxEvents"
   | "autoScrollToCurrentTime"
+  | "minHour"
+  | "maxHour"
 > {}
 
 function DayView({
@@ -35,11 +37,18 @@ function DayView({
   showCurrentTime,
   maxEvents,
   autoScrollToCurrentTime,
+  minHour,
+  maxHour,
 }: DayViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useCalendar();
   const { selectedDate } = state;
-  const dayEvents = useDayEventLayout(events, selectedDate) as DayEventLayout[];
+  const dayEvents = useDayEventLayout(
+    events,
+    selectedDate,
+    minHour,
+    maxHour,
+  ) as DayEventLayout[];
 
   const isToday = dateFn().isSame(selectedDate, "day");
 
@@ -96,7 +105,12 @@ function DayView({
         />
       </div>
       <div className={styles.timeGrid}>
-        <TimeColumn is12Hour={is12Hour} classNames={classNames} />
+        <TimeColumn
+          is12Hour={is12Hour}
+          classNames={classNames}
+          minHour={minHour}
+          maxHour={maxHour}
+        />
         <div className={cx(styles.eventsColumn, classNames?.dayColumn)}>
           <DayColumn
             dayEvents={dayEvents}
@@ -105,6 +119,8 @@ function DayView({
             classNames={classNames}
             isToday={isToday}
             showCurrentTime={showCurrentTime}
+            minHour={minHour}
+            maxHour={maxHour}
           />
         </div>
       </div>

@@ -5,17 +5,25 @@ import { DATE_FORMATS } from "../../../constants";
 import styles from "./TimeColumn.module.css";
 import { CalendarContentProps } from "../../../types";
 
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
-
 interface TimeColumnProps extends Pick<
   CalendarContentProps,
-  "is12Hour" | "classNames"
+  "is12Hour" | "classNames" | "minHour" | "maxHour"
 > {}
 
-function TimeColumn({ is12Hour, classNames }: TimeColumnProps) {
+function TimeColumn({
+  is12Hour,
+  classNames,
+  minHour,
+  maxHour,
+}: TimeColumnProps) {
+  const hours = Array.from(
+    { length: maxHour - minHour },
+    (_, i) => i + minHour,
+  );
+
   return (
     <div className={cx(styles.timeColumn, classNames?.timeColumn)}>
-      {HOURS.map((hour) => {
+      {hours.map((hour) => {
         const timeFormat = is12Hour ? DATE_FORMATS.HOUR_12H : DATE_FORMATS.TIME;
         return (
           <div key={hour} className={cx(styles.timeSlot, classNames?.timeSlot)}>

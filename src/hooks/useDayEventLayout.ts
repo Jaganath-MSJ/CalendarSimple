@@ -54,6 +54,8 @@ interface ProcessedEvent {
 export default function useDayEventLayout(
   events: CalendarEvent[],
   currentDateOrDates: DateType | DateType[],
+  minHour: number,
+  maxHour: number,
 ): DayEventLayout[] | DayEventLayout[][] {
   return useMemo(() => {
     const dates = Array.isArray(currentDateOrDates)
@@ -67,10 +69,23 @@ export default function useDayEventLayout(
       const eventsForDay = events.filter((event) => {
         const eventDate = dateFn(event.startDate).startOf("day");
         const currentDay = dateFn(currentDate).startOf("day");
+
+        const startMins =
+          dateFn(event.startDate).hour() * 60 +
+          dateFn(event.startDate).minute();
+        let endMins = event.endDate
+          ? dateFn(event.endDate).hour() * 60 + dateFn(event.endDate).minute()
+          : startMins + 1;
+        if (endMins <= startMins && event.endDate) endMins += 1440;
+
+        const isWithinBounds =
+          endMins > minHour * 60 && startMins < maxHour * 60;
+
         return (
           eventDate.isSame(currentDay) &&
           !isMultiDay(event) &&
-          !isAllDayEvent(event)
+          !isAllDayEvent(event) &&
+          isWithinBounds
         );
       });
 
@@ -88,19 +103,17 @@ export default function useDayEventLayout(
       const processedEvents: ProcessedEvent[] = eventsForDay.map(
         (event, index) => {
           const start = getMinutes(event.startDate);
-          let end = event.endDate ? getMinutes(event.endDate) : start + 1;
+          const end = event.endDate ? getMinutes(event.endDate) : start + 1;
 
-          // Edge Case: Zero-duration event treated as 1 minute logically
-          if (end === start) end = start + 1;
-
-          // Clamp end to 1440 (24h) if needed, simplified
-          if (end < start) end = 1440;
+          // Clamp start and end to boundaries for the algorithm
+          const clampedStart = Math.max(start, minHour * 60);
+          const clampedEnd = Math.min(end, maxHour * 60);
 
           return {
             id: `${index}-${event.title}`,
-            start,
-            end,
-            duration: end - start,
+            start: clampedStart,
+            end: clampedEnd,
+            duration: clampedEnd - clampedStart,
             original: event,
           };
         },
@@ -202,9 +215,12 @@ export default function useDayEventLayout(
 
       function toLayout(event: ProcessedEvent): DayEventLayout {
         const rawHeight = event.end - event.start;
+        // Shift top by the minHour offset
+        const top = event.start - minHour * 60;
+
         return {
           event: event.original,
-          top: event.start,
+          top: Math.max(0, top), // ensure it never renders above container
           height: Math.max(rawHeight, 15),
           left: parseFloat((event.left! * 100).toFixed(4)),
           width: parseFloat((event.width! * 100).toFixed(4)),
@@ -219,5 +235,5 @@ export default function useDayEventLayout(
       return dates.map((d) => generateLayoutForDate(d));
     }
     return generateLayoutForDate(dates[0]);
-  }, [events, currentDateOrDates]);
+  }, [events, currentDateOrDates, minHour, maxHour]);
 }

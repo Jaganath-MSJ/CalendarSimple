@@ -25,6 +25,8 @@ interface WeekViewProps extends Pick<
   | "autoScrollToCurrentTime"
   | "weekStartsOn"
   | "weekEndsOn"
+  | "minHour"
+  | "maxHour"
 > {}
 
 function WeekView({
@@ -39,6 +41,8 @@ function WeekView({
   autoScrollToCurrentTime,
   weekStartsOn,
   weekEndsOn,
+  minHour,
+  maxHour,
 }: WeekViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useCalendar();
@@ -58,9 +62,12 @@ function WeekView({
     return Array.from({ length }, (_, i) => startOfWeek.add(i, "day"));
   }, [startOfWeek, weekStartsOn, weekEndsOn]);
 
-  // Calculate events for each day of the week
-  // The hook resolves the layout computation for all 7 days efficiently
-  const weekEvents = useDayEventLayout(events, weekDays) as DayEventLayout[][];
+  const weekEvents = useDayEventLayout(
+    events,
+    weekDays,
+    minHour,
+    maxHour,
+  ) as DayEventLayout[][];
 
   const isCurrentWeek = useMemo(() => {
     const now = dateFn();
@@ -128,7 +135,12 @@ function WeekView({
         />
       </div>
       <div className={styles.timeGrid}>
-        <TimeColumn is12Hour={is12Hour} classNames={classNames} />
+        <TimeColumn
+          is12Hour={is12Hour}
+          classNames={classNames}
+          minHour={minHour}
+          maxHour={maxHour}
+        />
         <div className={styles.eventsGrid}>
           {weekDays.map((date, dayIndex) => {
             const isToday = dateFn().isSame(date, "day");
@@ -144,6 +156,8 @@ function WeekView({
                   classNames={classNames}
                   isToday={isToday}
                   showCurrentTime={showCurrentTime}
+                  minHour={minHour}
+                  maxHour={maxHour}
                 />
               </div>
             );
