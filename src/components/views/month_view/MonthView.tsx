@@ -29,6 +29,7 @@ interface MonthViewProps extends Pick<
   | "classNames"
   | "weekStartsOn"
   | "weekEndsOn"
+  | "showAdjacentMonths"
 > {}
 
 function MonthView({
@@ -44,6 +45,7 @@ function MonthView({
   classNames,
   weekStartsOn,
   weekEndsOn,
+  showAdjacentMonths,
   ...restProps
 }: MonthViewProps) {
   const { state, dispatch } = useCalendar();
@@ -135,6 +137,7 @@ function MonthView({
                   is12Hour={is12Hour}
                   onEventClick={onEventClick}
                   onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
+                  showAdjacentMonths={showAdjacentMonths}
                 />
               ))}
             </tr>

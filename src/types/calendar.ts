@@ -80,6 +80,7 @@ export interface CalendarProps {
   maxHour?: number;
   weekStartsOn?: number; // 0 (Sunday) to 6 (Saturday)
   weekEndsOn?: number; // 0 to 6
+  showAdjacentMonths?: boolean;
 
   // --- Layout ---
   width?: number | string;
@@ -112,6 +113,7 @@ export interface CalendarContentProps extends RequiredSome<
   | "maxHour"
   | "weekStartsOn"
   | "weekEndsOn"
+  | "showAdjacentMonths"
   | "width"
   | "height"
   | "theme"

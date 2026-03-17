@@ -76,6 +76,7 @@ export const defaultCalenderProps = {
   weekEndsOn: 6,
   theme: {},
   classNames: {},
+  showAdjacentMonths: true,
 };
 
 export const DATE_FORMATS = {

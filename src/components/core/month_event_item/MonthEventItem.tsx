@@ -12,7 +12,7 @@ import { CALENDAR_CONSTANTS, defaultTheme } from "../../../constants";
 
 interface MonthEventItemProps extends Pick<
   CalendarContentProps,
-  "onEventClick" | "theme" | "maxEvents" | "is12Hour"
+  "onEventClick" | "theme" | "maxEvents" | "is12Hour" | "showAdjacentMonths"
 > {
   dataClassName?: string;
   selectedClassName?: string;
@@ -49,6 +49,7 @@ function MonthEventItem({
   onEventClick,
   totalEvents = 0,
   is12Hour,
+  showAdjacentMonths,
 }: MonthEventItemProps) {
   const [showPopover, setShowPopover] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -95,73 +96,77 @@ function MonthEventItem({
       })}
     >
       <div className={styles.cellContent}>
-        <p className={styles.dateLabel}>{date}</p>
+        {(isCurrentMonth || showAdjacentMonths) && (
+          <>
+            <p className={styles.dateLabel}>{date}</p>
 
-        {data && (
-          <div className={cx(styles.dataContainer, dataClassName)}>
-            {visibleEvents.map((item, index) => {
-              if (!item || item.isSpacer) {
-                return (
-                  <div key={`spacer-${index}`} className={styles.spacer} />
-                );
-              }
+            {data && (
+              <div className={cx(styles.dataContainer, dataClassName)}>
+                {visibleEvents.map((item, index) => {
+                  if (!item || item.isSpacer) {
+                    return (
+                      <div key={`spacer-${index}`} className={styles.spacer} />
+                    );
+                  }
 
-              let diffDates = 1;
-              if (item.endDateWeek) {
-                diffDates =
-                  getDiffDays(item.endDateWeek, item.startDateWeek) + 1;
-              }
-              const tooltipText = generateTooltipText(
-                item,
-                ECalendarViewType.month,
-                is12Hour,
-              );
-              const width = `${cellWidth * diffDates - CALENDAR_CONSTANTS.EVENT_ITEM_PADDING}px`;
+                  let diffDates = 1;
+                  if (item.endDateWeek) {
+                    diffDates =
+                      getDiffDays(item.endDateWeek, item.startDateWeek) + 1;
+                  }
+                  const tooltipText = generateTooltipText(
+                    item,
+                    ECalendarViewType.month,
+                    is12Hour,
+                  );
+                  const width = `${cellWidth * diffDates - CALENDAR_CONSTANTS.EVENT_ITEM_PADDING}px`;
 
-              return (
-                <div
-                  key={item.id || `${item.startDate}-${index}`}
-                  className={styles.eventItem}
-                  id={item.id}
-                  style={{ width, backgroundColor: item.color }}
-                  title={tooltipText}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEventClick?.(item);
-                  }}
-                >
-                  {item.title}
-                </div>
-              );
-            })}
-            {hiddenEventsCount > 0 && (
-              <div className={styles.moreEventsContainer}>
-                <button
-                  className={styles.moreEvents}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!showPopover) {
-                      setAnchorEl(e.currentTarget);
-                      setShowPopover(true);
-                    }
-                    onMoreClick?.(dateObj);
-                  }}
-                >
-                  + {hiddenEventsCount} more
-                </button>
-                {showPopover && anchorEl && (
-                  <Popover
-                    dateObj={dateObj}
-                    events={allDayEvents}
-                    onEventClick={onEventClick}
-                    onClose={() => setShowPopover(false)}
-                    anchorEl={anchorEl}
-                    is12Hour={is12Hour}
-                  />
+                  return (
+                    <div
+                      key={item.id || `${item.startDate}-${index}`}
+                      className={styles.eventItem}
+                      id={item.id}
+                      style={{ width, backgroundColor: item.color }}
+                      title={tooltipText}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEventClick?.(item);
+                      }}
+                    >
+                      {item.title}
+                    </div>
+                  );
+                })}
+                {hiddenEventsCount > 0 && (
+                  <div className={styles.moreEventsContainer}>
+                    <button
+                      className={styles.moreEvents}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!showPopover) {
+                          setAnchorEl(e.currentTarget);
+                          setShowPopover(true);
+                        }
+                        onMoreClick?.(dateObj);
+                      }}
+                    >
+                      + {hiddenEventsCount} more
+                    </button>
+                    {showPopover && anchorEl && (
+                      <Popover
+                        dateObj={dateObj}
+                        events={allDayEvents}
+                        onEventClick={onEventClick}
+                        onClose={() => setShowPopover(false)}
+                        anchorEl={anchorEl}
+                        is12Hour={is12Hour}
+                      />
+                    )}
+                  </div>
                 )}
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </td>
