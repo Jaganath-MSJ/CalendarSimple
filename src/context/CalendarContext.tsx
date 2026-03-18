@@ -13,6 +13,7 @@ import { CALENDAR_ACTIONS } from "../constants";
 interface CalendarState {
   selectedDate: DateType;
   view: ECalendarViewType;
+  customDays?: number;
 }
 
 type CalendarAction =
@@ -43,12 +44,27 @@ function calendarReducer(
     case CALENDAR_ACTIONS.SET_VIEW:
       return { ...state, view: action.payload };
     case CALENDAR_ACTIONS.NEXT: {
+      if (state.view === ECalendarViewType.customDays) {
+        return {
+          ...state,
+          selectedDate: state.selectedDate.add(state.customDays || 3, "day"),
+        };
+      }
       const unit = (
         state.view === ECalendarViewType.schedule ? "day" : state.view
       ) as ManipulateType;
       return { ...state, selectedDate: state.selectedDate.add(1, unit) };
     }
     case CALENDAR_ACTIONS.PREV: {
+      if (state.view === ECalendarViewType.customDays) {
+        return {
+          ...state,
+          selectedDate: state.selectedDate.subtract(
+            state.customDays || 3,
+            "day",
+          ),
+        };
+      }
       const unit = (
         state.view === ECalendarViewType.schedule ? "day" : state.view
       ) as ManipulateType;
@@ -71,16 +87,19 @@ interface CalendarProviderProps {
   children: ReactNode;
   initialDate: DateType;
   initialView: ECalendarViewType;
+  initialCustomDays?: number;
 }
 
 export function CalendarProvider({
   children,
   initialDate,
   initialView,
+  initialCustomDays,
 }: CalendarProviderProps) {
   const [state, dispatch] = useReducer(calendarReducer, {
     selectedDate: initialDate,
     view: initialView,
+    customDays: initialCustomDays,
   });
 
   const value = useMemo(() => ({ state, dispatch }), [state]);

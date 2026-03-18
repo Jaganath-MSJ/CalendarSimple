@@ -45,6 +45,7 @@ interface HeaderProps extends Pick<
   | "onNavigate"
   | "onViewChange"
   | "events"
+  | "customDays"
 > {
   headerClassName?: string;
 }
@@ -56,6 +57,7 @@ function Header({
   onNavigate,
   onViewChange,
   events,
+  customDays,
 }: HeaderProps) {
   const { state, dispatch } = useCalendar();
   const { selectedDate, view } = state;
@@ -67,9 +69,17 @@ function Header({
     const unit = (
       view === ECalendarViewType.schedule ? "day" : view
     ) as ManipulateType;
-    const predictiveDate = isAdd
-      ? selectedDate.add(1, unit)
-      : selectedDate.subtract(1, unit);
+
+    let predictiveDate;
+    if (view === ECalendarViewType.customDays) {
+      predictiveDate = isAdd
+        ? selectedDate.add(customDays || 3, "day")
+        : selectedDate.subtract(customDays || 3, "day");
+    } else {
+      predictiveDate = isAdd
+        ? selectedDate.add(1, unit)
+        : selectedDate.subtract(1, unit);
+    }
 
     onNavigate?.(convertToDate(predictiveDate));
   };
@@ -110,6 +120,20 @@ function Header({
         }
         return `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR)}`;
       }
+    }
+    if (view === ECalendarViewType.customDays) {
+      const days = customDays || 3;
+      const endDate = selectedDate.add(days - 1, "day");
+      if (selectedDate.month() !== endDate.month()) {
+        if (selectedDate.year() !== endDate.year()) {
+          return `${formatDate(selectedDate, DATE_FORMATS.SHORT_MONTH_YEAR)} - ${formatDate(endDate, DATE_FORMATS.SHORT_MONTH_YEAR)}`;
+        }
+        return `${formatDate(selectedDate, DATE_FORMATS.SHORT_MONTH)} - ${formatDate(endDate, DATE_FORMATS.SHORT_MONTH_YEAR)}`;
+      }
+      if (days === 1) {
+        return formatDate(selectedDate, DATE_FORMATS.MONTH_DAY_YEAR);
+      }
+      return `${formatDate(selectedDate, DATE_FORMATS.DAY_DATE_SHORT_MONTH)} - ${formatDate(endDate, DATE_FORMATS.DAY_DATE_SHORT_MONTH)}, ${formatDate(selectedDate, "YYYY")}`;
     }
     if (view === ECalendarViewType.schedule) {
       if (events && events.length > 0) {
@@ -178,6 +202,11 @@ function Header({
               {option.label}
             </option>
           ))}
+          {customDays && customDays > 0 && customDays < 11 && (
+            <option key={customDays} value={ECalendarViewType.customDays}>
+              {`${customDays} Days`}
+            </option>
+          )}
         </select>
         <select
           className={styles.select}

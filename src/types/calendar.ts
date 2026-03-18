@@ -49,6 +49,7 @@ export const ECalendarViewType = {
   week: "week",
   day: "day",
   schedule: "schedule",
+  customDays: "customDays",
 } as const;
 
 export type ECalendarViewType =
@@ -81,6 +82,7 @@ export interface CalendarProps {
   weekStartsOn?: number; // 0 (Sunday) to 6 (Saturday)
   weekEndsOn?: number; // 0 to 6
   showAdjacentMonths?: boolean;
+  customDays?: number;
 
   // --- Layout ---
   width?: number | string;

@@ -15,6 +15,7 @@ import DayView from "./components/views/day_view/DayView";
 import WeekView from "./components/views/week_view/WeekView";
 import MonthView from "./components/views/month_view/MonthView";
 import ScheduleView from "./components/views/schedule_view/ScheduleView";
+import CustomDaysView from "./components/views/custom_days_view/CustomDaysView";
 import { CalendarProvider, useCalendar } from "./context/CalendarContext";
 
 function CalendarContent({
@@ -35,6 +36,7 @@ function CalendarContent({
   weekEndsOn,
   minHour,
   maxHour,
+  customDays,
   theme,
   classNames,
   ...restProps
@@ -77,14 +79,17 @@ function CalendarContent({
           <MonthView
             {...commonProps}
             {...restProps}
-            onDateClick={restProps.onDateClick!}
-            onMoreClick={restProps.onMoreClick!}
+            onDateClick={restProps.onDateClick}
+            onMoreClick={restProps.onMoreClick}
             width={width}
             height={height}
           />
         );
       case ECalendarViewType.schedule:
         return <ScheduleView {...commonProps} />;
+      case ECalendarViewType.customDays:
+        if (!customDays || customDays < 1 || customDays > 10) return null;
+        return <CustomDaysView {...commonProps} customDays={customDays} />;
       default:
         return null;
     }
@@ -107,6 +112,7 @@ function CalendarContent({
         onViewChange={onViewChange}
         pastYearLength={pastYearLength}
         futureYearLength={futureYearLength}
+        customDays={customDays}
       />
       {getViewComponent(view)}
     </section>
@@ -138,7 +144,11 @@ function Calendar({
   const validEvents = useEvents(allProps.events);
 
   return (
-    <CalendarProvider initialDate={initialDate} initialView={allProps.view}>
+    <CalendarProvider
+      initialDate={initialDate}
+      initialView={allProps.view}
+      initialCustomDays={allProps.customDays}
+    >
       <div
         ref={containerRef}
         style={{
