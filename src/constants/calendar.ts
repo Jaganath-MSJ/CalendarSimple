@@ -48,7 +48,7 @@ const MONTHS = {
 
 export const MONTH_LIST: MonthListType[] = Object.values(MONTHS);
 
-export const CALENDER_STRINGS = {
+export const CALENDAR_STRINGS = {
   MONTH: "monthDropdown",
   YEAR: "yearDropdown",
 };
@@ -60,7 +60,7 @@ export const VIEW_OPTIONS = [
   { label: "Schedule", value: ECalendarViewType.schedule },
 ];
 
-export const defaultCalenderProps = {
+export const defaultCalendarProps = {
   events: [],
   view: ECalendarViewType.month,
   is12Hour: false,

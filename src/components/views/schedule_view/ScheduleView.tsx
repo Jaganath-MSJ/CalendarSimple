@@ -8,7 +8,7 @@ import {
   generateTooltipText,
 } from "../../../utils";
 import styles from "./ScheduleView.module.css";
-import { DATE_FORMATS, CALENDAR_CONSTANTS } from "../../../constants";
+import { DATE_FORMATS, LAYOUT_CONSTANTS } from "../../../constants";
 import useScheduleView from "../../../hooks/useScheduleView";
 
 interface ScheduleViewProps extends Pick<
@@ -64,7 +64,7 @@ export default function ScheduleView({
               >
                 {dayEvents.map((event, index) => {
                   const eventColor =
-                    event.color || CALENDAR_CONSTANTS.DEFAULT_EVENT_COLOR;
+                    event.color || LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
 
                   const isFirstEventOfDay = index === 0;
 

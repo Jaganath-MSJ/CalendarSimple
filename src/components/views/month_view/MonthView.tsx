@@ -1,7 +1,7 @@
 import React, { CSSProperties, useCallback, useMemo } from "react";
 import cx from "classnames";
 import { CalendarContentProps } from "../../../types";
-import { DAY_LIST_NAME, CALENDAR_CONSTANTS } from "../../../constants";
+import { DAY_LIST_NAME, LAYOUT_CONSTANTS } from "../../../constants";
 import {
   dateFn,
   convertToDate,
@@ -63,7 +63,7 @@ function MonthView({
       restProps.maxEvents ??
       calculateMaxEvents(
         typeof height === "number" ? height : 0,
-        calendarGrid.length || CALENDAR_CONSTANTS.MIN_ROWS,
+        calendarGrid.length || LAYOUT_CONSTANTS.MIN_ROWS,
       ),
     [restProps.maxEvents, height, calendarGrid.length],
   );

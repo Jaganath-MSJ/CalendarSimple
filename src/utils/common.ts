@@ -6,7 +6,7 @@
  * and spatial calculations like the maximum number of viewable events per cell.
  */
 
-import { CALENDAR_CONSTANTS } from "../constants";
+import { LAYOUT_CONSTANTS } from "../constants";
 import { CalendarEvent } from "../types";
 import { dateFn } from "./date";
 
@@ -17,7 +17,7 @@ import { dateFn } from "./date";
  * @returns The maximum number of events to display
  */
 export function calculateMaxEvents(height: number, rowsInView: number): number {
-  const { DATE_LABEL_HEIGHT, CELL_PADDING, EVENT_HEIGHT } = CALENDAR_CONSTANTS;
+  const { DATE_LABEL_HEIGHT, CELL_PADDING, EVENT_HEIGHT } = LAYOUT_CONSTANTS;
 
   const cellHeight = height / rowsInView;
   const availableHeight = cellHeight - DATE_LABEL_HEIGHT - CELL_PADDING;

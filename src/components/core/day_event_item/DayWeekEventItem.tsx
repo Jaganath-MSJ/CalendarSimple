@@ -3,7 +3,7 @@ import cx from "classnames";
 import { formatDate, generateTooltipText } from "../../../utils";
 import { CalendarContentProps } from "../../../types";
 import { DayEventLayout } from "../../../hooks/useDayEventLayout";
-import { CALENDAR_CONSTANTS, DATE_FORMATS } from "../../../constants";
+import { LAYOUT_CONSTANTS, DATE_FORMATS } from "../../../constants";
 import styles from "./DayWeekEventItem.module.css";
 
 interface DayWeekEventItemProps extends Pick<
@@ -19,13 +19,13 @@ export function DayWeekEventItem({
   is12Hour,
   classNames,
 }: DayWeekEventItemProps) {
-  const eventColor = item.event.color || CALENDAR_CONSTANTS.DEFAULT_EVENT_COLOR;
+  const eventColor = item.event.color || LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
   const tooltipText = generateTooltipText(item.event, "day", is12Hour);
 
   const isSmall =
-    item.height < CALENDAR_CONSTANTS.SMALL_EVENT_HEIGHT &&
-    item.height >= CALENDAR_CONSTANTS.TINY_EVENT_HEIGHT;
-  const isTiny = item.height < CALENDAR_CONSTANTS.TINY_EVENT_HEIGHT;
+    item.height < LAYOUT_CONSTANTS.SMALL_EVENT_HEIGHT &&
+    item.height >= LAYOUT_CONSTANTS.TINY_EVENT_HEIGHT;
+  const isTiny = item.height < LAYOUT_CONSTANTS.TINY_EVENT_HEIGHT;
 
   return (
     <div

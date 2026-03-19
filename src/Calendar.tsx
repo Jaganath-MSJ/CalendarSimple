@@ -5,7 +5,7 @@ import {
   CalendarContentProps,
   ECalendarViewType,
 } from "./types";
-import { defaultCalenderProps, CALENDAR_CONSTANTS } from "./constants";
+import { defaultCalendarProps, LAYOUT_CONSTANTS } from "./constants";
 import { dateFn } from "./utils";
 import useResizeObserver from "./hooks/useResizeObserver";
 import useEvents from "./hooks/useEvents";
@@ -122,10 +122,10 @@ function CalendarContent({
 function Calendar({
   selectedDate,
   ...props
-}: CalendarProps = defaultCalenderProps) {
+}: CalendarProps = defaultCalendarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const allProps = { ...defaultCalenderProps, ...props };
+  const allProps = { ...defaultCalendarProps, ...props };
   const { width: observedWidth, height: observedHeight } = useResizeObserver(
     containerRef,
     !!allProps.width && !!allProps.height,
@@ -136,7 +136,7 @@ function Calendar({
   const mainHeight = allProps.height ?? observedHeight ?? 0;
   const height =
     (typeof mainHeight === "number" ? mainHeight : 0) -
-    CALENDAR_CONSTANTS.HEADER_HEIGHT;
+    LAYOUT_CONSTANTS.HEADER_HEIGHT;
 
   const initialDate = useMemo(() => dateFn(selectedDate), [selectedDate]);
 

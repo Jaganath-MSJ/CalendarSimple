@@ -8,7 +8,7 @@ import {
 import { getDiffDays, generateTooltipText, DateType } from "../../../utils";
 import styles from "./MonthEventItem.module.css";
 import Popover from "../../ui/popover/Popover";
-import { CALENDAR_CONSTANTS, defaultTheme } from "../../../constants";
+import { LAYOUT_CONSTANTS, defaultTheme } from "../../../constants";
 
 interface MonthEventItemProps extends Pick<
   CalendarContentProps,
@@ -119,7 +119,7 @@ function MonthEventItem({
                     ECalendarViewType.month,
                     is12Hour,
                   );
-                  const width = `${cellWidth * diffDates - CALENDAR_CONSTANTS.EVENT_ITEM_PADDING}px`;
+                  const width = `${cellWidth * diffDates - LAYOUT_CONSTANTS.EVENT_ITEM_PADDING}px`;
 
                   return (
                     <div

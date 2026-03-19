@@ -6,7 +6,7 @@ import {
   MonthListType,
 } from "../../types";
 import {
-  CALENDER_STRINGS,
+  CALENDAR_STRINGS,
   MONTH_LIST,
   DATE_FORMATS,
   CALENDAR_ACTIONS,
@@ -210,8 +210,8 @@ function Header({
         </select>
         <select
           className={styles.select}
-          id={CALENDER_STRINGS.MONTH}
-          name={CALENDER_STRINGS.MONTH}
+          id={CALENDAR_STRINGS.MONTH}
+          name={CALENDAR_STRINGS.MONTH}
           value={getMonth(selectedDate)}
           onChange={(e) => onDropdownClick(e, EYearOption.month)}
         >
@@ -223,8 +223,8 @@ function Header({
         </select>
         <select
           className={styles.select}
-          id={CALENDER_STRINGS.YEAR}
-          name={CALENDER_STRINGS.YEAR}
+          id={CALENDAR_STRINGS.YEAR}
+          name={CALENDAR_STRINGS.YEAR}
           value={getYear(selectedDate)}
           onChange={(e) => onDropdownClick(e, EYearOption.year)}
         >

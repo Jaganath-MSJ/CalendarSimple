@@ -1,4 +1,4 @@
-﻿export const defaultTheme = {
+export const defaultTheme = {
   default: {
     color: "#000",
     bgColor: "#fff",
@@ -13,7 +13,7 @@
   },
 };
 
-export const CALENDAR_CONSTANTS = {
+export const LAYOUT_CONSTANTS = {
   HEADER_HEIGHT: 122,
   DATE_LABEL_HEIGHT: 28,
   CELL_PADDING: 8,
