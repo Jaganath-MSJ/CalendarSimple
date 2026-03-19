@@ -6,9 +6,12 @@ This document provides a comprehensive breakdown of the features available in th
 
 The calendar is designed to provide users with multiple perspectives of their schedule. You can switch between these views using the `view` prop (`ECalendarViewType`).
 
-- **Month View (`"month"`)**: The default view, displaying a traditional grid of the entire month. Events are stacked on each day, and if there are too many events to fit, a customizable "+X more" button appears. You can configure which days of the week begin and end the layout (e.g., standard Monday-Friday work week) via `weekStartsOn` and `weekEndsOn`.
+- **Month View (`"month"`)**: The default view, displaying a traditional grid of the entire month. Events are stacked on each day, and if there are too many events to fit, a customizable "+X more" button appears.
+  - **Adjacent Months**: Use the `showAdjacentMonths` prop to toggle the visibility of dates from the previous and next months in the current month's grid.
+  - **Week Boundaries**: You can configure which days of the week begin and end the layout (e.g., standard Monday-Friday work week) via `weekStartsOn` and `weekEndsOn`.
 - **Week View (`"week"`)**: Displays a 7-day column layout (or custom range using `weekStartsOn`/`weekEndsOn`) with a time grid. Events are rendered as blocks spanning their respective time slots, making it easy to identify overlapping schedules and free time.
 - **Day View (`"day"`)**: Similar to the Week View but focused entirely on a single day. This is perfect for detailed daily planning and provides maximum horizontal space for event details.
+- **Custom Days View (`"customDays"`)**: A flexible time-grid view that displays a specific number of days, starting from the current `selectedDate`. This is ideal for 3-day or 5-day "short week" views. The number of days is controlled by the `customDays` prop.
 - **Schedule View (`"schedule"`)**: A chronological list of upcoming events grouped by date. This view is highly optimized for mobile devices or sidebars where space is limited and users just need to see "what's next."
 
 ## ✨ Event Handling

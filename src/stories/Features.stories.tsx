@@ -153,3 +153,22 @@ export const AutoScrollToCurrentTime: Story = {
     autoScrollToCurrentTime: true,
   },
 };
+
+// Story 9: Show Adjacent Months
+export const ShowAdjacentMonthsEnabled: Story = {
+  args: {
+    view: ECalendarViewType.month,
+    events: mockEvents,
+    selectedDate: today.toDate(),
+    showAdjacentMonths: true,
+  },
+};
+
+export const ShowAdjacentMonthsDisabled: Story = {
+  args: {
+    view: ECalendarViewType.month,
+    events: mockEvents,
+    selectedDate: today.toDate(),
+    showAdjacentMonths: false,
+  },
+};

@@ -130,6 +130,19 @@ const ScheduleApp = () => (
 );
 ```
 
+### Custom Days View Example
+
+Display a specific number of days in a time-grid layout.
+
+```tsx
+import React from "react";
+import Calendar from "calendar-simple";
+
+const ThreeDayApp = () => (
+  <Calendar view="customDays" customDays={3} is12Hour={true} />
+);
+```
+
 ## API Reference
 
 ### Props
@@ -138,7 +151,7 @@ const ScheduleApp = () => (
 | ------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------- | ----------------- |
 | `events`                  | `CalendarEvent[]`                                      | Array of event data objects to display.                                           | `[]`              |
 | `selectedDate`            | `Date`                                                 | The currently selected date object.                                               | `undefined`       |
-| `view`                    | `ECalendarViewType`                                    | The current view: `"month"`, `"week"`, `"day"`, or `"schedule"`.                  | `"month"`         |
+| `view`                    | `ECalendarViewType`                                    | The current view: `"month"`, `"week"`, `"day"`, `"schedule"`, or `"customDays"`.  | `"month"`         |
 | `selectable`              | `boolean`                                              | Enables visual selection state.                                                   | `false`           |
 | `is12Hour`                | `boolean`                                              | Display time in 12-hour AM/PM format instead of 24-hour format.                   | `false`           |
 | `onDateClick`             | `(date: Date) => void`                                 | Callback function fired when a date is clicked.                                   | `undefined`       |
@@ -160,6 +173,8 @@ const ScheduleApp = () => (
 | `maxHour`                 | `number`                                               | Maximum hour (0-24) to display in day and week view time grids.                   | `24`              |
 | `weekStartsOn`            | `number`                                               | Start day of the week (0 = Sunday, 1 = Monday, etc.).                             | `0`               |
 | `weekEndsOn`              | `number`                                               | End day of the week (0 = Sunday, 1 = Monday, etc.).                               | `6`               |
+| `showAdjacentMonths`      | `boolean`                                              | Show dates from the previous and next months in the month view grid.              | `false`           |
+| `customDays`              | `number`                                               | The number of days to display in the `customDays` view.                           | `3`               |
 
 ### Types
 
@@ -179,7 +194,7 @@ interface CalendarEvent {
 #### `ECalendarViewType` & `EDayType`
 
 ```typescript
-type ECalendarViewType = "month" | "week" | "day" | "schedule";
+type ECalendarViewType = "month" | "week" | "day" | "schedule" | "customDays";
 type EDayType = "full" | "half";
 ```
 
