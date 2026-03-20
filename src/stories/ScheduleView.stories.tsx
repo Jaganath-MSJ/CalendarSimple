@@ -28,14 +28,14 @@ const mockEvents: CalendarEvent[] = [
     startDate: today.hour(9).minute(0).format("YYYY-MM-DDTHH:mm:00"),
     endDate: today.hour(10).minute(0).format("YYYY-MM-DDTHH:mm:00"),
     title: "Morning Briefing",
-    color: "#3B82F6",
+    style: { backgroundColor: "#3B82F6" },
   },
   {
     id: "2",
     startDate: today.hour(13).minute(0).format("YYYY-MM-DDTHH:mm:00"),
     endDate: today.hour(14).minute(30).format("YYYY-MM-DDTHH:mm:00"),
     title: "Team Lunch",
-    color: "#10B981",
+    style: { backgroundColor: "#10B981" },
   },
   {
     id: "3",
@@ -50,7 +50,7 @@ const mockEvents: CalendarEvent[] = [
       .minute(0)
       .format("YYYY-MM-DDTHH:mm:00"),
     title: "Client Follow-up",
-    color: "#F59E0B",
+    style: { backgroundColor: "#F59E0B" },
   },
   {
     id: "4",
@@ -65,7 +65,7 @@ const mockEvents: CalendarEvent[] = [
       .minute(0)
       .format("YYYY-MM-DDTHH:mm:00"),
     title: "Design Review",
-    color: "#8B5CF6",
+    style: { backgroundColor: "#8B5CF6" },
   },
   {
     id: "5",
@@ -80,7 +80,7 @@ const mockEvents: CalendarEvent[] = [
       .minute(30)
       .format("YYYY-MM-DDTHH:mm:00"),
     title: "Weekly Sync",
-    color: "#EF4444",
+    style: { backgroundColor: "#EF4444" },
   },
 ];
 

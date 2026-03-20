@@ -1,9 +1,11 @@
-﻿export interface CalendarEvent {
+import { CSSProperties } from "react";
+
+export interface CalendarEvent {
   id?: string;
   startDate: string;
   endDate?: string;
   title: string;
-  color?: string;
+  style?: CSSProperties;
   [key: string]: unknown;
 }
 

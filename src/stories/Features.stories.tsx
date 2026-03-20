@@ -26,31 +26,31 @@ const mockEvents: CalendarEvent[] = [
     id: "1",
     startDate: today.format("YYYY-MM-DD"),
     title: "Morning Meeting",
-    color: "#3B82F6",
+    style: { backgroundColor: "#3B82F6" },
   },
   {
     id: "2",
     startDate: today.format("YYYY-MM-DD"),
     title: "Lunch Break",
-    color: "#F59E0B",
+    style: { backgroundColor: "#F59E0B" },
   },
   {
     id: "3",
     startDate: today.format("YYYY-MM-DD"),
     title: "Focus Time",
-    color: "#10B981",
+    style: { backgroundColor: "#10B981" },
   },
   {
     id: "4",
     startDate: today.format("YYYY-MM-DD"),
     title: "Team Sync",
-    color: "#8B5CF6",
+    style: { backgroundColor: "#8B5CF6" },
   },
   {
     id: "5",
     startDate: today.format("YYYY-MM-DD"),
     title: "Project Review",
-    color: "#EF4444",
+    style: { backgroundColor: "#EF4444" },
   },
 ];
 

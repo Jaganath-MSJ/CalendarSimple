@@ -28,35 +28,35 @@ const mockEvents: CalendarEvent[] = [
     startDate: today.hour(9).minute(0).format("YYYY-MM-DDTHH:mm:00"),
     endDate: today.hour(10).minute(0).format("YYYY-MM-DDTHH:mm:00"),
     title: "Morning Kickoff",
-    color: "#3B82F6",
+    style: { backgroundColor: "#3B82F6" },
   },
   {
     id: "2",
     startDate: today.hour(10).minute(30).format("YYYY-MM-DDTHH:mm:00"),
     endDate: today.hour(11).minute(45).format("YYYY-MM-DDTHH:mm:00"),
     title: "Design Sync",
-    color: "#10B981",
+    style: { backgroundColor: "#10B981" },
   },
   {
     id: "3", // Overlapping event
     startDate: today.hour(10).minute(0).format("YYYY-MM-DDTHH:mm:00"),
     endDate: today.hour(11).minute(0).format("YYYY-MM-DDTHH:mm:00"),
     title: "Urgent Meeting",
-    color: "#EF4444",
+    style: { backgroundColor: "#EF4444" },
   },
   {
     id: "4",
     startDate: today.hour(13).minute(0).format("YYYY-MM-DDTHH:mm:00"),
     endDate: today.hour(14).minute(0).format("YYYY-MM-DDTHH:mm:00"),
     title: "Lunch & Learn",
-    color: "#F59E0B",
+    style: { backgroundColor: "#F59E0B" },
   },
   {
     id: "5",
     startDate: today.hour(15).minute(0).format("YYYY-MM-DDTHH:mm:00"),
     endDate: today.hour(16).minute(0).format("YYYY-MM-DDTHH:mm:00"),
     title: "Project Review",
-    color: "#8B5CF6",
+    style: { backgroundColor: "#8B5CF6" },
   },
 ];
 

@@ -138,6 +138,7 @@ function MonthView({
                   onEventClick={onEventClick}
                   onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
                   showAdjacentMonths={showAdjacentMonths}
+                  classNames={classNames}
                 />
               ))}
             </tr>

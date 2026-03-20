@@ -20,7 +20,7 @@ import {
   ECalendarViewType,
   EventListType,
 } from "../../../types";
-import { DATE_FORMATS } from "../../../constants";
+import { DATE_FORMATS, LAYOUT_CONSTANTS } from "../../../constants";
 
 interface PopoverProps extends Pick<
   CalendarContentProps,
@@ -148,7 +148,10 @@ function Popover({
                 [styles.endAfter]: isEndAfter,
               })}
               id={item.id}
-              style={{ backgroundColor: item.color }}
+              style={{
+                backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                ...item.style,
+              }}
               onClick={(e) => {
                 e.stopPropagation();
                 onEventClick?.(item);

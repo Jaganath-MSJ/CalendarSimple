@@ -63,9 +63,6 @@ export default function ScheduleView({
                 className={cx(styles.dateGroup, classNames?.scheduleDateGroup)}
               >
                 {dayEvents.map((event, index) => {
-                  const eventColor =
-                    event.color || LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
-
                   const isFirstEventOfDay = index === 0;
 
                   return (
@@ -122,7 +119,11 @@ export default function ScheduleView({
                       <div className={styles.dotTimeColumn}>
                         <div
                           className={styles.eventDot}
-                          style={{ backgroundColor: eventColor }}
+                          style={{
+                            backgroundColor:
+                              event.style?.backgroundColor ||
+                              LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                          }}
                         />
                         <div
                           className={cx(
@@ -140,6 +141,10 @@ export default function ScheduleView({
                           styles.eventTitleColumn,
                           classNames?.scheduleTitle,
                         )}
+                        style={{
+                          ...event.style,
+                          backgroundColor: "transparent",
+                        }}
                       >
                         {renderEventTitle(event, dateKey)}
                       </div>

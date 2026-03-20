@@ -10,6 +10,7 @@ import useAllDayBanner, {
   BannerLayoutEvent,
 } from "../../../hooks/useAllDayBanner";
 import styles from "./AllDayBanner.module.css";
+import { LAYOUT_CONSTANTS } from "../../../constants";
 
 interface AllDayBannerProps extends Pick<
   CalendarContentProps,
@@ -115,8 +116,6 @@ export default function AllDayBanner({
             const widthPct = ((endIndex - startIndex + 1) / totalCols) * 100;
             const topPx = row * 24 + 2;
 
-            const bgColor = event.color || "#1a73e8";
-
             return (
               <div
                 key={event.id || `banner-evt-${idx}`}
@@ -128,10 +127,8 @@ export default function AllDayBanner({
                   top: `${topPx}px`,
                   left: `${leftPct}%`,
                   width: `calc(${widthPct}% - 4px)`,
-                  backgroundColor: bgColor,
-                  // Lighter background with darker border for pastel look as per docs
-                  // We'll approximate this by just using opacity on background or keeping it solid depending on design.
-                  // For simplicity, using solid color for now as per minimal requirements:
+                  backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                  ...event.style,
                 }}
                 onClick={() => onEventClick?.(event)}
                 title={generateTooltipText(

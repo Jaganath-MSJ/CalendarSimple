@@ -12,7 +12,12 @@ import { LAYOUT_CONSTANTS, defaultTheme } from "../../../constants";
 
 interface MonthEventItemProps extends Pick<
   CalendarContentProps,
-  "onEventClick" | "theme" | "maxEvents" | "is12Hour" | "showAdjacentMonths"
+  | "onEventClick"
+  | "theme"
+  | "maxEvents"
+  | "is12Hour"
+  | "showAdjacentMonths"
+  | "classNames"
 > {
   dataClassName?: string;
   selectedClassName?: string;
@@ -50,6 +55,7 @@ function MonthEventItem({
   totalEvents = 0,
   is12Hour,
   showAdjacentMonths,
+  classNames,
 }: MonthEventItemProps) {
   const [showPopover, setShowPopover] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -124,9 +130,13 @@ function MonthEventItem({
                   return (
                     <div
                       key={item.id || `${item.startDate}-${index}`}
-                      className={styles.eventItem}
+                      className={cx(styles.eventItem, classNames?.event)}
                       id={item.id}
-                      style={{ width, backgroundColor: item.color }}
+                      style={{
+                        width,
+                        backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                        ...item.style,
+                      }}
                       title={tooltipText}
                       onClick={(e) => {
                         e.stopPropagation();

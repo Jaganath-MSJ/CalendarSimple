@@ -19,7 +19,6 @@ export function DayWeekEventItem({
   is12Hour,
   classNames,
 }: DayWeekEventItemProps) {
-  const eventColor = item.event.color || LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
   const tooltipText = generateTooltipText(item.event, "day", is12Hour);
 
   const isSmall =
@@ -40,8 +39,9 @@ export function DayWeekEventItem({
           left: `${item.left}%`,
           zIndex: item.zIndex,
           "--event-width": `${item.width}%`,
-          backgroundColor: eventColor,
+          backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
           position: "absolute",
+          ...item.event.style,
         } as CSSProperties
       }
       id={item.event.id}
