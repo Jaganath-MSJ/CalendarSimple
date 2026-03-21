@@ -97,5 +97,5 @@ These scenarios ensure that the calendar's internal math, layout engine, and dat
 
 ### 2.5 Data Integrity (Missing Fields)
 
-- **Missing Title/ID**: Event objects without `id`, or `color`. Ensure auto-generated IDs and default labels ("No Title") are provided natively to prevent crash.
+- **Missing Title/ID**: Event objects without `id`, or `style`. Ensure auto-generated IDs and default labels ("No Title") are provided natively to prevent crash.
 - **Invalid Dates**: Non-standard string like `"fake-date"` passed. Ensure parsing functions exit cleanly and do not crash the component tree.

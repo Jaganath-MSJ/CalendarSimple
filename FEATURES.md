@@ -18,7 +18,7 @@ The calendar is designed to provide users with multiple perspectives of their sc
 
 `calendar-simple` provides robust capabilities for rendering and interacting with events.
 
-- **Data Structure**: Pass an array of `CalendarEvent` objects to the `events` prop. Each event strictly requires a `startDate` and a `title`, but optionally accepts an `endDate`, custom `color`, and an `id`.
+- **Data Structure**: Pass an array of `CalendarEvent` objects to the `events` prop. Each event strictly requires a `startDate` and a `title`, but optionally accepts an `endDate`, custom `style`, and an `id`.
 - **Custom Metadata**: The `CalendarEvent` interface allows any `[key: string]: unknown`, meaning you can attach custom database IDs, descriptions, or payload data directly to the event object. This metadata is returned to you intact when the event is clicked.
 - **Time Parsing**: `startDate` and `endDate` gracefully handle both Date-only formats (`YYYY-MM-DD`) for full-day events, and DateTime formats (`YYYY-MM-DDTHH:mm:ss`) for specific time blocks.
 

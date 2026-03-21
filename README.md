@@ -12,7 +12,7 @@ A lightweight, customizable, and responsive calendar component for React applica
 ## Features
 
 - **🗓️ Multiple Views**: Support for Month, Week, Day, and Schedule views, giving users different perspectives of their events.
-- **✨ Event Handling**: Built-in support for displaying and managing events with custom colors.
+- **✨ Event Handling**: Built-in support for displaying and managing events with custom styling.
 - **📱 Responsive**: Automatically adjusts layout based on container dimensions.
 - **🎨 Theming & Customization**: Fully customizable colors via the `theme` prop and individual element styling via `classNames`.
 - **🕒 Time Formatting**: Options for 12-hour (AM/PM) and 24-hour time formats.
@@ -74,21 +74,21 @@ const MyCalendar = () => {
       id: "1",
       startDate: "2024-02-14",
       title: "Valentine's Day",
-      color: "#ffcccc",
+      style: { backgroundColor: "#ffcccc" },
     },
     {
       id: "2",
       startDate: "2024-02-20",
       endDate: "2024-02-22",
       title: "Tech Conference",
-      color: "#e6f7ff",
+      style: { backgroundColor: "#e6f7ff" },
     },
     {
       id: "3",
       startDate: "2024-02-21T10:00:00",
       endDate: "2024-02-21T12:00:00",
       title: "Team Meeting",
-      color: "#cce5ff",
+      style: { backgroundColor: "#cce5ff" },
     },
   ];
 
@@ -186,7 +186,7 @@ interface CalendarEvent {
   startDate: string; // Format: YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss
   endDate?: string; // Format: YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss
   title: string; // Event title or description
-  color?: string; // CSS color string for event background
+  style?: CSSProperties; // React CSS properties for the event item
   [key: string]: unknown; // Allow any custom metadata fields
 }
 ```
