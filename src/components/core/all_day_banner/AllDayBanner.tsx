@@ -14,7 +14,7 @@ import { LAYOUT_CONSTANTS } from "../../../constants";
 
 interface AllDayBannerProps extends Pick<
   CalendarContentProps,
-  "maxEvents" | "onEventClick" | "classNames" | "is12Hour"
+  "maxEvents" | "onEventClick" | "classNames" | "is12Hour" | "renderEvent"
 > {
   days: DateType[];
   events: CalendarEvent[];
@@ -27,6 +27,7 @@ export default function AllDayBanner({
   onEventClick,
   classNames,
   is12Hour,
+  renderEvent,
 }: AllDayBannerProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const MAX_VISIBLE_ROWS = maxEvents ?? 3;
@@ -137,7 +138,11 @@ export default function AllDayBanner({
                   is12Hour,
                 )}
               >
-                <span className={styles.title}>{event.title}</span>
+                {renderEvent ? (
+                  renderEvent(event)
+                ) : (
+                  <span className={styles.title}>{event.title}</span>
+                )}
               </div>
             );
           },

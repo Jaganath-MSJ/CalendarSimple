@@ -14,6 +14,8 @@ interface DayColumnProps extends Pick<
   | "showCurrentTime"
   | "minHour"
   | "maxHour"
+  | "renderEvent"
+  | "renderHourCell"
 > {
   dayEvents: DayEventLayout[];
   isToday?: boolean;
@@ -28,6 +30,8 @@ function DayColumn({
   showCurrentTime,
   minHour,
   maxHour,
+  renderEvent,
+  renderHourCell,
 }: DayColumnProps) {
   const hours = Array.from(
     { length: maxHour - minHour },
@@ -37,10 +41,9 @@ function DayColumn({
   return (
     <>
       {hours.map((hour) => (
-        <div
-          key={hour}
-          className={cx(styles.eventSlot, classNames?.timeSlot)}
-        />
+        <div key={hour} className={cx(styles.eventSlot, classNames?.timeSlot)}>
+          {renderHourCell?.(new Date(new Date().setHours(hour, 0, 0, 0)))}
+        </div>
       ))}
       {dayEvents.map((item, index) => (
         <DayWeekEventItem
@@ -49,6 +52,7 @@ function DayColumn({
           onEventClick={onEventClick}
           is12Hour={is12Hour}
           classNames={classNames}
+          renderEvent={renderEvent}
         />
       ))}
       {isToday && showCurrentTime && (

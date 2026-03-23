@@ -27,6 +27,9 @@ interface WeekViewProps extends Pick<
   | "weekEndsOn"
   | "minHour"
   | "maxHour"
+  | "renderEvent"
+  | "renderHourCell"
+  | "renderDateCell"
 > {}
 
 function WeekView({
@@ -43,6 +46,9 @@ function WeekView({
   weekEndsOn,
   minHour,
   maxHour,
+  renderEvent,
+  renderHourCell,
+  renderDateCell,
 }: WeekViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useCalendar();
@@ -105,7 +111,12 @@ function WeekView({
                 }
               : undefined;
 
-            return (
+            return renderDateCell ? (
+              renderDateCell({
+                date: date.toDate(),
+                isToday,
+              })
+            ) : (
               <div
                 key={index}
                 className={cx(styles.dayHeader, classNames?.dayHeader)}
@@ -132,6 +143,7 @@ function WeekView({
           onEventClick={onEventClick}
           classNames={classNames}
           is12Hour={is12Hour}
+          renderEvent={renderEvent}
         />
       </div>
       <div className={styles.timeGrid}>
@@ -158,6 +170,8 @@ function WeekView({
                   showCurrentTime={showCurrentTime}
                   minHour={minHour}
                   maxHour={maxHour}
+                  renderEvent={renderEvent}
+                  renderHourCell={renderHourCell}
                 />
               </div>
             );

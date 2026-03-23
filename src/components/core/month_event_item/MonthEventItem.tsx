@@ -18,6 +18,8 @@ interface MonthEventItemProps extends Pick<
   | "is12Hour"
   | "showAdjacentMonths"
   | "classNames"
+  | "renderEvent"
+  | "renderDateCell"
 > {
   dataClassName?: string;
   selectedClassName?: string;
@@ -56,6 +58,8 @@ function MonthEventItem({
   is12Hour,
   showAdjacentMonths,
   classNames,
+  renderEvent,
+  renderDateCell,
 }: MonthEventItemProps) {
   const [showPopover, setShowPopover] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -104,7 +108,16 @@ function MonthEventItem({
       <div className={styles.cellContent}>
         {(isCurrentMonth || showAdjacentMonths) && (
           <>
-            <p className={styles.dateLabel}>{date}</p>
+            {renderDateCell ? (
+              renderDateCell({
+                date: dateObj.toDate(),
+                isToday,
+                isSelected,
+                isCurrentMonth,
+              })
+            ) : (
+              <p className={styles.dateLabel}>{date}</p>
+            )}
 
             {data && (
               <div className={cx(styles.dataContainer, dataClassName)}>
@@ -143,7 +156,7 @@ function MonthEventItem({
                         onEventClick?.(item);
                       }}
                     >
-                      {item.title}
+                      {renderEvent ? renderEvent(item) : item.title}
                     </div>
                   );
                 })}
@@ -170,6 +183,7 @@ function MonthEventItem({
                         onClose={() => setShowPopover(false)}
                         anchorEl={anchorEl}
                         is12Hour={is12Hour}
+                        renderEvent={renderEvent}
                       />
                     )}
                   </div>

@@ -8,7 +8,7 @@ import styles from "./DayWeekEventItem.module.css";
 
 interface DayWeekEventItemProps extends Pick<
   CalendarContentProps,
-  "onEventClick" | "is12Hour" | "classNames"
+  "onEventClick" | "is12Hour" | "classNames" | "renderEvent"
 > {
   item: DayEventLayout;
 }
@@ -18,6 +18,7 @@ export function DayWeekEventItem({
   onEventClick,
   is12Hour,
   classNames,
+  renderEvent,
 }: DayWeekEventItemProps) {
   const tooltipText = generateTooltipText(item.event, "day", is12Hour);
 
@@ -48,13 +49,19 @@ export function DayWeekEventItem({
       onClick={() => onEventClick?.(item.event)}
       title={tooltipText}
     >
-      <div className={styles.eventTitle}>{item.event.title}</div>
-      <div className={styles.eventTime}>
-        {formatDate(
-          item.event.startDate,
-          is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME,
-        )}
-      </div>
+      {renderEvent ? (
+        renderEvent(item.event)
+      ) : (
+        <>
+          <div className={styles.eventTitle}>{item.event.title}</div>
+          <div className={styles.eventTime}>
+            {formatDate(
+              item.event.startDate,
+              is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME,
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

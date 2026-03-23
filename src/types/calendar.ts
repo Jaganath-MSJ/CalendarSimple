@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { CalendarEvent } from "./events";
 import { CalendarTheme, CalendarClassNames } from "./theme";
 
@@ -21,6 +22,20 @@ export const EDayType = {
 } as const;
 
 export type EDayType = (typeof EDayType)[keyof typeof EDayType];
+
+export interface RenderHeaderProps {
+  currentDate: Date;
+  view: ECalendarViewType;
+  onNavigate: (date: Date) => void;
+  onViewChange: (view: ECalendarViewType) => void;
+}
+
+export interface RenderDateCellProps {
+  date: Date;
+  isToday: boolean;
+  isSelected?: boolean;
+  isCurrentMonth?: boolean;
+}
 
 export interface CalendarProps {
   // --- Data & State ---
@@ -58,6 +73,12 @@ export interface CalendarProps {
   // --- Appearance ---
   theme?: CalendarTheme;
   classNames?: CalendarClassNames;
+
+  // --- Custom Renderers ---
+  renderEvent?: (event: CalendarEvent) => ReactNode;
+  renderHeader?: (props: RenderHeaderProps) => ReactNode;
+  renderHourCell?: (date: Date) => ReactNode;
+  renderDateCell?: (props: RenderDateCellProps) => ReactNode;
 }
 
 export interface CalendarContentProps extends RequiredSome<

@@ -5,7 +5,11 @@ import {
   CalendarContentProps,
   ECalendarViewType,
 } from "./types";
-import { defaultCalendarProps, LAYOUT_CONSTANTS } from "./constants";
+import {
+  defaultCalendarProps,
+  LAYOUT_CONSTANTS,
+  CALENDAR_ACTIONS,
+} from "./constants";
 import { dateFn } from "./utils";
 import useResizeObserver from "./hooks/useResizeObserver";
 import useEvents from "./hooks/useEvents";
@@ -42,7 +46,7 @@ function CalendarContent({
   ...restProps
 }: CalendarContentProps) {
   const {
-    state: { view },
+    state: { view, selectedDate },
     dispatch,
   } = useCalendar();
 
@@ -68,6 +72,9 @@ function CalendarContent({
       weekEndsOn,
       minHour,
       maxHour,
+      renderEvent: restProps.renderEvent,
+      renderHourCell: restProps.renderHourCell,
+      renderDateCell: restProps.renderDateCell,
     };
     switch (view) {
       case ECalendarViewType.day:
@@ -105,15 +112,33 @@ function CalendarContent({
       }
       className={cx(styles.calendar, classNames?.root)}
     >
-      <Header
-        headerClassName={classNames?.header}
-        events={events}
-        onNavigate={onNavigate}
-        onViewChange={onViewChange}
-        pastYearLength={pastYearLength}
-        futureYearLength={futureYearLength}
-        customDays={customDays}
-      />
+      {restProps.renderHeader ? (
+        restProps.renderHeader({
+          currentDate: selectedDate.toDate(),
+          view,
+          onNavigate: (date: Date) => {
+            dispatch({
+              type: CALENDAR_ACTIONS.SET_DATE,
+              payload: dateFn(date),
+            });
+            if (onNavigate) onNavigate(date);
+          },
+          onViewChange: (newView: ECalendarViewType) => {
+            dispatch({ type: CALENDAR_ACTIONS.SET_VIEW, payload: newView });
+            if (onViewChange) onViewChange(newView);
+          },
+        })
+      ) : (
+        <Header
+          headerClassName={classNames?.header}
+          events={events}
+          onNavigate={onNavigate}
+          onViewChange={onViewChange}
+          pastYearLength={pastYearLength}
+          futureYearLength={futureYearLength}
+          customDays={customDays}
+        />
+      )}
       {getViewComponent(view)}
     </section>
   );

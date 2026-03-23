@@ -26,6 +26,9 @@ interface CustomViewProps extends Pick<
   | "minHour"
   | "maxHour"
   | "customDays"
+  | "renderEvent"
+  | "renderHourCell"
+  | "renderDateCell"
 > {}
 
 function CustomView({
@@ -41,6 +44,9 @@ function CustomView({
   minHour,
   maxHour,
   customDays = 3,
+  renderEvent,
+  renderHourCell,
+  renderDateCell,
 }: CustomViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useCalendar();
@@ -95,7 +101,12 @@ function CustomView({
                 }
               : undefined;
 
-            return (
+            return renderDateCell ? (
+              renderDateCell({
+                date: date.toDate(),
+                isToday,
+              })
+            ) : (
               <div
                 key={index}
                 className={cx(styles.dayHeader, classNames?.dayHeader)}
@@ -122,6 +133,7 @@ function CustomView({
           onEventClick={onEventClick}
           classNames={classNames}
           is12Hour={is12Hour}
+          renderEvent={renderEvent}
         />
       </div>
       <div className={styles.timeGrid}>
@@ -148,6 +160,8 @@ function CustomView({
                   showCurrentTime={showCurrentTime}
                   minHour={minHour}
                   maxHour={maxHour}
+                  renderEvent={renderEvent}
+                  renderHourCell={renderHourCell}
                 />
               </div>
             );

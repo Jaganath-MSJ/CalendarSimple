@@ -20,6 +20,7 @@ interface ScheduleViewProps extends Pick<
   | "theme"
   | "classNames"
   | "autoScrollToCurrentTime"
+  | "renderEvent"
 > {}
 
 export default function ScheduleView({
@@ -29,6 +30,7 @@ export default function ScheduleView({
   theme,
   classNames,
   autoScrollToCurrentTime,
+  renderEvent,
 }: ScheduleViewProps) {
   const { todayRef, groupedEvents, renderEventTime, renderEventTitle } =
     useScheduleView({
@@ -115,39 +117,45 @@ export default function ScheduleView({
                         )}
                       </div>
 
-                      {/* Column 2: Dot + Time */}
-                      <div className={styles.dotTimeColumn}>
-                        <div
-                          className={styles.eventDot}
-                          style={{
-                            backgroundColor:
-                              event.style?.backgroundColor ||
-                              LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
-                          }}
-                        />
-                        <div
-                          className={cx(
-                            styles.eventTime,
-                            classNames?.scheduleTime,
-                          )}
-                        >
-                          {renderEventTime(event, dateKey)}
-                        </div>
-                      </div>
+                      {renderEvent ? (
+                        renderEvent(event)
+                      ) : (
+                        <>
+                          {/* Column 2: Dot + Time */}
+                          <div className={styles.dotTimeColumn}>
+                            <div
+                              className={styles.eventDot}
+                              style={{
+                                backgroundColor:
+                                  event.style?.backgroundColor ||
+                                  LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                              }}
+                            />
+                            <div
+                              className={cx(
+                                styles.eventTime,
+                                classNames?.scheduleTime,
+                              )}
+                            >
+                              {renderEventTime(event, dateKey)}
+                            </div>
+                          </div>
 
-                      {/* Column 3: Title */}
-                      <div
-                        className={cx(
-                          styles.eventTitleColumn,
-                          classNames?.scheduleTitle,
-                        )}
-                        style={{
-                          ...event.style,
-                          backgroundColor: "transparent",
-                        }}
-                      >
-                        {renderEventTitle(event, dateKey)}
-                      </div>
+                          {/* Column 3: Title */}
+                          <div
+                            className={cx(
+                              styles.eventTitleColumn,
+                              classNames?.scheduleTitle,
+                            )}
+                            style={{
+                              ...event.style,
+                              backgroundColor: "transparent",
+                            }}
+                          >
+                            {renderEventTitle(event, dateKey)}
+                          </div>
+                        </>
+                      )}
                     </div>
                   );
                 })}

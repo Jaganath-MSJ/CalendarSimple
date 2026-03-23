@@ -24,7 +24,7 @@ import { DATE_FORMATS, LAYOUT_CONSTANTS } from "../../../constants";
 
 interface PopoverProps extends Pick<
   CalendarContentProps,
-  "onEventClick" | "is12Hour"
+  "onEventClick" | "is12Hour" | "renderEvent"
 > {
   dateObj: DateType;
   events: EventListType[];
@@ -39,6 +39,7 @@ function Popover({
   onClose,
   anchorEl,
   is12Hour,
+  renderEvent,
 }: PopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const [stylePosition, setStylePosition] = useState<CSSProperties>({
@@ -159,7 +160,7 @@ function Popover({
               }}
               title={tooltipText}
             >
-              {item.title}
+              {renderEvent ? renderEvent(item) : item.title}
             </div>
           );
         })}

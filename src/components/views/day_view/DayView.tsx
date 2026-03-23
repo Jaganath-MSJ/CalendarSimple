@@ -25,6 +25,9 @@ interface DayViewProps extends Pick<
   | "autoScrollToCurrentTime"
   | "minHour"
   | "maxHour"
+  | "renderEvent"
+  | "renderHourCell"
+  | "renderDateCell"
 > {}
 
 function DayView({
@@ -39,6 +42,9 @@ function DayView({
   autoScrollToCurrentTime,
   minHour,
   maxHour,
+  renderEvent,
+  renderHourCell,
+  renderDateCell,
 }: DayViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useCalendar();
@@ -81,19 +87,26 @@ function DayView({
       <div className={styles.stickyTopContainer}>
         <div className={styles.dayHeaderContainer}>
           <div className={styles.timeHeaderSpacer} />
-          <div className={cx(styles.dayHeader, classNames?.dayHeader)}>
-            <div className={cx(styles.dayName, classNames?.dayName)}>
-              {DAY_LIST_NAME[dayType][selectedDate.day()]}
+          {renderDateCell ? (
+            renderDateCell({
+              date: selectedDate.toDate(),
+              isToday,
+            })
+          ) : (
+            <div className={cx(styles.dayHeader, classNames?.dayHeader)}>
+              <div className={cx(styles.dayName, classNames?.dayName)}>
+                {DAY_LIST_NAME[dayType][selectedDate.day()]}
+              </div>
+              <div
+                className={cx(styles.dayNumber, classNames?.dayNumber, {
+                  [styles.today]: isToday,
+                })}
+                style={todayStyle}
+              >
+                {formatDate(selectedDate, DATE_FORMATS.DAY_NUMBER)}
+              </div>
             </div>
-            <div
-              className={cx(styles.dayNumber, classNames?.dayNumber, {
-                [styles.today]: isToday,
-              })}
-              style={todayStyle}
-            >
-              {formatDate(selectedDate, DATE_FORMATS.DAY_NUMBER)}
-            </div>
-          </div>
+          )}
         </div>
         <AllDayBanner
           days={[selectedDate]}
@@ -102,6 +115,7 @@ function DayView({
           onEventClick={onEventClick}
           classNames={classNames}
           is12Hour={is12Hour}
+          renderEvent={renderEvent}
         />
       </div>
       <div className={styles.timeGrid}>
@@ -121,6 +135,8 @@ function DayView({
             showCurrentTime={showCurrentTime}
             minHour={minHour}
             maxHour={maxHour}
+            renderEvent={renderEvent}
+            renderHourCell={renderHourCell}
           />
         </div>
       </div>
