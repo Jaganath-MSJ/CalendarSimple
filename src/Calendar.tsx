@@ -137,6 +137,7 @@ function CalendarContent({
           pastYearLength={pastYearLength}
           futureYearLength={futureYearLength}
           customDays={customDays}
+          resetDateOnViewChange={restProps.resetDateOnViewChange}
         />
       )}
       {getViewComponent(view)}

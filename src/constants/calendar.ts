@@ -77,6 +77,7 @@ export const defaultCalendarProps = {
   theme: {},
   classNames: {},
   showAdjacentMonths: true,
+  resetDateOnViewChange: false,
 };
 
 export const DATE_FORMATS = {

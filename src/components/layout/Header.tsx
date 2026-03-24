@@ -46,6 +46,7 @@ interface HeaderProps extends Pick<
   | "onViewChange"
   | "events"
   | "customDays"
+  | "resetDateOnViewChange"
 > {
   headerClassName?: string;
 }
@@ -56,8 +57,9 @@ function Header({
   futureYearLength,
   onNavigate,
   onViewChange,
-  events,
   customDays,
+  events,
+  resetDateOnViewChange,
 }: HeaderProps) {
   const { state, dispatch } = useCalendar();
   const { selectedDate, view } = state;
@@ -104,6 +106,10 @@ function Header({
   const onViewDropdownClick = (e: ChangeEvent<HTMLSelectElement>) => {
     const newView = e.target.value as ECalendarViewType;
     dispatch({ type: CALENDAR_ACTIONS.SET_VIEW, payload: newView });
+    if (resetDateOnViewChange) {
+      dispatch({ type: CALENDAR_ACTIONS.TODAY });
+      onNavigate?.(convertToDate(dateFn()));
+    }
     onViewChange?.(newView);
   };
 

@@ -58,6 +58,7 @@ export interface CalendarProps {
   weekEndsOn?: number; // 0 to 6
   showAdjacentMonths?: boolean;
   customDays?: number;
+  resetDateOnViewChange?: boolean;
 
   // --- Layout ---
   width?: number | string;
@@ -97,6 +98,7 @@ export interface CalendarContentProps extends RequiredSome<
   | "weekStartsOn"
   | "weekEndsOn"
   | "showAdjacentMonths"
+  | "resetDateOnViewChange"
   | "width"
   | "height"
   | "theme"

@@ -286,3 +286,21 @@ export const CustomRenderers: Story = {
     },
   },
 };
+
+export const PagerResets: Story = {
+  args: {
+    view: ECalendarViewType.month,
+    events: customizeEvents,
+    selectedDate: today.toDate(),
+    selectable: true,
+    resetDateOnViewChange: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "When `resetDateOnViewChange` is true, changing the calendar view (e.g., from Month to Week) will automatically reset the selected date to Today.",
+      },
+    },
+  },
+};
