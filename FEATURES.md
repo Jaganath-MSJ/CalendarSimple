@@ -40,6 +40,15 @@ For complete control over the layout, borders, font weights, and spacing, you ca
 
 - Example keys include `root`, `header`, `dayColumn`, `timeSlot`, `event`, `scheduleTitle`, and many more.
 
+### 🧩 Custom Renderers (Ultimate Flexibility)
+
+For scenarios where simple CSS/theme overrides aren't enough, `calendar-simple` provides high-level render props. This allows you to completely replace core UI elements with your own React components.
+
+- **`renderEvent(event: CalendarEvent)`**: Completely replaces the default event chip across all views (Month, Week, Day, Schedule, and All-Day banners). This enables you to build complex, interactive event cards with custom internal layouts and logic.
+- **`renderHeader(props: RenderHeaderProps)`**: Replaces the default top navigation header. You receive the `currentDate`, `view`, `onNavigate`, and `onViewChange` as props, allowing you to build a completely bespoke navigation experience.
+- **`renderHourCell(date: Date)`**: Customizes the time grid slots in Day, Week, and Custom Days views. Ideal for adding background patterns, custom time labels, or indicating "busy" vs "free" time slots independently of events.
+- **`renderDateCell(props: RenderDateCellProps)`**: Customizes individual date headers in Week/Day views and individual date cells in the Month view. You receive `date`, `isToday`, `isSelected`, and `isCurrentMonth`.
+
 ## 🕒 Time Formatting
 
 Global applications require flexible time display options.

@@ -15,6 +15,7 @@ A lightweight, customizable, and responsive calendar component for React applica
 - **✨ Event Handling**: Built-in support for displaying and managing events with custom styling.
 - **📱 Responsive**: Automatically adjusts layout based on container dimensions.
 - **🎨 Theming & Customization**: Fully customizable colors via the `theme` prop and individual element styling via `classNames`.
+- **🧩 Custom Renderers**: Ultimate flexibility to completely replace events, headers, and grid cells with custom React components.
 - **🕒 Time Formatting**: Options for 12-hour (AM/PM) and 24-hour time formats.
 - **👆 Interactive**: Granular control with click handlers for dates, specific events, view changes, and "more" indicators.
 - **🕒 Current Time & Timezone**: Display a real-time indicator with automatic local timezone GMT offset, and optionally auto-scroll to the current time on load.
@@ -113,6 +114,56 @@ const MyCalendar = () => {
 };
 ```
 
+### 🧩 Custom Renderers (Ultimate Flexibility)
+
+You can completely override core UI elements using render props.
+
+```tsx
+<Calendar
+  renderEvent={(event) => (
+    <div
+      style={{
+        padding: "2px",
+        backgroundColor: "#e0f2fe",
+        borderRadius: "4px",
+      }}
+    >
+      <strong>🚀 {event.title}</strong>
+    </div>
+  )}
+  renderHeader={({ currentDate, onNavigate }) => (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        padding: "10px",
+      }}
+    >
+      <button
+        onClick={() =>
+          onNavigate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))
+        }
+      >
+        Prev
+      </button>
+      <h2>
+        {currentDate.toLocaleDateString("default", {
+          month: "long",
+          year: "numeric",
+        })}
+      </h2>
+      <button
+        onClick={() =>
+          onNavigate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))
+        }
+      >
+        Next
+      </button>
+    </div>
+  )}
+/>
+```
+
 ### Schedule View Example
 
 The Schedule view displays a continuous scrollable list of events, grouped by date.
@@ -175,6 +226,10 @@ const ThreeDayApp = () => (
 | `weekEndsOn`              | `number`                                               | End day of the week (0 = Sunday, 1 = Monday, etc.).                               | `6`               |
 | `showAdjacentMonths`      | `boolean`                                              | Show dates from the previous and next months in the month view grid.              | `false`           |
 | `customDays`              | `number`                                               | The number of days to display in the `customDays` view.                           | `3`               |
+| `renderEvent`             | `(event: CalendarEvent) => ReactNode`                  | Custom renderer for event items.                                                  | `undefined`       |
+| `renderHeader`            | `(props: RenderHeaderProps) => ReactNode`              | Custom renderer for the calendar header.                                          | `undefined`       |
+| `renderHourCell`          | `(date: Date) => ReactNode`                            | Custom renderer for background of hour slots (Day/Week/Custom views).             | `undefined`       |
+| `renderDateCell`          | `(props: RenderDateCellProps) => ReactNode`            | Custom renderer for day headers and month date cells.                             | `undefined`       |
 
 ### Types
 
@@ -214,6 +269,28 @@ interface CalendarTheme {
     color?: string;
     bgColor?: string;
   };
+}
+```
+
+#### `RenderHeaderProps`
+
+```typescript
+interface RenderHeaderProps {
+  currentDate: Date;
+  view: ECalendarViewType;
+  onNavigate: (date: Date) => void;
+  onViewChange: (view: ECalendarViewType) => void;
+}
+```
+
+#### `RenderDateCellProps`
+
+```typescript
+interface RenderDateCellProps {
+  date: Date;
+  isToday: boolean;
+  isSelected?: boolean;
+  isCurrentMonth?: boolean;
 }
 ```
 

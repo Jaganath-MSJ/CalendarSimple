@@ -4,7 +4,7 @@ import Calendar from "../Calendar";
 import { ECalendarViewType } from "../types";
 
 const meta: Meta<typeof Calendar> = {
-  title: "Calendar/CustomView",
+  title: "CustomView",
   component: Calendar,
   args: {
     view: ECalendarViewType.customDays,
