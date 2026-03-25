@@ -43,6 +43,7 @@ function CalendarContent({
   customDays,
   theme,
   classNames,
+  showAllDayRow,
   ...restProps
 }: CalendarContentProps) {
   const {
@@ -66,6 +67,7 @@ function CalendarContent({
       theme,
       classNames,
       showCurrentTime,
+      showAllDayRow,
       maxEvents,
       autoScrollToCurrentTime,
       weekStartsOn,

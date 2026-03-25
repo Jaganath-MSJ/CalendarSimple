@@ -56,6 +56,7 @@ export default function useDayEventLayout(
   currentDateOrDates: DateType | DateType[],
   minHour: number,
   maxHour: number,
+  showAllDayRow: boolean = true,
 ): DayEventLayout[] | DayEventLayout[][] {
   return useMemo(() => {
     const dates = Array.isArray(currentDateOrDates)
@@ -81,12 +82,37 @@ export default function useDayEventLayout(
         const isWithinBounds =
           endMins > minHour * 60 && startMins < maxHour * 60;
 
-        return (
-          eventDate.isSame(currentDay) &&
-          !isMultiDay(event) &&
-          !isAllDayEvent(event) &&
-          isWithinBounds
-        );
+        // If showAllDayRow is false, we should keep all-day and multi-day events,
+        // but only if they overlap with currentDay
+        const isMulti = isMultiDay(event);
+        const isAllDay = isAllDayEvent(event);
+
+        if (showAllDayRow) {
+          return (
+            eventDate.isSame(currentDay) &&
+            !isMulti &&
+            !isAllDay &&
+            isWithinBounds
+          );
+        } else {
+          // If hiding the all-day row, we want to show all-day/multi-day events in the grid.
+          // We must check if the event spans over 'currentDay'.
+          const eventStart = dateFn(event.startDate).startOf("day");
+          const eventEnd = event.endDate
+            ? dateFn(event.endDate).endOf("day")
+            : eventStart.endOf("day");
+          const overlapsCurrentDay =
+            currentDay.isBetween(eventStart, eventEnd, "day", "[]") ||
+            currentDay.isSame(eventStart, "day") ||
+            currentDay.isSame(eventEnd, "day");
+
+          if (!overlapsCurrentDay) return false;
+
+          // For normal timed events, still check bounds
+          if (!isMulti && !isAllDay && !isWithinBounds) return false;
+
+          return true;
+        }
       });
 
       if (eventsForDay.length === 0) return [];
@@ -102,8 +128,20 @@ export default function useDayEventLayout(
       // -------------------------------------------------------------------------
       const processedEvents: ProcessedEvent[] = eventsForDay.map(
         (event, index) => {
-          const start = getMinutes(event.startDate);
-          const end = event.endDate ? getMinutes(event.endDate) : start + 1;
+          const isMulti = isMultiDay(event);
+          const isAllDay = isAllDayEvent(event);
+
+          let start = getMinutes(event.startDate);
+          let end = event.endDate ? getMinutes(event.endDate) : start + 1;
+
+          if (!showAllDayRow && (isMulti || isAllDay)) {
+            // Force it to span the entire visible grid (minHour to maxHour)
+            start = minHour * 60;
+            end = maxHour * 60;
+          } else if (!isMulti && !isAllDay) {
+            // For normal timed events, if it crosses midnight, cap appropriately
+            if (end <= start && event.endDate) end += 1440;
+          }
 
           // Clamp start and end to boundaries for the algorithm
           const clampedStart = Math.max(start, minHour * 60);
@@ -235,5 +273,5 @@ export default function useDayEventLayout(
       return dates.map((d) => generateLayoutForDate(d));
     }
     return generateLayoutForDate(dates[0]);
-  }, [events, currentDateOrDates, minHour, maxHour]);
+  }, [events, currentDateOrDates, minHour, maxHour, showAllDayRow]);
 }

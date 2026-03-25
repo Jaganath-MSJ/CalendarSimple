@@ -28,6 +28,7 @@ interface DayViewProps extends Pick<
   | "renderEvent"
   | "renderHourCell"
   | "renderDateCell"
+  | "showAllDayRow"
 > {}
 
 function DayView({
@@ -45,6 +46,7 @@ function DayView({
   renderEvent,
   renderHourCell,
   renderDateCell,
+  showAllDayRow,
 }: DayViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useCalendar();
@@ -54,6 +56,7 @@ function DayView({
     selectedDate,
     minHour,
     maxHour,
+    showAllDayRow,
   ) as DayEventLayout[];
 
   const isToday = dateFn().isSame(selectedDate, "day");
@@ -108,15 +111,17 @@ function DayView({
             </div>
           )}
         </div>
-        <AllDayBanner
-          days={[selectedDate]}
-          events={events || []}
-          maxEvents={maxEvents}
-          onEventClick={onEventClick}
-          classNames={classNames}
-          is12Hour={is12Hour}
-          renderEvent={renderEvent}
-        />
+        {showAllDayRow && (
+          <AllDayBanner
+            days={[selectedDate]}
+            events={events || []}
+            maxEvents={maxEvents}
+            onEventClick={onEventClick}
+            classNames={classNames}
+            is12Hour={is12Hour}
+            renderEvent={renderEvent}
+          />
+        )}
       </div>
       <div className={styles.timeGrid}>
         <TimeColumn

@@ -78,6 +78,7 @@ export const defaultCalendarProps = {
   classNames: {},
   showAdjacentMonths: true,
   resetDateOnViewChange: false,
+  showAllDayRow: true,
 };
 
 export const DATE_FORMATS = {

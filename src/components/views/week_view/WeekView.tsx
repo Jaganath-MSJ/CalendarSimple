@@ -30,6 +30,7 @@ interface WeekViewProps extends Pick<
   | "renderEvent"
   | "renderHourCell"
   | "renderDateCell"
+  | "showAllDayRow"
 > {}
 
 function WeekView({
@@ -49,6 +50,7 @@ function WeekView({
   renderEvent,
   renderHourCell,
   renderDateCell,
+  showAllDayRow,
 }: WeekViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useCalendar();
@@ -73,6 +75,7 @@ function WeekView({
     weekDays,
     minHour,
     maxHour,
+    showAllDayRow,
   ) as DayEventLayout[][];
 
   const isCurrentWeek = useMemo(() => {
@@ -136,15 +139,17 @@ function WeekView({
             );
           })}
         </div>
-        <AllDayBanner
-          days={weekDays}
-          events={events || []}
-          maxEvents={maxEvents}
-          onEventClick={onEventClick}
-          classNames={classNames}
-          is12Hour={is12Hour}
-          renderEvent={renderEvent}
-        />
+        {showAllDayRow && (
+          <AllDayBanner
+            days={weekDays}
+            events={events || []}
+            maxEvents={maxEvents}
+            onEventClick={onEventClick}
+            classNames={classNames}
+            is12Hour={is12Hour}
+            renderEvent={renderEvent}
+          />
+        )}
       </div>
       <div className={styles.timeGrid}>
         <TimeColumn

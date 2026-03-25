@@ -7,6 +7,9 @@
  */
 
 import dayjs, { Dayjs, ManipulateType } from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
+
+dayjs.extend(isBetween);
 
 export type { ManipulateType };
 export type DateType = Dayjs;

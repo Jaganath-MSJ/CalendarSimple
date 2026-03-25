@@ -304,3 +304,33 @@ export const PagerResets: Story = {
     },
   },
 };
+
+export const HideAllDayRow: Story = {
+  args: {
+    view: ECalendarViewType.week,
+    events: [
+      ...customizeEvents,
+      {
+        id: "5",
+        startDate: today.add(1, "day").format("YYYY-MM-DD"),
+        title: "Top",
+      },
+      {
+        id: "6",
+        startDate: today.format("YYYY-MM-DD"),
+        endDate: today.add(1, "day").format("YYYY-MM-DD"),
+        title: "Top 2",
+      },
+    ],
+    selectedDate: today.toDate(),
+    showAllDayRow: false,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Set `showAllDayRow` to `false` to completely hide the all-day event banner at the top of the Day and Week views.",
+      },
+    },
+  },
+};
