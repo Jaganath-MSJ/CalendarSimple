@@ -60,6 +60,7 @@ export interface CalendarProps {
   customDays?: number;
   resetDateOnViewChange?: boolean;
   showAllDayRow?: boolean;
+  renderScheduleSeparator?: (date: Date) => ReactNode;
 
   // --- Layout ---
   width?: number | string;

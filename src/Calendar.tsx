@@ -44,6 +44,7 @@ function CalendarContent({
   theme,
   classNames,
   showAllDayRow,
+  renderScheduleSeparator,
   ...restProps
 }: CalendarContentProps) {
   const {
@@ -75,6 +76,7 @@ function CalendarContent({
       minHour,
       maxHour,
       renderEvent: restProps.renderEvent,
+      renderScheduleSeparator,
       renderHourCell: restProps.renderHourCell,
       renderDateCell: restProps.renderDateCell,
     };

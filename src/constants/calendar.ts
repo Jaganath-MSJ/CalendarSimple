@@ -79,6 +79,7 @@ export const defaultCalendarProps = {
   showAdjacentMonths: true,
   resetDateOnViewChange: false,
   showAllDayRow: true,
+  eventOverlapOffset: 0,
 };
 
 export const DATE_FORMATS = {

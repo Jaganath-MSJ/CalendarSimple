@@ -305,6 +305,48 @@ export const PagerResets: Story = {
   },
 };
 
+export const ScheduleViewCustomSeparator: Story = {
+  args: {
+    view: ECalendarViewType.schedule,
+    events: customizeEvents,
+    selectedDate: today.toDate(),
+    renderScheduleSeparator: (date: Date) => (
+      <div
+        style={{
+          padding: "16px 0",
+          textAlign: "center",
+          color: "#70757a",
+          fontSize: "12px",
+          fontWeight: 500,
+          textTransform: "uppercase",
+          letterSpacing: "1px",
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        <div
+          style={{ flex: 1, height: "1px", backgroundColor: "#dadce0" }}
+        ></div>
+        <span style={{ padding: "0 16px" }}>
+          Separator for {date.toLocaleDateString()}
+        </span>
+        <div
+          style={{ flex: 1, height: "1px", backgroundColor: "#dadce0" }}
+        ></div>
+      </div>
+    ),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Use `renderScheduleSeparator` to provide a custom component that remains visible between days in the Schedule view. This example adds a stylized line with a date label.",
+      },
+    },
+  },
+};
+
 export const HideAllDayRow: Story = {
   args: {
     view: ECalendarViewType.week,

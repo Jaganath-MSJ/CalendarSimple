@@ -21,6 +21,7 @@ interface ScheduleViewProps extends Pick<
   | "classNames"
   | "autoScrollToCurrentTime"
   | "renderEvent"
+  | "renderScheduleSeparator"
 > {}
 
 export default function ScheduleView({
@@ -31,6 +32,7 @@ export default function ScheduleView({
   classNames,
   autoScrollToCurrentTime,
   renderEvent,
+  renderScheduleSeparator,
 }: ScheduleViewProps) {
   const { todayRef, groupedEvents, renderEventTime, renderEventTitle } =
     useScheduleView({
@@ -46,9 +48,10 @@ export default function ScheduleView({
       ) : (
         Object.keys(groupedEvents)
           .sort()
-          .map((dateKey) => {
+          .map((dateKey, groupIndex, allKeys) => {
             const dayEvents = groupedEvents[dateKey];
             const dateObj = dateFn(dateKey);
+            const isLastGroup = groupIndex === allKeys.length - 1;
 
             const isToday = checkIsToday(dateObj, dateObj.date());
             const todayStyle = isToday
@@ -59,107 +62,117 @@ export default function ScheduleView({
               : undefined;
 
             return (
-              <div
-                key={dateKey}
-                ref={isToday ? todayRef : undefined}
-                className={cx(styles.dateGroup, classNames?.scheduleDateGroup)}
-              >
-                {dayEvents.map((event, index) => {
-                  const isFirstEventOfDay = index === 0;
+              <React.Fragment key={dateKey}>
+                <div
+                  ref={isToday ? todayRef : undefined}
+                  className={cx(
+                    styles.dateGroup,
+                    classNames?.scheduleDateGroup,
+                    {
+                      [styles.noBorder]: !!renderScheduleSeparator,
+                    },
+                  )}
+                >
+                  {dayEvents.map((event, index) => {
+                    const isFirstEventOfDay = index === 0;
 
-                  return (
-                    <div
-                      key={event.id || index}
-                      className={cx(
-                        styles.eventItemContainer,
-                        classNames?.event,
-                      )}
-                      onClick={() => onEventClick?.(event)}
-                      title={generateTooltipText(
-                        event,
-                        ECalendarViewType.schedule,
-                        is12Hour,
-                      )}
-                    >
-                      {/* Column 1: Date Info (only shown on the first event of the day) */}
-                      <div className={styles.dateInfoColumn}>
-                        {isFirstEventOfDay && (
+                    return (
+                      <div
+                        key={event.id || index}
+                        className={cx(
+                          styles.eventItemContainer,
+                          classNames?.event,
+                        )}
+                        onClick={() => onEventClick?.(event)}
+                        title={generateTooltipText(
+                          event,
+                          ECalendarViewType.schedule,
+                          is12Hour,
+                        )}
+                      >
+                        {/* Column 1: Date Info (only shown on the first event of the day) */}
+                        <div className={styles.dateInfoColumn}>
+                          {isFirstEventOfDay && (
+                            <>
+                              <div
+                                className={cx(
+                                  styles.dateNumber,
+                                  classNames?.scheduleDateNumber,
+                                  {
+                                    [styles.today]: isToday,
+                                  },
+                                )}
+                                style={todayStyle}
+                              >
+                                {formatDate(dateObj, DATE_FORMATS.DAY_NUMBER)}
+                              </div>
+                              <div
+                                className={cx(
+                                  styles.dateSubInfo,
+                                  classNames?.scheduleDateSubInfo,
+                                )}
+                              >
+                                {formatDate(
+                                  dateObj,
+                                  DATE_FORMATS.SHORT_MONTH,
+                                ).toUpperCase()}
+                                ,{" "}
+                                {formatDate(
+                                  dateObj,
+                                  DATE_FORMATS.SHORT_DAY,
+                                ).toUpperCase()}
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+                        {renderEvent ? (
+                          renderEvent(event)
+                        ) : (
                           <>
-                            <div
-                              className={cx(
-                                styles.dateNumber,
-                                classNames?.scheduleDateNumber,
-                                {
-                                  [styles.today]: isToday,
-                                },
-                              )}
-                              style={todayStyle}
-                            >
-                              {formatDate(dateObj, DATE_FORMATS.DAY_NUMBER)}
+                            {/* Column 2: Dot + Time */}
+                            <div className={styles.dotTimeColumn}>
+                              <div
+                                className={styles.eventDot}
+                                style={{
+                                  backgroundColor:
+                                    event.style?.backgroundColor ||
+                                    LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                                }}
+                              />
+                              <div
+                                className={cx(
+                                  styles.eventTime,
+                                  classNames?.scheduleTime,
+                                )}
+                              >
+                                {renderEventTime(event, dateKey)}
+                              </div>
                             </div>
+
+                            {/* Column 3: Title */}
                             <div
                               className={cx(
-                                styles.dateSubInfo,
-                                classNames?.scheduleDateSubInfo,
+                                styles.eventTitleColumn,
+                                classNames?.scheduleTitle,
                               )}
+                              style={{
+                                ...event.style,
+                                backgroundColor: "transparent",
+                              }}
                             >
-                              {formatDate(
-                                dateObj,
-                                DATE_FORMATS.SHORT_MONTH,
-                              ).toUpperCase()}
-                              ,{" "}
-                              {formatDate(
-                                dateObj,
-                                DATE_FORMATS.SHORT_DAY,
-                              ).toUpperCase()}
+                              {renderEventTitle(event, dateKey)}
                             </div>
                           </>
                         )}
                       </div>
-
-                      {renderEvent ? (
-                        renderEvent(event)
-                      ) : (
-                        <>
-                          {/* Column 2: Dot + Time */}
-                          <div className={styles.dotTimeColumn}>
-                            <div
-                              className={styles.eventDot}
-                              style={{
-                                backgroundColor:
-                                  event.style?.backgroundColor ||
-                                  LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
-                              }}
-                            />
-                            <div
-                              className={cx(
-                                styles.eventTime,
-                                classNames?.scheduleTime,
-                              )}
-                            >
-                              {renderEventTime(event, dateKey)}
-                            </div>
-                          </div>
-
-                          {/* Column 3: Title */}
-                          <div
-                            className={cx(
-                              styles.eventTitleColumn,
-                              classNames?.scheduleTitle,
-                            )}
-                            style={{
-                              ...event.style,
-                              backgroundColor: "transparent",
-                            }}
-                          >
-                            {renderEventTitle(event, dateKey)}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+                {!isLastGroup &&
+                  renderScheduleSeparator &&
+                  renderScheduleSeparator(dateObj.toDate())}
+              </React.Fragment>
             );
           })
       )}
