@@ -305,6 +305,45 @@ export const PagerResets: Story = {
   },
 };
 
+export const ConcurrentEventStacking: Story = {
+  args: {
+    view: ECalendarViewType.day,
+    selectedDate: today.toDate(),
+    eventOverlapOffset: 15, // 15% offset for stacking
+    events: [
+      {
+        id: "1",
+        title: "Event 1",
+        startDate: today.set("hour", 10).set("minute", 0).format(),
+        endDate: today.set("hour", 12).set("minute", 0).format(),
+        style: { backgroundColor: "#1a73e8" },
+      },
+      {
+        id: "2",
+        title: "Event 2",
+        startDate: today.set("hour", 10).set("minute", 30).format(),
+        endDate: today.set("hour", 12).set("minute", 30).format(),
+        style: { backgroundColor: "#d93025" },
+      },
+      {
+        id: "3",
+        title: "Event 3",
+        startDate: today.set("hour", 11).set("minute", 0).format(),
+        endDate: today.set("hour", 13).set("minute", 0).format(),
+        style: { backgroundColor: "#f9ab00" },
+      },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Set `eventOverlapOffset` (e.g., `15`) to switch from tiled layout to a stacking layout. Overlapping events will be indented by the specified percentage, creating a layered look.",
+      },
+    },
+  },
+};
+
 export const ScheduleViewCustomSeparator: Story = {
   args: {
     view: ECalendarViewType.schedule,

@@ -61,6 +61,7 @@ export interface CalendarProps {
   resetDateOnViewChange?: boolean;
   showAllDayRow?: boolean;
   renderScheduleSeparator?: (date: Date) => ReactNode;
+  eventOverlapOffset?: number;
 
   // --- Layout ---
   width?: number | string;
@@ -106,6 +107,7 @@ export interface CalendarContentProps extends RequiredSome<
   | "height"
   | "theme"
   | "classNames"
+  | "eventOverlapOffset"
 > {}
 
 export interface MonthListType {

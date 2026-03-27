@@ -31,6 +31,7 @@ interface WeekViewProps extends Pick<
   | "renderHourCell"
   | "renderDateCell"
   | "showAllDayRow"
+  | "eventOverlapOffset"
 > {}
 
 function WeekView({
@@ -51,6 +52,7 @@ function WeekView({
   renderHourCell,
   renderDateCell,
   showAllDayRow,
+  eventOverlapOffset,
 }: WeekViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useCalendar();
@@ -76,6 +78,7 @@ function WeekView({
     minHour,
     maxHour,
     showAllDayRow,
+    eventOverlapOffset,
   ) as DayEventLayout[][];
 
   const isCurrentWeek = useMemo(() => {

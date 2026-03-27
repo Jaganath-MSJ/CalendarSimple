@@ -29,6 +29,8 @@ interface CustomViewProps extends Pick<
   | "renderEvent"
   | "renderHourCell"
   | "renderDateCell"
+  | "showAllDayRow"
+  | "eventOverlapOffset"
 > {}
 
 function CustomView({
@@ -47,6 +49,8 @@ function CustomView({
   renderEvent,
   renderHourCell,
   renderDateCell,
+  showAllDayRow,
+  eventOverlapOffset,
 }: CustomViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useCalendar();
@@ -63,6 +67,8 @@ function CustomView({
     viewDays,
     minHour,
     maxHour,
+    showAllDayRow,
+    eventOverlapOffset,
   ) as DayEventLayout[][];
 
   const hasToday = useMemo(() => {
@@ -126,15 +132,17 @@ function CustomView({
             );
           })}
         </div>
-        <AllDayBanner
-          days={viewDays}
-          events={events || []}
-          maxEvents={maxEvents}
-          onEventClick={onEventClick}
-          classNames={classNames}
-          is12Hour={is12Hour}
-          renderEvent={renderEvent}
-        />
+        {showAllDayRow && (
+          <AllDayBanner
+            days={viewDays}
+            events={events || []}
+            maxEvents={maxEvents}
+            onEventClick={onEventClick}
+            classNames={classNames}
+            is12Hour={is12Hour}
+            renderEvent={renderEvent}
+          />
+        )}
       </div>
       <div className={styles.timeGrid}>
         <TimeColumn

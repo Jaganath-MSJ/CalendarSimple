@@ -56,7 +56,8 @@ export default function useDayEventLayout(
   currentDateOrDates: DateType | DateType[],
   minHour: number,
   maxHour: number,
-  showAllDayRow: boolean = true,
+  showAllDayRow: boolean,
+  eventOverlapOffset: number,
 ): DayEventLayout[] | DayEventLayout[][] {
   return useMemo(() => {
     const dates = Array.isArray(currentDateOrDates)
@@ -217,37 +218,43 @@ export default function useDayEventLayout(
         const totalCols = columns.length;
 
         // Phase 4 - Initialise default dimensions
-        // Initially, assign equal width (1/totalCols) to every event.
         for (const event of cluster) {
-          event.left = event.columnIndex! / totalCols;
-          event.width = 1 / totalCols;
+          if (eventOverlapOffset > 0) {
+            // Stacked layout: each column is shifted by offset
+            event.left = (event.columnIndex! * eventOverlapOffset) / 100;
+            event.width = 1 - event.left;
+          } else {
+            // Tiled layout: equal width
+            event.left = event.columnIndex! / totalCols;
+            event.width = 1 / totalCols;
+          }
         }
 
-        // Phase 5 - Width Expansion
-        // Allow events to expand horizontally and occupy adjacent empty columns
-        // if those columns have no competing events at that exact time slice.
-        const colMap: Map<number, ProcessedEvent[]> = new Map();
-        for (const event of cluster) {
-          const c = event.columnIndex!;
-          if (!colMap.has(c)) colMap.set(c, []);
-          colMap.get(c)!.push(event);
-        }
-
-        for (const event of cluster) {
-          let expandCols = 1;
-
-          for (let c = event.columnIndex! + 1; c < totalCols; c++) {
-            const colEvents = colMap.get(c) ?? [];
-            const blocked = colEvents.some(
-              (other) => other.start < event.end && event.start < other.end,
-            );
-            if (blocked) break;
-            expandCols++;
+        // Phase 5 - Width Expansion (Only for tiled layout)
+        if (eventOverlapOffset === 0) {
+          const colMap: Map<number, ProcessedEvent[]> = new Map();
+          for (const event of cluster) {
+            const c = event.columnIndex!;
+            if (!colMap.has(c)) colMap.set(c, []);
+            colMap.get(c)!.push(event);
           }
 
-          const maxPossibleCols = totalCols - event.columnIndex!;
-          event.expandCols = Math.min(expandCols, maxPossibleCols);
-          event.width = event.expandCols / totalCols;
+          for (const event of cluster) {
+            let expandCols = 1;
+
+            for (let c = event.columnIndex! + 1; c < totalCols; c++) {
+              const colEvents = colMap.get(c) ?? [];
+              const blocked = colEvents.some(
+                (other) => other.start < event.end && event.start < other.end,
+              );
+              if (blocked) break;
+              expandCols++;
+            }
+
+            const maxPossibleCols = totalCols - event.columnIndex!;
+            event.expandCols = Math.min(expandCols, maxPossibleCols);
+            event.width = event.expandCols / totalCols;
+          }
         }
       }
 
@@ -273,5 +280,12 @@ export default function useDayEventLayout(
       return dates.map((d) => generateLayoutForDate(d));
     }
     return generateLayoutForDate(dates[0]);
-  }, [events, currentDateOrDates, minHour, maxHour, showAllDayRow]);
+  }, [
+    events,
+    currentDateOrDates,
+    minHour,
+    maxHour,
+    showAllDayRow,
+    eventOverlapOffset,
+  ]);
 }

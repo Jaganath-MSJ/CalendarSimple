@@ -45,6 +45,7 @@ function CalendarContent({
   classNames,
   showAllDayRow,
   renderScheduleSeparator,
+  eventOverlapOffset,
   ...restProps
 }: CalendarContentProps) {
   const {
@@ -77,6 +78,7 @@ function CalendarContent({
       maxHour,
       renderEvent: restProps.renderEvent,
       renderScheduleSeparator,
+      eventOverlapOffset,
       renderHourCell: restProps.renderHourCell,
       renderDateCell: restProps.renderDateCell,
     };

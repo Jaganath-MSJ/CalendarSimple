@@ -29,6 +29,7 @@ interface DayViewProps extends Pick<
   | "renderHourCell"
   | "renderDateCell"
   | "showAllDayRow"
+  | "eventOverlapOffset"
 > {}
 
 function DayView({
@@ -47,6 +48,7 @@ function DayView({
   renderHourCell,
   renderDateCell,
   showAllDayRow,
+  eventOverlapOffset,
 }: DayViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useCalendar();
@@ -57,6 +59,7 @@ function DayView({
     minHour,
     maxHour,
     showAllDayRow,
+    eventOverlapOffset,
   ) as DayEventLayout[];
 
   const isToday = dateFn().isSame(selectedDate, "day");
