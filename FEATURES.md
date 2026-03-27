@@ -10,9 +10,12 @@ The calendar is designed to provide users with multiple perspectives of their sc
   - **Adjacent Months**: Use the `showAdjacentMonths` prop to toggle the visibility of dates from the previous and next months in the current month's grid.
   - **Week Boundaries**: You can configure which days of the week begin and end the layout (e.g., standard Monday-Friday work week) via `weekStartsOn` and `weekEndsOn`.
 - **Week View (`"week"`)**: Displays a 7-day column layout (or custom range using `weekStartsOn`/`weekEndsOn`) with a time grid. Events are rendered as blocks spanning their respective time slots, making it easy to identify overlapping schedules and free time.
+  - **All-Day Row**: Automatically extracts all-day and multi-day events to a top banner. This can be disabled using `showAllDayRow={false}` which pushes them into the time grid as 24-hour blocks.
+  - **Concurrent Event Layout**: Overlapping events are mathematically tiled to prevent collision. You can switch to a sleek, layered styling by providing a percentage via `eventOverlapOffset` (e.g. `15`).
 - **Day View (`"day"`)**: Similar to the Week View but focused entirely on a single day. This is perfect for detailed daily planning and provides maximum horizontal space for event details.
 - **Custom Days View (`"customDays"`)**: A flexible time-grid view that displays a specific number of days, starting from the current `selectedDate`. This is ideal for 3-day or 5-day "short week" views. The number of days is controlled by the `customDays` prop.
 - **Schedule View (`"schedule"`)**: A chronological list of upcoming events grouped by date. This view is highly optimized for mobile devices or sidebars where space is limited and users just need to see "what's next."
+  - **Custom Separators**: You can use `renderScheduleSeparator` to cleanly divide groups of events by rendering a line or date marker between dates.
 
 ## ✨ Event Handling
 
@@ -65,6 +68,7 @@ Make your calendar reactive to user input by hooking into these extensive callba
 - `onDateClick(date: Date)`: Triggered when a user clicks an empty cell or day header. Use this to update your local state or open an "Add Event" modal.
 - `onEventClick(event: CalendarEvent)`: Triggered when a user clicks on a rendered event. Perfect for opening event details or edit screens.
 - `onViewChange(view: ECalendarViewType)`: Fired when the user uses the built-in header tabs to change the view (e.g., switching from Month to Week).
+  - **Auto-Reset Date**: If you pass `resetDateOnViewChange={true}`, the calendar will automatically snap back to the current day ("Today") whenever the user manually switches the view.
 - `onNavigate(date: Date)`: Fired when the user clicks the "Next" or "Previous" buttons to flip through months/weeks, or uses the Month/Year dropdowns.
 - `onMoreClick(date: Date, hiddenEvents?: CalendarEvent[])`: In the month view, if a day has too many events, a "+X more" text appears. Clicking it fires this callback, returning the specific date and an array of the events that were pushed out of view.
 
