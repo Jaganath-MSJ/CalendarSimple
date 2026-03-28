@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 import { resolve } from "path";
@@ -31,6 +32,11 @@ export default defineConfig({
     target: "es2020",
     minify: "esbuild", // or 'terser'
     chunkSizeWarningLimit: 2000,
+  },
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: "./src/setupTests.ts",
   },
   plugins: [
     // Generates .d.ts files (equivalent to tsup's dts: true)
