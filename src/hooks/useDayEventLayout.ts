@@ -196,8 +196,8 @@ export default function useDayEventLayout(
 
       // If ordering is disabled, bypass expensive layout processing
       if (!isEventOrderingEnabled) {
-        return processedEvents.map((event, index) => {
-          event.columnIndex = index;
+        return processedEvents.map((event) => {
+          event.columnIndex = 0; // Use a constant so zIndex stays 1 and naturally DOM-stacks without breaking header z-indexes
           event.left = 0;
           event.width = 1;
           return toLayout(event);
@@ -307,7 +307,7 @@ export default function useDayEventLayout(
           height: Math.max(rawHeight, 15),
           left: parseFloat((event.left! * 100).toFixed(4)),
           width: parseFloat((event.width! * 100).toFixed(4)),
-          zIndex: event.columnIndex! + 1,
+          zIndex: Math.min(event.columnIndex! + 1, 14), // Cap z-index below 15 (timeHeaderSpacer) and 20 (stickyTopContainer)
         };
       }
 
