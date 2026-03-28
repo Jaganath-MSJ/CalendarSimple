@@ -83,6 +83,13 @@ export interface CalendarProps {
   renderHeader?: (props: RenderHeaderProps) => ReactNode;
   renderHourCell?: (date: Date) => ReactNode;
   renderDateCell?: (props: RenderDateCellProps) => ReactNode;
+
+  // --- Performance Options ---
+  enrichedEventsByDate?: Record<string, CalendarEvent[]>;
+  enableEnrichedEvents?: boolean;
+  eventsAreSorted?: boolean;
+  isEventOrderingEnabled?: boolean;
+  sortedMonthView?: boolean | ((a: CalendarEvent, b: CalendarEvent) => number);
 }
 
 export interface CalendarContentProps extends RequiredSome<
@@ -108,6 +115,10 @@ export interface CalendarContentProps extends RequiredSome<
   | "theme"
   | "classNames"
   | "eventOverlapOffset"
+  | "enableEnrichedEvents"
+  | "eventsAreSorted"
+  | "isEventOrderingEnabled"
+  | "sortedMonthView"
 > {}
 
 export interface MonthListType {

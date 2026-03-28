@@ -17,16 +17,24 @@ import { CalendarEvent } from "../types/events";
  * @param events - The raw array of calendar events to process.
  * @returns A memoized array containing only logically valid events.
  */
-export default function useEvents(events: CalendarEvent[]) {
+export default function useEvents(
+  events: CalendarEvent[],
+  eventsAreSorted?: boolean,
+  enableEnrichedEvents?: boolean,
+) {
   const validEvents = useMemo(() => {
     // -------------------------------------------------------------------------
     // 1. Basic Validation: Filter invalid date ranges
     // -------------------------------------------------------------------------
+    if (eventsAreSorted || enableEnrichedEvents) {
+      return events;
+    }
+
     return events.filter((event) => {
       if (!event.endDate) return true;
       return !dateFn(event.endDate).isBefore(dateFn(event.startDate));
     });
-  }, [events]);
+  }, [events, eventsAreSorted, enableEnrichedEvents]);
 
   return validEvents;
 }

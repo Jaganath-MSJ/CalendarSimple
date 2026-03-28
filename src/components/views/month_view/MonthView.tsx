@@ -32,6 +32,11 @@ interface MonthViewProps extends Pick<
   | "showAdjacentMonths"
   | "renderEvent"
   | "renderDateCell"
+  | "enableEnrichedEvents"
+  | "enrichedEventsByDate"
+  | "eventsAreSorted"
+  | "isEventOrderingEnabled"
+  | "sortedMonthView"
 > {}
 
 function MonthView({
@@ -50,6 +55,11 @@ function MonthView({
   showAdjacentMonths,
   renderEvent,
   renderDateCell,
+  enableEnrichedEvents,
+  enrichedEventsByDate,
+  eventsAreSorted,
+  isEventOrderingEnabled,
+  sortedMonthView,
   ...restProps
 }: MonthViewProps) {
   const { state, dispatch } = useCalendar();
@@ -60,6 +70,13 @@ function MonthView({
     events,
     weekStartsOn,
     weekEndsOn,
+    {
+      enableEnrichedEvents,
+      enrichedEventsByDate,
+      eventsAreSorted,
+      isEventOrderingEnabled,
+      sortedMonthView,
+    },
   );
 
   const maxEvents = useMemo(

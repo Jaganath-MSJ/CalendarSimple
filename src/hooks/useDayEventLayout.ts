@@ -13,8 +13,16 @@
 
 import { CalendarEvent } from "../types";
 import { useMemo } from "react";
-import { dateFn, DateType } from "../utils/date";
+import { dateFn, DateType, formatDate } from "../utils/date";
 import { isAllDayEvent, isMultiDay } from "../utils/common";
+import { DATE_FORMATS } from "../constants";
+
+export interface UseDayEventLayoutOptions {
+  enableEnrichedEvents?: boolean;
+  enrichedEventsByDate?: Record<string, CalendarEvent[]>;
+  eventsAreSorted?: boolean;
+  isEventOrderingEnabled?: boolean;
+}
 
 /**
  * Represents the final calculated CSS positioning for an event in the day view.
@@ -58,7 +66,15 @@ export default function useDayEventLayout(
   maxHour: number,
   showAllDayRow: boolean,
   eventOverlapOffset: number,
+  options: UseDayEventLayoutOptions = {},
 ): DayEventLayout[] | DayEventLayout[][] {
+  const {
+    enableEnrichedEvents,
+    enrichedEventsByDate,
+    eventsAreSorted,
+    isEventOrderingEnabled = true,
+  } = options;
+
   return useMemo(() => {
     const dates = Array.isArray(currentDateOrDates)
       ? currentDateOrDates
@@ -68,53 +84,63 @@ export default function useDayEventLayout(
       // -------------------------------------------------------------------------
       // 1. Initial Filtering: Only process timed events for this specific day
       // -------------------------------------------------------------------------
-      const eventsForDay = events.filter((event) => {
-        const eventDate = dateFn(event.startDate).startOf("day");
-        const currentDay = dateFn(currentDate).startOf("day");
+      const getEventsForDay = () => {
+        const filterFn = (event: CalendarEvent) => {
+          const eventDate = dateFn(event.startDate).startOf("day");
+          const currentDay = dateFn(currentDate).startOf("day");
 
-        const startMins =
-          dateFn(event.startDate).hour() * 60 +
-          dateFn(event.startDate).minute();
-        let endMins = event.endDate
-          ? dateFn(event.endDate).hour() * 60 + dateFn(event.endDate).minute()
-          : startMins + 1;
-        if (endMins <= startMins && event.endDate) endMins += 1440;
+          const startMins =
+            dateFn(event.startDate).hour() * 60 +
+            dateFn(event.startDate).minute();
+          let endMins = event.endDate
+            ? dateFn(event.endDate).hour() * 60 + dateFn(event.endDate).minute()
+            : startMins + 1;
+          if (endMins <= startMins && event.endDate) endMins += 1440;
 
-        const isWithinBounds =
-          endMins > minHour * 60 && startMins < maxHour * 60;
+          const isWithinBounds =
+            endMins > minHour * 60 && startMins < maxHour * 60;
 
-        // If showAllDayRow is false, we should keep all-day and multi-day events,
-        // but only if they overlap with currentDay
-        const isMulti = isMultiDay(event);
-        const isAllDay = isAllDayEvent(event);
+          // If showAllDayRow is false, we should keep all-day and multi-day events,
+          // but only if they overlap with currentDay
+          const isMulti = isMultiDay(event);
+          const isAllDay = isAllDayEvent(event);
 
-        if (showAllDayRow) {
-          return (
-            eventDate.isSame(currentDay) &&
-            !isMulti &&
-            !isAllDay &&
-            isWithinBounds
-          );
-        } else {
-          // If hiding the all-day row, we want to show all-day/multi-day events in the grid.
-          // We must check if the event spans over 'currentDay'.
-          const eventStart = dateFn(event.startDate).startOf("day");
-          const eventEnd = event.endDate
-            ? dateFn(event.endDate).endOf("day")
-            : eventStart.endOf("day");
-          const overlapsCurrentDay =
-            currentDay.isBetween(eventStart, eventEnd, "day", "[]") ||
-            currentDay.isSame(eventStart, "day") ||
-            currentDay.isSame(eventEnd, "day");
+          if (showAllDayRow) {
+            return (
+              eventDate.isSame(currentDay) &&
+              !isMulti &&
+              !isAllDay &&
+              isWithinBounds
+            );
+          } else {
+            // If hiding the all-day row, we want to show all-day/multi-day events in the grid.
+            // We must check if the event spans over 'currentDay'.
+            const eventStart = dateFn(event.startDate).startOf("day");
+            const eventEnd = event.endDate
+              ? dateFn(event.endDate).endOf("day")
+              : eventStart.endOf("day");
+            const overlapsCurrentDay =
+              currentDay.isBetween(eventStart, eventEnd, "day", "[]") ||
+              currentDay.isSame(eventStart, "day") ||
+              currentDay.isSame(eventEnd, "day");
 
-          if (!overlapsCurrentDay) return false;
+            if (!overlapsCurrentDay) return false;
 
-          // For normal timed events, still check bounds
-          if (!isMulti && !isAllDay && !isWithinBounds) return false;
+            // For normal timed events, still check bounds
+            if (!isMulti && !isAllDay && !isWithinBounds) return false;
 
-          return true;
+            return true;
+          }
+        };
+
+        if (enableEnrichedEvents && enrichedEventsByDate) {
+          const dateStr = formatDate(currentDate, DATE_FORMATS.DATE);
+          return (enrichedEventsByDate[dateStr] || []).filter(filterFn);
         }
-      });
+        return events.filter(filterFn);
+      };
+
+      const eventsForDay = getEventsForDay();
 
       if (eventsForDay.length === 0) return [];
 
@@ -161,10 +187,22 @@ export default function useDayEventLayout(
       // -------------------------------------------------------------------------
       // Phase 1 - Sorting: Start time asc, then Duration desc
       // -------------------------------------------------------------------------
-      processedEvents.sort((a, b) => {
-        if (a.start === b.start) return b.duration - a.duration;
-        return a.start - b.start;
-      });
+      if (!eventsAreSorted) {
+        processedEvents.sort((a, b) => {
+          if (a.start === b.start) return b.duration - a.duration;
+          return a.start - b.start;
+        });
+      }
+
+      // If ordering is disabled, bypass expensive layout processing
+      if (!isEventOrderingEnabled) {
+        return processedEvents.map((event, index) => {
+          event.columnIndex = index;
+          event.left = 0;
+          event.width = 1;
+          return toLayout(event);
+        });
+      }
 
       // -------------------------------------------------------------------------
       // Phase 2 - Sweep-line Clustering: Group overlapping events
@@ -287,5 +325,9 @@ export default function useDayEventLayout(
     maxHour,
     showAllDayRow,
     eventOverlapOffset,
+    enableEnrichedEvents,
+    enrichedEventsByDate,
+    eventsAreSorted,
+    isEventOrderingEnabled,
   ]);
 }

@@ -46,6 +46,11 @@ function CalendarContent({
   showAllDayRow,
   renderScheduleSeparator,
   eventOverlapOffset,
+  enableEnrichedEvents,
+  enrichedEventsByDate,
+  eventsAreSorted,
+  isEventOrderingEnabled,
+  sortedMonthView,
   ...restProps
 }: CalendarContentProps) {
   const {
@@ -81,6 +86,11 @@ function CalendarContent({
       eventOverlapOffset,
       renderHourCell: restProps.renderHourCell,
       renderDateCell: restProps.renderDateCell,
+      enableEnrichedEvents,
+      enrichedEventsByDate,
+      eventsAreSorted,
+      isEventOrderingEnabled,
+      sortedMonthView,
     };
     switch (view) {
       case ECalendarViewType.day:
@@ -173,7 +183,11 @@ function Calendar({
   const initialDate = useMemo(() => dateFn(selectedDate), [selectedDate]);
 
   // Filter out events where the end date is before the start date
-  const validEvents = useEvents(allProps.events);
+  const validEvents = useEvents(
+    allProps.events,
+    allProps.eventsAreSorted,
+    allProps.enableEnrichedEvents,
+  );
 
   return (
     <CalendarProvider

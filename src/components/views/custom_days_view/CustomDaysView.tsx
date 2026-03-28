@@ -31,6 +31,10 @@ interface CustomViewProps extends Pick<
   | "renderDateCell"
   | "showAllDayRow"
   | "eventOverlapOffset"
+  | "enableEnrichedEvents"
+  | "enrichedEventsByDate"
+  | "eventsAreSorted"
+  | "isEventOrderingEnabled"
 > {}
 
 function CustomView({
@@ -51,6 +55,10 @@ function CustomView({
   renderDateCell,
   showAllDayRow,
   eventOverlapOffset,
+  enableEnrichedEvents,
+  enrichedEventsByDate,
+  eventsAreSorted,
+  isEventOrderingEnabled,
 }: CustomViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useCalendar();
@@ -69,6 +77,12 @@ function CustomView({
     maxHour,
     showAllDayRow,
     eventOverlapOffset,
+    {
+      enableEnrichedEvents,
+      enrichedEventsByDate,
+      eventsAreSorted,
+      isEventOrderingEnabled,
+    },
   ) as DayEventLayout[][];
 
   const hasToday = useMemo(() => {

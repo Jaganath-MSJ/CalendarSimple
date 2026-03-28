@@ -80,6 +80,10 @@ export const defaultCalendarProps = {
   resetDateOnViewChange: false,
   showAllDayRow: true,
   eventOverlapOffset: 0,
+  enableEnrichedEvents: false,
+  eventsAreSorted: false,
+  isEventOrderingEnabled: true,
+  sortedMonthView: true,
 };
 
 export const DATE_FORMATS = {

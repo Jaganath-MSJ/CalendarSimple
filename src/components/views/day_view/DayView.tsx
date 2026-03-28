@@ -30,6 +30,10 @@ interface DayViewProps extends Pick<
   | "renderDateCell"
   | "showAllDayRow"
   | "eventOverlapOffset"
+  | "enableEnrichedEvents"
+  | "enrichedEventsByDate"
+  | "eventsAreSorted"
+  | "isEventOrderingEnabled"
 > {}
 
 function DayView({
@@ -49,6 +53,10 @@ function DayView({
   renderDateCell,
   showAllDayRow,
   eventOverlapOffset,
+  enableEnrichedEvents,
+  enrichedEventsByDate,
+  eventsAreSorted,
+  isEventOrderingEnabled,
 }: DayViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useCalendar();
@@ -60,6 +68,12 @@ function DayView({
     maxHour,
     showAllDayRow,
     eventOverlapOffset,
+    {
+      enableEnrichedEvents,
+      enrichedEventsByDate,
+      eventsAreSorted,
+      isEventOrderingEnabled,
+    },
   ) as DayEventLayout[];
 
   const isToday = dateFn().isSame(selectedDate, "day");
