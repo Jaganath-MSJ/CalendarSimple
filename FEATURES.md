@@ -77,6 +77,15 @@ Make your calendar reactive to user input by hooking into these extensive callba
 - The calendar utilizes CSS Grid and Flexbox to fluidly adapt to the width and height of its parent container.
 - If no explicitly fixed `width` or `height` props are provided, it relies on a ResizeObserver hook to monitor the DOM wrapper and recalculates internal sizes automatically, ensuring events and columns always align perfectly to the available space.
 
+## ⚡ Performance Options
+
+When rendering thousands of events simultaneously, you can utilize the internal performance engine to bypass intensive layout checks.
+
+- **`enableEnrichedEvents` & `enrichedEventsByDate`**: Instead of passing a flat array of events and forcing the calendar to filter them by intersecting dates, you can map them externally (`Record<string, CalendarEvent[]>`) and pass them in to achieve true O(1) day-rendering lookups.
+- **`eventsAreSorted`**: Skips the expensive initial `[...events].sort()` operations algorithmically when you feed the calendar a pre-sorted dataset.
+- **`isEventOrderingEnabled`**: Setting this to `false` is an ultra-fast path for massive data payloads. It bypasses iterative sweep-line calculations and Tetris overlapping resolutions to assign items linearly, keeping performance instantaneous at the expense of visual collision spacing.
+- **`sortedMonthView`**: Exposes the ability to enforce a custom priority/sorting-function inside the Month View for Tetris slot allocations, or turn them off completely.
+
 ## 🛡️ TypeScript Support
 
 `calendar-simple` was built ground-up in TypeScript. All props, callback payloads, and internal data structures are exported, ensuring your IDE provides full intellisense and compile-time safety.

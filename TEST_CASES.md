@@ -71,6 +71,13 @@ These test cases verify that the specific props and configurations passed to the
 - **Theme Colors (`theme`)**: Pass specific hex codes into `theme={{ default: { bgColor: "black", color: "white" } }}` and verify styling.
 - **Custom Render Props (`renderEvent`, `renderHeader`, `renderHourCell`, `renderDateCell`, `renderScheduleSeparator`)**: Replace default rendering (events, header, hour grid, date cells, schedule division lines) with custom React components and verify interaction callbacks/scaling integrity are preserved.
 
+### 1.10 Performance Options
+
+- **Enriched Events (`enableEnrichedEvents`, `enrichedEventsByDate`)**: Pass a pre-mapped dictionary of events directly to dates. Verify the layout renders the same UI via O(1) logic bypassing raw iteration.
+- **Pre-Sorted Events (`eventsAreSorted`)**: Pass a pre-sorted array of events and true marker. Verify that the time-slot assignments match logic without executing intensive background mapping validations.
+- **Unordered Placement Bypass (`isEventOrderingEnabled={false}`)**: Render thousands of heavy-payload events. Verify bypass disables Tetris and logic overlap, clamping DOM stack-ordering (z-index) properly without overflowing into sticky headers.
+- **Sorted Month Logic (`sortedMonthView`)**: Pass a customized sort-function priority and assert Tetris grid stacks visually prioritize matching the custom logical rule.
+
 ---
 
 ## 2. Event Data & Edge Cases (The "Stress Suite")

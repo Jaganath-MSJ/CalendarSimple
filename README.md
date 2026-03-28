@@ -234,6 +234,11 @@ const ThreeDayApp = () => (
 | `renderHourCell`          | `(date: Date) => ReactNode`                            | Custom renderer for background of hour slots (Day/Week/Custom views).              | `undefined`       |
 | `renderDateCell`          | `(props: RenderDateCellProps) => ReactNode`            | Custom renderer for day headers and month date cells.                              | `undefined`       |
 | `renderScheduleSeparator` | `(date: Date) => ReactNode`                            | Custom renderer for the separator between daily event groups in the Schedule view. | `undefined`       |
+| `enableEnrichedEvents`    | `boolean`                                              | Enables O(1) dictionary lookups instead of filtering across all events.            | `false`           |
+| `enrichedEventsByDate`    | `Record<string, CalendarEvent[]>`                      | Pre-mapped event payload used when `enableEnrichedEvents` is active.               | `undefined`       |
+| `eventsAreSorted`         | `boolean`                                              | Skips algorithmic sorting logic assuming the input `events` are already ordered.   | `false`           |
+| `isEventOrderingEnabled`  | `boolean`                                              | Enables collision/overlap resolution mapping (Tetris slot-stacking for views).     | `true`            |
+| `sortedMonthView`         | `boolean \| function`                                  | Sorts the items logically before Tetris slot-stacking overlapping occurrences.     | `true`            |
 
 ### Types
 
