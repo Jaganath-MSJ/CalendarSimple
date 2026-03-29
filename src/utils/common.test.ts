@@ -1,0 +1,108 @@
+import { describe, it, expect } from "vitest";
+import { calculateMaxEvents, isAllDayEvent, isMultiDay } from "./common";
+import { LAYOUT_CONSTANTS } from "../constants";
+
+describe("common utils", () => {
+  describe("calculateMaxEvents", () => {
+    it("should calculate correctly based on given height and rows", () => {
+      // Let's mock a height where each row has plenty of space
+      const height = 1200;
+      const rowsInView = 6;
+      const cellHeight = 1200 / 6; // 200
+      // Math.round((200 - DATE_LABEL_HEIGHT - CELL_PADDING) / EVENT_HEIGHT) - 1
+      const availableNodeHeight =
+        cellHeight -
+        LAYOUT_CONSTANTS.DATE_LABEL_HEIGHT -
+        LAYOUT_CONSTANTS.CELL_PADDING;
+
+      const expected =
+        Math.round(availableNodeHeight / LAYOUT_CONSTANTS.EVENT_HEIGHT) - 1;
+
+      const result = calculateMaxEvents(height, rowsInView);
+      expect(result).toBe(Math.max(0, expected));
+    });
+
+    it("should not return a negative number for small heights", () => {
+      expect(calculateMaxEvents(10, 6)).toBe(0);
+    });
+  });
+
+  describe("isAllDayEvent", () => {
+    it("returns true when event has only date format", () => {
+      expect(
+        isAllDayEvent({ id: "1", title: "e", startDate: "2024-01-01" }),
+      ).toBe(true);
+      expect(
+        isAllDayEvent({
+          id: "1",
+          title: "e",
+          startDate: "2024-01-01",
+          endDate: "2024-01-02",
+        }),
+      ).toBe(true);
+    });
+
+    it("returns false when event has time formats", () => {
+      expect(
+        isAllDayEvent({
+          id: "1",
+          title: "e",
+          startDate: "2024-01-01T10:00:00",
+        }),
+      ).toBe(false);
+      expect(
+        isAllDayEvent({
+          id: "1",
+          title: "e",
+          startDate: "2024-01-01 10:00:00",
+        }),
+      ).toBe(false);
+      expect(
+        isAllDayEvent({
+          id: "1",
+          title: "e",
+          startDate: "2024-01-01",
+          endDate: "2024-01-02T10:00:00",
+        }),
+      ).toBe(false);
+    });
+  });
+
+  describe("isMultiDay", () => {
+    it("returns false if there is no endDate provided", () => {
+      expect(
+        isMultiDay({ id: "1", title: "e", startDate: "2024-01-01T10:00:00" }),
+      ).toBe(false);
+    });
+
+    it("returns false for same day events even with different times", () => {
+      expect(
+        isMultiDay({
+          id: "1",
+          title: "e",
+          startDate: "2024-01-01T10:00:00",
+          endDate: "2024-01-01T14:00:00",
+        }),
+      ).toBe(false);
+    });
+
+    it("returns true when events span across midnight", () => {
+      expect(
+        isMultiDay({
+          id: "1",
+          title: "e",
+          startDate: "2024-01-01T23:00:00",
+          endDate: "2024-01-02T01:00:00",
+        }),
+      ).toBe(true);
+      expect(
+        isMultiDay({
+          id: "1",
+          title: "e",
+          startDate: "2024-01-01",
+          endDate: "2024-01-02",
+        }),
+      ).toBe(true);
+    });
+  });
+});
