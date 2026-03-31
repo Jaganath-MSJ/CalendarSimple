@@ -93,7 +93,7 @@ export interface CalendarProps {
 }
 
 export interface CalendarContentProps extends RequiredSome<
-  Omit<CalendarProps, "selectedDate">,
+  CalendarProps,
   | "events"
   | "view"
   | "is12Hour"

@@ -65,6 +65,13 @@ function CalendarContent({
     }
   }, [restProps.view, dispatch]);
 
+  // Sync external date prop to context if it changes
+  useEffect(() => {
+    if (restProps.selectedDate) {
+      dispatch({ type: "SET_DATE", payload: dateFn(restProps.selectedDate) });
+    }
+  }, [restProps.selectedDate, dispatch]);
+
   const getViewComponent = (view: ECalendarViewType) => {
     const commonProps = {
       events,
@@ -161,10 +168,7 @@ function CalendarContent({
   );
 }
 
-function Calendar({
-  selectedDate,
-  ...props
-}: CalendarProps = defaultCalendarProps) {
+function Calendar(props: CalendarProps = defaultCalendarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const allProps = { ...defaultCalendarProps, ...props };
@@ -180,7 +184,10 @@ function Calendar({
     (typeof mainHeight === "number" ? mainHeight : 0) -
     LAYOUT_CONSTANTS.HEADER_HEIGHT;
 
-  const initialDate = useMemo(() => dateFn(selectedDate), [selectedDate]);
+  const initialDate = useMemo(
+    () => dateFn(props.selectedDate),
+    [props.selectedDate],
+  );
 
   // Filter out events where the end date is before the start date
   const validEvents = useEvents(

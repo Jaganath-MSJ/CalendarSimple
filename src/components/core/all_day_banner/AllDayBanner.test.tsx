@@ -63,21 +63,35 @@ describe("AllDayBanner Component", () => {
     expect(screen.getByText("All Day")).toBeInTheDocument();
   });
 
-  it("triggers expand/collapse icon click", () => {
+  it("triggers expand/collapse icon click and displays +X more when maxEvents is reached", () => {
     mockUseAllDayBanner.mockReturnValue({
-      layoutEvents: [{ event: { id: "1", title: "All Day" } }],
+      layoutEvents: [
+        { event: { id: "1", title: "All Day 1" } },
+        { event: { id: "2", title: "All Day 2" } },
+      ],
       effectiveMaxRows: 1,
-      hiddenCounts: [1, 0],
-      visibleLayoutEvents: [],
+      hiddenCounts: [1, 0], // Simulates 1 hidden event in the first day column
+      visibleLayoutEvents: [
+        {
+          event: { id: "1", title: "All Day 1", startDate: "2024-03-01" },
+          row: 0,
+          startIndex: 0,
+          endIndex: 1,
+        },
+      ],
       containerHeight: "30px",
       showExpandCollapse: true,
     });
 
     render(<AllDayBanner {...defaultProps} />);
 
-    const moreChip = screen.getByText("+ 1 more");
-    fireEvent.click(moreChip);
+    // Renders the visible event
+    expect(screen.getByText("All Day 1")).toBeInTheDocument();
 
-    // Component handles boolean state via mock... we'd normally verify visual class change on icon
+    // Renders the overflow '+1 more' indicator instead of 'All Day 2'
+    const moreChip = screen.getByText("+ 1 more");
+    expect(moreChip).toBeInTheDocument();
+
+    fireEvent.click(moreChip);
   });
 });

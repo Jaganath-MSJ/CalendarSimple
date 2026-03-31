@@ -219,4 +219,81 @@ describe("useDayEventLayout Hook", () => {
     expect(layout[1]).toHaveLength(1);
     expect(layout[1][0].event.id).toBe("B");
   });
+
+  it("handles ConcurrentStress correctly grouping 5 overlapping events", () => {
+    const events: CalendarEvent[] = Array.from({ length: 5 }).map((_, i) => ({
+      id: `Event-${i}`,
+      title: `Event ${i}`,
+      startDate: "2024-03-01T12:00:00",
+      endDate: "2024-03-01T13:00:00",
+    }));
+
+    const { result } = renderHook(() =>
+      useDayEventLayout(events, baseDate, 0, 24, true, 0),
+    );
+    const layout = result.current as DayEventLayout[];
+    expect(layout).toHaveLength(5);
+
+    // Width should be divided evenly (100 / 5 = 20)
+    layout.forEach((l, i) => {
+      expect(l.width).toBe(20);
+      expect(l.left).toBe(i * 20); // 0, 20, 40, 60, 80
+    });
+  });
+
+  it("handles NestedOverlaps correctly (an event fully engulfed by another)", () => {
+    const events: CalendarEvent[] = [
+      {
+        id: "Outer",
+        title: "Outer",
+        startDate: "2024-03-01T09:00:00",
+        endDate: "2024-03-01T12:00:00",
+      },
+      {
+        id: "Inner",
+        title: "Inner",
+        startDate: "2024-03-01T10:00:00",
+        endDate: "2024-03-01T11:00:00",
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useDayEventLayout(events, baseDate, 0, 24, true, 0),
+    );
+
+    const layout = result.current as DayEventLayout[];
+    const outerEvent = layout.find((l) => l.event.id === "Outer");
+    const innerEvent = layout.find((l) => l.event.id === "Inner");
+
+    expect(outerEvent!.width).toBe(50);
+    expect(innerEvent!.width).toBe(50);
+    expect(outerEvent!.left).toBe(0);
+    expect(innerEvent!.left).toBe(50);
+  });
+
+  it("safely plots Zero Duration events without blowing up the layout bounds", () => {
+    const events: CalendarEvent[] = [
+      {
+        id: "Zero",
+        title: "Exact Time Entry",
+        startDate: "2024-03-01T10:00:00",
+        endDate: "2024-03-01T10:00:00", // Exactly zero duration
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useDayEventLayout(events, baseDate, 0, 24, true, 0),
+    );
+
+    const layout = result.current as DayEventLayout[];
+    expect(layout).toHaveLength(1);
+    const event = layout[0];
+
+    // Starting at 10:00 means top is (10 - 0) * 60 = 600px
+    expect(event.top).toBe(600);
+    // Usually zero duration is mapped to a minimum block height of e.g. 30px or clamped to the event duration itself.
+    // If it's literally 0, it shouldn't be negative or NaN.
+    expect(event.height).toBeGreaterThanOrEqual(0);
+    expect(event.width).toBe(100);
+  });
 });

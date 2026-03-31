@@ -137,7 +137,8 @@ export function getYearList(
   futureLength: number,
   selectedYear: number,
 ): number[] {
-  const yearLength = pastLength + futureLength;
+  // length should include past years, future years, and the current year (+1)
+  const yearLength = pastLength + futureLength + 1;
   const yearStarting = dateFn().year() - pastLength;
   const yearList = Array.from(
     { length: yearLength },

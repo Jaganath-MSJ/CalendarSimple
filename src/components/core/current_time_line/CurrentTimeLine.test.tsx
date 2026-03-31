@@ -45,4 +45,23 @@ describe("CurrentTimeLine Component", () => {
 
     expect(lineElement.style.top).toBe("751px");
   });
+
+  it("resets vertical position seamlessly precisely at midnight across days", () => {
+    vi.setSystemTime(new Date(2024, 2, 1, 23, 59)); // 11:59 PM
+    const { container } = render(<CurrentTimeLine minHour={0} maxHour={24} />);
+
+    // Position should be (23 - 0) * 60 + 59 = 1439px
+    let lineElement = container.firstChild as HTMLElement;
+    expect(lineElement.style.top).toBe("1439px");
+
+    // Fast forward 1 minute to exactly midnight (new day start)
+    // advancetimersByTime automatically updates the fake system time
+    act(() => {
+      vi.advanceTimersByTime(60000); // Trigger setInterval
+    });
+
+    // Position should cycle back up to (0 - 0) * 60 + 0 = 0px
+    lineElement = container.firstChild as HTMLElement;
+    expect(lineElement.style.top).toBe("0px");
+  });
 });

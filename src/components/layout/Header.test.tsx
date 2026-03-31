@@ -87,4 +87,31 @@ describe("Header Component", () => {
       payload: ECalendarViewType.week,
     });
   });
+
+  it("limits the year dropdown options based on pastYearLength and futureYearLength", () => {
+    // Current state mock is 2024. With past 2 and future 2, expect 2022, 2023, 2024, 2025, 2026.
+    render(
+      <Header {...defaultProps} pastYearLength={2} futureYearLength={2} />,
+    );
+
+    // There are three selects in Header: 1. View, 2. Month, 3. Year
+    const dropdowns = screen.getAllByRole("combobox");
+    const yearDropdown = dropdowns[2]; // Index 2 is Year
+
+    const options = Array.from(yearDropdown.querySelectorAll("option")).map(
+      (opt) => opt.value,
+    );
+
+    const currentYear = new Date().getFullYear();
+    const expected = [
+      String(currentYear - 2),
+      String(currentYear - 1),
+      String(currentYear),
+      String(currentYear + 1),
+      String(currentYear + 2),
+    ];
+
+    expect(options).toEqual(expected);
+    expect(options.length).toBe(5);
+  });
 });

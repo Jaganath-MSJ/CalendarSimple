@@ -1,5 +1,6 @@
 import { renderHook } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
+import { CalendarEvent } from "../types";
 import useEvents from "./useEvents";
 
 describe("useEvents Hook", () => {
@@ -38,5 +39,22 @@ describe("useEvents Hook", () => {
 
     expect(result.current).toHaveLength(3);
     expect(result.current.map((e) => e.id)).toEqual(["1", "2", "3"]);
+  });
+
+  it("safely processes events missing id and title without crashing (MissingDataFields)", () => {
+    // Asserting that event processing doesn't crash when optional fields are omitted
+    // Event components down the line handle the "No Title" visual fallback natively
+    const rawEvents = [
+      {
+        startDate: "2024-01-01",
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useEvents(rawEvents as unknown as CalendarEvent[]),
+    );
+    expect(result.current).toHaveLength(1);
+    expect(result.current[0].startDate).toBe("2024-01-01");
+    expect(result.current[0].id).toBeUndefined();
   });
 });

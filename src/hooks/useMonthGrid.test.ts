@@ -97,4 +97,48 @@ describe("useMonthGrid Hook", () => {
     expect(thuEvents[0]?.id).toBe("1"); // A is shorter, put first
     expect(thuEvents[1]?.id).toBe("2"); // B is longer, put second
   });
+
+  it("handles DurationOddities (Extreme 5-year ranges) without infinite loop crash", () => {
+    const events: CalendarEvent[] = [
+      {
+        id: "Extreme",
+        title: "5 Year Span",
+        startDate: "2020-01-01",
+        endDate: "2025-01-01",
+      },
+    ];
+
+    // Testing a month right in the middle: Feb 2024
+    const { result } = renderHook(() =>
+      useMonthGrid(selectedDate, events, weekStartsOn, weekEndsOn),
+    );
+
+    const grid = result.current;
+
+    // The event should be present on every single day of the month grid
+    for (const week of grid) {
+      for (const day of week) {
+        expect(day.events[0]?.id).toBe("Extreme");
+      }
+    }
+  });
+
+  it("handles strictly zero-duration events", () => {
+    const events: CalendarEvent[] = [
+      {
+        id: "Zero",
+        title: "Moment",
+        startDate: "2024-02-15T12:00:00",
+        endDate: "2024-02-15T12:00:00",
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useMonthGrid(selectedDate, events, weekStartsOn, weekEndsOn),
+    );
+
+    const thirdWeek = result.current[2];
+    expect(thirdWeek[4].displayDay).toBe(15);
+    expect(thirdWeek[4].events[0]?.id).toBe("Zero");
+  });
 });
