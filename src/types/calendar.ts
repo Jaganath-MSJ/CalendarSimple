@@ -42,6 +42,7 @@ export interface CalendarProps {
   events?: CalendarEvent[];
   selectedDate?: Date;
   view?: ECalendarViewType;
+  testId?: string;
 
   // --- Configuration ---
   is12Hour?: boolean;

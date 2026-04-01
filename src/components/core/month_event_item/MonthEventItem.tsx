@@ -9,6 +9,7 @@ import { getDiffDays, generateTooltipText, DateType } from "../../../utils";
 import styles from "./MonthEventItem.module.css";
 import Popover from "../../ui/popover/Popover";
 import { LAYOUT_CONSTANTS, defaultTheme } from "../../../constants";
+import { useCalendar } from "../../../context/CalendarContext";
 
 interface MonthEventItemProps extends Pick<
   CalendarContentProps,
@@ -61,6 +62,7 @@ function MonthEventItem({
   renderEvent,
   renderDateCell,
 }: MonthEventItemProps) {
+  const { testId } = useCalendar();
   const [showPopover, setShowPopover] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
@@ -145,6 +147,7 @@ function MonthEventItem({
                       key={item.id || `${item.startDate}-${index}`}
                       className={cx(styles.eventItem, classNames?.event)}
                       id={item.id}
+                      data-testid={`${testId}-month-event-item`}
                       style={{
                         width,
                         backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,

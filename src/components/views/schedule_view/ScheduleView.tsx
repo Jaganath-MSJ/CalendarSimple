@@ -10,6 +10,7 @@ import {
 import styles from "./ScheduleView.module.css";
 import { DATE_FORMATS, LAYOUT_CONSTANTS } from "../../../constants";
 import useScheduleView from "../../../hooks/useScheduleView";
+import { useCalendar } from "../../../context/CalendarContext";
 
 interface ScheduleViewProps extends Pick<
   CalendarContentProps,
@@ -34,6 +35,7 @@ export default function ScheduleView({
   renderEvent,
   renderScheduleSeparator,
 }: ScheduleViewProps) {
+  const { testId } = useCalendar();
   const { todayRef, groupedEvents, renderEventTime, renderEventTitle } =
     useScheduleView({
       events,
@@ -42,7 +44,10 @@ export default function ScheduleView({
     });
 
   return (
-    <div className={styles.scheduleView}>
+    <div
+      className={styles.scheduleView}
+      data-testid={`${testId}-schedule-view`}
+    >
       {Object.keys(groupedEvents).length === 0 ? (
         <div className={styles.emptyState}>No events to display</div>
       ) : (

@@ -63,7 +63,7 @@ function WeekView({
   isEventOrderingEnabled,
 }: WeekViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { state } = useCalendar();
+  const { state, testId } = useCalendar();
   const { selectedDate } = state;
   const startOfWeek = useMemo(() => {
     const currentDay = selectedDate.day();
@@ -118,7 +118,11 @@ function WeekView({
   }, [autoScrollToCurrentTime, isCurrentWeek]);
 
   return (
-    <div className={styles.weekView} ref={containerRef}>
+    <div
+      className={styles.weekView}
+      ref={containerRef}
+      data-testid={`${testId}-week-view`}
+    >
       <div className={styles.stickyTopContainer}>
         <div className={styles.weekHeader}>
           <div className={styles.timeHeaderSpacer} />
@@ -182,6 +186,7 @@ function WeekView({
               <div
                 key={dayIndex}
                 className={cx(styles.dayColumn, classNames?.dayColumn)}
+                data-testid={`${testId}-day-column`}
               >
                 <DayColumn
                   dayEvents={weekEvents[dayIndex]}

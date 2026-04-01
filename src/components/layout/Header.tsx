@@ -61,7 +61,7 @@ function Header({
   events,
   resetDateOnViewChange,
 }: HeaderProps) {
-  const { state, dispatch } = useCalendar();
+  const { state, dispatch, testId } = useCalendar();
   const { selectedDate, view } = state;
 
   const onMonthArrowClick = (option: EMonthOption) => {
@@ -169,10 +169,14 @@ function Header({
   };
 
   return (
-    <div className={cx(styles.header, headerClassName)}>
+    <div
+      className={cx(styles.header, headerClassName)}
+      data-testid={`${testId}-header`}
+    >
       <div className={styles.navigation}>
         <button
           className={styles.todayButton}
+          data-testid={`${testId}-header-today-btn`}
           onClick={() => {
             dispatch({ type: CALENDAR_ACTIONS.TODAY });
             onNavigate?.(convertToDate(dateFn()));
@@ -183,12 +187,14 @@ function Header({
         <div className={styles.arrows}>
           <button
             className={styles.iconButton}
+            data-testid={`${testId}-header-prev-btn`}
             onClick={() => onMonthArrowClick(EMonthOption.sub)}
           >
             <LeftArrow />
           </button>
           <button
             className={styles.iconButton}
+            data-testid={`${testId}-header-next-btn`}
             onClick={() => onMonthArrowClick(EMonthOption.add)}
           >
             <RightArrow />

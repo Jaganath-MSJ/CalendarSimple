@@ -61,7 +61,7 @@ function CustomView({
   isEventOrderingEnabled,
 }: CustomViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { state } = useCalendar();
+  const { state, testId } = useCalendar();
   const { selectedDate } = state;
 
   const viewDays = useMemo(() => {
@@ -108,7 +108,11 @@ function CustomView({
   }, [autoScrollToCurrentTime, hasToday]);
 
   return (
-    <div className={styles.customView} ref={containerRef}>
+    <div
+      className={styles.customView}
+      ref={containerRef}
+      data-testid={`${testId}-custom-days-view`}
+    >
       <div className={styles.stickyTopContainer}>
         <div className={styles.customHeader}>
           <div className={styles.timeHeaderSpacer} />
@@ -172,6 +176,7 @@ function CustomView({
               <div
                 key={dayIndex}
                 className={cx(styles.dayColumn, classNames?.dayColumn)}
+                data-testid={`${testId}-day-column`}
               >
                 <DayColumn
                   dayEvents={viewEvents[dayIndex]}

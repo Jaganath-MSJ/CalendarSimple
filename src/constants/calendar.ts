@@ -84,6 +84,7 @@ export const defaultCalendarProps = {
   eventsAreSorted: false,
   isEventOrderingEnabled: true,
   sortedMonthView: true,
+  testId: "calendar",
 };
 
 export const DATE_FORMATS = {

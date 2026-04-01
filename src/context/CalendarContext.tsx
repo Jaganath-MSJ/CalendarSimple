@@ -27,6 +27,7 @@ const CalendarContext = createContext<
   | {
       state: CalendarState;
       dispatch: Dispatch<CalendarAction>;
+      testId?: string;
     }
   | undefined
 >(undefined);
@@ -88,6 +89,7 @@ interface CalendarProviderProps {
   initialDate: DateType;
   initialView: ECalendarViewType;
   initialCustomDays?: number;
+  testId?: string;
 }
 
 export function CalendarProvider({
@@ -95,6 +97,7 @@ export function CalendarProvider({
   initialDate,
   initialView,
   initialCustomDays,
+  testId,
 }: CalendarProviderProps) {
   const [state, dispatch] = useReducer(calendarReducer, {
     selectedDate: initialDate,
@@ -102,7 +105,7 @@ export function CalendarProvider({
     customDays: initialCustomDays,
   });
 
-  const value = useMemo(() => ({ state, dispatch }), [state]);
+  const value = useMemo(() => ({ state, dispatch, testId }), [state, testId]);
 
   return (
     <CalendarContext.Provider value={value}>

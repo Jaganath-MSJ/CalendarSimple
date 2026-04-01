@@ -21,6 +21,7 @@ import {
   EventListType,
 } from "../../../types";
 import { DATE_FORMATS, LAYOUT_CONSTANTS } from "../../../constants";
+import { useCalendar } from "../../../context/CalendarContext";
 
 interface PopoverProps extends Pick<
   CalendarContentProps,
@@ -41,6 +42,7 @@ function Popover({
   is12Hour,
   renderEvent,
 }: PopoverProps) {
+  const { testId } = useCalendar();
   const popoverRef = useRef<HTMLDivElement>(null);
   const [stylePosition, setStylePosition] = useState<CSSProperties>({
     visibility: "hidden",
@@ -121,6 +123,7 @@ function Popover({
       ref={popoverRef}
       style={stylePosition}
       onClick={(e) => e.stopPropagation()}
+      data-testid={`${testId}-popover-content`}
     >
       <div className={styles.popoverHeader}>
         {formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH)}

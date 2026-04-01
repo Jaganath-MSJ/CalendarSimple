@@ -59,7 +59,7 @@ function DayView({
   isEventOrderingEnabled,
 }: DayViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { state } = useCalendar();
+  const { state, testId } = useCalendar();
   const { selectedDate } = state;
   const dayEvents = useDayEventLayout(
     events,
@@ -103,7 +103,11 @@ function DayView({
   }, [autoScrollToCurrentTime, isToday]);
 
   return (
-    <div className={styles.dayView} ref={containerRef}>
+    <div
+      className={styles.dayView}
+      ref={containerRef}
+      data-testid={`${testId}-day-view`}
+    >
       <div className={styles.stickyTopContainer}>
         <div className={styles.dayHeaderContainer}>
           <div className={styles.timeHeaderSpacer} />
@@ -147,7 +151,10 @@ function DayView({
           minHour={minHour}
           maxHour={maxHour}
         />
-        <div className={cx(styles.eventsColumn, classNames?.dayColumn)}>
+        <div
+          className={cx(styles.eventsColumn, classNames?.dayColumn)}
+          data-testid={`${testId}-day-column`}
+        >
           <DayColumn
             dayEvents={dayEvents}
             onEventClick={onEventClick}

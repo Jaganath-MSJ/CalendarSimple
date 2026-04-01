@@ -5,6 +5,7 @@ import { CalendarContentProps } from "../../../types";
 import { DayEventLayout } from "../../../hooks/useDayEventLayout";
 import { LAYOUT_CONSTANTS, DATE_FORMATS } from "../../../constants";
 import styles from "./DayWeekEventItem.module.css";
+import { useCalendar } from "../../../context/CalendarContext";
 
 interface DayWeekEventItemProps extends Pick<
   CalendarContentProps,
@@ -20,6 +21,7 @@ export function DayWeekEventItem({
   classNames,
   renderEvent,
 }: DayWeekEventItemProps) {
+  const { testId } = useCalendar();
   const tooltipText = generateTooltipText(item.event, "day", is12Hour);
 
   const isSmall =
@@ -33,6 +35,7 @@ export function DayWeekEventItem({
         [styles.eventItemSmall]: isSmall,
         [styles.eventItemTiny]: isTiny,
       })}
+      data-testid={`${testId}-day-event-item`}
       style={
         {
           top: `${item.top}px`,

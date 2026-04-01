@@ -3,6 +3,7 @@ import cx from "classnames";
 import styles from "./CurrentTimeLine.module.css";
 import { dateFn } from "../../../utils";
 import { CalendarContentProps } from "../../../types";
+import { useCalendar } from "../../../context/CalendarContext";
 
 interface CurrentTimeLineProps extends Pick<
   CalendarContentProps,
@@ -16,6 +17,7 @@ const CurrentTimeLine = ({
   minHour,
   maxHour,
 }: CurrentTimeLineProps) => {
+  const { testId } = useCalendar();
   const [position, setPosition] = useState(() => {
     const now = dateFn();
     return (now.hour() - minHour) * 60 + now.minute();
@@ -45,6 +47,7 @@ const CurrentTimeLine = ({
     <div
       className={cx(styles.currentTimeLine, className)}
       style={{ top: `${position}px` }}
+      data-testid={`${testId}-current-time-line`}
     >
       <div className={styles.circle} />
       <div className={styles.line} />

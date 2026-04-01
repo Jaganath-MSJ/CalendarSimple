@@ -11,6 +11,7 @@ import useAllDayBanner, {
 } from "../../../hooks/useAllDayBanner";
 import styles from "./AllDayBanner.module.css";
 import { LAYOUT_CONSTANTS } from "../../../constants";
+import { useCalendar } from "../../../context/CalendarContext";
 
 interface AllDayBannerProps extends Pick<
   CalendarContentProps,
@@ -29,6 +30,7 @@ export default function AllDayBanner({
   is12Hour,
   renderEvent,
 }: AllDayBannerProps) {
+  const { testId } = useCalendar();
   const [isExpanded, setIsExpanded] = useState(false);
   const MAX_VISIBLE_ROWS = maxEvents ?? 3;
 
@@ -57,7 +59,10 @@ export default function AllDayBanner({
 
   if (layoutEvents.length === 0) {
     return (
-      <div className={styles.bannerWrapper}>
+      <div
+        className={styles.bannerWrapper}
+        data-testid={`${testId}-all-day-banner`}
+      >
         <div className={styles.timeHeaderSpacer}>
           <span className={styles.timezoneLabel}>{gmtLabel}</span>
         </div>
@@ -69,7 +74,10 @@ export default function AllDayBanner({
   const totalCols = days.length;
 
   return (
-    <div className={styles.bannerWrapper}>
+    <div
+      className={styles.bannerWrapper}
+      data-testid={`${testId}-all-day-banner`}
+    >
       <div className={styles.timeHeaderSpacer}>
         <span className={styles.timezoneLabel}>{gmtLabel}</span>
         {showExpandCollapse && (

@@ -51,6 +51,7 @@ function CalendarContent({
   eventsAreSorted,
   isEventOrderingEnabled,
   sortedMonthView,
+  testId,
   ...restProps
 }: CalendarContentProps) {
   const {
@@ -127,6 +128,7 @@ function CalendarContent({
 
   return (
     <section
+      data-testid={`${testId}-container`}
       style={
         {
           "--calendar-width": `${width}px`,
@@ -201,6 +203,7 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
       initialDate={initialDate}
       initialView={allProps.view}
       initialCustomDays={allProps.customDays}
+      testId={allProps.testId}
     >
       <div
         ref={containerRef}

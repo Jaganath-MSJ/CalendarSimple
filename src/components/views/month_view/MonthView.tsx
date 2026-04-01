@@ -62,7 +62,7 @@ function MonthView({
   sortedMonthView,
   ...restProps
 }: MonthViewProps) {
-  const { state, dispatch } = useCalendar();
+  const { state, dispatch, testId } = useCalendar();
   const { selectedDate } = state;
 
   const calendarGrid = useMonthGrid(
@@ -107,7 +107,7 @@ function MonthView({
   }, [dayType, weekStartsOn, weekEndsOn]);
 
   return (
-    <div className={styles.monthView}>
+    <div className={styles.monthView} data-testid={`${testId}-month-view`}>
       <table
         className={cx(styles.table, classNames?.table)}
         style={
