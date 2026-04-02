@@ -3,6 +3,8 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import MonthEventItem from "./MonthEventItem";
 import { dateFn } from "../../../utils";
+import { ECalendarViewType } from "../../../types";
+import { CalendarProvider } from "../../../context/CalendarContext";
 
 describe("MonthEventItem Component", () => {
   const dateObj = dateFn("2024-03-01");
@@ -23,18 +25,23 @@ describe("MonthEventItem Component", () => {
 
   it("renders date correctly and applies selected classes", () => {
     render(
-      <table>
-        <tbody>
-          <tr>
-            <MonthEventItem
-              {...defaultProps}
-              isSelected
-              isToday={false}
-              isCurrentMonth
-            />
-          </tr>
-        </tbody>
-      </table>,
+      <CalendarProvider
+        initialDate={dateObj}
+        initialView={ECalendarViewType.month}
+      >
+        <table>
+          <tbody>
+            <tr>
+              <MonthEventItem
+                {...defaultProps}
+                isSelected
+                isToday={false}
+                isCurrentMonth
+              />
+            </tr>
+          </tbody>
+        </table>
+      </CalendarProvider>,
     );
     expect(screen.getByText("1")).toBeInTheDocument();
   });
@@ -47,22 +54,27 @@ describe("MonthEventItem Component", () => {
       { id: "3", title: "E3", startDate: "2024-03-01", endDate: "2024-03-01" },
     ];
     render(
-      <table>
-        <tbody>
-          <tr>
-            <MonthEventItem
-              {...defaultProps}
-              data={data as never}
-              cellWidth={100}
-              isSelected={false}
-              isToday={false}
-              isCurrentMonth
-              maxEvents={2}
-              totalEvents={3}
-            />
-          </tr>
-        </tbody>
-      </table>,
+      <CalendarProvider
+        initialDate={dateObj}
+        initialView={ECalendarViewType.month}
+      >
+        <table>
+          <tbody>
+            <tr>
+              <MonthEventItem
+                {...defaultProps}
+                data={data as never}
+                cellWidth={100}
+                isSelected={false}
+                isToday={false}
+                isCurrentMonth
+                maxEvents={2}
+                totalEvents={3}
+              />
+            </tr>
+          </tbody>
+        </table>
+      </CalendarProvider>,
     );
     expect(screen.getByText("E1")).toBeInTheDocument();
     expect(screen.getByText("E2")).toBeInTheDocument();

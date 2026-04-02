@@ -2,7 +2,9 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { DayWeekEventItem } from "./DayWeekEventItem";
-import { CalendarEvent } from "../../../types";
+import { CalendarEvent, ECalendarViewType } from "../../../types";
+import { dateFn } from "../../../utils";
+import { CalendarProvider } from "../../../context/CalendarContext";
 
 describe("DayWeekEventItem Component", () => {
   const mockItem = {
@@ -28,7 +30,12 @@ describe("DayWeekEventItem Component", () => {
 
   it("renders the event item with correct styles and title", () => {
     const { container } = render(
-      <DayWeekEventItem {...defaultProps} is12Hour />,
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+      >
+        <DayWeekEventItem {...defaultProps} is12Hour />
+      </CalendarProvider>,
     );
     const eventEl = container.firstChild as HTMLElement;
 
@@ -41,7 +48,12 @@ describe("DayWeekEventItem Component", () => {
   it("fires onEventClick", () => {
     const mockClick = vi.fn();
     render(
-      <DayWeekEventItem {...defaultProps} is12Hour onEventClick={mockClick} />,
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+      >
+        <DayWeekEventItem {...defaultProps} is12Hour onEventClick={mockClick} />
+      </CalendarProvider>,
     );
 
     fireEvent.click(screen.getByText("Meeting"));
@@ -52,7 +64,14 @@ describe("DayWeekEventItem Component", () => {
     const customRender = (evt: CalendarEvent) => (
       <div data-testid="custom-event">{evt.title} Custom</div>
     );
-    render(<DayWeekEventItem {...defaultProps} renderEvent={customRender} />);
+    render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+      >
+        <DayWeekEventItem {...defaultProps} renderEvent={customRender} />
+      </CalendarProvider>,
+    );
 
     expect(screen.getByTestId("custom-event")).toBeInTheDocument();
     expect(screen.getByText("Meeting Custom")).toBeInTheDocument();

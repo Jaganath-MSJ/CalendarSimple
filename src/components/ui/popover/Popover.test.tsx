@@ -3,7 +3,8 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import Popover from "./Popover";
 import { dateFn } from "../../../utils";
-import { CalendarEvent } from "../../../types";
+import { CalendarEvent, ECalendarViewType } from "../../../types";
+import { CalendarProvider } from "../../../context/CalendarContext";
 
 describe("Popover Component", () => {
   const mockAnchorEl = document.createElement("div");
@@ -38,14 +39,19 @@ describe("Popover Component", () => {
 
   it("renders correctly with given events", () => {
     render(
-      <Popover
-        dateObj={dateObj}
-        events={events as never}
-        onClose={mockOnClose}
-        anchorEl={mockAnchorEl}
-        onEventClick={mockOnEventClick}
-        is12Hour={false}
-      />,
+      <CalendarProvider
+        initialDate={dateObj}
+        initialView={ECalendarViewType.month}
+      >
+        <Popover
+          dateObj={dateObj}
+          events={events as never}
+          onClose={mockOnClose}
+          anchorEl={mockAnchorEl}
+          onEventClick={mockOnEventClick}
+          is12Hour={false}
+        />
+      </CalendarProvider>,
     );
 
     // Check if event titles are rendered
@@ -55,14 +61,19 @@ describe("Popover Component", () => {
 
   it("calls onEventClick and onClose when an event is clicked", () => {
     render(
-      <Popover
-        dateObj={dateObj}
-        events={events as never}
-        onClose={mockOnClose}
-        anchorEl={mockAnchorEl}
-        onEventClick={mockOnEventClick}
-        is12Hour={false}
-      />,
+      <CalendarProvider
+        initialDate={dateObj}
+        initialView={ECalendarViewType.month}
+      >
+        <Popover
+          dateObj={dateObj}
+          events={events as never}
+          onClose={mockOnClose}
+          anchorEl={mockAnchorEl}
+          onEventClick={mockOnEventClick}
+          is12Hour={false}
+        />
+      </CalendarProvider>,
     );
 
     const event1 = screen.getByText("Event 1");
@@ -75,14 +86,19 @@ describe("Popover Component", () => {
 
   it("calls onClose when clicking outside", () => {
     render(
-      <Popover
-        dateObj={dateObj}
-        events={events as never}
-        onClose={mockOnClose}
-        anchorEl={mockAnchorEl}
-        onEventClick={mockOnEventClick}
-        is12Hour={false}
-      />,
+      <CalendarProvider
+        initialDate={dateObj}
+        initialView={ECalendarViewType.month}
+      >
+        <Popover
+          dateObj={dateObj}
+          events={events as never}
+          onClose={mockOnClose}
+          anchorEl={mockAnchorEl}
+          onEventClick={mockOnEventClick}
+          is12Hour={false}
+        />
+      </CalendarProvider>,
     );
 
     // Trigger mousedown on document body to simulate clicking outside
@@ -95,15 +111,20 @@ describe("Popover Component", () => {
       <span data-testid="custom-render">Custom: {event.title}</span>
     );
     render(
-      <Popover
-        dateObj={dateObj}
-        events={events as never}
-        onClose={mockOnClose}
-        anchorEl={mockAnchorEl}
-        onEventClick={mockOnEventClick}
-        renderEvent={customRender}
-        is12Hour={false}
-      />,
+      <CalendarProvider
+        initialDate={dateObj}
+        initialView={ECalendarViewType.month}
+      >
+        <Popover
+          dateObj={dateObj}
+          events={events as never}
+          onClose={mockOnClose}
+          anchorEl={mockAnchorEl}
+          onEventClick={mockOnEventClick}
+          renderEvent={customRender}
+          is12Hour={false}
+        />
+      </CalendarProvider>,
     );
 
     expect(screen.getAllByTestId("custom-render")).toHaveLength(2);

@@ -4,6 +4,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import AllDayBanner from "./AllDayBanner";
 import * as hooks from "../../../hooks/useAllDayBanner";
 import { dateFn } from "../../../utils";
+import { ECalendarViewType } from "../../../types";
+import { CalendarProvider } from "../../../context/CalendarContext";
 
 vi.mock("../../../hooks/useAllDayBanner", () => ({
   default: vi.fn(),
@@ -37,7 +39,14 @@ describe("AllDayBanner Component", () => {
   };
 
   it("renders empty state without failing", () => {
-    render(<AllDayBanner {...defaultProps} />);
+    render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+      >
+        <AllDayBanner {...defaultProps} />
+      </CalendarProvider>,
+    );
     // Just the container background should render
     expect(screen.getByText(/GMT|UTC/)).toBeInTheDocument();
   });
@@ -59,7 +68,14 @@ describe("AllDayBanner Component", () => {
       showExpandCollapse: true,
     });
 
-    render(<AllDayBanner {...defaultProps} />);
+    render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+      >
+        <AllDayBanner {...defaultProps} />
+      </CalendarProvider>,
+    );
     expect(screen.getByText("All Day")).toBeInTheDocument();
   });
 
@@ -83,7 +99,14 @@ describe("AllDayBanner Component", () => {
       showExpandCollapse: true,
     });
 
-    render(<AllDayBanner {...defaultProps} />);
+    render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+      >
+        <AllDayBanner {...defaultProps} />
+      </CalendarProvider>,
+    );
 
     // Renders the visible event
     expect(screen.getByText("All Day 1")).toBeInTheDocument();

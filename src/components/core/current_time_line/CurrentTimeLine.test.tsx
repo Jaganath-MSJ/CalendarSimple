@@ -2,6 +2,9 @@ import React from "react";
 import { render, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import CurrentTimeLine from "./CurrentTimeLine";
+import { dateFn } from "../../../utils";
+import { ECalendarViewType } from "../../../types";
+import { CalendarProvider } from "../../../context/CalendarContext";
 
 describe("CurrentTimeLine Component", () => {
   beforeEach(() => {
@@ -14,7 +17,14 @@ describe("CurrentTimeLine Component", () => {
 
   it("renders correctly within bounds", () => {
     vi.setSystemTime(new Date(2024, 2, 1, 12, 30)); // 12:30 PM
-    const { container } = render(<CurrentTimeLine minHour={0} maxHour={24} />);
+    const { container } = render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.day}
+      >
+        <CurrentTimeLine minHour={0} maxHour={24} />
+      </CalendarProvider>,
+    );
 
     // Position should be (12 - 0) * 60 + 30 = 750px
     const lineElement = container.firstChild as HTMLElement;
@@ -24,7 +34,14 @@ describe("CurrentTimeLine Component", () => {
 
   it("does not render when time is outside of bounds", () => {
     vi.setSystemTime(new Date(2024, 2, 1, 23, 30)); // 23:30 PM
-    const { container } = render(<CurrentTimeLine minHour={0} maxHour={22} />);
+    const { container } = render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.day}
+      >
+        <CurrentTimeLine minHour={0} maxHour={22} />
+      </CalendarProvider>,
+    );
 
     // Should return null (container has no children)
     expect(container.firstChild).toBeNull();
@@ -33,7 +50,14 @@ describe("CurrentTimeLine Component", () => {
   it("updates position over time", () => {
     vi.setSystemTime(new Date(2024, 2, 1, 12, 30));
 
-    const { container } = render(<CurrentTimeLine minHour={0} maxHour={24} />);
+    const { container } = render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.day}
+      >
+        <CurrentTimeLine minHour={0} maxHour={24} />
+      </CalendarProvider>,
+    );
 
     const lineElement = container.firstChild as HTMLElement;
     expect(lineElement.style.top).toBe("750px");
@@ -48,7 +72,14 @@ describe("CurrentTimeLine Component", () => {
 
   it("resets vertical position seamlessly precisely at midnight across days", () => {
     vi.setSystemTime(new Date(2024, 2, 1, 23, 59)); // 11:59 PM
-    const { container } = render(<CurrentTimeLine minHour={0} maxHour={24} />);
+    const { container } = render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.day}
+      >
+        <CurrentTimeLine minHour={0} maxHour={24} />
+      </CalendarProvider>,
+    );
 
     // Position should be (23 - 0) * 60 + 59 = 1439px
     let lineElement = container.firstChild as HTMLElement;

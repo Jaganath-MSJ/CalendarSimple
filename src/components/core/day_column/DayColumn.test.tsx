@@ -2,6 +2,9 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import DayColumn from "./DayColumn";
+import { dateFn } from "../../../utils";
+import { ECalendarViewType } from "../../../types";
+import { CalendarProvider } from "../../../context/CalendarContext";
 
 describe("DayColumn Component", () => {
   const dayEvents = [
@@ -30,7 +33,14 @@ describe("DayColumn Component", () => {
   };
 
   it("renders correctly with given events and hours", () => {
-    render(<DayColumn {...defaultProps} minHour={8} maxHour={12} />);
+    render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+      >
+        <DayColumn {...defaultProps} minHour={8} maxHour={12} />
+      </CalendarProvider>,
+    );
     expect(screen.getByText("Test Event")).toBeInTheDocument();
   });
 
@@ -39,13 +49,18 @@ describe("DayColumn Component", () => {
       <span data-testid="custom-hour">{date.getHours()}</span>
     );
     render(
-      <DayColumn
-        {...defaultProps}
-        dayEvents={[]}
-        minHour={8}
-        maxHour={10}
-        renderHourCell={customRenderHour}
-      />,
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+      >
+        <DayColumn
+          {...defaultProps}
+          dayEvents={[]}
+          minHour={8}
+          maxHour={10}
+          renderHourCell={customRenderHour}
+        />
+      </CalendarProvider>,
     );
 
     // Should render two hours: 8 and 9
