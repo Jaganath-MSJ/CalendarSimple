@@ -207,6 +207,7 @@ function Header({
         <select
           className={styles.select}
           value={view}
+          data-testid={`${testId}-header-view-select`}
           onChange={onViewDropdownClick}
         >
           {VIEW_OPTIONS.map((option) => (
@@ -225,6 +226,7 @@ function Header({
           id={CALENDAR_STRINGS.MONTH}
           name={CALENDAR_STRINGS.MONTH}
           value={getMonth(selectedDate)}
+          data-testid={`${testId}-header-month-select`}
           onChange={(e) => onDropdownClick(e, EYearOption.month)}
         >
           {MONTH_LIST.map((month: MonthListType) => (
@@ -238,6 +240,7 @@ function Header({
           id={CALENDAR_STRINGS.YEAR}
           name={CALENDAR_STRINGS.YEAR}
           value={getYear(selectedDate)}
+          data-testid={`${testId}-header-year-select`}
           onChange={(e) => onDropdownClick(e, EYearOption.year)}
         >
           {getYearList(

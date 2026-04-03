@@ -88,6 +88,7 @@ export default function ScheduleView({
                           styles.eventItemContainer,
                           classNames?.event,
                         )}
+                        data-testid={`${testId}-${event.id}-schedule-event`}
                         onClick={() => onEventClick?.(event)}
                         title={generateTooltipText(
                           event,

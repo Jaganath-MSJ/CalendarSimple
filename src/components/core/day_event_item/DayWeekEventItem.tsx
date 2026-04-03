@@ -35,7 +35,7 @@ export function DayWeekEventItem({
         [styles.eventItemSmall]: isSmall,
         [styles.eventItemTiny]: isTiny,
       })}
-      data-testid={`${testId}-day-event-item`}
+      data-testid={`${testId}-${item.event.id}-day-event-item`}
       style={
         {
           top: `${item.top}px`,

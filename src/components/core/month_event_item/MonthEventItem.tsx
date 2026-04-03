@@ -100,6 +100,7 @@ function MonthEventItem({
   return (
     <td
       style={style}
+      data-testid={`${testId}-${date}-month-cell`}
       onClick={() => onClick?.(dateObj)}
       className={cx(styles.dateData, className, {
         [styles.currentMonth]: !isCurrentMonth,
@@ -141,13 +142,14 @@ function MonthEventItem({
                     is12Hour,
                   );
                   const width = `${cellWidth * diffDates - LAYOUT_CONSTANTS.EVENT_ITEM_PADDING}px`;
+                  const id = item.id || `${item.startDate}-${index}`;
 
                   return (
                     <div
-                      key={item.id || `${item.startDate}-${index}`}
+                      key={id}
                       className={cx(styles.eventItem, classNames?.event)}
                       id={item.id}
-                      data-testid={`${testId}-month-event-item`}
+                      data-testid={`${testId}-${id}-month-event-item`}
                       style={{
                         width,
                         backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
@@ -167,6 +169,7 @@ function MonthEventItem({
                   <div className={styles.moreEventsContainer}>
                     <button
                       className={styles.moreEvents}
+                      data-testid={`${testId}-${date}-more-events`}
                       onClick={(e) => {
                         e.stopPropagation();
                         if (!showPopover) {

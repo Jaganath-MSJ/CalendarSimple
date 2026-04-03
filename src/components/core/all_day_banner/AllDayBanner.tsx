@@ -85,6 +85,7 @@ export default function AllDayBanner({
             className={cx(styles.expandIcon, {
               [styles.expanded]: isExpanded,
             })}
+            data-testid={`${testId}-all-day-expand-icon`}
             onClick={() => setIsExpanded(!isExpanded)}
             title={
               isExpanded ? "Collapse all day events" : "Expand all day events"
@@ -139,6 +140,7 @@ export default function AllDayBanner({
                   backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
                   ...event.style,
                 }}
+                data-testid={`${testId}-${event.id}-all-day-event`}
                 onClick={() => onEventClick?.(event)}
                 title={generateTooltipText(
                   event,
@@ -171,6 +173,7 @@ export default function AllDayBanner({
                   left: `${leftPct}%`,
                   width: `calc(${widthPct}% - 4px)`,
                 }}
+                data-testid={`${testId}-${idx}-all-day-more-chip`}
                 onClick={() => setIsExpanded(true)}
               >
                 + {count} more

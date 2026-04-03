@@ -152,6 +152,7 @@ function Popover({
                 [styles.endAfter]: isEndAfter,
               })}
               id={item.id}
+              data-testid={`${testId}-${item.id}-popover-item`}
               style={{
                 backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
                 ...item.style,
