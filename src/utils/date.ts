@@ -86,8 +86,14 @@ export function isSameDate(date1: DateType, date2: DateType): boolean {
   return dateFn(date1).isSame(dateFn(date2), "day");
 }
 
-export function formatDate(date: DateInputType, format: string): string {
-  return dateFn(date).format(format);
+export function formatDate(
+  date: DateInputType,
+  format: string,
+  locale?: string,
+): string {
+  return dateFn(date)
+    .locale(locale || "en")
+    .format(format);
 }
 
 export function convertToDate(dayjsDate: DateType): Date {

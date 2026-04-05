@@ -7,7 +7,7 @@ import {
 } from "../../types";
 import {
   CALENDAR_STRINGS,
-  MONTH_LIST,
+  getMonthList,
   DATE_FORMATS,
   CALENDAR_ACTIONS,
   VIEW_OPTIONS,
@@ -47,6 +47,8 @@ interface HeaderProps extends Pick<
   | "events"
   | "customDays"
   | "resetDateOnViewChange"
+  | "locale"
+  | "localeMessages"
 > {
   headerClassName?: string;
 }
@@ -60,6 +62,8 @@ function Header({
   customDays,
   events,
   resetDateOnViewChange,
+  locale,
+  localeMessages,
 }: HeaderProps) {
   const { state, dispatch, testId } = useCalendar();
   const { selectedDate, view } = state;
@@ -115,16 +119,16 @@ function Header({
 
   const getHeaderTitle = () => {
     if (view === ECalendarViewType.day) {
-      return formatDate(selectedDate, DATE_FORMATS.MONTH_DAY_YEAR);
+      return formatDate(selectedDate, DATE_FORMATS.MONTH_DAY_YEAR, locale);
     }
     if (view === ECalendarViewType.week) {
       const startOfWeek = selectedDate.startOf("week");
       const endOfWeek = selectedDate.endOf("week");
       if (startOfWeek.month() !== endOfWeek.month()) {
         if (startOfWeek.year() !== endOfWeek.year()) {
-          return `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR)}`;
+          return `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
         }
-        return `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR)}`;
+        return `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH, locale)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
       }
     }
     if (view === ECalendarViewType.customDays) {
@@ -132,14 +136,14 @@ function Header({
       const endDate = selectedDate.add(days - 1, "day");
       if (selectedDate.month() !== endDate.month()) {
         if (selectedDate.year() !== endDate.year()) {
-          return `${formatDate(selectedDate, DATE_FORMATS.SHORT_MONTH_YEAR)} - ${formatDate(endDate, DATE_FORMATS.SHORT_MONTH_YEAR)}`;
+          return `${formatDate(selectedDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)} - ${formatDate(endDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
         }
-        return `${formatDate(selectedDate, DATE_FORMATS.SHORT_MONTH)} - ${formatDate(endDate, DATE_FORMATS.SHORT_MONTH_YEAR)}`;
+        return `${formatDate(selectedDate, DATE_FORMATS.SHORT_MONTH, locale)} - ${formatDate(endDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
       }
       if (days === 1) {
-        return formatDate(selectedDate, DATE_FORMATS.MONTH_DAY_YEAR);
+        return formatDate(selectedDate, DATE_FORMATS.MONTH_DAY_YEAR, locale);
       }
-      return `${formatDate(selectedDate, DATE_FORMATS.DAY_DATE_SHORT_MONTH)} - ${formatDate(endDate, DATE_FORMATS.DAY_DATE_SHORT_MONTH)}, ${formatDate(selectedDate, "YYYY")}`;
+      return `${formatDate(selectedDate, DATE_FORMATS.DAY_DATE_SHORT_MONTH, locale)} - ${formatDate(endDate, DATE_FORMATS.DAY_DATE_SHORT_MONTH, locale)}, ${formatDate(selectedDate, "YYYY")}`;
     }
     if (view === ECalendarViewType.schedule) {
       if (events && events.length > 0) {
@@ -158,14 +162,14 @@ function Header({
           minDate.year() !== maxDate.year()
         ) {
           if (minDate.year() !== maxDate.year()) {
-            return `${formatDate(minDate, DATE_FORMATS.SHORT_MONTH_YEAR)} - ${formatDate(maxDate, DATE_FORMATS.SHORT_MONTH_YEAR)}`;
+            return `${formatDate(minDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)} - ${formatDate(maxDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
           }
-          return `${formatDate(minDate, DATE_FORMATS.SHORT_MONTH)} - ${formatDate(maxDate, DATE_FORMATS.SHORT_MONTH_YEAR)}`;
+          return `${formatDate(minDate, DATE_FORMATS.SHORT_MONTH, locale)} - ${formatDate(maxDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
         }
-        return formatDate(minDate, DATE_FORMATS.SHORT_MONTH_YEAR);
+        return formatDate(minDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale);
       }
     }
-    return formatDate(selectedDate, DATE_FORMATS.MONTH_YEAR);
+    return formatDate(selectedDate, DATE_FORMATS.MONTH_YEAR, locale);
   };
 
   return (
@@ -182,7 +186,7 @@ function Header({
             onNavigate?.(convertToDate(dateFn()));
           }}
         >
-          Today
+          {localeMessages?.today || "Today"}
         </button>
         <div className={styles.arrows}>
           <button
@@ -212,12 +216,13 @@ function Header({
         >
           {VIEW_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
-              {option.label}
+              {localeMessages?.[option.value as keyof typeof localeMessages] ||
+                option.label}
             </option>
           ))}
           {customDays && customDays > 0 && customDays < 11 && (
             <option key={customDays} value={ECalendarViewType.customDays}>
-              {`${customDays} Days`}
+              {customDays} {localeMessages?.days || "Days"}
             </option>
           )}
         </select>
@@ -229,7 +234,7 @@ function Header({
           data-testid={`${testId}-header-month-select`}
           onChange={(e) => onDropdownClick(e, EYearOption.month)}
         >
-          {MONTH_LIST.map((month: MonthListType) => (
+          {getMonthList(locale).map((month: MonthListType) => (
             <option key={month.label} value={month.value}>
               {month.label}
             </option>

@@ -205,6 +205,15 @@ function App() {
         is12Hour
         showCurrentTime
         autoScrollToCurrentTime
+        locale="es-MX"
+        localeMessages={{
+          day: "நாள்",
+          week: "வாரம்",
+          month: "மாதம்",
+          schedule: "நிகழ்ச்சி",
+          days: "நாட்கள்",
+          today: "இன்று",
+        }}
         // width={400}
         // height={400}
       />

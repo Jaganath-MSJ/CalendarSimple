@@ -23,6 +23,7 @@ interface ScheduleViewProps extends Pick<
   | "autoScrollToCurrentTime"
   | "renderEvent"
   | "renderScheduleSeparator"
+  | "locale"
 > {}
 
 export default function ScheduleView({
@@ -34,6 +35,7 @@ export default function ScheduleView({
   autoScrollToCurrentTime,
   renderEvent,
   renderScheduleSeparator,
+  locale,
 }: ScheduleViewProps) {
   const { testId } = useCalendar();
   const { todayRef, groupedEvents, renderEventTime, renderEventTitle } =
@@ -41,6 +43,7 @@ export default function ScheduleView({
       events,
       autoScrollToCurrentTime,
       is12Hour,
+      locale,
     });
 
   return (
@@ -94,6 +97,7 @@ export default function ScheduleView({
                           event,
                           ECalendarViewType.schedule,
                           is12Hour,
+                          locale,
                         )}
                       >
                         {/* Column 1: Date Info (only shown on the first event of the day) */}
@@ -110,7 +114,11 @@ export default function ScheduleView({
                                 )}
                                 style={todayStyle}
                               >
-                                {formatDate(dateObj, DATE_FORMATS.DAY_NUMBER)}
+                                {formatDate(
+                                  dateObj,
+                                  DATE_FORMATS.DAY_NUMBER,
+                                  locale,
+                                )}
                               </div>
                               <div
                                 className={cx(
@@ -121,11 +129,13 @@ export default function ScheduleView({
                                 {formatDate(
                                   dateObj,
                                   DATE_FORMATS.SHORT_MONTH,
+                                  locale,
                                 ).toUpperCase()}
                                 ,{" "}
                                 {formatDate(
                                   dateObj,
                                   DATE_FORMATS.SHORT_DAY,
+                                  locale,
                                 ).toUpperCase()}
                               </div>
                             </>

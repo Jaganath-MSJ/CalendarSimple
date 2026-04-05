@@ -8,7 +8,7 @@ import { useCalendar } from "../../../context/CalendarContext";
 
 interface TimeColumnProps extends Pick<
   CalendarContentProps,
-  "is12Hour" | "classNames" | "minHour" | "maxHour"
+  "is12Hour" | "classNames" | "minHour" | "maxHour" | "locale"
 > {}
 
 function TimeColumn({
@@ -16,6 +16,7 @@ function TimeColumn({
   classNames,
   minHour,
   maxHour,
+  locale,
 }: TimeColumnProps) {
   const { testId } = useCalendar();
   const hours = Array.from(
@@ -32,7 +33,7 @@ function TimeColumn({
         const timeFormat = is12Hour ? DATE_FORMATS.HOUR_12H : DATE_FORMATS.TIME;
         return (
           <div key={hour} className={cx(styles.timeSlot, classNames?.timeSlot)}>
-            {formatDate(dateFn().hour(hour).minute(0), timeFormat)}
+            {formatDate(dateFn().hour(hour).minute(0), timeFormat, locale)}
           </div>
         );
       })}

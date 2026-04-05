@@ -5,7 +5,7 @@ import useDayEventLayout, {
   DayEventLayout,
 } from "../../../hooks/useDayEventLayout";
 import { CalendarContentProps } from "../../../types";
-import { DAY_LIST_NAME, DATE_FORMATS } from "../../../constants";
+import { getDayListNames, DATE_FORMATS } from "../../../constants";
 import styles from "./DayView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
 import TimeColumn from "../../core/time_column/TimeColumn";
@@ -34,6 +34,7 @@ interface DayViewProps extends Pick<
   | "enrichedEventsByDate"
   | "eventsAreSorted"
   | "isEventOrderingEnabled"
+  | "locale"
 > {}
 
 function DayView({
@@ -57,6 +58,7 @@ function DayView({
   enrichedEventsByDate,
   eventsAreSorted,
   isEventOrderingEnabled,
+  locale,
 }: DayViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, testId } = useCalendar();
@@ -119,7 +121,7 @@ function DayView({
           ) : (
             <div className={cx(styles.dayHeader, classNames?.dayHeader)}>
               <div className={cx(styles.dayName, classNames?.dayName)}>
-                {DAY_LIST_NAME[dayType][selectedDate.day()]}
+                {getDayListNames(dayType, locale)[selectedDate.day()]}
               </div>
               <div
                 className={cx(styles.dayNumber, classNames?.dayNumber, {
@@ -127,7 +129,7 @@ function DayView({
                 })}
                 style={todayStyle}
               >
-                {formatDate(selectedDate, DATE_FORMATS.DAY_NUMBER)}
+                {formatDate(selectedDate, DATE_FORMATS.DAY_NUMBER, locale)}
               </div>
             </div>
           )}
@@ -141,6 +143,7 @@ function DayView({
             classNames={classNames}
             is12Hour={is12Hour}
             renderEvent={renderEvent}
+            locale={locale}
           />
         )}
       </div>
@@ -150,6 +153,7 @@ function DayView({
           classNames={classNames}
           minHour={minHour}
           maxHour={maxHour}
+          locale={locale}
         />
         <div
           className={cx(styles.eventsColumn, classNames?.dayColumn)}

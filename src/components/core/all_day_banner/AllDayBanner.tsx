@@ -15,7 +15,12 @@ import { useCalendar } from "../../../context/CalendarContext";
 
 interface AllDayBannerProps extends Pick<
   CalendarContentProps,
-  "maxEvents" | "onEventClick" | "classNames" | "is12Hour" | "renderEvent"
+  | "maxEvents"
+  | "onEventClick"
+  | "classNames"
+  | "is12Hour"
+  | "renderEvent"
+  | "locale"
 > {
   days: DateType[];
   events: CalendarEvent[];
@@ -29,6 +34,7 @@ export default function AllDayBanner({
   classNames,
   is12Hour,
   renderEvent,
+  locale,
 }: AllDayBannerProps) {
   const { testId } = useCalendar();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -146,6 +152,7 @@ export default function AllDayBanner({
                   event,
                   ECalendarViewType.week,
                   is12Hour,
+                  locale,
                 )}
               >
                 {renderEvent ? (

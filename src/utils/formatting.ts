@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file formatting.ts
  * @description Utilities to format data for user interface presentation.
  *
@@ -25,6 +25,7 @@ export function generateTooltipText(
   event: CalendarEvent,
   viewType: ECalendarViewType,
   is12Hour?: boolean,
+  locale?: string,
 ): string {
   const timeFormat = is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME;
   const isMulti =
@@ -40,9 +41,9 @@ export function generateTooltipText(
     formatStr = `${DATE_FORMATS.DATE} ${timeFormat}`;
   }
 
-  let tooltipText = `${event.title} (${formatDate(event.startDate, formatStr)}`;
+  let tooltipText = `${event.title} (${formatDate(event.startDate, formatStr, locale)}`;
   if (event.endDate) {
-    tooltipText += ` - ${formatDate(event.endDate, formatStr)}`;
+    tooltipText += ` - ${formatDate(event.endDate, formatStr, locale)}`;
   }
   tooltipText += `)`;
 

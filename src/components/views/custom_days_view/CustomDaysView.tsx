@@ -5,7 +5,7 @@ import useDayEventLayout, {
   DayEventLayout,
 } from "../../../hooks/useDayEventLayout";
 import { CalendarContentProps } from "../../../types";
-import { DAY_LIST_NAME, DATE_FORMATS } from "../../../constants";
+import { getDayListNames, DATE_FORMATS } from "../../../constants";
 import styles from "./CustomDaysView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
 import TimeColumn from "../../core/time_column/TimeColumn";
@@ -35,6 +35,7 @@ interface CustomViewProps extends Pick<
   | "enrichedEventsByDate"
   | "eventsAreSorted"
   | "isEventOrderingEnabled"
+  | "locale"
 > {}
 
 function CustomView({
@@ -59,6 +60,7 @@ function CustomView({
   enrichedEventsByDate,
   eventsAreSorted,
   isEventOrderingEnabled,
+  locale,
 }: CustomViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, testId } = useCalendar();
@@ -136,7 +138,7 @@ function CustomView({
                 className={cx(styles.dayHeader, classNames?.dayHeader)}
               >
                 <div className={cx(styles.dayName, classNames?.dayName)}>
-                  {DAY_LIST_NAME[dayType][date.day()]}
+                  {getDayListNames(dayType, locale)[date.day()]}
                 </div>
                 <div
                   className={cx(styles.dayNumber, classNames?.dayNumber, {
@@ -144,7 +146,7 @@ function CustomView({
                   })}
                   style={todayStyle}
                 >
-                  {formatDate(date, DATE_FORMATS.DAY_NUMBER)}
+                  {formatDate(date, DATE_FORMATS.DAY_NUMBER, locale)}
                 </div>
               </div>
             );
@@ -159,6 +161,7 @@ function CustomView({
             classNames={classNames}
             is12Hour={is12Hour}
             renderEvent={renderEvent}
+            locale={locale}
           />
         )}
       </div>
@@ -168,6 +171,7 @@ function CustomView({
           classNames={classNames}
           minHour={minHour}
           maxHour={maxHour}
+          locale={locale}
         />
         <div className={styles.eventsGrid}>
           {viewDays.map((date, dayIndex) => {

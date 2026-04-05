@@ -27,6 +27,7 @@ interface UseScheduleViewProps {
   events: CalendarEvent[];
   autoScrollToCurrentTime?: boolean;
   is12Hour?: boolean;
+  locale?: string;
 }
 
 /**
@@ -39,6 +40,7 @@ export default function useScheduleView({
   events,
   autoScrollToCurrentTime,
   is12Hour,
+  locale,
 }: UseScheduleViewProps) {
   const todayRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +66,7 @@ export default function useScheduleView({
         : current;
 
       while (current.isBefore(end) || current.isSame(end)) {
-        const dateKey = formatDate(current, DATE_FORMATS.DATE);
+        const dateKey = formatDate(current, DATE_FORMATS.DATE, locale);
         if (!groups[dateKey]) {
           groups[dateKey] = [];
         }
@@ -74,7 +76,7 @@ export default function useScheduleView({
     });
 
     return groups;
-  }, [events]);
+  }, [events, locale]);
 
   useEffect(() => {
     if (autoScrollToCurrentTime && todayRef.current) {
@@ -115,23 +117,23 @@ export default function useScheduleView({
       if (currentDay.isSame(startDay)) {
         return isMidnight(event.startDate)
           ? "All day"
-          : `${formatTime(formatDate(event.startDate, timeFormat))}`;
+          : `${formatTime(formatDate(event.startDate, timeFormat, locale))}`;
       } else if (currentDay.isSame(endDay)) {
         return isEndOfDay(event.endDate!)
           ? "All day"
-          : `Until ${formatTime(formatDate(event.endDate!, timeFormat))}`;
+          : `Until ${formatTime(formatDate(event.endDate!, timeFormat, locale))}`;
       } else {
         return "All day";
       }
     }
 
     // Normal single day time range
-    const startStr = formatDate(event.startDate, timeFormat);
+    const startStr = formatDate(event.startDate, timeFormat, locale);
     if (event.endDate) {
       if (isMidnight(event.startDate) && isEndOfDay(event.endDate)) {
         return "All day";
       }
-      const endStr = formatDate(event.endDate, timeFormat);
+      const endStr = formatDate(event.endDate, timeFormat, locale);
       return `${formatTime(startStr)} – ${formatTime(endStr)}`;
     }
     return formatTime(startStr);

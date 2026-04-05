@@ -5,7 +5,7 @@ import useDayEventLayout, {
   DayEventLayout,
 } from "../../../hooks/useDayEventLayout";
 import { CalendarContentProps } from "../../../types";
-import { DAY_LIST_NAME, DATE_FORMATS } from "../../../constants";
+import { getDayListNames, DATE_FORMATS } from "../../../constants";
 import styles from "./WeekView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
 import TimeColumn from "../../core/time_column/TimeColumn";
@@ -36,6 +36,7 @@ interface WeekViewProps extends Pick<
   | "enrichedEventsByDate"
   | "eventsAreSorted"
   | "isEventOrderingEnabled"
+  | "locale"
 > {}
 
 function WeekView({
@@ -61,6 +62,7 @@ function WeekView({
   enrichedEventsByDate,
   eventsAreSorted,
   isEventOrderingEnabled,
+  locale,
 }: WeekViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, testId } = useCalendar();
@@ -146,7 +148,7 @@ function WeekView({
                 className={cx(styles.dayHeader, classNames?.dayHeader)}
               >
                 <div className={cx(styles.dayName, classNames?.dayName)}>
-                  {DAY_LIST_NAME[dayType][date.day()]}
+                  {getDayListNames(dayType, locale)[date.day()]}
                 </div>
                 <div
                   className={cx(styles.dayNumber, classNames?.dayNumber, {
@@ -154,7 +156,7 @@ function WeekView({
                   })}
                   style={todayStyle}
                 >
-                  {formatDate(date, DATE_FORMATS.DAY_NUMBER)}
+                  {formatDate(date, DATE_FORMATS.DAY_NUMBER, locale)}
                 </div>
               </div>
             );
@@ -169,6 +171,7 @@ function WeekView({
             classNames={classNames}
             is12Hour={is12Hour}
             renderEvent={renderEvent}
+            locale={locale}
           />
         )}
       </div>
@@ -178,6 +181,7 @@ function WeekView({
           classNames={classNames}
           minHour={minHour}
           maxHour={maxHour}
+          locale={locale}
         />
         <div className={styles.eventsGrid}>
           {weekDays.map((date, dayIndex) => {

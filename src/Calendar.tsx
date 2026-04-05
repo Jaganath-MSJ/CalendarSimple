@@ -52,6 +52,8 @@ function CalendarContent({
   isEventOrderingEnabled,
   sortedMonthView,
   testId,
+  locale,
+  localeMessages,
   ...restProps
 }: CalendarContentProps) {
   const {
@@ -99,6 +101,8 @@ function CalendarContent({
       eventsAreSorted,
       isEventOrderingEnabled,
       sortedMonthView,
+      locale,
+      localeMessages,
     };
     switch (view) {
       case ECalendarViewType.day:
@@ -163,6 +167,8 @@ function CalendarContent({
           futureYearLength={futureYearLength}
           customDays={customDays}
           resetDateOnViewChange={restProps.resetDateOnViewChange}
+          locale={locale}
+          localeMessages={localeMessages}
         />
       )}
       {getViewComponent(view)}

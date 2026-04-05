@@ -91,6 +91,20 @@ export interface CalendarProps {
   eventsAreSorted?: boolean;
   isEventOrderingEnabled?: boolean;
   sortedMonthView?: boolean | ((a: CalendarEvent, b: CalendarEvent) => number);
+
+  // --- Localization ---
+  /** the dayjs locale code (e.g., 'en', 'fr', 'es-mx'). Requires importing the locale in dayjs. */
+  locale?: string;
+
+  /** Translations for built-in calendar text elements */
+  localeMessages?: {
+    today?: string;
+    day?: string;
+    week?: string;
+    month?: string;
+    schedule?: string;
+    days?: string; // used in custom days dropdown like '3 Days'
+  };
 }
 
 export interface CalendarContentProps extends RequiredSome<
@@ -120,6 +134,8 @@ export interface CalendarContentProps extends RequiredSome<
   | "eventsAreSorted"
   | "isEventOrderingEnabled"
   | "sortedMonthView"
+  | "locale"
+  | "localeMessages"
 > {}
 
 export interface MonthListType {

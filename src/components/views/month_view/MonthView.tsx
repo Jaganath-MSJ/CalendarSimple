@@ -1,7 +1,7 @@
 import React, { CSSProperties, useCallback, useMemo } from "react";
 import cx from "classnames";
 import { CalendarContentProps } from "../../../types";
-import { DAY_LIST_NAME, LAYOUT_CONSTANTS } from "../../../constants";
+import { getDayListNames, LAYOUT_CONSTANTS } from "../../../constants";
 import {
   dateFn,
   convertToDate,
@@ -37,6 +37,7 @@ interface MonthViewProps extends Pick<
   | "eventsAreSorted"
   | "isEventOrderingEnabled"
   | "sortedMonthView"
+  | "locale"
 > {}
 
 function MonthView({
@@ -60,6 +61,7 @@ function MonthView({
   eventsAreSorted,
   isEventOrderingEnabled,
   sortedMonthView,
+  locale,
   ...restProps
 }: MonthViewProps) {
   const { state, dispatch, testId } = useCalendar();
@@ -101,10 +103,10 @@ function MonthView({
   );
 
   const headerDays = useMemo(() => {
-    const list = DAY_LIST_NAME[dayType];
+    const list = getDayListNames(dayType, locale);
     const length = ((weekEndsOn - weekStartsOn + 7) % 7) + 1;
     return Array.from({ length }, (_, i) => list[(weekStartsOn + i) % 7]);
-  }, [dayType, weekStartsOn, weekEndsOn]);
+  }, [dayType, weekStartsOn, weekEndsOn, locale]);
 
   return (
     <div className={styles.monthView} data-testid={`${testId}-month-view`}>
