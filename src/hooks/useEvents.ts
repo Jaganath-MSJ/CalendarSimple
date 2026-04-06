@@ -32,7 +32,7 @@ export default function useEvents(
 
     return events.filter((event) => {
       if (!event.endDate) return true;
-      return !dateFn(event.endDate).isBefore(dateFn(event.startDate));
+      return dateFn(event.endDate) >= dateFn(event.startDate);
     });
   }, [events, eventsAreSorted, enableEnrichedEvents]);
 

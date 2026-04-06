@@ -29,7 +29,7 @@ export function calculateMaxEvents(height: number, rowsInView: number): number {
 /**
  * Helper to determine if an event is an all-day event.
  * An event is considered "all-day" if its start and end date strings
- * contain only a date (e.g. YYYY-MM-DD) and no time component (no 'T' or space).
+ * contain only a date (e.g. yyyy-MM-dd) and no time component (no 'T' or space).
  *
  * @param event - The calendar event to check.
  * @returns True if the event has no time payload.
@@ -61,5 +61,5 @@ export function isMultiDay(event: CalendarEvent): boolean {
   if (!event.endDate) return false;
   const start = dateFn(event.startDate).startOf("day");
   const end = dateFn(event.endDate).startOf("day");
-  return !start.isSame(end);
+  return !start.equals(dateFn(end));
 }

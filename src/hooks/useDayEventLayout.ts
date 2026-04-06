@@ -90,10 +90,9 @@ export default function useDayEventLayout(
           const currentDay = dateFn(currentDate).startOf("day");
 
           const startMins =
-            dateFn(event.startDate).hour() * 60 +
-            dateFn(event.startDate).minute();
+            dateFn(event.startDate).hour * 60 + dateFn(event.startDate).minute;
           let endMins = event.endDate
-            ? dateFn(event.endDate).hour() * 60 + dateFn(event.endDate).minute()
+            ? dateFn(event.endDate).hour * 60 + dateFn(event.endDate).minute
             : startMins + 1;
           if (endMins <= startMins && event.endDate) endMins += 1440;
 
@@ -107,7 +106,7 @@ export default function useDayEventLayout(
 
           if (showAllDayRow) {
             return (
-              eventDate.isSame(currentDay) &&
+              eventDate.equals(currentDay) &&
               !isMulti &&
               !isAllDay &&
               isWithinBounds
@@ -120,9 +119,8 @@ export default function useDayEventLayout(
               ? dateFn(event.endDate).endOf("day")
               : eventStart.endOf("day");
             const overlapsCurrentDay =
-              currentDay.isBetween(eventStart, eventEnd, "day", "[]") ||
-              currentDay.isSame(eventStart, "day") ||
-              currentDay.isSame(eventEnd, "day");
+              currentDay >= eventStart.startOf("day") &&
+              currentDay <= eventEnd.startOf("day");
 
             if (!overlapsCurrentDay) return false;
 
@@ -147,7 +145,7 @@ export default function useDayEventLayout(
       // Helper to get minutes from start of day
       const getMinutes = (dateStr: string) => {
         const d = dateFn(dateStr);
-        return d.hour() * 60 + d.minute();
+        return d.hour * 60 + d.minute;
       };
 
       // -------------------------------------------------------------------------

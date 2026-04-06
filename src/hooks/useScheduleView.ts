@@ -65,13 +65,13 @@ export default function useScheduleView({
         ? dateFn(event.endDate).startOf("day")
         : current;
 
-      while (current.isBefore(end) || current.isSame(end)) {
+      while (current < end || current.equals(end)) {
         const dateKey = formatDate(current, DATE_FORMATS.DATE, locale);
         if (!groups[dateKey]) {
           groups[dateKey] = [];
         }
         groups[dateKey].push(event);
-        current = current.add(1, "day");
+        current = current.plus({ day: 1 });
       }
     });
 
@@ -103,22 +103,22 @@ export default function useScheduleView({
     const endDay = event.endDate
       ? dateFn(event.endDate).startOf("day")
       : startDay;
-    const isMultiDay = !startDay.isSame(endDay);
+    const isMultiDay = !startDay.equals(endDay);
 
     const timeFormat = is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME;
     const formatTime = (t: string) => t.replace(/^0/, "").replace(":00", " ");
 
     const isMidnight = (d: string) =>
-      dateFn(d).hour() === 0 && dateFn(d).minute() === 0;
+      dateFn(d).hour === 0 && dateFn(d).minute === 0;
     const isEndOfDay = (d: string) =>
-      dateFn(d).hour() === 23 && dateFn(d).minute() === 59;
+      dateFn(d).hour === 23 && dateFn(d).minute === 59;
 
     if (isMultiDay) {
-      if (currentDay.isSame(startDay)) {
+      if (currentDay.equals(startDay)) {
         return isMidnight(event.startDate)
           ? "All day"
           : `${formatTime(formatDate(event.startDate, timeFormat, locale))}`;
-      } else if (currentDay.isSame(endDay)) {
+      } else if (currentDay.equals(endDay)) {
         return isEndOfDay(event.endDate!)
           ? "All day"
           : `Until ${formatTime(formatDate(event.endDate!, timeFormat, locale))}`;

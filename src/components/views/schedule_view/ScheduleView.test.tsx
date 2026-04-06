@@ -42,6 +42,15 @@ describe("ScheduleView Component", () => {
     theme: {},
     eventProps: {},
     classNames: {},
+    locale: "en",
+    localeMessages: {
+      today: "Today",
+      day: "Day",
+      week: "Week",
+      month: "Month",
+      schedule: "Schedule",
+      days: "Days",
+    },
     autoScrollToCurrentTime: false,
     dayType: "half" as const,
   };

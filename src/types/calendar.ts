@@ -93,7 +93,7 @@ export interface CalendarProps {
   sortedMonthView?: boolean | ((a: CalendarEvent, b: CalendarEvent) => number);
 
   // --- Localization ---
-  /** the dayjs locale code (e.g., 'en', 'fr', 'es-mx'). Requires importing the locale in dayjs. */
+  /** the luxon locale code (e.g., 'en', 'fr', 'es-mx'). */
   locale?: string;
 
   /** Translations for built-in calendar text elements */

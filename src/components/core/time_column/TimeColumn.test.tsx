@@ -13,7 +13,13 @@ describe("TimeColumn Component", () => {
         initialDate={dateFn()}
         initialView={ECalendarViewType.week}
       >
-        <TimeColumn minHour={8} maxHour={18} is12Hour={false} classNames={{}} />
+        <TimeColumn
+          minHour={8}
+          maxHour={18}
+          is12Hour={false}
+          classNames={{}}
+          locale="en"
+        />
       </CalendarProvider>,
     );
 
@@ -35,6 +41,7 @@ describe("TimeColumn Component", () => {
           maxHour={15}
           is12Hour={false}
           classNames={{}}
+          locale="en"
         />
       </CalendarProvider>,
     );
@@ -49,7 +56,13 @@ describe("TimeColumn Component", () => {
         initialDate={dateFn()}
         initialView={ECalendarViewType.week}
       >
-        <TimeColumn minHour={14} maxHour={15} is12Hour={true} classNames={{}} />
+        <TimeColumn
+          minHour={14}
+          maxHour={15}
+          is12Hour={true}
+          classNames={{}}
+          locale="en"
+        />
       </CalendarProvider>,
     );
 

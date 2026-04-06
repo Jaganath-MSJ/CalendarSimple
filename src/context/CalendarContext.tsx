@@ -6,7 +6,7 @@ import React, {
   useMemo,
   Dispatch,
 } from "react";
-import { dateFn, DateType, ManipulateType } from "../utils";
+import { dateFn, DateType } from "../utils";
 import { ECalendarViewType } from "../types";
 import { CALENDAR_ACTIONS } from "../constants";
 
@@ -48,30 +48,27 @@ function calendarReducer(
       if (state.view === ECalendarViewType.customDays) {
         return {
           ...state,
-          selectedDate: state.selectedDate.add(state.customDays || 3, "day"),
+          selectedDate: state.selectedDate.plus({ day: state.customDays || 3 }),
         };
       }
-      const unit = (
-        state.view === ECalendarViewType.schedule ? "day" : state.view
-      ) as ManipulateType;
-      return { ...state, selectedDate: state.selectedDate.add(1, unit) };
+      const unit =
+        state.view === ECalendarViewType.schedule ? "day" : state.view;
+      return { ...state, selectedDate: state.selectedDate.plus({ [unit]: 1 }) };
     }
     case CALENDAR_ACTIONS.PREV: {
       if (state.view === ECalendarViewType.customDays) {
         return {
           ...state,
-          selectedDate: state.selectedDate.subtract(
-            state.customDays || 3,
-            "day",
-          ),
+          selectedDate: state.selectedDate.minus({
+            day: state.customDays || 3,
+          }),
         };
       }
-      const unit = (
-        state.view === ECalendarViewType.schedule ? "day" : state.view
-      ) as ManipulateType;
+      const unit =
+        state.view === ECalendarViewType.schedule ? "day" : state.view;
       return {
         ...state,
-        selectedDate: state.selectedDate.subtract(1, unit),
+        selectedDate: state.selectedDate.minus({ [unit]: 1 }),
       };
     }
     case CALENDAR_ACTIONS.TODAY:

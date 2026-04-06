@@ -55,7 +55,10 @@ describe("Calendar Component Integration", () => {
   it("responds to ControlledState updates", () => {
     const start = dateFn("2024-03-01");
     const { rerender } = render(
-      <Calendar selectedDate={start.toDate()} view={ECalendarViewType.month} />,
+      <Calendar
+        selectedDate={start.toJSDate()}
+        view={ECalendarViewType.month}
+      />,
     );
 
     expect(screen.getByText("March 2024")).toBeInTheDocument();
@@ -63,7 +66,7 @@ describe("Calendar Component Integration", () => {
     const newDate = dateFn("2025-06-15");
     rerender(
       <Calendar
-        selectedDate={newDate.toDate()}
+        selectedDate={newDate.toJSDate()}
         view={ECalendarViewType.month}
       />,
     );

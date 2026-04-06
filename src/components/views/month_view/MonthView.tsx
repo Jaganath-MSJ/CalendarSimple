@@ -94,7 +94,7 @@ function MonthView({
   const onClickDateHandler = useCallback(
     (dateInput: DateType) => {
       const newDate = dateFn(dateInput);
-      if (selectable && !newDate.isSame(selectedDate, "day")) {
+      if (selectable && !newDate.hasSame(selectedDate, "day")) {
         onDateClick?.(convertToDate(newDate));
         dispatch({ type: "SET_DATE", payload: newDate });
       }
@@ -139,7 +139,7 @@ function MonthView({
                   isSelected={
                     selectable &&
                     dayInfo.isCurrentMonth &&
-                    dayInfo.displayDay === selectedDate.date()
+                    dayInfo.displayDay === selectedDate.day
                   }
                   isToday={dayInfo.isToday}
                   isCurrentMonth={dayInfo.isCurrentMonth}

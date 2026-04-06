@@ -38,6 +38,8 @@ describe("Header Component", () => {
     resetDateOnViewChange: false,
     onNavigate: vi.fn(),
     onViewChange: vi.fn(),
+    locale: "en",
+    localeMessages: {},
   };
 
   it("renders correctly with current date and view", () => {

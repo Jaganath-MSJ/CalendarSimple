@@ -1,13 +1,13 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import dayjs from "dayjs";
+import { DateTime } from "luxon";
 import Calendar, { ECalendarViewType } from "../../index";
 const action =
   (name: string) =>
   (...params: any[]) =>
     console.log(name, params);
 
-const today = dayjs();
+const today = DateTime.now();
 
 const meta: Meta<typeof Calendar> = {
   title: "Tests/Layout Limits",
@@ -17,7 +17,7 @@ const meta: Meta<typeof Calendar> = {
   },
   args: {
     height: 600,
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
   },
 };
 
@@ -26,7 +26,7 @@ type Story = StoryObj<typeof Calendar>;
 
 const heavyAllDayEvents = Array.from({ length: 8 }).map((_, i) => ({
   id: `all-day-${i}`,
-  startDate: today.format("YYYY-MM-DD"), // Date only string
+  startDate: today.toFormat("yyyy-MM-dd"), // Date only string
   title: `All Day Event ${i + 1}`,
   style: { backgroundColor: `hsl(${i * 40}, 70%, 50%)` },
 }));
@@ -52,7 +52,7 @@ export const AdjacentMonthsHidden: Story = {
   args: {
     view: ECalendarViewType.month,
     showAdjacentMonths: false,
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
   },
 };
 
@@ -72,14 +72,22 @@ export const TimeRangeLimits: Story = {
     events: [
       {
         id: "morning",
-        startDate: today.hour(9).minute(0).format("YYYY-MM-DDTHH:mm:00"),
-        endDate: today.hour(10).minute(0).format("YYYY-MM-DDTHH:mm:00"),
+        startDate: today
+          .set({ hour: 9, minute: 0 })
+          .toFormat("yyyy-MM-ddTHH:mm:00"),
+        endDate: today
+          .set({ hour: 10, minute: 0 })
+          .toFormat("yyyy-MM-ddTHH:mm:00"),
         title: "Within Range",
       },
       {
         id: "too-early",
-        startDate: today.hour(5).minute(0).format("YYYY-MM-DDTHH:mm:00"),
-        endDate: today.hour(6).minute(0).format("YYYY-MM-DDTHH:mm:00"),
+        startDate: today
+          .set({ hour: 5, minute: 0 })
+          .toFormat("yyyy-MM-ddTHH:mm:00"),
+        endDate: today
+          .set({ hour: 6, minute: 0 })
+          .toFormat("yyyy-MM-ddTHH:mm:00"),
         title: "Out of Bounds (Should be hidden or clipped)",
         style: { backgroundColor: "red" },
       },

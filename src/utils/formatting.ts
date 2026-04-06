@@ -29,7 +29,8 @@ export function generateTooltipText(
 ): string {
   const timeFormat = is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME;
   const isMulti =
-    event.endDate && !dateFn(event.startDate).isSame(event.endDate, "day");
+    event.endDate &&
+    !dateFn(event.startDate).hasSame(dateFn(event.endDate), "day");
   const isAllDay = isAllDayEvent(event);
 
   let formatStr = timeFormat;

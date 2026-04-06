@@ -90,8 +90,8 @@ export default function useAllDayBanner(
       const eEnd = e.endDate ? dateFn(e.endDate).startOf("day") : eStart;
       // Intersects if start is before viewEnd AND end is after viewStart
       return (
-        (eStart.isBefore(viewEnd) || eStart.isSame(viewEnd)) &&
-        (eEnd.isAfter(viewStart) || eEnd.isSame(viewStart))
+        (eStart < viewEnd || eStart.equals(viewEnd)) &&
+        (eEnd > viewStart || eEnd.equals(viewStart))
       );
     });
 
@@ -130,16 +130,16 @@ export default function useAllDayBanner(
 
       // Calculate bound indices for the current visible view
       let startIndex = days.findIndex((d) =>
-        dateFn(d).startOf("day").isSame(eStart),
+        dateFn(d).startOf("day").equals(eStart),
       );
-      if (startIndex === -1 && eStart.isBefore(viewStart)) {
+      if (startIndex === -1 && eStart < viewStart) {
         startIndex = 0;
       }
 
       let endIndex = days.findIndex((d) =>
-        dateFn(d).startOf("day").isSame(eEnd),
+        dateFn(d).startOf("day").equals(eEnd),
       );
-      if (endIndex === -1 && eEnd.isAfter(viewEnd)) {
+      if (endIndex === -1 && eEnd > viewEnd) {
         endIndex = days.length - 1;
       }
 
@@ -147,8 +147,8 @@ export default function useAllDayBanner(
       if (startIndex === -1) startIndex = 0;
       if (endIndex === -1) endIndex = days.length - 1;
 
-      const isClippedLeft = eStart.isBefore(viewStart);
-      const isClippedRight = eEnd.isAfter(viewEnd);
+      const isClippedLeft = eStart < viewStart;
+      const isClippedRight = eEnd > viewEnd;
 
       // Row stacking: Find the lowest row index where the event fits without overlap
       let rowIndex = 0;

@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import dayjs from "dayjs";
+import { DateTime } from "luxon";
 import Calendar, { ECalendarViewType, CalendarEvent } from "../";
 
 const meta: Meta<typeof Calendar> = {
@@ -19,13 +19,13 @@ const meta: Meta<typeof Calendar> = {
 export default meta;
 type Story = StoryObj<typeof Calendar>;
 
-const today = dayjs();
+const today = DateTime.now();
 
 const customizeEvents: CalendarEvent[] = [
   {
     id: "1",
-    startDate: today.format("YYYY-MM-DD") + "T10:00:00",
-    endDate: today.format("YYYY-MM-DD") + "T12:00:00",
+    startDate: today.toFormat("yyyy-MM-dd") + "T10:00:00",
+    endDate: today.toFormat("yyyy-MM-dd") + "T12:00:00",
     title: "Static Style (Red Border)",
     style: {
       border: "2px solid red",
@@ -34,8 +34,8 @@ const customizeEvents: CalendarEvent[] = [
   },
   {
     id: "2",
-    startDate: today.format("YYYY-MM-DD") + "T13:00:00",
-    endDate: today.format("YYYY-MM-DD") + "T15:00:00",
+    startDate: today.toFormat("yyyy-MM-dd") + "T13:00:00",
+    endDate: today.toFormat("yyyy-MM-dd") + "T15:00:00",
     title: "Static Style (Opacity)",
     style: {
       backgroundColor: "#10B981",
@@ -45,7 +45,7 @@ const customizeEvents: CalendarEvent[] = [
   },
   {
     id: "3",
-    startDate: today.add(1, "day").format("YYYY-MM-DD") + "T09:00:00",
+    startDate: today.plus({ days: 1 }).toFormat("yyyy-MM-dd") + "T09:00:00",
     title: "All Day Style",
     style: {
       borderRadius: "0px",
@@ -58,7 +58,7 @@ export const EventStyle: Story = {
   args: {
     view: ECalendarViewType.week,
     events: customizeEvents,
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
   },
 };
 
@@ -83,11 +83,11 @@ export const EventClassNames: Story = {
     events: [
       {
         id: "4",
-        startDate: today.format("YYYY-MM-DD"),
+        startDate: today.toFormat("yyyy-MM-dd"),
         title: "Event with ClassName",
       },
     ],
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
     classNames: {
       event: "custom-event",
     },
@@ -98,7 +98,7 @@ export const ScheduleViewCustomization: Story = {
   args: {
     view: ECalendarViewType.schedule,
     events: customizeEvents,
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
   },
 };
 
@@ -106,7 +106,7 @@ export const CustomRenderers: Story = {
   args: {
     view: ECalendarViewType.week,
     events: customizeEvents,
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
     renderEvent: (event: CalendarEvent) => (
       <div
         style={{
@@ -133,8 +133,10 @@ export const CustomRenderers: Story = {
           </span>
         </div>
         <div style={{ color: "#64748b", fontSize: "0.75rem" }}>
-          {dayjs(event.startDate).format("h:mm A")} -{" "}
-          {dayjs(event.endDate).format("h:mm A")}
+          {DateTime.fromISO(event.startDate).toFormat("h:mm A")} -{" "}
+          {event.endDate
+            ? DateTime.fromISO(event.endDate).toFormat("h:mm A")
+            : ""}
         </div>
       </div>
     ),
@@ -154,7 +156,9 @@ export const CustomRenderers: Story = {
           <button
             onClick={() =>
               props.onNavigate(
-                dayjs(props.currentDate).subtract(1, "week").toDate(),
+                DateTime.fromISO(props.currentDate)
+                  .minus({ week: 1 })
+                  .toJSDate(),
               )
             }
             style={{
@@ -173,7 +177,11 @@ export const CustomRenderers: Story = {
           </button>
           <button
             onClick={() =>
-              props.onNavigate(dayjs(props.currentDate).add(1, "week").toDate())
+              props.onNavigate(
+                DateTime.fromISO(props.currentDate)
+                  .plus({ week: 1 })
+                  .toJSDate(),
+              )
             }
             style={{
               padding: "8px 16px",
@@ -197,7 +205,7 @@ export const CustomRenderers: Story = {
             fontFamily: "Inter, system-ui, sans-serif",
           }}
         >
-          {dayjs(props.currentDate).format("MMMM YYYY")}
+          {DateTime.fromISO(props.currentDate).toFormat("MMMM yyyy")}
         </span>
         <div style={{ display: "flex", gap: "4px" }}>
           {["day", "week", "month"].map((v) => (
@@ -245,7 +253,7 @@ export const CustomRenderers: Story = {
             color: props.isToday ? "#3b82f6" : "#64748b",
           }}
         >
-          {dayjs(props.date).format("ddd")}
+          {DateTime.fromISO(props.date).toFormat("ddd")}
         </span>
         <div
           style={{
@@ -261,12 +269,12 @@ export const CustomRenderers: Story = {
             fontWeight: 700,
           }}
         >
-          {dayjs(props.date).format("D")}
+          {DateTime.fromISO(props.date).toFormat("D")}
         </div>
       </div>
     ),
     renderHourCell: (date: Date) => {
-      const isTop = dayjs(date).minute() === 0;
+      const isTop = DateTime.fromJSDate(date).minute === 0;
       return (
         <div
           style={{
@@ -277,7 +285,8 @@ export const CustomRenderers: Story = {
             bottom: 0,
             borderTop: isTop ? "1px dashed #f1f5f9" : "none",
             backgroundColor:
-              dayjs(date).hour() >= 9 && dayjs(date).hour() < 18
+              DateTime.fromJSDate(date).hour >= 9 &&
+              DateTime.fromJSDate(date).hour < 18
                 ? "transparent"
                 : "rgba(248, 250, 252, 0.4)",
           }}
@@ -291,7 +300,7 @@ export const PagerResets: Story = {
   args: {
     view: ECalendarViewType.month,
     events: customizeEvents,
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
     selectable: true,
     resetDateOnViewChange: true,
   },
@@ -308,28 +317,40 @@ export const PagerResets: Story = {
 export const ConcurrentEventStacking: Story = {
   args: {
     view: ECalendarViewType.day,
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
     eventOverlapOffset: 15, // 15% offset for stacking
     events: [
       {
         id: "1",
         title: "Event 1",
-        startDate: today.set("hour", 10).set("minute", 0).format(),
-        endDate: today.set("hour", 12).set("minute", 0).format(),
+        startDate: today
+          .set({ hour: 10, minute: 0 })
+          .toFormat("yyyy-MM-dd'T'HH:mm:ss"),
+        endDate: today
+          .set({ hour: 12, minute: 0 })
+          .toFormat("yyyy-MM-dd'T'HH:mm:ss"),
         style: { backgroundColor: "#1a73e8" },
       },
       {
         id: "2",
         title: "Event 2",
-        startDate: today.set("hour", 10).set("minute", 30).format(),
-        endDate: today.set("hour", 12).set("minute", 30).format(),
+        startDate: today
+          .set({ hour: 10, minute: 30 })
+          .toFormat("yyyy-MM-dd'T'HH:mm:ss"),
+        endDate: today
+          .set({ hour: 12, minute: 30 })
+          .toFormat("yyyy-MM-dd'T'HH:mm:ss"),
         style: { backgroundColor: "#d93025" },
       },
       {
         id: "3",
         title: "Event 3",
-        startDate: today.set("hour", 11).set("minute", 0).format(),
-        endDate: today.set("hour", 13).set("minute", 0).format(),
+        startDate: today
+          .set({ hour: 11, minute: 0 })
+          .toFormat("yyyy-MM-dd'T'HH:mm:ss"),
+        endDate: today
+          .set({ hour: 13, minute: 0 })
+          .toFormat("yyyy-MM-dd'T'HH:mm:ss"),
         style: { backgroundColor: "#f9ab00" },
       },
     ],
@@ -348,7 +369,7 @@ export const ScheduleViewCustomSeparator: Story = {
   args: {
     view: ECalendarViewType.schedule,
     events: customizeEvents,
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
     renderScheduleSeparator: (date: Date) => (
       <div
         style={{
@@ -393,17 +414,17 @@ export const HideAllDayRow: Story = {
       ...customizeEvents,
       {
         id: "5",
-        startDate: today.add(1, "day").format("YYYY-MM-DD"),
+        startDate: today.plus({ days: 1 }).toFormat("yyyy-MM-dd"),
         title: "Top",
       },
       {
         id: "6",
-        startDate: today.format("YYYY-MM-DD"),
-        endDate: today.add(1, "day").format("YYYY-MM-DD"),
+        startDate: today.toFormat("yyyy-MM-dd"),
+        endDate: today.plus({ days: 1 }).toFormat("yyyy-MM-dd"),
         title: "Top 2",
       },
     ],
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
     showAllDayRow: false,
   },
   parameters: {

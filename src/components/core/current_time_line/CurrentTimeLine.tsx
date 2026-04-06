@@ -20,14 +20,14 @@ const CurrentTimeLine = ({
   const { testId } = useCalendar();
   const [position, setPosition] = useState(() => {
     const now = dateFn();
-    return (now.hour() - minHour) * 60 + now.minute();
+    return (now.hour - minHour) * 60 + now.minute;
   });
 
   useEffect(() => {
     const updatePosition = () => {
       const now = dateFn();
-      const hours = now.hour();
-      const minutes = now.minute();
+      const hours = now.hour;
+      const minutes = now.minute;
       // eventSlot height is 60px per hour
       const totalMinutes = (hours - minHour) * 60 + minutes;
       setPosition(totalMinutes);

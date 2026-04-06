@@ -61,7 +61,7 @@ export default function ScheduleView({
             const dateObj = dateFn(dateKey);
             const isLastGroup = groupIndex === allKeys.length - 1;
 
-            const isToday = checkIsToday(dateObj, dateObj.date());
+            const isToday = checkIsToday(dateObj, dateObj.day);
             const todayStyle = isToday
               ? {
                   color: theme?.today?.color,
@@ -187,7 +187,7 @@ export default function ScheduleView({
                 </div>
                 {!isLastGroup &&
                   renderScheduleSeparator &&
-                  renderScheduleSeparator(dateObj.toDate())}
+                  renderScheduleSeparator(dateObj.toJSDate())}
               </React.Fragment>
             );
           })

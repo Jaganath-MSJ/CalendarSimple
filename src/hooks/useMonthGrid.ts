@@ -104,7 +104,7 @@ export default function useMonthGrid(
         });
 
     const length = ((weekEndsOn - weekStartsOn + 7) % 7) + 1;
-    const calendarArray = calendarize(selectedDate.toDate(), weekStartsOn);
+    const calendarArray = calendarize(selectedDate.toJSDate(), weekStartsOn);
 
     return calendarArray.map((week: number[], weekIndex: number) => {
       const slicedWeek = week.slice(0, length);

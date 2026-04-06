@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useRef } from "react";
 import cx from "classnames";
-import { dateFn, formatDate } from "../../../utils";
+import { getDayOfWeek, dateFn, formatDate } from "../../../utils";
 import useDayEventLayout, {
   DayEventLayout,
 } from "../../../hooks/useDayEventLayout";
@@ -68,7 +68,7 @@ function CustomView({
 
   const viewDays = useMemo(() => {
     return Array.from({ length: customDays }, (_, i) =>
-      selectedDate.add(i, "day"),
+      selectedDate.plus({ day: i }),
     );
   }, [selectedDate, customDays]);
 
@@ -89,14 +89,14 @@ function CustomView({
 
   const hasToday = useMemo(() => {
     const now = dateFn();
-    return viewDays.some((day) => now.isSame(day, "day"));
+    return viewDays.some((day) => now.hasSame(day, "day"));
   }, [viewDays]);
 
   useEffect(() => {
     if (autoScrollToCurrentTime && containerRef.current && hasToday) {
       const now = dateFn();
-      const hours = now.hour();
-      const minutes = now.minute();
+      const hours = now.hour;
+      const minutes = now.minute;
       const totalMinutes = hours * 60 + minutes;
 
       const container = containerRef.current;
@@ -119,7 +119,7 @@ function CustomView({
         <div className={styles.customHeader}>
           <div className={styles.timeHeaderSpacer} />
           {viewDays.map((date, index) => {
-            const isToday = dateFn().isSame(date, "day");
+            const isToday = dateFn().hasSame(date, "day");
             const todayStyle = isToday
               ? {
                   color: theme?.today?.color,
@@ -129,7 +129,7 @@ function CustomView({
 
             return renderDateCell ? (
               renderDateCell({
-                date: date.toDate(),
+                date: date.toJSDate(),
                 isToday,
               })
             ) : (
@@ -138,7 +138,7 @@ function CustomView({
                 className={cx(styles.dayHeader, classNames?.dayHeader)}
               >
                 <div className={cx(styles.dayName, classNames?.dayName)}>
-                  {getDayListNames(dayType, locale)[date.day()]}
+                  {getDayListNames(dayType, locale)[getDayOfWeek(date)]}
                 </div>
                 <div
                   className={cx(styles.dayNumber, classNames?.dayNumber, {
@@ -175,7 +175,7 @@ function CustomView({
         />
         <div className={styles.eventsGrid}>
           {viewDays.map((date, dayIndex) => {
-            const isToday = dateFn().isSame(date, "day");
+            const isToday = dateFn().hasSame(date, "day");
             return (
               <div
                 key={dayIndex}

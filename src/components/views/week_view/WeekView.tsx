@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useRef } from "react";
 import cx from "classnames";
-import { dateFn, formatDate } from "../../../utils";
+import { getDayOfWeek, dateFn, formatDate } from "../../../utils";
 import useDayEventLayout, {
   DayEventLayout,
 } from "../../../hooks/useDayEventLayout";
@@ -68,18 +68,18 @@ function WeekView({
   const { state, testId } = useCalendar();
   const { selectedDate } = state;
   const startOfWeek = useMemo(() => {
-    const currentDay = selectedDate.day();
+    const currentDay = getDayOfWeek(selectedDate);
     const diff =
       currentDay >= weekStartsOn
         ? weekStartsOn - currentDay
         : weekStartsOn - currentDay - 7;
-    return selectedDate.add(diff, "day").startOf("day");
+    return selectedDate.plus({ day: diff }).startOf("day");
   }, [selectedDate, weekStartsOn]);
 
   const weekDays = useMemo(() => {
     let length = weekEndsOn - weekStartsOn + 1;
     if (length <= 0) length += 7;
-    return Array.from({ length }, (_, i) => startOfWeek.add(i, "day"));
+    return Array.from({ length }, (_, i) => startOfWeek.plus({ day: i }));
   }, [startOfWeek, weekStartsOn, weekEndsOn]);
 
   const weekEvents = useDayEventLayout(
@@ -99,14 +99,14 @@ function WeekView({
 
   const isCurrentWeek = useMemo(() => {
     const now = dateFn();
-    return weekDays.some((day) => now.isSame(day, "day"));
+    return weekDays.some((day) => now.hasSame(day, "day"));
   }, [weekDays]);
 
   useEffect(() => {
     if (autoScrollToCurrentTime && containerRef.current && isCurrentWeek) {
       const now = dateFn();
-      const hours = now.hour();
-      const minutes = now.minute();
+      const hours = now.hour;
+      const minutes = now.minute;
       const totalMinutes = hours * 60 + minutes;
 
       const container = containerRef.current;
@@ -129,7 +129,7 @@ function WeekView({
         <div className={styles.weekHeader}>
           <div className={styles.timeHeaderSpacer} />
           {weekDays.map((date, index) => {
-            const isToday = dateFn().isSame(date, "day");
+            const isToday = dateFn().hasSame(date, "day");
             const todayStyle = isToday
               ? {
                   color: theme?.today?.color,
@@ -139,7 +139,7 @@ function WeekView({
 
             return renderDateCell ? (
               renderDateCell({
-                date: date.toDate(),
+                date: date.toJSDate(),
                 isToday,
               })
             ) : (
@@ -148,7 +148,7 @@ function WeekView({
                 className={cx(styles.dayHeader, classNames?.dayHeader)}
               >
                 <div className={cx(styles.dayName, classNames?.dayName)}>
-                  {getDayListNames(dayType, locale)[date.day()]}
+                  {getDayListNames(dayType, locale)[getDayOfWeek(date)]}
                 </div>
                 <div
                   className={cx(styles.dayNumber, classNames?.dayNumber, {
@@ -185,7 +185,7 @@ function WeekView({
         />
         <div className={styles.eventsGrid}>
           {weekDays.map((date, dayIndex) => {
-            const isToday = dateFn().isSame(date, "day");
+            const isToday = dateFn().hasSame(date, "day");
             return (
               <div
                 key={dayIndex}

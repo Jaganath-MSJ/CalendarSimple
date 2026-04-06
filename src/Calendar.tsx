@@ -143,7 +143,7 @@ function CalendarContent({
     >
       {restProps.renderHeader ? (
         restProps.renderHeader({
-          currentDate: selectedDate.toDate(),
+          currentDate: selectedDate.toJSDate(),
           view,
           onNavigate: (date: Date) => {
             dispatch({

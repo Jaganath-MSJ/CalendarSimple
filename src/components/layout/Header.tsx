@@ -21,7 +21,6 @@ import {
   formatDate,
   getMonth,
   getYear,
-  ManipulateType,
 } from "../../utils";
 import styles from "./Header.module.css";
 import LeftArrow from "../../assets/LeftArrow";
@@ -72,19 +71,21 @@ function Header({
     const isAdd = option === EMonthOption.add;
     dispatch({ type: isAdd ? CALENDAR_ACTIONS.NEXT : CALENDAR_ACTIONS.PREV });
 
-    const unit = (
-      view === ECalendarViewType.schedule ? "day" : view
-    ) as ManipulateType;
+    const unit = (view === ECalendarViewType.schedule ? "day" : view) as
+      | "day"
+      | "week"
+      | "month"
+      | "year";
 
     let predictiveDate;
     if (view === ECalendarViewType.customDays) {
       predictiveDate = isAdd
-        ? selectedDate.add(customDays || 3, "day")
-        : selectedDate.subtract(customDays || 3, "day");
+        ? selectedDate.plus({ day: customDays || 3 })
+        : selectedDate.minus({ day: customDays || 3 });
     } else {
       predictiveDate = isAdd
-        ? selectedDate.add(1, unit)
-        : selectedDate.subtract(1, unit);
+        ? selectedDate.plus({ [unit]: 1 })
+        : selectedDate.minus({ [unit]: 1 });
     }
 
     onNavigate?.(convertToDate(predictiveDate));
@@ -124,8 +125,8 @@ function Header({
     if (view === ECalendarViewType.week) {
       const startOfWeek = selectedDate.startOf("week");
       const endOfWeek = selectedDate.endOf("week");
-      if (startOfWeek.month() !== endOfWeek.month()) {
-        if (startOfWeek.year() !== endOfWeek.year()) {
+      if (startOfWeek.month !== endOfWeek.month) {
+        if (startOfWeek.year !== endOfWeek.year) {
           return `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
         }
         return `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH, locale)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
@@ -133,9 +134,9 @@ function Header({
     }
     if (view === ECalendarViewType.customDays) {
       const days = customDays || 3;
-      const endDate = selectedDate.add(days - 1, "day");
-      if (selectedDate.month() !== endDate.month()) {
-        if (selectedDate.year() !== endDate.year()) {
+      const endDate = selectedDate.plus({ day: days - 1 });
+      if (selectedDate.month !== endDate.month) {
+        if (selectedDate.year !== endDate.year) {
           return `${formatDate(selectedDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)} - ${formatDate(endDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
         }
         return `${formatDate(selectedDate, DATE_FORMATS.SHORT_MONTH, locale)} - ${formatDate(endDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
@@ -143,7 +144,7 @@ function Header({
       if (days === 1) {
         return formatDate(selectedDate, DATE_FORMATS.MONTH_DAY_YEAR, locale);
       }
-      return `${formatDate(selectedDate, DATE_FORMATS.DAY_DATE_SHORT_MONTH, locale)} - ${formatDate(endDate, DATE_FORMATS.DAY_DATE_SHORT_MONTH, locale)}, ${formatDate(selectedDate, "YYYY")}`;
+      return `${formatDate(selectedDate, DATE_FORMATS.DAY_DATE_SHORT_MONTH, locale)} - ${formatDate(endDate, DATE_FORMATS.DAY_DATE_SHORT_MONTH, locale)}, ${formatDate(selectedDate, "yyyy")}`;
     }
     if (view === ECalendarViewType.schedule) {
       if (events && events.length > 0) {
@@ -153,15 +154,12 @@ function Header({
         events.forEach((event) => {
           const sd = dateFn(event.startDate);
           const ed = event.endDate ? dateFn(event.endDate) : sd;
-          if (sd.isBefore(minDate)) minDate = sd;
-          if (ed.isAfter(maxDate)) maxDate = ed;
+          if (sd < minDate) minDate = sd;
+          if (ed > maxDate) maxDate = ed;
         });
 
-        if (
-          minDate.month() !== maxDate.month() ||
-          minDate.year() !== maxDate.year()
-        ) {
-          if (minDate.year() !== maxDate.year()) {
+        if (minDate.month !== maxDate.month || minDate.year !== maxDate.year) {
+          if (minDate.year !== maxDate.year) {
             return `${formatDate(minDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)} - ${formatDate(maxDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
           }
           return `${formatDate(minDate, DATE_FORMATS.SHORT_MONTH, locale)} - ${formatDate(maxDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;

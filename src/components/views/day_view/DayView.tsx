@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import cx from "classnames";
-import { dateFn, formatDate } from "../../../utils";
+import { getDayOfWeek, dateFn, formatDate } from "../../../utils";
 import useDayEventLayout, {
   DayEventLayout,
 } from "../../../hooks/useDayEventLayout";
@@ -78,7 +78,7 @@ function DayView({
     },
   ) as DayEventLayout[];
 
-  const isToday = dateFn().isSame(selectedDate, "day");
+  const isToday = dateFn().hasSame(selectedDate, "day");
 
   const todayStyle = isToday
     ? {
@@ -90,8 +90,8 @@ function DayView({
   useEffect(() => {
     if (autoScrollToCurrentTime && containerRef.current && isToday) {
       const now = dateFn();
-      const hours = now.hour();
-      const minutes = now.minute();
+      const hours = now.hour;
+      const minutes = now.minute;
       const totalMinutes = hours * 60 + minutes;
 
       const container = containerRef.current;
@@ -115,13 +115,13 @@ function DayView({
           <div className={styles.timeHeaderSpacer} />
           {renderDateCell ? (
             renderDateCell({
-              date: selectedDate.toDate(),
+              date: selectedDate.toJSDate(),
               isToday,
             })
           ) : (
             <div className={cx(styles.dayHeader, classNames?.dayHeader)}>
               <div className={cx(styles.dayName, classNames?.dayName)}>
-                {getDayListNames(dayType, locale)[selectedDate.day()]}
+                {getDayListNames(dayType, locale)[getDayOfWeek(selectedDate)]}
               </div>
               <div
                 className={cx(styles.dayNumber, classNames?.dayNumber, {

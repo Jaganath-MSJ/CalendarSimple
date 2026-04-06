@@ -11,7 +11,9 @@ const TestComponent = () => {
   return (
     <div>
       <span data-testid="view">{state.view}</span>
-      <span data-testid="date">{state.selectedDate.format("YYYY-MM-DD")}</span>
+      <span data-testid="date">
+        {state.selectedDate.toFormat("yyyy-MM-dd")}
+      </span>
       <button
         onClick={() => dispatch({ type: CALENDAR_ACTIONS.NEXT })}
         data-testid="next"

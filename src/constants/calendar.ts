@@ -1,22 +1,16 @@
+import { Info } from "luxon";
 import { ECalendarViewType, EDayType, MonthListType } from "../types";
-import { dateFn } from "../utils/date";
 
 export function getDayListNames(dayType: EDayType, locale?: string): string[] {
-  const format = dayType === EDayType.full ? "dddd" : "ddd";
-  return Array.from({ length: 7 }, (_, i) =>
-    dateFn()
-      .day(i)
-      .locale(locale || "en")
-      .format(format),
-  );
+  const format = dayType === EDayType.full ? "long" : "short";
+  const days = Info.weekdays(format, { locale: locale || "en" });
+  // Luxon returns Mon-Sun. We need Sun-Sat to match expected 0-6 index.
+  return [days[6], ...days.slice(0, 6)];
 }
 
 export function getMonthList(locale?: string): MonthListType[] {
-  return Array.from({ length: 12 }, (_, i) => ({
-    label: dateFn()
-      .month(i)
-      .locale(locale || "en")
-      .format("MMMM"),
+  return Info.months("long", { locale: locale || "en" }).map((label, i) => ({
+    label,
     value: i,
   }));
 }
@@ -70,19 +64,19 @@ export const defaultCalendarProps = {
 };
 
 export const DATE_FORMATS = {
-  DATE: "YYYY-MM-DD",
+  DATE: "yyyy-MM-dd",
   TIME: "HH:mm",
-  TIME_12H: "hh:mm A",
-  HOUR_12H: "hh A",
-  MONTH_YEAR: "MMMM YYYY",
-  DAY_INDEX: "d",
-  DAY_NUMBER: "D",
-  FULL_DATE: "dddd, MMMM D, YYYY",
-  MONTH_DAY_YEAR: "MMMM D, YYYY",
-  SHORT_MONTH_YEAR: "MMM YYYY",
+  TIME_12H: "hh:mm a",
+  HOUR_12H: "hh a",
+  MONTH_YEAR: "MMMM yyyy",
+  DAY_INDEX: "c",
+  DAY_NUMBER: "d",
+  FULL_DATE: "EEEE, MMMM d, yyyy",
+  MONTH_DAY_YEAR: "MMMM d, yyyy",
+  SHORT_MONTH_YEAR: "MMM yyyy",
   SHORT_MONTH: "MMM",
-  SHORT_DAY: "ddd",
-  DAY_DATE_SHORT_MONTH: "ddd, D MMM",
+  SHORT_DAY: "EEE",
+  DAY_DATE_SHORT_MONTH: "EEE, d MMM",
 };
 
 export const CALENDAR_ACTIONS = {

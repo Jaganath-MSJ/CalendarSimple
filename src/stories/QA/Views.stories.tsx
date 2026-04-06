@@ -1,9 +1,9 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import dayjs from "dayjs";
+import { DateTime } from "luxon";
 import Calendar, { ECalendarViewType } from "../../index";
 
-const today = dayjs();
+const today = DateTime.now();
 
 const meta: Meta<typeof Calendar> = {
   title: "Tests/Views",
@@ -13,7 +13,7 @@ const meta: Meta<typeof Calendar> = {
   },
   args: {
     height: 600,
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
     resetDateOnViewChange: true,
     showCurrentTime: true,
   },
@@ -25,8 +25,10 @@ type Story = StoryObj<typeof Calendar>;
 const mockEvents = [
   {
     id: "1",
-    startDate: today.hour(12).minute(0).format("YYYY-MM-DDTHH:mm:00"),
-    endDate: today.hour(13).minute(0).format("YYYY-MM-DDTHH:mm:00"),
+    startDate: today
+      .set({ hour: 12, minute: 0 })
+      .toFormat("yyyy-MM-ddTHH:mm:00"),
+    endDate: today.set({ hour: 13, minute: 0 }).toFormat("yyyy-MM-ddTHH:mm:00"),
     title: "Test Event",
     style: { backgroundColor: "#FF5733" },
   },

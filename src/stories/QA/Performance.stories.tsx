@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import dayjs from "dayjs";
+import { DateTime } from "luxon";
 import Calendar, { ECalendarViewType } from "../../index";
 import { CalendarEvent } from "../../types";
 
@@ -12,7 +12,7 @@ const meta: Meta<typeof Calendar> = {
   },
   args: {
     height: 800,
-    selectedDate: dayjs().toDate(),
+    selectedDate: DateTime.now().toJSDate(),
   },
 };
 
@@ -22,7 +22,7 @@ type Story = StoryObj<typeof Calendar>;
 // Create a massive amount of events
 const generateMassiveEventLoad = (amount: number, isSorted = false) => {
   const events: CalendarEvent[] = [];
-  const startDay = dayjs().startOf("month");
+  const startDay = DateTime.now().startOf("month");
 
   for (let i = 0; i < amount; i++) {
     const randomDayOffset = Math.floor(Math.random() * 28);
@@ -33,16 +33,15 @@ const generateMassiveEventLoad = (amount: number, isSorted = false) => {
     if (isSorted) startHour = 8;
 
     const start = startDay
-      .add(randomDayOffset, "day")
-      .hour(startHour)
-      .minute(0);
-    const end = start.add(duration, "minute");
+      .plus({ days: randomDayOffset })
+      .set({ hour: startHour, minute: 0 });
+    const end = start.plus({ minute: duration });
 
     events.push({
       id: `perf-ev-${i}`,
       title: `Task #${i + 1}`,
-      startDate: start.format("YYYY-MM-DDTHH:mm:00"),
-      endDate: end.format("YYYY-MM-DDTHH:mm:00"),
+      startDate: start.toFormat("yyyy-MM-ddTHH:mm:00"),
+      endDate: end.toFormat("yyyy-MM-ddTHH:mm:00"),
       style: { backgroundColor: `hsl(${i % 360}, 70%, 60%)` },
     });
   }
@@ -50,7 +49,9 @@ const generateMassiveEventLoad = (amount: number, isSorted = false) => {
   // Pre-sort items sequentially if required
   if (isSorted) {
     return events.sort(
-      (a, b) => dayjs(a.startDate).valueOf() - dayjs(b.startDate).valueOf(),
+      (a, b) =>
+        DateTime.fromISO(a.startDate).valueOf() -
+        DateTime.fromISO(b.startDate).valueOf(),
     );
   }
 
@@ -87,7 +88,7 @@ export const FastUnorderedPlacement: Story = {
 const enrichedPayload = generateMassiveEventLoad(2000);
 const preCategorized: Record<string, CalendarEvent[]> = {};
 enrichedPayload.forEach((ev) => {
-  const dStr = dayjs(ev.startDate).format("YYYY-MM-DD");
+  const dStr = DateTime.fromISO(ev.startDate).toFormat("yyyy-MM-dd");
   if (!preCategorized[dStr]) preCategorized[dStr] = [];
   preCategorized[dStr].push(ev);
 });

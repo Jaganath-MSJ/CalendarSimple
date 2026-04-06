@@ -26,6 +26,15 @@ describe("DayWeekEventItem Component", () => {
     item: mockItem,
     is12Hour: false,
     classNames: {},
+    locale: "en",
+    localeMessages: {
+      today: "Today",
+      day: "Day",
+      week: "Week",
+      month: "Month",
+      schedule: "Schedule",
+      days: "Days",
+    },
   };
 
   it("renders the event item with correct styles and title", () => {

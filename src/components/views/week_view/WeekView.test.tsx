@@ -48,6 +48,15 @@ describe("WeekView Component", () => {
     eventsAreSorted: false,
     isEventOrderingEnabled: false,
     classNames: {},
+    locale: "en",
+    localeMessages: {
+      today: "Today",
+      day: "Day",
+      week: "Week",
+      month: "Month",
+      schedule: "Schedule",
+      days: "Days",
+    },
   };
 
   it("renders the week headers correctly", () => {

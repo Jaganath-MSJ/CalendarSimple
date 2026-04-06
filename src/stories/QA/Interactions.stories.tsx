@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import dayjs from "dayjs";
+import { DateTime } from "luxon";
 import Calendar, { ECalendarViewType } from "../../index";
 const action =
   (name: string) =>
   (...params: any[]) =>
     console.log(name, params);
 
-const today = dayjs();
+const today = DateTime.now();
 
 const meta: Meta<typeof Calendar> = {
   title: "Tests/Interactions",
@@ -28,8 +28,10 @@ type Story = StoryObj<typeof Calendar>;
 const mockEvents = [
   {
     id: "interact-1",
-    startDate: today.hour(10).minute(0).format("YYYY-MM-DDTHH:mm:00"),
-    endDate: today.hour(11).minute(0).format("YYYY-MM-DDTHH:mm:00"),
+    startDate: today
+      .set({ hour: 10, minute: 0 })
+      .toFormat("yyyy-MM-ddTHH:mm:00"),
+    endDate: today.set({ hour: 11, minute: 0 }).toFormat("yyyy-MM-ddTHH:mm:00"),
     title: "Clickable Event",
     style: { backgroundColor: "#8B5CF6" },
   },
@@ -56,11 +58,14 @@ export const DisabledSelectable: Story = {
 
 export const ControlledState: Story = {
   render: (args: any) => {
-    const [date, setDate] = useState(today.toDate());
+    const [date, setDate] = useState(today.toJSDate());
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div>
-          <h3>Controlled Date State: {dayjs(date).format("YYYY-MM-DD")}</h3>
+          <h3>
+            Controlled Date State:{" "}
+            {DateTime.fromJSDate(date).toFormat("yyyy-MM-dd")}
+          </h3>
           <p>
             Click on cells or use navigation headers to test controlled state
             change via `onNavigate` and `onDateClick`.

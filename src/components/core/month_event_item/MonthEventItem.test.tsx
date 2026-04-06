@@ -21,6 +21,15 @@ describe("MonthEventItem Component", () => {
     is12Hour: false,
     showAdjacentMonths: false,
     classNames: {},
+    locale: "en",
+    localeMessages: {
+      today: "Today",
+      day: "Day",
+      week: "Week",
+      month: "Month",
+      schedule: "Schedule",
+      days: "Days",
+    },
   };
 
   it("renders date correctly and applies selected classes", () => {

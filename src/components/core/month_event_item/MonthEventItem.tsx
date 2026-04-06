@@ -113,7 +113,7 @@ function MonthEventItem({
           <>
             {renderDateCell ? (
               renderDateCell({
-                date: dateObj.toDate(),
+                date: dateObj.toJSDate(),
                 isToday,
                 isSelected,
                 isCurrentMonth,

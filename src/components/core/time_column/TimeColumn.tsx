@@ -33,7 +33,7 @@ function TimeColumn({
         const timeFormat = is12Hour ? DATE_FORMATS.HOUR_12H : DATE_FORMATS.TIME;
         return (
           <div key={hour} className={cx(styles.timeSlot, classNames?.timeSlot)}>
-            {formatDate(dateFn().hour(hour).minute(0), timeFormat, locale)}
+            {formatDate(dateFn().set({ hour, minute: 0 }), timeFormat, locale)}
           </div>
         );
       })}

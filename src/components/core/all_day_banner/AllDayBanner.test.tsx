@@ -36,6 +36,15 @@ describe("AllDayBanner Component", () => {
     eventProps: {},
     is12Hour: false,
     classNames: {},
+    locale: "en",
+    localeMessages: {
+      today: "Today",
+      day: "Day",
+      week: "Week",
+      month: "Month",
+      schedule: "Schedule",
+      days: "Days",
+    },
   };
 
   it("renders empty state without failing", () => {
