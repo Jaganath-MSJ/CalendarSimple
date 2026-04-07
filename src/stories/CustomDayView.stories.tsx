@@ -28,8 +28,10 @@ const mockEvents: CalendarEvent[] = [
     id: "1",
     startDate: today
       .set({ hour: 9, minute: 0 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
-    endDate: today.set({ hour: 10, minute: 0 }).toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
+    endDate: today
+      .set({ hour: 10, minute: 0 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Morning Kickoff",
     style: { backgroundColor: "#3B82F6" },
   },
@@ -39,12 +41,12 @@ const mockEvents: CalendarEvent[] = [
       .plus({ days: 1 })
       .set({ hour: 10 })
       .set({ minute: 30 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     endDate: today
       .plus({ days: 1 })
       .set({ hour: 11 })
       .set({ minute: 45 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Design Sync",
     style: { backgroundColor: "#10B981" },
   },
@@ -52,8 +54,10 @@ const mockEvents: CalendarEvent[] = [
     id: "3", // Overlapping event
     startDate: today
       .set({ hour: 10, minute: 0 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
-    endDate: today.set({ hour: 11, minute: 0 }).toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
+    endDate: today
+      .set({ hour: 11, minute: 0 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Urgent Meeting",
     style: { backgroundColor: "#EF4444" },
   },
@@ -63,12 +67,12 @@ const mockEvents: CalendarEvent[] = [
       .plus({ days: 2 })
       .set({ hour: 13 })
       .set({ minute: 0 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     endDate: today
       .plus({ days: 2 })
       .set({ hour: 14 })
       .set({ minute: 0 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Lunch & Learn",
     style: { backgroundColor: "#F59E0B" },
   },
@@ -76,8 +80,10 @@ const mockEvents: CalendarEvent[] = [
     id: "5",
     startDate: today
       .set({ hour: 15, minute: 0 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
-    endDate: today.set({ hour: 16, minute: 0 }).toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
+    endDate: today
+      .set({ hour: 16, minute: 0 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Project Review",
     style: { backgroundColor: "#8B5CF6" },
   },

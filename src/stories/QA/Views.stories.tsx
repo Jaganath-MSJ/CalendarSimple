@@ -27,8 +27,10 @@ const mockEvents = [
     id: "1",
     startDate: today
       .set({ hour: 12, minute: 0 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
-    endDate: today.set({ hour: 13, minute: 0 }).toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
+    endDate: today
+      .set({ hour: 13, minute: 0 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Test Event",
     style: { backgroundColor: "#FF5733" },
   },

@@ -146,7 +146,9 @@ export default function useMonthGrid(
       // 2. Event Identification: Identify all events overlapping with this week
       // -------------------------------------------------------------------------
       const weekStart = getStartOfDay(processedWeek[0].currentDate);
-      const weekEnd = getStartOfDay(processedWeek[6].currentDate);
+      const weekEnd = getStartOfDay(
+        processedWeek[processedWeek.length - 1].currentDate,
+      );
 
       let weekEvents: InternalCalendarEvent[] = [];
 

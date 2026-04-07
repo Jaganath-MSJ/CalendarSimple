@@ -38,7 +38,7 @@ const mockEvents: CalendarEvent[] = [
   },
   {
     id: "3",
-    startDate: today.minus({ day: 2 }).toFormat("yyyy-MM-dd"),
+    startDate: today.minus({ days: 2 }).toFormat("yyyy-MM-dd"),
     title: "Design Review",
     style: { backgroundColor: "#8B5CF6" },
   },

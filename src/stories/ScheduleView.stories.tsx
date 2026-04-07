@@ -27,8 +27,10 @@ const mockEvents: CalendarEvent[] = [
     id: "1",
     startDate: today
       .set({ hour: 9, minute: 0 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
-    endDate: today.set({ hour: 10, minute: 0 }).toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
+    endDate: today
+      .set({ hour: 10, minute: 0 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Morning Briefing",
     style: { backgroundColor: "#3B82F6" },
   },
@@ -36,10 +38,10 @@ const mockEvents: CalendarEvent[] = [
     id: "2",
     startDate: today
       .set({ hour: 13, minute: 0 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     endDate: today
       .set({ hour: 14, minute: 30 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Team Lunch",
     style: { backgroundColor: "#10B981" },
   },
@@ -49,12 +51,12 @@ const mockEvents: CalendarEvent[] = [
       .plus({ days: 1 })
       .set({ hour: 10 })
       .set({ minute: 0 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     endDate: today
       .plus({ days: 1 })
       .set({ hour: 11 })
       .set({ minute: 0 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Client Follow-up",
     style: { backgroundColor: "#F59E0B" },
   },
@@ -64,12 +66,12 @@ const mockEvents: CalendarEvent[] = [
       .plus({ days: 2 })
       .set({ hour: 15 })
       .set({ minute: 0 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     endDate: today
       .plus({ days: 2 })
       .set({ hour: 16 })
       .set({ minute: 0 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Design Review",
     style: { backgroundColor: "#8B5CF6" },
   },
@@ -79,12 +81,12 @@ const mockEvents: CalendarEvent[] = [
       .plus({ days: 5 })
       .set({ hour: 9 })
       .set({ minute: 30 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     endDate: today
       .plus({ days: 5 })
       .set({ hour: 10 })
       .set({ minute: 30 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Weekly Sync",
     style: { backgroundColor: "#EF4444" },
   },

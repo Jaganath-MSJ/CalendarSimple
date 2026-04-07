@@ -35,13 +35,13 @@ const generateMassiveEventLoad = (amount: number, isSorted = false) => {
     const start = startDay
       .plus({ days: randomDayOffset })
       .set({ hour: startHour, minute: 0 });
-    const end = start.plus({ minute: duration });
+    const end = start.plus({ minutes: duration });
 
     events.push({
       id: `perf-ev-${i}`,
       title: `Task #${i + 1}`,
-      startDate: start.toFormat("yyyy-MM-ddTHH:mm:00"),
-      endDate: end.toFormat("yyyy-MM-ddTHH:mm:00"),
+      startDate: start.toFormat("yyyy-MM-dd'T'HH:mm:00"),
+      endDate: end.toFormat("yyyy-MM-dd'T'HH:mm:00"),
       style: { backgroundColor: `hsl(${i % 360}, 70%, 60%)` },
     });
   }

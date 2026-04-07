@@ -28,10 +28,10 @@ export const AbsoluteOverlap: Story = {
         id: "ev1",
         startDate: today
           .set({ hour: 13, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         endDate: today
           .set({ hour: 14, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         title: "Same Time 1",
         style: { backgroundColor: "red" },
       },
@@ -39,10 +39,10 @@ export const AbsoluteOverlap: Story = {
         id: "ev2",
         startDate: today
           .set({ hour: 13, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         endDate: today
           .set({ hour: 14, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         title: "Same Time 2",
         style: { backgroundColor: "blue" },
       },
@@ -57,10 +57,10 @@ export const ConcurrentStress: Story = {
       id: `concurrent-${i}`,
       startDate: today
         .set({ hour: 15, minute: 0 })
-        .toFormat("yyyy-MM-ddTHH:mm:00"),
+        .toFormat("yyyy-MM-dd'T'HH:mm:00"),
       endDate: today
         .set({ hour: 16, minute: 0 })
-        .toFormat("yyyy-MM-ddTHH:mm:00"),
+        .toFormat("yyyy-MM-dd'T'HH:mm:00"),
       title: `Parallel ${i + 1}`,
       style: { backgroundColor: `hsl(${i * 60}, 70%, 50%)` },
     })),
@@ -75,10 +75,10 @@ export const NestedOverlaps: Story = {
         id: "outer",
         startDate: today
           .set({ hour: 10, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         endDate: today
           .set({ hour: 12, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         title: "2-Hour Outer",
         style: { backgroundColor: "#d1d5db" },
       },
@@ -86,10 +86,10 @@ export const NestedOverlaps: Story = {
         id: "inner",
         startDate: today
           .set({ hour: 10, minute: 30 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         endDate: today
           .set({ hour: 11, minute: 30 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         title: "1-Hour Inner",
         style: { backgroundColor: "#3b82f6" },
       },
@@ -106,10 +106,10 @@ export const LayoutOverlapOffset: Story = {
         id: "o1",
         startDate: today
           .set({ hour: 13, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         endDate: today
           .set({ hour: 15, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         title: "Offset Layer 1",
         style: { backgroundColor: "#fca5a5" },
       },
@@ -117,10 +117,10 @@ export const LayoutOverlapOffset: Story = {
         id: "o2",
         startDate: today
           .set({ hour: 13, minute: 30 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         endDate: today
           .set({ hour: 15, minute: 30 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         title: "Offset Layer 2",
         style: { backgroundColor: "#f87171" },
       },
@@ -128,10 +128,10 @@ export const LayoutOverlapOffset: Story = {
         id: "o3",
         startDate: today
           .set({ hour: 14, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         endDate: today
           .set({ hour: 16, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         title: "Offset Layer 3",
         style: { backgroundColor: "#ef4444" },
       },
@@ -147,10 +147,10 @@ export const DurationOddities: Story = {
         id: "zero-duration",
         startDate: today
           .set({ hour: 10, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         endDate: today
           .set({ hour: 10, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         title: "Zero Duration Event",
         style: { backgroundColor: "#f43f5e" },
       },
@@ -158,10 +158,10 @@ export const DurationOddities: Story = {
         id: "negative-duration",
         startDate: today
           .set({ hour: 14, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         endDate: today
           .set({ hour: 12, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"), // Reverses time!
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"), // Reverses time!
         title: "Negative Duration (Should ignore/fail safe)",
         style: { backgroundColor: "#8b5cf6" },
       },
@@ -169,7 +169,7 @@ export const DurationOddities: Story = {
         id: "missing-end",
         startDate: today
           .set({ hour: 16, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         // endDate omitted deliberately
         title: "Missing End Date",
         style: { backgroundColor: "#10b981" },
@@ -195,12 +195,12 @@ export const MultiDayOvernight: Story = {
         id: "on",
         startDate: today
           .set({ hour: 22, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         endDate: today
           .plus({ days: 1 })
           .set({ hour: 2 })
           .set({ minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         title: "Overnight Switch (10PM to 2AM)",
         style: { backgroundColor: "#ec4899" },
       },
@@ -216,10 +216,10 @@ export const MissingDataFields: Story = {
         // Missing title, missing ID
         startDate: today
           .set({ hour: 9, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         endDate: today
           .set({ hour: 10, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
       } as any,
       {
         // Invalid Dates

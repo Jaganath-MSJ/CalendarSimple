@@ -6,6 +6,7 @@ import React, {
   CSSProperties,
 } from "react";
 import cx from "classnames";
+import { createPortal } from "react-dom";
 import styles from "./Popover.module.css";
 import {
   DateType,
@@ -117,7 +118,7 @@ function Popover({
     };
   }, [onClose]);
 
-  return (
+  const content = (
     <div
       className={styles.popover}
       ref={popoverRef}
@@ -171,6 +172,8 @@ function Popover({
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }
 
 export default Popover;

@@ -30,8 +30,10 @@ const mockEvents = [
     id: "interact-1",
     startDate: today
       .set({ hour: 10, minute: 0 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"),
-    endDate: today.set({ hour: 11, minute: 0 }).toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
+    endDate: today
+      .set({ hour: 11, minute: 0 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Clickable Event",
     style: { backgroundColor: "#8B5CF6" },
   },

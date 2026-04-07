@@ -68,7 +68,7 @@ function CustomView({
 
   const viewDays = useMemo(() => {
     return Array.from({ length: customDays }, (_, i) =>
-      selectedDate.plus({ day: i }),
+      selectedDate.plus({ days: i }),
     );
   }, [selectedDate, customDays]);
 

@@ -30,8 +30,10 @@ const mockEvents = [
     id: "1",
     startDate: today
       .set({ hour: 14, minute: 0 })
-      .toFormat("yyyy-MM-ddTHH:mm:00"), // 2:00 PM / 14:00
-    endDate: today.set({ hour: 15, minute: 0 }).toFormat("yyyy-MM-ddTHH:mm:00"),
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"), // 2:00 PM / 14:00
+    endDate: today
+      .set({ hour: 15, minute: 0 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Afternoon Event",
     style: { backgroundColor: "#F59E0B" },
   },

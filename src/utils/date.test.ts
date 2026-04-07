@@ -13,7 +13,7 @@ describe("date utils", () => {
     const result = checkIsToday(today, today.day);
     expect(result).toBe(true);
 
-    const pastDate = dateFn().minus({ month: 1 });
+    const pastDate = dateFn().minus({ months: 1 });
     const resultFalse = checkIsToday(pastDate, pastDate.day);
     expect(resultFalse).toBe(false);
   });

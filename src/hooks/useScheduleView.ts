@@ -71,7 +71,7 @@ export default function useScheduleView({
           groups[dateKey] = [];
         }
         groups[dateKey].push(event);
-        current = current.plus({ day: 1 });
+        current = current.plus({ days: 1 });
       }
     });
 

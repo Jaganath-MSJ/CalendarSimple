@@ -74,20 +74,20 @@ export const TimeRangeLimits: Story = {
         id: "morning",
         startDate: today
           .set({ hour: 9, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         endDate: today
           .set({ hour: 10, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         title: "Within Range",
       },
       {
         id: "too-early",
         startDate: today
           .set({ hour: 5, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         endDate: today
           .set({ hour: 6, minute: 0 })
-          .toFormat("yyyy-MM-ddTHH:mm:00"),
+          .toFormat("yyyy-MM-dd'T'HH:mm:00"),
         title: "Out of Bounds (Should be hidden or clipped)",
         style: { backgroundColor: "red" },
       },

@@ -48,7 +48,9 @@ function calendarReducer(
       if (state.view === ECalendarViewType.customDays) {
         return {
           ...state,
-          selectedDate: state.selectedDate.plus({ day: state.customDays || 3 }),
+          selectedDate: state.selectedDate.plus({
+            days: state.customDays || 3,
+          }),
         };
       }
       const unit =
@@ -60,7 +62,7 @@ function calendarReducer(
         return {
           ...state,
           selectedDate: state.selectedDate.minus({
-            day: state.customDays || 3,
+            days: state.customDays || 3,
           }),
         };
       }

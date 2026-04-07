@@ -80,8 +80,8 @@ function Header({
     let predictiveDate;
     if (view === ECalendarViewType.customDays) {
       predictiveDate = isAdd
-        ? selectedDate.plus({ day: customDays || 3 })
-        : selectedDate.minus({ day: customDays || 3 });
+        ? selectedDate.plus({ days: customDays || 3 })
+        : selectedDate.minus({ days: customDays || 3 });
     } else {
       predictiveDate = isAdd
         ? selectedDate.plus({ [unit]: 1 })
@@ -134,7 +134,7 @@ function Header({
     }
     if (view === ECalendarViewType.customDays) {
       const days = customDays || 3;
-      const endDate = selectedDate.plus({ day: days - 1 });
+      const endDate = selectedDate.plus({ days: days - 1 });
       if (selectedDate.month !== endDate.month) {
         if (selectedDate.year !== endDate.year) {
           return `${formatDate(selectedDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)} - ${formatDate(endDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;

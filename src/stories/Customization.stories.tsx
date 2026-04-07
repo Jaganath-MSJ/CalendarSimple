@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { DateTime } from "luxon";
+import { dateFn } from "../utils";
 import Calendar, { ECalendarViewType, CalendarEvent } from "../";
 
 const meta: Meta<typeof Calendar> = {
@@ -19,7 +19,7 @@ const meta: Meta<typeof Calendar> = {
 export default meta;
 type Story = StoryObj<typeof Calendar>;
 
-const today = DateTime.now();
+const today = dateFn();
 
 const customizeEvents: CalendarEvent[] = [
   {
@@ -133,10 +133,9 @@ export const CustomRenderers: Story = {
           </span>
         </div>
         <div style={{ color: "#64748b", fontSize: "0.75rem" }}>
-          {DateTime.fromISO(event.startDate).toFormat("h:mm A")} -{" "}
-          {event.endDate
-            ? DateTime.fromISO(event.endDate).toFormat("h:mm A")
-            : ""}
+          {dateFn(event.startDate).toFormat("h:mm A")}
+          {" - "}
+          {event.endDate ? dateFn(event.endDate).toFormat("h:mm A") : ""}
         </div>
       </div>
     ),
@@ -156,9 +155,7 @@ export const CustomRenderers: Story = {
           <button
             onClick={() =>
               props.onNavigate(
-                DateTime.fromISO(props.currentDate)
-                  .minus({ week: 1 })
-                  .toJSDate(),
+                dateFn(props.currentDate).minus({ weeks: 1 }).toJSDate(),
               )
             }
             style={{
@@ -178,9 +175,7 @@ export const CustomRenderers: Story = {
           <button
             onClick={() =>
               props.onNavigate(
-                DateTime.fromISO(props.currentDate)
-                  .plus({ week: 1 })
-                  .toJSDate(),
+                dateFn(props.currentDate).plus({ weeks: 1 }).toJSDate(),
               )
             }
             style={{
@@ -205,7 +200,7 @@ export const CustomRenderers: Story = {
             fontFamily: "Inter, system-ui, sans-serif",
           }}
         >
-          {DateTime.fromISO(props.currentDate).toFormat("MMMM yyyy")}
+          {dateFn(props.currentDate).toFormat("MMMM yyyy")}
         </span>
         <div style={{ display: "flex", gap: "4px" }}>
           {["day", "week", "month"].map((v) => (
@@ -253,7 +248,7 @@ export const CustomRenderers: Story = {
             color: props.isToday ? "#3b82f6" : "#64748b",
           }}
         >
-          {DateTime.fromISO(props.date).toFormat("ddd")}
+          {dateFn(props.date).toFormat("ccc")}
         </span>
         <div
           style={{
@@ -269,12 +264,12 @@ export const CustomRenderers: Story = {
             fontWeight: 700,
           }}
         >
-          {DateTime.fromISO(props.date).toFormat("D")}
+          {dateFn(props.date).toFormat("d")}
         </div>
       </div>
     ),
     renderHourCell: (date: Date) => {
-      const isTop = DateTime.fromJSDate(date).minute === 0;
+      const isTop = dateFn(date).minute === 0;
       return (
         <div
           style={{
@@ -285,8 +280,7 @@ export const CustomRenderers: Story = {
             bottom: 0,
             borderTop: isTop ? "1px dashed #f1f5f9" : "none",
             backgroundColor:
-              DateTime.fromJSDate(date).hour >= 9 &&
-              DateTime.fromJSDate(date).hour < 18
+              dateFn(date).hour >= 9 && dateFn(date).hour < 18
                 ? "transparent"
                 : "rgba(248, 250, 252, 0.4)",
           }}

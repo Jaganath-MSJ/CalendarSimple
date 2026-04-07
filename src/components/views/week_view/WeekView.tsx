@@ -73,13 +73,13 @@ function WeekView({
       currentDay >= weekStartsOn
         ? weekStartsOn - currentDay
         : weekStartsOn - currentDay - 7;
-    return selectedDate.plus({ day: diff }).startOf("day");
+    return selectedDate.plus({ days: diff }).startOf("day");
   }, [selectedDate, weekStartsOn]);
 
   const weekDays = useMemo(() => {
     let length = weekEndsOn - weekStartsOn + 1;
     if (length <= 0) length += 7;
-    return Array.from({ length }, (_, i) => startOfWeek.plus({ day: i }));
+    return Array.from({ length }, (_, i) => startOfWeek.plus({ days: i }));
   }, [startOfWeek, weekStartsOn, weekEndsOn]);
 
   const weekEvents = useDayEventLayout(
