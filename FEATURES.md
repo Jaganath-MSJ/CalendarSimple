@@ -61,6 +61,17 @@ Global applications require flexible time display options.
 - **Time Range Limits**: Use `minHour` and `maxHour` (values 0-24) to constrain the visible time lines in Day and Week views, removing unnecessary empty hours.
 - **Current Time Indicator**: Display a line indicating the current time in the Day and Week views by passing `showCurrentTime={true}`. You can also automatically scroll to this time when the view loads by passing `autoScrollToCurrentTime={true}`.
 
+## 🌍 Localization (Internationalization)
+
+`calendar-simple` provides first-class support for global applications through easy-to-use localization props.
+
+- **Luxon Powered**: The calendar uses Luxon internally for date manipulation and formatting. By passing a valid Luxon locale string (e.g., `"fr"`, `"es-MX"`, `"zh"`, `"ar"`) to the `locale` prop, all date strings, month names, and day headers will automatically translate according to regional standards.
+- **Custom UI Messages**: Some UI elements like "Today", "Day", "Week", and "Month" are built-in and not derived directly from dates. You can translate these using the `localeMessages` prop.
+  - **Supported Keys**: `today`, `day`, `week`, `month`, `schedule`, `days`.
+  - **Example**: `localeMessages={{ today: "Hoy", schedule: "Agenda" }}`.
+- **Flexible Week Start**: Different regions start their week on different days. Use the `weekStartsOn` prop (0 for Sunday, 1 = Monday, ..., 6 = Saturday) alongside the locale to match regional expectations. The calendar does not automatically shift the start day based on `locale` alone, giving you explicit control.
+- **12h/24h Time**: Use the `is12Hour` prop to toggle between time formats. When combined with a `locale`, the time strings will use the appropriate locale-specific designators (like AM/PM vs. markers in other languages).
+
 ## 👆 Interactive Callbacks
 
 Make your calendar reactive to user input by hooking into these extensive callback props:

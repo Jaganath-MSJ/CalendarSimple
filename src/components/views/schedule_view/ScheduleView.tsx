@@ -101,7 +101,10 @@ export default function ScheduleView({
                         )}
                       >
                         {/* Column 1: Date Info (only shown on the first event of the day) */}
-                        <div className={styles.dateInfoColumn}>
+                        <div
+                          className={styles.dateInfoColumn}
+                          data-testid={`${testId}-date-info`}
+                        >
                           {isFirstEventOfDay && (
                             <>
                               <div

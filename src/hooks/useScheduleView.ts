@@ -66,7 +66,7 @@ export default function useScheduleView({
         : current;
 
       while (current < end || current.equals(end)) {
-        const dateKey = formatDate(current, DATE_FORMATS.DATE, locale);
+        const dateKey = formatDate(current, DATE_FORMATS.DATE);
         if (!groups[dateKey]) {
           groups[dateKey] = [];
         }
@@ -76,7 +76,7 @@ export default function useScheduleView({
     });
 
     return groups;
-  }, [events, locale]);
+  }, [events]);
 
   useEffect(() => {
     if (autoScrollToCurrentTime && todayRef.current) {

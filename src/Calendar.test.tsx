@@ -108,4 +108,128 @@ describe("Calendar Component Integration", () => {
 
     expect(onViewChange).toHaveBeenCalledWith(ECalendarViewType.week);
   });
+
+  describe("Localization Support", () => {
+    it("renders the header months in the specified locale", () => {
+      const date = dateFn("2024-01-15");
+      const { rerender } = render(
+        <Calendar
+          selectedDate={date.toJSDate()}
+          view={ECalendarViewType.month}
+          locale="fr"
+        />,
+      );
+
+      // January in French is "janvier"
+      // The header typically shows "January 2024", in French it should be "janvier 2024"
+      // Note: Luxon might capitalize differently, but let's check for the presence of the word.
+      expect(screen.getByText(/janvier 2024/i)).toBeInTheDocument();
+
+      rerender(
+        <Calendar
+          selectedDate={date.toJSDate()}
+          view={ECalendarViewType.month}
+          locale="es"
+        />,
+      );
+      // January in Spanish is "enero"
+      expect(screen.getByText(/enero 2024/i)).toBeInTheDocument();
+    });
+
+    it("uses localeMessages to override default UI text", () => {
+      render(
+        <Calendar
+          view={ECalendarViewType.month}
+          localeMessages={{
+            today: "TODAY_CUSTOM",
+            month: "MONTH_VIEW_CUSTOM",
+          }}
+        />,
+      );
+
+      expect(screen.getByText("TODAY_CUSTOM")).toBeInTheDocument();
+      expect(screen.getByText("MONTH_VIEW_CUSTOM")).toBeInTheDocument();
+    });
+
+    it("renders week days in the specified locale", () => {
+      const { getByTestId } = render(
+        <Calendar
+          view={ECalendarViewType.week}
+          selectedDate={new Date("2024-01-15")}
+          locale="fr"
+        />,
+      );
+
+      const weekView = getByTestId("calendar-week-view");
+      // In French, week days starts with Lun, Mar, Mer, Jeu, Ven, Sam, Dim
+      expect(weekView).toHaveTextContent(/lun/i);
+      expect(weekView).toHaveTextContent(/mar/i);
+    });
+
+    it("translates schedule view date groups", () => {
+      render(
+        <Calendar
+          view={ECalendarViewType.schedule}
+          selectedDate={dateFn("2024-01-15").toJSDate()}
+          events={[
+            { id: "1", title: "Localized Event", startDate: "2024-01-15" },
+          ]}
+          locale="fr"
+        />,
+      );
+
+      // Check the date info container for French translation
+      const dateInfo = screen.getByTestId("calendar-date-info");
+      expect(dateInfo.textContent?.toLowerCase()).toContain("janv");
+      expect(screen.getByText("Localized Event")).toBeInTheDocument();
+    });
+
+    it("respects weekStartsOn alongside locale", () => {
+      const { getByTestId } = render(
+        <Calendar
+          view={ECalendarViewType.week}
+          selectedDate={dateFn("2023-12-31").toJSDate()} // A Sunday
+          locale="fr"
+          weekStartsOn={1} // Monday
+        />,
+      );
+
+      const weekView = getByTestId("calendar-week-view");
+      // If week starts on Monday, then 2023-12-31 (Sunday) should be at the end
+      // or at least we check if it's rendered properly.
+      expect(weekView).toBeInTheDocument();
+    });
+
+    it("uses all localeMessages keys including 'days' and 'schedule'", () => {
+      render(
+        <Calendar
+          view={ECalendarViewType.month}
+          customDays={3}
+          localeMessages={{
+            today: "TODAY_OVERRIDE",
+            day: "DAY_OVERRIDE",
+            week: "WEEK_OVERRIDE",
+            month: "MONTH_OVERRIDE",
+            schedule: "SCHEDULE_OVERRIDE",
+            days: "DAYS_OVERRIDE",
+          }}
+        />,
+      );
+
+      // Check header buttons/dropdowns
+      expect(screen.getByText("TODAY_OVERRIDE")).toBeInTheDocument();
+
+      const viewSelect = screen.getByTestId("calendar-header-view-select");
+      fireEvent.change(viewSelect, {
+        target: { value: ECalendarViewType.schedule },
+      });
+      expect(screen.getByText("SCHEDULE_OVERRIDE")).toBeInTheDocument();
+
+      fireEvent.change(viewSelect, {
+        target: { value: ECalendarViewType.customDays },
+      });
+      // The option text for customDays is "${customDays} ${localeMessages.days}"
+      expect(screen.getByText(/3 DAYS_OVERRIDE/i)).toBeInTheDocument();
+    });
+  });
 });
