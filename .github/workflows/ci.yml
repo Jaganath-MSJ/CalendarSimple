@@ -3,6 +3,9 @@ name: CI Pipeline
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
