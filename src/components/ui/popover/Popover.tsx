@@ -6,6 +6,7 @@ import React, {
   CSSProperties,
 } from "react";
 import cx from "classnames";
+import { createPortal } from "react-dom";
 import styles from "./Popover.module.css";
 import {
   DateType,
@@ -20,11 +21,12 @@ import {
   ECalendarViewType,
   EventListType,
 } from "../../../types";
-import { DATE_FORMATS } from "../../../constants";
+import { DATE_FORMATS, LAYOUT_CONSTANTS } from "../../../constants";
+import { useCalendar } from "../../../context/CalendarContext";
 
 interface PopoverProps extends Pick<
   CalendarContentProps,
-  "onEventClick" | "is12Hour"
+  "onEventClick" | "is12Hour" | "renderEvent"
 > {
   dateObj: DateType;
   events: EventListType[];
@@ -39,7 +41,9 @@ function Popover({
   onClose,
   anchorEl,
   is12Hour,
+  renderEvent,
 }: PopoverProps) {
+  const { testId } = useCalendar();
   const popoverRef = useRef<HTMLDivElement>(null);
   const [stylePosition, setStylePosition] = useState<CSSProperties>({
     visibility: "hidden",
@@ -52,7 +56,7 @@ function Popover({
       const PADDING = 10;
 
       // Base position: bottom-left of the anchor
-      let top = anchorRect.bottom + 4; // 4px gap
+      const top = anchorRect.bottom + 4; // 4px gap
       let left = anchorRect.left;
 
       // Available space in viewport
@@ -62,7 +66,7 @@ function Popover({
       const spaceBelow = viewportHeight - top;
       const spaceAbove = anchorRect.top - PADDING;
 
-      let newStyle: CSSProperties = {
+      const newStyle: CSSProperties = {
         visibility: "visible",
         position: "fixed",
         top: `${top}px`,
@@ -114,12 +118,13 @@ function Popover({
     };
   }, [onClose]);
 
-  return (
+  const content = (
     <div
       className={styles.popover}
       ref={popoverRef}
       style={stylePosition}
       onClick={(e) => e.stopPropagation()}
+      data-testid={`${testId}-popover-content`}
     >
       <div className={styles.popoverHeader}>
         {formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH)}
@@ -148,7 +153,11 @@ function Popover({
                 [styles.endAfter]: isEndAfter,
               })}
               id={item.id}
-              style={{ backgroundColor: item.color }}
+              data-testid={`${testId}-${item.id}-popover-item`}
+              style={{
+                backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                ...item.style,
+              }}
               onClick={(e) => {
                 e.stopPropagation();
                 onEventClick?.(item);
@@ -156,13 +165,15 @@ function Popover({
               }}
               title={tooltipText}
             >
-              {item.title}
+              {renderEvent ? renderEvent(item) : item.title}
             </div>
           );
         })}
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }
 
 export default Popover;

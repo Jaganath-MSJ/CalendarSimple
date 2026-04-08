@@ -27,6 +27,7 @@ interface UseScheduleViewProps {
   events: CalendarEvent[];
   autoScrollToCurrentTime?: boolean;
   is12Hour?: boolean;
+  locale?: string;
 }
 
 /**
@@ -39,6 +40,7 @@ export default function useScheduleView({
   events,
   autoScrollToCurrentTime,
   is12Hour,
+  locale,
 }: UseScheduleViewProps) {
   const todayRef = useRef<HTMLDivElement>(null);
 
@@ -63,13 +65,13 @@ export default function useScheduleView({
         ? dateFn(event.endDate).startOf("day")
         : current;
 
-      while (current.isBefore(end) || current.isSame(end)) {
+      while (current < end || current.equals(end)) {
         const dateKey = formatDate(current, DATE_FORMATS.DATE);
         if (!groups[dateKey]) {
           groups[dateKey] = [];
         }
         groups[dateKey].push(event);
-        current = current.add(1, "day");
+        current = current.plus({ days: 1 });
       }
     });
 
@@ -101,37 +103,37 @@ export default function useScheduleView({
     const endDay = event.endDate
       ? dateFn(event.endDate).startOf("day")
       : startDay;
-    const isMultiDay = !startDay.isSame(endDay);
+    const isMultiDay = !startDay.equals(endDay);
 
     const timeFormat = is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME;
     const formatTime = (t: string) => t.replace(/^0/, "").replace(":00", " ");
 
     const isMidnight = (d: string) =>
-      dateFn(d).hour() === 0 && dateFn(d).minute() === 0;
+      dateFn(d).hour === 0 && dateFn(d).minute === 0;
     const isEndOfDay = (d: string) =>
-      dateFn(d).hour() === 23 && dateFn(d).minute() === 59;
+      dateFn(d).hour === 23 && dateFn(d).minute === 59;
 
     if (isMultiDay) {
-      if (currentDay.isSame(startDay)) {
+      if (currentDay.equals(startDay)) {
         return isMidnight(event.startDate)
           ? "All day"
-          : `${formatTime(formatDate(event.startDate, timeFormat))}`;
-      } else if (currentDay.isSame(endDay)) {
+          : `${formatTime(formatDate(event.startDate, timeFormat, locale))}`;
+      } else if (currentDay.equals(endDay)) {
         return isEndOfDay(event.endDate!)
           ? "All day"
-          : `Until ${formatTime(formatDate(event.endDate!, timeFormat))}`;
+          : `Until ${formatTime(formatDate(event.endDate!, timeFormat, locale))}`;
       } else {
         return "All day";
       }
     }
 
     // Normal single day time range
-    const startStr = formatDate(event.startDate, timeFormat);
+    const startStr = formatDate(event.startDate, timeFormat, locale);
     if (event.endDate) {
       if (isMidnight(event.startDate) && isEndOfDay(event.endDate)) {
         return "All day";
       }
-      const endStr = formatDate(event.endDate, timeFormat);
+      const endStr = formatDate(event.endDate, timeFormat, locale);
       return `${formatTime(startStr)} – ${formatTime(endStr)}`;
     }
     return formatTime(startStr);

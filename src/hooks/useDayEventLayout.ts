@@ -13,8 +13,16 @@
 
 import { CalendarEvent } from "../types";
 import { useMemo } from "react";
-import { dateFn, DateType } from "../utils/date";
+import { dateFn, DateType, formatDate } from "../utils/date";
 import { isAllDayEvent, isMultiDay } from "../utils/common";
+import { DATE_FORMATS } from "../constants";
+
+export interface UseDayEventLayoutOptions {
+  enableEnrichedEvents?: boolean;
+  enrichedEventsByDate?: Record<string, CalendarEvent[]>;
+  eventsAreSorted?: boolean;
+  isEventOrderingEnabled?: boolean;
+}
 
 /**
  * Represents the final calculated CSS positioning for an event in the day view.
@@ -54,7 +62,19 @@ interface ProcessedEvent {
 export default function useDayEventLayout(
   events: CalendarEvent[],
   currentDateOrDates: DateType | DateType[],
+  minHour: number,
+  maxHour: number,
+  showAllDayRow: boolean,
+  eventOverlapOffset: number,
+  options: UseDayEventLayoutOptions = {},
 ): DayEventLayout[] | DayEventLayout[][] {
+  const {
+    enableEnrichedEvents,
+    enrichedEventsByDate,
+    eventsAreSorted,
+    isEventOrderingEnabled = true,
+  } = options;
+
   return useMemo(() => {
     const dates = Array.isArray(currentDateOrDates)
       ? currentDateOrDates
@@ -64,22 +84,68 @@ export default function useDayEventLayout(
       // -------------------------------------------------------------------------
       // 1. Initial Filtering: Only process timed events for this specific day
       // -------------------------------------------------------------------------
-      const eventsForDay = events.filter((event) => {
-        const eventDate = dateFn(event.startDate).startOf("day");
-        const currentDay = dateFn(currentDate).startOf("day");
-        return (
-          eventDate.isSame(currentDay) &&
-          !isMultiDay(event) &&
-          !isAllDayEvent(event)
-        );
-      });
+      const getEventsForDay = () => {
+        const filterFn = (event: CalendarEvent) => {
+          const eventDate = dateFn(event.startDate).startOf("day");
+          const currentDay = dateFn(currentDate).startOf("day");
+
+          const startMins =
+            dateFn(event.startDate).hour * 60 + dateFn(event.startDate).minute;
+          let endMins = event.endDate
+            ? dateFn(event.endDate).hour * 60 + dateFn(event.endDate).minute
+            : startMins + 1;
+          if (endMins <= startMins && event.endDate) endMins += 1440;
+
+          const isWithinBounds =
+            endMins > minHour * 60 && startMins < maxHour * 60;
+
+          // If showAllDayRow is false, we should keep all-day and multi-day events,
+          // but only if they overlap with currentDay
+          const isMulti = isMultiDay(event);
+          const isAllDay = isAllDayEvent(event);
+
+          if (showAllDayRow) {
+            return (
+              eventDate.equals(currentDay) &&
+              !isMulti &&
+              !isAllDay &&
+              isWithinBounds
+            );
+          } else {
+            // If hiding the all-day row, we want to show all-day/multi-day events in the grid.
+            // We must check if the event spans over 'currentDay'.
+            const eventStart = dateFn(event.startDate).startOf("day");
+            const eventEnd = event.endDate
+              ? dateFn(event.endDate).endOf("day")
+              : eventStart.endOf("day");
+            const overlapsCurrentDay =
+              currentDay >= eventStart.startOf("day") &&
+              currentDay <= eventEnd.startOf("day");
+
+            if (!overlapsCurrentDay) return false;
+
+            // For normal timed events, still check bounds
+            if (!isMulti && !isAllDay && !isWithinBounds) return false;
+
+            return true;
+          }
+        };
+
+        if (enableEnrichedEvents && enrichedEventsByDate) {
+          const dateStr = formatDate(currentDate, DATE_FORMATS.DATE);
+          return (enrichedEventsByDate[dateStr] || []).filter(filterFn);
+        }
+        return events.filter(filterFn);
+      };
+
+      const eventsForDay = getEventsForDay();
 
       if (eventsForDay.length === 0) return [];
 
       // Helper to get minutes from start of day
       const getMinutes = (dateStr: string) => {
         const d = dateFn(dateStr);
-        return d.hour() * 60 + d.minute();
+        return d.hour * 60 + d.minute;
       };
 
       // -------------------------------------------------------------------------
@@ -87,20 +153,30 @@ export default function useDayEventLayout(
       // -------------------------------------------------------------------------
       const processedEvents: ProcessedEvent[] = eventsForDay.map(
         (event, index) => {
-          const start = getMinutes(event.startDate);
+          const isMulti = isMultiDay(event);
+          const isAllDay = isAllDayEvent(event);
+
+          let start = getMinutes(event.startDate);
           let end = event.endDate ? getMinutes(event.endDate) : start + 1;
 
-          // Edge Case: Zero-duration event treated as 1 minute logically
-          if (end === start) end = start + 1;
+          if (!showAllDayRow && (isMulti || isAllDay)) {
+            // Force it to span the entire visible grid (minHour to maxHour)
+            start = minHour * 60;
+            end = maxHour * 60;
+          } else if (!isMulti && !isAllDay) {
+            // For normal timed events, if it crosses midnight, cap appropriately
+            if (end <= start && event.endDate) end += 1440;
+          }
 
-          // Clamp end to 1440 (24h) if needed, simplified
-          if (end < start) end = 1440;
+          // Clamp start and end to boundaries for the algorithm
+          const clampedStart = Math.max(start, minHour * 60);
+          const clampedEnd = Math.min(end, maxHour * 60);
 
           return {
             id: `${index}-${event.title}`,
-            start,
-            end,
-            duration: end - start,
+            start: clampedStart,
+            end: clampedEnd,
+            duration: clampedEnd - clampedStart,
             original: event,
           };
         },
@@ -109,10 +185,22 @@ export default function useDayEventLayout(
       // -------------------------------------------------------------------------
       // Phase 1 - Sorting: Start time asc, then Duration desc
       // -------------------------------------------------------------------------
-      processedEvents.sort((a, b) => {
-        if (a.start === b.start) return b.duration - a.duration;
-        return a.start - b.start;
-      });
+      if (!eventsAreSorted) {
+        processedEvents.sort((a, b) => {
+          if (a.start === b.start) return b.duration - a.duration;
+          return a.start - b.start;
+        });
+      }
+
+      // If ordering is disabled, bypass expensive layout processing
+      if (!isEventOrderingEnabled) {
+        return processedEvents.map((event) => {
+          event.columnIndex = 0; // Use a constant so zIndex stays 1 and naturally DOM-stacks without breaking header z-indexes
+          event.left = 0;
+          event.width = 1;
+          return toLayout(event);
+        });
+      }
 
       // -------------------------------------------------------------------------
       // Phase 2 - Sweep-line Clustering: Group overlapping events
@@ -166,49 +254,58 @@ export default function useDayEventLayout(
         const totalCols = columns.length;
 
         // Phase 4 - Initialise default dimensions
-        // Initially, assign equal width (1/totalCols) to every event.
         for (const event of cluster) {
-          event.left = event.columnIndex! / totalCols;
-          event.width = 1 / totalCols;
+          if (eventOverlapOffset > 0) {
+            // Stacked layout: each column is shifted by offset
+            event.left = (event.columnIndex! * eventOverlapOffset) / 100;
+            event.width = 1 - event.left;
+          } else {
+            // Tiled layout: equal width
+            event.left = event.columnIndex! / totalCols;
+            event.width = 1 / totalCols;
+          }
         }
 
-        // Phase 5 - Width Expansion
-        // Allow events to expand horizontally and occupy adjacent empty columns
-        // if those columns have no competing events at that exact time slice.
-        const colMap: Map<number, ProcessedEvent[]> = new Map();
-        for (const event of cluster) {
-          const c = event.columnIndex!;
-          if (!colMap.has(c)) colMap.set(c, []);
-          colMap.get(c)!.push(event);
-        }
-
-        for (const event of cluster) {
-          let expandCols = 1;
-
-          for (let c = event.columnIndex! + 1; c < totalCols; c++) {
-            const colEvents = colMap.get(c) ?? [];
-            const blocked = colEvents.some(
-              (other) => other.start < event.end && event.start < other.end,
-            );
-            if (blocked) break;
-            expandCols++;
+        // Phase 5 - Width Expansion (Only for tiled layout)
+        if (eventOverlapOffset === 0) {
+          const colMap: Map<number, ProcessedEvent[]> = new Map();
+          for (const event of cluster) {
+            const c = event.columnIndex!;
+            if (!colMap.has(c)) colMap.set(c, []);
+            colMap.get(c)!.push(event);
           }
 
-          const maxPossibleCols = totalCols - event.columnIndex!;
-          event.expandCols = Math.min(expandCols, maxPossibleCols);
-          event.width = event.expandCols / totalCols;
+          for (const event of cluster) {
+            let expandCols = 1;
+
+            for (let c = event.columnIndex! + 1; c < totalCols; c++) {
+              const colEvents = colMap.get(c) ?? [];
+              const blocked = colEvents.some(
+                (other) => other.start < event.end && event.start < other.end,
+              );
+              if (blocked) break;
+              expandCols++;
+            }
+
+            const maxPossibleCols = totalCols - event.columnIndex!;
+            event.expandCols = Math.min(expandCols, maxPossibleCols);
+            event.width = event.expandCols / totalCols;
+          }
         }
       }
 
       function toLayout(event: ProcessedEvent): DayEventLayout {
         const rawHeight = event.end - event.start;
+        // Shift top by the minHour offset
+        const top = event.start - minHour * 60;
+
         return {
           event: event.original,
-          top: event.start,
+          top: Math.max(0, top), // ensure it never renders above container
           height: Math.max(rawHeight, 15),
           left: parseFloat((event.left! * 100).toFixed(4)),
           width: parseFloat((event.width! * 100).toFixed(4)),
-          zIndex: event.columnIndex! + 1,
+          zIndex: Math.min(event.columnIndex! + 1, 14), // Cap z-index below 15 (timeHeaderSpacer) and 20 (stickyTopContainer)
         };
       }
 
@@ -219,5 +316,16 @@ export default function useDayEventLayout(
       return dates.map((d) => generateLayoutForDate(d));
     }
     return generateLayoutForDate(dates[0]);
-  }, [events, currentDateOrDates]);
+  }, [
+    events,
+    currentDateOrDates,
+    minHour,
+    maxHour,
+    showAllDayRow,
+    eventOverlapOffset,
+    enableEnrichedEvents,
+    enrichedEventsByDate,
+    eventsAreSorted,
+    isEventOrderingEnabled,
+  ]);
 }

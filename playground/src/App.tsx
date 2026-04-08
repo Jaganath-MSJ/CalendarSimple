@@ -1,5 +1,8 @@
-import Calendar, { ECalendarViewType, type CalendarEvent } from "../../src";
-// import "calendar-simple/dist/styles.css";
+import Calendar, {
+  ECalendarViewType,
+  type CalendarEvent,
+} from "calendar-simple";
+import "calendar-simple/dist/styles.css";
 
 function App() {
   const generateLiveEvents = (): CalendarEvent[] => {
@@ -35,7 +38,7 @@ function App() {
         startDate: formatDateTime(setTime(startOfToday, 9, 0)),
         endDate: formatDateTime(setTime(startOfToday, 10, 0)),
         title: "Standard Event",
-        color: "blue",
+        style: { backgroundColor: "blue" },
       },
 
       // 2. Zero Duration Event
@@ -44,7 +47,7 @@ function App() {
         startDate: formatDateTime(setTime(startOfToday, 10, 30)),
         endDate: formatDateTime(setTime(startOfToday, 10, 30)),
         title: "Zero Duration",
-        color: "red",
+        style: { backgroundColor: "red" },
       },
 
       // 3. Negative Duration (should be handled gracefully)
@@ -53,7 +56,7 @@ function App() {
         startDate: formatDateTime(setTime(startOfToday, 12, 0)),
         endDate: formatDateTime(setTime(startOfToday, 11, 0)),
         title: "Negative Duration",
-        color: "orange",
+        style: { backgroundColor: "orange" },
       },
 
       // 4. Overlapping - Completely Overlapping
@@ -62,14 +65,14 @@ function App() {
         startDate: formatDateTime(setTime(startOfToday, 13, 0)),
         endDate: formatDateTime(setTime(startOfToday, 14, 0)),
         title: "Completely Overlapping A",
-        color: "green",
+        style: { backgroundColor: "green" },
       },
       {
         id: "TC4b",
         startDate: formatDateTime(setTime(startOfToday, 13, 0)),
         endDate: formatDateTime(setTime(startOfToday, 14, 0)),
         title: "Completely Overlapping B",
-        color: "teal",
+        style: { backgroundColor: "teal" },
       },
 
       // 5. Overlapping - Partially Overlapping
@@ -78,14 +81,14 @@ function App() {
         startDate: formatDateTime(setTime(startOfToday, 14, 30)),
         endDate: formatDateTime(setTime(startOfToday, 15, 30)),
         title: "Partially Overlapping A",
-        color: "purple",
+        style: { backgroundColor: "purple" },
       },
       {
         id: "TC5b",
         startDate: formatDateTime(setTime(startOfToday, 15, 0)),
         endDate: formatDateTime(setTime(startOfToday, 16, 0)),
         title: "Partially Overlapping B",
-        color: "indigo",
+        style: { backgroundColor: "indigo" },
       },
 
       // 6. Overlapping - Nested
@@ -94,14 +97,14 @@ function App() {
         startDate: formatDateTime(setTime(startOfToday, 16, 0)),
         endDate: formatDateTime(setTime(startOfToday, 18, 0)),
         title: "Outer Event",
-        color: "pink",
+        style: { backgroundColor: "pink" },
       },
       {
         id: "TC6b",
         startDate: formatDateTime(setTime(startOfToday, 16, 30)),
         endDate: formatDateTime(setTime(startOfToday, 17, 30)),
         title: "Inner Event",
-        color: "rose",
+        style: { backgroundColor: "rose" },
       },
 
       // 7. Many short events at same time (stress test)
@@ -110,7 +113,7 @@ function App() {
         startDate: formatDateTime(setTime(addDays(startOfToday, 1), 9, 0)),
         endDate: formatDateTime(setTime(addDays(startOfToday, 1), 9, 30)),
         title: `Short Event ${i + 1}`,
-        color: "gray",
+        style: { backgroundColor: "gray" },
       })),
 
       // 8. Multi-day Event (Datetime)
@@ -119,7 +122,7 @@ function App() {
         startDate: formatDateTime(setTime(addDays(startOfToday, 1), 22, 0)),
         endDate: formatDateTime(setTime(addDays(startOfToday, 2), 2, 0)),
         title: "Overnight Event (Datetime)",
-        color: "cyan",
+        style: { backgroundColor: "cyan" },
       },
 
       // 9. Cross-midnight exactly
@@ -128,7 +131,7 @@ function App() {
         startDate: formatDateTime(setTime(addDays(startOfToday, 2), 23, 0)),
         endDate: formatDateTime(setTime(addDays(startOfToday, 3), 1, 0)),
         title: "Cross Midnight",
-        color: "sky",
+        style: { backgroundColor: "sky" },
       },
 
       // 10. Only Start Date (Datetime) - Missing End Date
@@ -136,7 +139,7 @@ function App() {
         id: "TC10",
         startDate: formatDateTime(setTime(startOfToday, 8, 0)),
         title: "Missing End Time",
-        color: "violet",
+        style: { backgroundColor: "violet" },
       },
 
       // 11. Multi-day Date-only String (YYYY-MM-DD)
@@ -145,7 +148,7 @@ function App() {
         startDate: formatDate(addDays(startOfToday, 3)),
         endDate: formatDate(addDays(startOfToday, 5)),
         title: "Multi-Day Date Only",
-        color: "fuchsia",
+        style: { backgroundColor: "fuchsia" },
       },
 
       // 12. Single-day Date-only String (YYYY-MM-DD)
@@ -154,7 +157,7 @@ function App() {
         startDate: formatDate(addDays(startOfToday, 1)),
         endDate: formatDate(addDays(startOfToday, 1)),
         title: "Single-Day Date Only",
-        color: "magenta",
+        style: { backgroundColor: "magenta" },
       },
 
       // 13. Only Start Date (Date-only String)
@@ -162,7 +165,7 @@ function App() {
         id: "TC13",
         startDate: formatDate(addDays(startOfToday, -1)),
         title: "Missing End Date (Date Only)",
-        color: "lime",
+        style: { backgroundColor: "lime" },
       },
 
       // 14. Very Long Event
@@ -171,7 +174,7 @@ function App() {
         startDate: formatDate(addDays(today, -10)),
         endDate: formatDate(addDays(today, 10)),
         title: "Very Long Event (20 Days)",
-        color: "slate",
+        style: { backgroundColor: "slate" },
       },
 
       // 15. Spanning entire day (Datetime)
@@ -180,7 +183,7 @@ function App() {
         startDate: formatDateTime(setTime(addDays(startOfToday, 4), 0, 0)),
         endDate: formatDateTime(setTime(addDays(startOfToday, 4), 23, 59)),
         title: "Full Day (Datetime)",
-        color: "emerald",
+        style: { backgroundColor: "emerald" },
       },
     ];
   };

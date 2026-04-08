@@ -6,13 +6,14 @@ import React, {
   useMemo,
   Dispatch,
 } from "react";
-import { dateFn, DateType, ManipulateType } from "../utils";
+import { dateFn, DateType } from "../utils";
 import { ECalendarViewType } from "../types";
 import { CALENDAR_ACTIONS } from "../constants";
 
 interface CalendarState {
   selectedDate: DateType;
   view: ECalendarViewType;
+  customDays?: number;
 }
 
 type CalendarAction =
@@ -26,6 +27,7 @@ const CalendarContext = createContext<
   | {
       state: CalendarState;
       dispatch: Dispatch<CalendarAction>;
+      testId?: string;
     }
   | undefined
 >(undefined);
@@ -43,18 +45,32 @@ function calendarReducer(
     case CALENDAR_ACTIONS.SET_VIEW:
       return { ...state, view: action.payload };
     case CALENDAR_ACTIONS.NEXT: {
-      const unit = (
-        state.view === ECalendarViewType.schedule ? "day" : state.view
-      ) as ManipulateType;
-      return { ...state, selectedDate: state.selectedDate.add(1, unit) };
+      if (state.view === ECalendarViewType.customDays) {
+        return {
+          ...state,
+          selectedDate: state.selectedDate.plus({
+            days: state.customDays || 3,
+          }),
+        };
+      }
+      const unit =
+        state.view === ECalendarViewType.schedule ? "day" : state.view;
+      return { ...state, selectedDate: state.selectedDate.plus({ [unit]: 1 }) };
     }
     case CALENDAR_ACTIONS.PREV: {
-      const unit = (
-        state.view === ECalendarViewType.schedule ? "day" : state.view
-      ) as ManipulateType;
+      if (state.view === ECalendarViewType.customDays) {
+        return {
+          ...state,
+          selectedDate: state.selectedDate.minus({
+            days: state.customDays || 3,
+          }),
+        };
+      }
+      const unit =
+        state.view === ECalendarViewType.schedule ? "day" : state.view;
       return {
         ...state,
-        selectedDate: state.selectedDate.subtract(1, unit),
+        selectedDate: state.selectedDate.minus({ [unit]: 1 }),
       };
     }
     case CALENDAR_ACTIONS.TODAY:
@@ -71,19 +87,24 @@ interface CalendarProviderProps {
   children: ReactNode;
   initialDate: DateType;
   initialView: ECalendarViewType;
+  initialCustomDays?: number;
+  testId?: string;
 }
 
 export function CalendarProvider({
   children,
   initialDate,
   initialView,
+  initialCustomDays,
+  testId,
 }: CalendarProviderProps) {
   const [state, dispatch] = useReducer(calendarReducer, {
     selectedDate: initialDate,
     view: initialView,
+    customDays: initialCustomDays,
   });
 
-  const value = useMemo(() => ({ state, dispatch }), [state]);
+  const value = useMemo(() => ({ state, dispatch, testId }), [state, testId]);
 
   return (
     <CalendarContext.Provider value={value}>

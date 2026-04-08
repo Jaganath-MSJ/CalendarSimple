@@ -5,7 +5,11 @@ import {
   CalendarContentProps,
   ECalendarViewType,
 } from "./types";
-import { defaultCalenderProps, CALENDAR_CONSTANTS } from "./constants";
+import {
+  defaultCalendarProps,
+  LAYOUT_CONSTANTS,
+  CALENDAR_ACTIONS,
+} from "./constants";
 import { dateFn } from "./utils";
 import useResizeObserver from "./hooks/useResizeObserver";
 import useEvents from "./hooks/useEvents";
@@ -15,6 +19,7 @@ import DayView from "./components/views/day_view/DayView";
 import WeekView from "./components/views/week_view/WeekView";
 import MonthView from "./components/views/month_view/MonthView";
 import ScheduleView from "./components/views/schedule_view/ScheduleView";
+import CustomDaysView from "./components/views/custom_days_view/CustomDaysView";
 import { CalendarProvider, useCalendar } from "./context/CalendarContext";
 
 function CalendarContent({
@@ -28,15 +33,31 @@ function CalendarContent({
   onEventClick,
   onNavigate,
   onViewChange,
-  theme,
-  classNames,
   showCurrentTime,
   maxEvents,
   autoScrollToCurrentTime,
+  weekStartsOn,
+  weekEndsOn,
+  minHour,
+  maxHour,
+  customDays,
+  theme,
+  classNames,
+  showAllDayRow,
+  renderScheduleSeparator,
+  eventOverlapOffset,
+  enableEnrichedEvents,
+  enrichedEventsByDate,
+  eventsAreSorted,
+  isEventOrderingEnabled,
+  sortedMonthView,
+  testId,
+  locale,
+  localeMessages,
   ...restProps
 }: CalendarContentProps) {
   const {
-    state: { view },
+    state: { view, selectedDate },
     dispatch,
   } = useCalendar();
 
@@ -45,7 +66,14 @@ function CalendarContent({
     if (restProps.view) {
       dispatch({ type: "SET_VIEW", payload: restProps.view });
     }
-  }, [restProps.view]);
+  }, [restProps.view, dispatch]);
+
+  // Sync external date prop to context if it changes
+  useEffect(() => {
+    if (restProps.selectedDate) {
+      dispatch({ type: "SET_DATE", payload: dateFn(restProps.selectedDate) });
+    }
+  }, [restProps.selectedDate, dispatch]);
 
   const getViewComponent = (view: ECalendarViewType) => {
     const commonProps = {
@@ -56,8 +84,25 @@ function CalendarContent({
       theme,
       classNames,
       showCurrentTime,
+      showAllDayRow,
       maxEvents,
       autoScrollToCurrentTime,
+      weekStartsOn,
+      weekEndsOn,
+      minHour,
+      maxHour,
+      renderEvent: restProps.renderEvent,
+      renderScheduleSeparator,
+      eventOverlapOffset,
+      renderHourCell: restProps.renderHourCell,
+      renderDateCell: restProps.renderDateCell,
+      enableEnrichedEvents,
+      enrichedEventsByDate,
+      eventsAreSorted,
+      isEventOrderingEnabled,
+      sortedMonthView,
+      locale,
+      localeMessages,
     };
     switch (view) {
       case ECalendarViewType.day:
@@ -69,14 +114,17 @@ function CalendarContent({
           <MonthView
             {...commonProps}
             {...restProps}
-            onDateClick={restProps.onDateClick!}
-            onMoreClick={restProps.onMoreClick!}
+            onDateClick={restProps.onDateClick}
+            onMoreClick={restProps.onMoreClick}
             width={width}
             height={height}
           />
         );
       case ECalendarViewType.schedule:
         return <ScheduleView {...commonProps} />;
+      case ECalendarViewType.customDays:
+        if (!customDays || customDays < 1 || customDays > 10) return null;
+        return <CustomDaysView {...commonProps} customDays={customDays} />;
       default:
         return null;
     }
@@ -84,6 +132,7 @@ function CalendarContent({
 
   return (
     <section
+      data-testid={`${testId}-container`}
       style={
         {
           "--calendar-width": `${width}px`,
@@ -92,26 +141,45 @@ function CalendarContent({
       }
       className={cx(styles.calendar, classNames?.root)}
     >
-      <Header
-        headerClassName={classNames?.header}
-        events={events}
-        onNavigate={onNavigate}
-        onViewChange={onViewChange}
-        pastYearLength={pastYearLength}
-        futureYearLength={futureYearLength}
-      />
+      {restProps.renderHeader ? (
+        restProps.renderHeader({
+          currentDate: selectedDate.toJSDate(),
+          view,
+          onNavigate: (date: Date) => {
+            dispatch({
+              type: CALENDAR_ACTIONS.SET_DATE,
+              payload: dateFn(date),
+            });
+            if (onNavigate) onNavigate(date);
+          },
+          onViewChange: (newView: ECalendarViewType) => {
+            dispatch({ type: CALENDAR_ACTIONS.SET_VIEW, payload: newView });
+            if (onViewChange) onViewChange(newView);
+          },
+        })
+      ) : (
+        <Header
+          headerClassName={classNames?.header}
+          events={events}
+          onNavigate={onNavigate}
+          onViewChange={onViewChange}
+          pastYearLength={pastYearLength}
+          futureYearLength={futureYearLength}
+          customDays={customDays}
+          resetDateOnViewChange={restProps.resetDateOnViewChange}
+          locale={locale}
+          localeMessages={localeMessages}
+        />
+      )}
       {getViewComponent(view)}
     </section>
   );
 }
 
-function Calendar({
-  selectedDate,
-  ...props
-}: CalendarProps = defaultCalenderProps) {
+function Calendar(props: CalendarProps = defaultCalendarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const allProps = { ...defaultCalenderProps, ...props };
+  const allProps = { ...defaultCalendarProps, ...props };
   const { width: observedWidth, height: observedHeight } = useResizeObserver(
     containerRef,
     !!allProps.width && !!allProps.height,
@@ -122,15 +190,27 @@ function Calendar({
   const mainHeight = allProps.height ?? observedHeight ?? 0;
   const height =
     (typeof mainHeight === "number" ? mainHeight : 0) -
-    CALENDAR_CONSTANTS.HEADER_HEIGHT;
+    LAYOUT_CONSTANTS.HEADER_HEIGHT;
 
-  const initialDate = useMemo(() => dateFn(selectedDate), [selectedDate]);
+  const initialDate = useMemo(
+    () => dateFn(props.selectedDate),
+    [props.selectedDate],
+  );
 
   // Filter out events where the end date is before the start date
-  const validEvents = useEvents(allProps.events);
+  const validEvents = useEvents(
+    allProps.events,
+    allProps.eventsAreSorted,
+    allProps.enableEnrichedEvents,
+  );
 
   return (
-    <CalendarProvider initialDate={initialDate} initialView={allProps.view}>
+    <CalendarProvider
+      initialDate={initialDate}
+      initialView={allProps.view}
+      initialCustomDays={allProps.customDays}
+      testId={allProps.testId}
+    >
       <div
         ref={containerRef}
         style={{

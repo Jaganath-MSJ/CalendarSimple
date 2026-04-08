@@ -1,11 +1,11 @@
 import React, { useMemo, useEffect, useRef } from "react";
 import cx from "classnames";
-import { dateFn, formatDate } from "../../../utils";
+import { getDayOfWeek, dateFn, formatDate } from "../../../utils";
 import useDayEventLayout, {
   DayEventLayout,
 } from "../../../hooks/useDayEventLayout";
 import { CalendarContentProps } from "../../../types";
-import { DAY_LIST_NAME, DATE_FORMATS } from "../../../constants";
+import { getDayListNames, DATE_FORMATS } from "../../../constants";
 import styles from "./WeekView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
 import TimeColumn from "../../core/time_column/TimeColumn";
@@ -23,6 +23,20 @@ interface WeekViewProps extends Pick<
   | "showCurrentTime"
   | "maxEvents"
   | "autoScrollToCurrentTime"
+  | "weekStartsOn"
+  | "weekEndsOn"
+  | "minHour"
+  | "maxHour"
+  | "renderEvent"
+  | "renderHourCell"
+  | "renderDateCell"
+  | "showAllDayRow"
+  | "eventOverlapOffset"
+  | "enableEnrichedEvents"
+  | "enrichedEventsByDate"
+  | "eventsAreSorted"
+  | "isEventOrderingEnabled"
+  | "locale"
 > {}
 
 function WeekView({
@@ -35,33 +49,64 @@ function WeekView({
   showCurrentTime,
   maxEvents,
   autoScrollToCurrentTime,
+  weekStartsOn,
+  weekEndsOn,
+  minHour,
+  maxHour,
+  renderEvent,
+  renderHourCell,
+  renderDateCell,
+  showAllDayRow,
+  eventOverlapOffset,
+  enableEnrichedEvents,
+  enrichedEventsByDate,
+  eventsAreSorted,
+  isEventOrderingEnabled,
+  locale,
 }: WeekViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { state } = useCalendar();
+  const { state, testId } = useCalendar();
   const { selectedDate } = state;
-  const startOfWeek = useMemo(
-    () => selectedDate.startOf("week"),
-    [selectedDate],
-  );
+  const startOfWeek = useMemo(() => {
+    const currentDay = getDayOfWeek(selectedDate);
+    const diff =
+      currentDay >= weekStartsOn
+        ? weekStartsOn - currentDay
+        : weekStartsOn - currentDay - 7;
+    return selectedDate.plus({ days: diff }).startOf("day");
+  }, [selectedDate, weekStartsOn]);
 
   const weekDays = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, "day"));
-  }, [startOfWeek]);
+    let length = weekEndsOn - weekStartsOn + 1;
+    if (length <= 0) length += 7;
+    return Array.from({ length }, (_, i) => startOfWeek.plus({ days: i }));
+  }, [startOfWeek, weekStartsOn, weekEndsOn]);
 
-  // Calculate events for each day of the week
-  // The hook resolves the layout computation for all 7 days efficiently
-  const weekEvents = useDayEventLayout(events, weekDays) as DayEventLayout[][];
+  const weekEvents = useDayEventLayout(
+    events,
+    weekDays,
+    minHour,
+    maxHour,
+    showAllDayRow,
+    eventOverlapOffset,
+    {
+      enableEnrichedEvents,
+      enrichedEventsByDate,
+      eventsAreSorted,
+      isEventOrderingEnabled,
+    },
+  ) as DayEventLayout[][];
 
   const isCurrentWeek = useMemo(() => {
     const now = dateFn();
-    return weekDays.some((day) => now.isSame(day, "day"));
+    return weekDays.some((day) => now.hasSame(day, "day"));
   }, [weekDays]);
 
   useEffect(() => {
     if (autoScrollToCurrentTime && containerRef.current && isCurrentWeek) {
       const now = dateFn();
-      const hours = now.hour();
-      const minutes = now.minute();
+      const hours = now.hour;
+      const minutes = now.minute;
       const totalMinutes = hours * 60 + minutes;
 
       const container = containerRef.current;
@@ -75,12 +120,16 @@ function WeekView({
   }, [autoScrollToCurrentTime, isCurrentWeek]);
 
   return (
-    <div className={styles.weekView} ref={containerRef}>
+    <div
+      className={styles.weekView}
+      ref={containerRef}
+      data-testid={`${testId}-week-view`}
+    >
       <div className={styles.stickyTopContainer}>
         <div className={styles.weekHeader}>
           <div className={styles.timeHeaderSpacer} />
           {weekDays.map((date, index) => {
-            const isToday = dateFn().isSame(date, "day");
+            const isToday = dateFn().hasSame(date, "day");
             const todayStyle = isToday
               ? {
                   color: theme?.today?.color,
@@ -88,13 +137,18 @@ function WeekView({
                 }
               : undefined;
 
-            return (
+            return renderDateCell ? (
+              renderDateCell({
+                date: date.toJSDate(),
+                isToday,
+              })
+            ) : (
               <div
                 key={index}
                 className={cx(styles.dayHeader, classNames?.dayHeader)}
               >
                 <div className={cx(styles.dayName, classNames?.dayName)}>
-                  {DAY_LIST_NAME[dayType][index]}
+                  {getDayListNames(dayType, locale)[getDayOfWeek(date)]}
                 </div>
                 <div
                   className={cx(styles.dayNumber, classNames?.dayNumber, {
@@ -102,30 +156,41 @@ function WeekView({
                   })}
                   style={todayStyle}
                 >
-                  {formatDate(date, DATE_FORMATS.DAY_NUMBER)}
+                  {formatDate(date, DATE_FORMATS.DAY_NUMBER, locale)}
                 </div>
               </div>
             );
           })}
         </div>
-        <AllDayBanner
-          days={weekDays}
-          events={events || []}
-          maxEvents={maxEvents}
-          onEventClick={onEventClick}
-          classNames={classNames}
-          is12Hour={is12Hour}
-        />
+        {showAllDayRow && (
+          <AllDayBanner
+            days={weekDays}
+            events={events || []}
+            maxEvents={maxEvents}
+            onEventClick={onEventClick}
+            classNames={classNames}
+            is12Hour={is12Hour}
+            renderEvent={renderEvent}
+            locale={locale}
+          />
+        )}
       </div>
       <div className={styles.timeGrid}>
-        <TimeColumn is12Hour={is12Hour} classNames={classNames} />
+        <TimeColumn
+          is12Hour={is12Hour}
+          classNames={classNames}
+          minHour={minHour}
+          maxHour={maxHour}
+          locale={locale}
+        />
         <div className={styles.eventsGrid}>
           {weekDays.map((date, dayIndex) => {
-            const isToday = dateFn().isSame(date, "day");
+            const isToday = dateFn().hasSame(date, "day");
             return (
               <div
                 key={dayIndex}
                 className={cx(styles.dayColumn, classNames?.dayColumn)}
+                data-testid={`${testId}-day-column`}
               >
                 <DayColumn
                   dayEvents={weekEvents[dayIndex]}
@@ -134,6 +199,10 @@ function WeekView({
                   classNames={classNames}
                   isToday={isToday}
                   showCurrentTime={showCurrentTime}
+                  minHour={minHour}
+                  maxHour={maxHour}
+                  renderEvent={renderEvent}
+                  renderHourCell={renderHourCell}
                 />
               </div>
             );

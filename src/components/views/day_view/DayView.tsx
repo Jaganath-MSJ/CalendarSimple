@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from "react";
 import cx from "classnames";
-import { dateFn, formatDate } from "../../../utils";
+import { getDayOfWeek, dateFn, formatDate } from "../../../utils";
 import useDayEventLayout, {
   DayEventLayout,
 } from "../../../hooks/useDayEventLayout";
 import { CalendarContentProps } from "../../../types";
-import { DAY_LIST_NAME, DATE_FORMATS } from "../../../constants";
+import { getDayListNames, DATE_FORMATS } from "../../../constants";
 import styles from "./DayView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
 import TimeColumn from "../../core/time_column/TimeColumn";
@@ -23,6 +23,18 @@ interface DayViewProps extends Pick<
   | "showCurrentTime"
   | "maxEvents"
   | "autoScrollToCurrentTime"
+  | "minHour"
+  | "maxHour"
+  | "renderEvent"
+  | "renderHourCell"
+  | "renderDateCell"
+  | "showAllDayRow"
+  | "eventOverlapOffset"
+  | "enableEnrichedEvents"
+  | "enrichedEventsByDate"
+  | "eventsAreSorted"
+  | "isEventOrderingEnabled"
+  | "locale"
 > {}
 
 function DayView({
@@ -35,13 +47,38 @@ function DayView({
   showCurrentTime,
   maxEvents,
   autoScrollToCurrentTime,
+  minHour,
+  maxHour,
+  renderEvent,
+  renderHourCell,
+  renderDateCell,
+  showAllDayRow,
+  eventOverlapOffset,
+  enableEnrichedEvents,
+  enrichedEventsByDate,
+  eventsAreSorted,
+  isEventOrderingEnabled,
+  locale,
 }: DayViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { state } = useCalendar();
+  const { state, testId } = useCalendar();
   const { selectedDate } = state;
-  const dayEvents = useDayEventLayout(events, selectedDate) as DayEventLayout[];
+  const dayEvents = useDayEventLayout(
+    events,
+    selectedDate,
+    minHour,
+    maxHour,
+    showAllDayRow,
+    eventOverlapOffset,
+    {
+      enableEnrichedEvents,
+      enrichedEventsByDate,
+      eventsAreSorted,
+      isEventOrderingEnabled,
+    },
+  ) as DayEventLayout[];
 
-  const isToday = dateFn().isSame(selectedDate, "day");
+  const isToday = dateFn().hasSame(selectedDate, "day");
 
   const todayStyle = isToday
     ? {
@@ -53,8 +90,8 @@ function DayView({
   useEffect(() => {
     if (autoScrollToCurrentTime && containerRef.current && isToday) {
       const now = dateFn();
-      const hours = now.hour();
-      const minutes = now.minute();
+      const hours = now.hour;
+      const minutes = now.minute;
       const totalMinutes = hours * 60 + minutes;
 
       const container = containerRef.current;
@@ -68,36 +105,60 @@ function DayView({
   }, [autoScrollToCurrentTime, isToday]);
 
   return (
-    <div className={styles.dayView} ref={containerRef}>
+    <div
+      className={styles.dayView}
+      ref={containerRef}
+      data-testid={`${testId}-day-view`}
+    >
       <div className={styles.stickyTopContainer}>
         <div className={styles.dayHeaderContainer}>
           <div className={styles.timeHeaderSpacer} />
-          <div className={cx(styles.dayHeader, classNames?.dayHeader)}>
-            <div className={cx(styles.dayName, classNames?.dayName)}>
-              {DAY_LIST_NAME[dayType][selectedDate.day()]}
+          {renderDateCell ? (
+            renderDateCell({
+              date: selectedDate.toJSDate(),
+              isToday,
+            })
+          ) : (
+            <div className={cx(styles.dayHeader, classNames?.dayHeader)}>
+              <div className={cx(styles.dayName, classNames?.dayName)}>
+                {getDayListNames(dayType, locale)[getDayOfWeek(selectedDate)]}
+              </div>
+              <div
+                className={cx(styles.dayNumber, classNames?.dayNumber, {
+                  [styles.today]: isToday,
+                })}
+                style={todayStyle}
+              >
+                {formatDate(selectedDate, DATE_FORMATS.DAY_NUMBER, locale)}
+              </div>
             </div>
-            <div
-              className={cx(styles.dayNumber, classNames?.dayNumber, {
-                [styles.today]: isToday,
-              })}
-              style={todayStyle}
-            >
-              {formatDate(selectedDate, DATE_FORMATS.DAY_NUMBER)}
-            </div>
-          </div>
+          )}
         </div>
-        <AllDayBanner
-          days={[selectedDate]}
-          events={events || []}
-          maxEvents={maxEvents}
-          onEventClick={onEventClick}
-          classNames={classNames}
-          is12Hour={is12Hour}
-        />
+        {showAllDayRow && (
+          <AllDayBanner
+            days={[selectedDate]}
+            events={events || []}
+            maxEvents={maxEvents}
+            onEventClick={onEventClick}
+            classNames={classNames}
+            is12Hour={is12Hour}
+            renderEvent={renderEvent}
+            locale={locale}
+          />
+        )}
       </div>
       <div className={styles.timeGrid}>
-        <TimeColumn is12Hour={is12Hour} classNames={classNames} />
-        <div className={cx(styles.eventsColumn, classNames?.dayColumn)}>
+        <TimeColumn
+          is12Hour={is12Hour}
+          classNames={classNames}
+          minHour={minHour}
+          maxHour={maxHour}
+          locale={locale}
+        />
+        <div
+          className={cx(styles.eventsColumn, classNames?.dayColumn)}
+          data-testid={`${testId}-day-column`}
+        >
           <DayColumn
             dayEvents={dayEvents}
             onEventClick={onEventClick}
@@ -105,6 +166,10 @@ function DayView({
             classNames={classNames}
             isToday={isToday}
             showCurrentTime={showCurrentTime}
+            minHour={minHour}
+            maxHour={maxHour}
+            renderEvent={renderEvent}
+            renderHourCell={renderHourCell}
           />
         </div>
       </div>

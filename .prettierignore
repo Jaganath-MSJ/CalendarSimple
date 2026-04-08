@@ -1,0 +1,15 @@
+# Ignore Artifacts
+node_modules
+dist
+storybook-static
+coverage
+.cache
+
+# Misc
+.env
+.npmrc
+eslint.config.js
+package-lock.json
+
+# Ignore generated documentation
+docs/

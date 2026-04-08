@@ -12,7 +12,6 @@
 import { useMemo } from "react";
 import calendarize from "calendarize";
 import {
-  dateFn,
   checkIsToday,
   DateType,
   getMonthStartingDay,
@@ -68,46 +67,71 @@ type CalendarMatrix = CalendarDayInfo[][];
  * 4. Data Preparation: Formats the data for the UI, including calculating event continuity across days.
  *
  * @param selectedDate - The currently selected date (determining the month to show)
- * @param events - List of all events
  * @returns A structured matrix of weeks and days with assigned events
  */
+export interface UseMonthGridOptions {
+  enableEnrichedEvents?: boolean;
+  enrichedEventsByDate?: Record<string, CalendarEvent[]>;
+  eventsAreSorted?: boolean;
+  isEventOrderingEnabled?: boolean;
+  sortedMonthView?: boolean | ((a: CalendarEvent, b: CalendarEvent) => number);
+}
+
 export default function useMonthGrid(
   selectedDate: DateType,
   events: CalendarEvent[],
+  weekStartsOn: number,
+  weekEndsOn: number,
+  options: UseMonthGridOptions = {},
 ): CalendarMatrix {
+  const {
+    enableEnrichedEvents,
+    enrichedEventsByDate,
+    eventsAreSorted,
+    isEventOrderingEnabled = true,
+    sortedMonthView = true,
+  } = options;
+
   return useMemo(() => {
     // Sort events
-    const dataEvents = [...events].sort((a, b) => {
-      return getDiffDays(
-        getStartOfDay(a.startDate),
-        getStartOfDay(b.startDate),
-      );
-    });
+    const dataEvents = eventsAreSorted
+      ? events
+      : [...events].sort((a, b) => {
+          return getDiffDays(
+            getStartOfDay(a.startDate),
+            getStartOfDay(b.startDate),
+          );
+        });
 
-    const calendarArray = calendarize(selectedDate.toDate());
+    const length = ((weekEndsOn - weekStartsOn + 7) % 7) + 1;
+    const calendarArray = calendarize(selectedDate.toJSDate(), weekStartsOn);
 
     return calendarArray.map((week: number[], weekIndex: number) => {
+      const slicedWeek = week.slice(0, length);
       // -------------------------------------------------------------------------
       // 1. Grid Generation: Calculate dates for the entire week first
       // -------------------------------------------------------------------------
-      const processedWeek = week.map((day: number, dayIndex: number) => {
-        let currentDate = dateFn(selectedDate);
+      const processedWeek = slicedWeek.map((day: number, dayIndex: number) => {
+        let currentDate: DateType;
         let isCurrentMonth = true;
         let displayDay = day;
 
         if (day === 0) {
           isCurrentMonth = false;
+          const startOfMonth = getStartOfMonth(selectedDate);
+          const startDayOfWeek = getMonthStartingDay(selectedDate);
+          const diffFromWeekStartToMonthStart =
+            (startDayOfWeek - weekStartsOn + 7) % 7;
+
           if (weekIndex === 0) {
-            const startOfMonth = getStartOfMonth(selectedDate);
-            const startDayOfWeek = getMonthStartingDay(selectedDate);
-            currentDate = subDays(startOfMonth, startDayOfWeek - dayIndex);
+            currentDate = subDays(
+              startOfMonth,
+              diffFromWeekStartToMonthStart - dayIndex,
+            );
             displayDay = getDate(currentDate);
           } else {
-            const startOfMonth = getStartOfMonth(selectedDate);
-            const startDayOfWeek = getMonthStartingDay(selectedDate);
-
             const globalIndex = weekIndex * 7 + dayIndex;
-            const daysFromStart = globalIndex - startDayOfWeek;
+            const daysFromStart = globalIndex - diffFromWeekStartToMonthStart;
 
             currentDate = addDays(startOfMonth, daysFromStart);
             displayDay = getDate(currentDate);
@@ -122,17 +146,39 @@ export default function useMonthGrid(
       // 2. Event Identification: Identify all events overlapping with this week
       // -------------------------------------------------------------------------
       const weekStart = getStartOfDay(processedWeek[0].currentDate);
-      const weekEnd = getStartOfDay(processedWeek[6].currentDate);
+      const weekEnd = getStartOfDay(
+        processedWeek[processedWeek.length - 1].currentDate,
+      );
 
-      const weekEvents: InternalCalendarEvent[] = dataEvents.filter((item) => {
-        const start = getStartOfDay(item.startDate);
-        const end = item.endDate ? getStartOfDay(item.endDate) : start;
-        // Check overlap
-        return (
-          isBeforeDate(start, addDays(weekEnd, 1)) &&
-          isAfterDate(end, subDays(weekStart, 1))
-        );
-      });
+      let weekEvents: InternalCalendarEvent[] = [];
+
+      if (enableEnrichedEvents && enrichedEventsByDate) {
+        const addedEventIds = new Set<string>();
+        for (let i = 0; i < length; i++) {
+          const dateStr = formatDate(
+            processedWeek[i].currentDate,
+            DATE_FORMATS.DATE,
+          );
+          const dayEvents = enrichedEventsByDate[dateStr] || [];
+          dayEvents.forEach((e) => {
+            const eventId = e.id || e.startDate + e.title;
+            if (!addedEventIds.has(eventId)) {
+              weekEvents.push({ ...e });
+              addedEventIds.add(eventId);
+            }
+          });
+        }
+      } else {
+        weekEvents = dataEvents.filter((item) => {
+          const start = getStartOfDay(item.startDate);
+          const end = item.endDate ? getStartOfDay(item.endDate) : start;
+          // Check overlap
+          return (
+            isBeforeDate(start, addDays(weekEnd, 1)) &&
+            isAfterDate(end, subDays(weekStart, 1))
+          );
+        });
+      }
 
       // -------------------------------------------------------------------------
       // 3. Event Sorting: Start Date asc, then Duration desc
@@ -142,19 +188,25 @@ export default function useMonthGrid(
       // By placing longer events first (among those starting on the same day), we ensure
       // that long-spanning events get stable top slots, reducing visual fragmentation.
       // -------------------------------------------------------------------------
-      weekEvents.sort((a, b) => {
-        const startA = getStartOfDay(a.startDate);
-        const startB = getStartOfDay(b.startDate);
-        // Primary sort: Start date (ascending)
-        if (!isSameDate(startA, startB)) return getDiffDays(startA, startB);
+      if (sortedMonthView) {
+        if (typeof sortedMonthView === "function") {
+          weekEvents.sort(sortedMonthView);
+        } else {
+          weekEvents.sort((a, b) => {
+            const startA = getStartOfDay(a.startDate);
+            const startB = getStartOfDay(b.startDate);
+            // Primary sort: Start date (ascending)
+            if (!isSameDate(startA, startB)) return getDiffDays(startA, startB);
 
-        // Secondary sort: Duration (descending)
-        const endA = a.endDate ? getStartOfDay(a.endDate) : startA;
-        const endB = b.endDate ? getStartOfDay(b.endDate) : startB;
-        const durA = getDiffDays(endA, startA);
-        const durB = getDiffDays(endB, startB);
-        return durB - durA; // Longer events first
-      });
+            // Secondary sort: Duration (descending)
+            const endA = a.endDate ? getStartOfDay(a.endDate) : startA;
+            const endB = b.endDate ? getStartOfDay(b.endDate) : startB;
+            const durA = getDiffDays(endA, startA);
+            const durB = getDiffDays(endB, startB);
+            return durB - durA; // Longer events first
+          });
+        }
+      }
 
       // -------------------------------------------------------------------------
       // 4. Slot Assignment: "Tetris" Algorithm
@@ -171,13 +223,13 @@ export default function useMonthGrid(
       // 2. Find the lowest `slotIndex` where `slots[day][slotIndex]` is empty for all days in the range.
       // 3. Mark that slot as used for those days.
       // -------------------------------------------------------------------------
-      const slots: string[][] = Array(7)
+      const slots: string[][] = Array(length)
         .fill(null)
         .map(() => []); // slots[dayIndex][slotIndex] = eventId
       const eventSlots = new Map<string, number>(); // Map<eventId, slotIndex> for quick lookup later
 
       weekEvents.forEach((event, index) => {
-        // Determine start/end indices in this week (0..6)
+        // Determine start/end indices in this week (0..length-1)
         // We clip the event's start/end to the current week's boundaries because
         // we are only rendering one week at a time in this loop.
         const start = getStartOfDay(event.startDate);
@@ -188,32 +240,34 @@ export default function useMonthGrid(
 
         // Clip to week boundaries
         if (startIndex < 0) startIndex = 0;
-        if (endIndex > 6) endIndex = 6;
+        if (endIndex > length - 1) endIndex = length - 1;
 
-        // Find first available slot
-        let slotIndex = 0;
-        while (true) {
-          let isAvailable = true;
-          // Check if this slotIndex is free for the entire duration of the event (within this week)
-          for (let i = startIndex; i <= endIndex; i++) {
-            if (slots[i][slotIndex]) {
-              isAvailable = false;
-              break;
-            }
-          }
-          if (isAvailable) break; // Found a spot!
-          slotIndex++; // Try the next slot down
-        }
-
-        // Assign the found slot
-        // We create a unique temporary ID because the raw event data might not have one,
-        // or we might be processing split segments of the same logical event.
         const eventId = event.startDate + event.title + index;
-        eventSlots.set(eventId, slotIndex);
 
-        // Mark the slots as occupied
-        for (let i = startIndex; i <= endIndex; i++) {
-          slots[i][slotIndex] = eventId;
+        if (!isEventOrderingEnabled) {
+          eventSlots.set(eventId, index);
+        } else {
+          // Find first available slot
+          let slotIndex = 0;
+          while (true) {
+            let isAvailable = true;
+            // Check if this slotIndex is free for the entire duration of the event (within this week)
+            for (let i = startIndex; i <= endIndex; i++) {
+              if (slots[i][slotIndex]) {
+                isAvailable = false;
+                break;
+              }
+            }
+            if (isAvailable) break; // Found a spot!
+            slotIndex++; // Try the next slot down
+          }
+
+          eventSlots.set(eventId, slotIndex);
+
+          // Mark the slots as occupied
+          for (let i = startIndex; i <= endIndex; i++) {
+            slots[i][slotIndex] = eventId;
+          }
         }
 
         // Store the ID on the event object temporarily for step 5
@@ -261,7 +315,7 @@ export default function useMonthGrid(
               const itemEndDate = event.endDate
                 ? getStartOfDay(event.endDate)
                 : getStartOfDay(event.startDate);
-              const endOfWeekDate = addDays(currentDate, 6 - dayIndex);
+              const endOfWeekDate = addDays(currentDate, length - 1 - dayIndex);
 
               let effectiveEndDate = itemEndDate;
               if (isAfterDate(itemEndDate, endOfWeekDate)) {
@@ -295,5 +349,15 @@ export default function useMonthGrid(
         };
       });
     });
-  }, [selectedDate, events]);
+  }, [
+    selectedDate,
+    events,
+    weekStartsOn,
+    weekEndsOn,
+    enableEnrichedEvents,
+    enrichedEventsByDate,
+    eventsAreSorted,
+    isEventOrderingEnabled,
+    sortedMonthView,
+  ]);
 }

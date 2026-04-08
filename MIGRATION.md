@@ -48,7 +48,32 @@ import Calendar from "calendar-simple";
 import type { CalendarEvent, ECalendarViewType } from "calendar-simple";
 ```
 
-### 3. New Features to Keep in Mind
+### 3. v1.2.0 - Event Styling Refactor (Breaking)
+
+In v1.2.0, we replaced the limited `color` property on events with a much more flexible `style` property. This allows you to apply any CSS styling (borders, gradients, opacity, etc.) to individual event items.
+
+- **DEPRECATED**: `color?: string`
+- **NEW**: `style?: React.CSSProperties`
+
+**Before:**
+
+```tsx
+const event = {
+  title: "Meeting",
+  color: "#3b82f6",
+};
+```
+
+**After (v1.2.0+):**
+
+```tsx
+const event = {
+  title: "Meeting",
+  style: { backgroundColor: "#3b82f6" },
+};
+```
+
+### 4. New Features to Keep in Mind
 
 - **Invalid Event Filtering**: We now automatically validate your event data arrays. Events where the `endDate` incorrectly occurs before the `startDate` are considered natively invalid and silently filtered out. This ensures the calendar no longer crashes or renders malformed UI bounds when receiving bad data.
 

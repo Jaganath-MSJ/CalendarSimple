@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import cx from "classnames";
 import {
   CalendarContentProps,
@@ -8,11 +8,19 @@ import {
 import { getDiffDays, generateTooltipText, DateType } from "../../../utils";
 import styles from "./MonthEventItem.module.css";
 import Popover from "../../ui/popover/Popover";
-import { CALENDAR_CONSTANTS, defaultTheme } from "../../../constants";
+import { LAYOUT_CONSTANTS, defaultTheme } from "../../../constants";
+import { useCalendar } from "../../../context/CalendarContext";
 
 interface MonthEventItemProps extends Pick<
   CalendarContentProps,
-  "onEventClick" | "theme" | "maxEvents" | "is12Hour"
+  | "onEventClick"
+  | "theme"
+  | "maxEvents"
+  | "is12Hour"
+  | "showAdjacentMonths"
+  | "classNames"
+  | "renderEvent"
+  | "renderDateCell"
 > {
   dataClassName?: string;
   selectedClassName?: string;
@@ -49,9 +57,14 @@ function MonthEventItem({
   onEventClick,
   totalEvents = 0,
   is12Hour,
+  showAdjacentMonths,
+  classNames,
+  renderEvent,
+  renderDateCell,
 }: MonthEventItemProps) {
+  const { testId } = useCalendar();
   const [showPopover, setShowPopover] = useState(false);
-  const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const styleSource = isSelected
     ? { ...defaultTheme.selected, ...theme?.selected }
@@ -87,6 +100,7 @@ function MonthEventItem({
   return (
     <td
       style={style}
+      data-testid={`${testId}-${date}-month-cell`}
       onClick={() => onClick?.(dateObj)}
       className={cx(styles.dateData, className, {
         [styles.currentMonth]: !isCurrentMonth,
@@ -95,71 +109,94 @@ function MonthEventItem({
       })}
     >
       <div className={styles.cellContent}>
-        <p className={styles.dateLabel}>{date}</p>
+        {(isCurrentMonth || showAdjacentMonths) && (
+          <>
+            {renderDateCell ? (
+              renderDateCell({
+                date: dateObj.toJSDate(),
+                isToday,
+                isSelected,
+                isCurrentMonth,
+              })
+            ) : (
+              <p className={styles.dateLabel}>{date}</p>
+            )}
 
-        {data && (
-          <div className={cx(styles.dataContainer, dataClassName)}>
-            {visibleEvents.map((item, index) => {
-              if (!item || item.isSpacer) {
-                return (
-                  <div key={`spacer-${index}`} className={styles.spacer} />
-                );
-              }
+            {data && (
+              <div className={cx(styles.dataContainer, dataClassName)}>
+                {visibleEvents.map((item, index) => {
+                  if (!item || item.isSpacer) {
+                    return (
+                      <div key={`spacer-${index}`} className={styles.spacer} />
+                    );
+                  }
 
-              let diffDates = 1;
-              if (item.endDateWeek) {
-                diffDates =
-                  getDiffDays(item.endDateWeek, item.startDateWeek) + 1;
-              }
-              const tooltipText = generateTooltipText(
-                item,
-                ECalendarViewType.month,
-                is12Hour,
-              );
-              const width = `${cellWidth * diffDates - CALENDAR_CONSTANTS.EVENT_ITEM_PADDING}px`;
+                  let diffDates = 1;
+                  if (item.endDateWeek) {
+                    diffDates =
+                      getDiffDays(item.endDateWeek, item.startDateWeek) + 1;
+                  }
+                  const tooltipText = generateTooltipText(
+                    item,
+                    ECalendarViewType.month,
+                    is12Hour,
+                  );
+                  const width = `${cellWidth * diffDates - LAYOUT_CONSTANTS.EVENT_ITEM_PADDING}px`;
+                  const id = item.id || `${item.startDate}-${index}`;
 
-              return (
-                <div
-                  key={item.id || `${item.startDate}-${index}`}
-                  className={styles.eventItem}
-                  id={item.id}
-                  style={{ width, backgroundColor: item.color }}
-                  title={tooltipText}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEventClick?.(item);
-                  }}
-                >
-                  {item.title}
-                </div>
-              );
-            })}
-            {hiddenEventsCount > 0 && (
-              <div className={styles.moreEventsContainer}>
-                <button
-                  ref={moreButtonRef}
-                  className={styles.moreEvents}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    !showPopover && setShowPopover(true);
-                    onMoreClick?.(dateObj);
-                  }}
-                >
-                  + {hiddenEventsCount} more
-                </button>
-                {showPopover && (
-                  <Popover
-                    dateObj={dateObj}
-                    events={allDayEvents}
-                    onEventClick={onEventClick}
-                    onClose={() => setShowPopover(false)}
-                    anchorEl={moreButtonRef.current}
-                    is12Hour={is12Hour}
-                  />
+                  return (
+                    <div
+                      key={id}
+                      className={cx(styles.eventItem, classNames?.event)}
+                      id={item.id}
+                      data-testid={`${testId}-${id}-month-event-item`}
+                      style={{
+                        width,
+                        backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                        ...item.style,
+                      }}
+                      title={tooltipText}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEventClick?.(item);
+                      }}
+                    >
+                      {renderEvent ? renderEvent(item) : item.title}
+                    </div>
+                  );
+                })}
+                {hiddenEventsCount > 0 && (
+                  <div className={styles.moreEventsContainer}>
+                    <button
+                      className={styles.moreEvents}
+                      data-testid={`${testId}-${date}-more-events`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!showPopover) {
+                          setAnchorEl(e.currentTarget);
+                          setShowPopover(true);
+                        }
+                        onMoreClick?.(dateObj);
+                      }}
+                    >
+                      + {hiddenEventsCount} more
+                    </button>
+                    {showPopover && anchorEl && (
+                      <Popover
+                        dateObj={dateObj}
+                        events={allDayEvents}
+                        onEventClick={onEventClick}
+                        onClose={() => setShowPopover(false)}
+                        anchorEl={anchorEl}
+                        is12Hour={is12Hour}
+                        renderEvent={renderEvent}
+                      />
+                    )}
+                  </div>
                 )}
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </td>

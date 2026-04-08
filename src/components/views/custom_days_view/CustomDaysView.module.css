@@ -1,0 +1,82 @@
+.customView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  background-color: var(--calendar-bg, #fff);
+  position: relative;
+}
+
+.stickyTopContainer {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--calendar-bg, #fff);
+  border-bottom: 1px solid var(--calendar-border-color, #e0e0e0);
+}
+
+.customHeader {
+  display: flex;
+  border-bottom: 1px solid var(--calendar-border-color, #e0e0e0);
+}
+
+.timeHeaderSpacer {
+  width: 60px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--calendar-border-color, #e0e0e0);
+}
+
+.dayHeader {
+  flex: 1;
+  padding: 10px 5px;
+  text-align: center;
+  border-right: 1px solid var(--calendar-border-color, #e0e0e0);
+  min-width: 0;
+}
+
+.dayHeader:last-child {
+  border-right: none;
+}
+
+.dayName {
+  font-size: 12px;
+  color: var(--calendar-text-secondary, #666);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.dayNumber {
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  margin: 0 auto;
+  border-radius: 50%;
+}
+
+.today {
+  background-color: var(--calendar-primary-color, #1a73e8);
+  color: #fff;
+}
+
+.timeGrid {
+  display: flex;
+  flex: 1;
+}
+
+.eventsGrid {
+  display: flex;
+  flex: 1;
+  position: relative;
+}
+
+.dayColumn {
+  flex: 1;
+  border-right: 1px solid var(--calendar-border-color, #f0f0f0);
+  position: relative;
+  min-width: 0;
+}
+
+.dayColumn:last-child {
+  border-right: none;
+}

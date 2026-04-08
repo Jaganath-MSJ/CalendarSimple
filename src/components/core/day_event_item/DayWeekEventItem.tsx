@@ -3,12 +3,13 @@ import cx from "classnames";
 import { formatDate, generateTooltipText } from "../../../utils";
 import { CalendarContentProps } from "../../../types";
 import { DayEventLayout } from "../../../hooks/useDayEventLayout";
-import { CALENDAR_CONSTANTS, DATE_FORMATS } from "../../../constants";
+import { LAYOUT_CONSTANTS, DATE_FORMATS } from "../../../constants";
 import styles from "./DayWeekEventItem.module.css";
+import { useCalendar } from "../../../context/CalendarContext";
 
 interface DayWeekEventItemProps extends Pick<
   CalendarContentProps,
-  "onEventClick" | "is12Hour" | "classNames"
+  "onEventClick" | "is12Hour" | "classNames" | "renderEvent"
 > {
   item: DayEventLayout;
 }
@@ -18,14 +19,15 @@ export function DayWeekEventItem({
   onEventClick,
   is12Hour,
   classNames,
+  renderEvent,
 }: DayWeekEventItemProps) {
-  const eventColor = item.event.color || CALENDAR_CONSTANTS.DEFAULT_EVENT_COLOR;
+  const { testId } = useCalendar();
   const tooltipText = generateTooltipText(item.event, "day", is12Hour);
 
   const isSmall =
-    item.height < CALENDAR_CONSTANTS.SMALL_EVENT_HEIGHT &&
-    item.height >= CALENDAR_CONSTANTS.TINY_EVENT_HEIGHT;
-  const isTiny = item.height < CALENDAR_CONSTANTS.TINY_EVENT_HEIGHT;
+    item.height < LAYOUT_CONSTANTS.SMALL_EVENT_HEIGHT &&
+    item.height >= LAYOUT_CONSTANTS.TINY_EVENT_HEIGHT;
+  const isTiny = item.height < LAYOUT_CONSTANTS.TINY_EVENT_HEIGHT;
 
   return (
     <div
@@ -33,6 +35,7 @@ export function DayWeekEventItem({
         [styles.eventItemSmall]: isSmall,
         [styles.eventItemTiny]: isTiny,
       })}
+      data-testid={`${testId}-${item.event.id}-day-event-item`}
       style={
         {
           top: `${item.top}px`,
@@ -40,21 +43,28 @@ export function DayWeekEventItem({
           left: `${item.left}%`,
           zIndex: item.zIndex,
           "--event-width": `${item.width}%`,
-          backgroundColor: eventColor,
+          backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
           position: "absolute",
+          ...item.event.style,
         } as CSSProperties
       }
       id={item.event.id}
       onClick={() => onEventClick?.(item.event)}
       title={tooltipText}
     >
-      <div className={styles.eventTitle}>{item.event.title}</div>
-      <div className={styles.eventTime}>
-        {formatDate(
-          item.event.startDate,
-          is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME,
-        )}
-      </div>
+      {renderEvent ? (
+        renderEvent(item.event)
+      ) : (
+        <>
+          <div className={styles.eventTitle}>{item.event.title}</div>
+          <div className={styles.eventTime}>
+            {formatDate(
+              item.event.startDate,
+              is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME,
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

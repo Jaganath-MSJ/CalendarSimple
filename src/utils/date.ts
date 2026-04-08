@@ -2,21 +2,30 @@
  * @file date.ts
  * @description Date manipulation and formatting wrappers.
  *
- * This file encapsulates `dayjs` logic and exposes standardized, reusable
+ * This file encapsulates `luxon` logic and exposes standardized, reusable
  * utility functions for date calculations throughout the application.
  */
 
-import dayjs, { Dayjs, ManipulateType } from "dayjs";
+import { DateTime } from "luxon";
 
-export type { ManipulateType };
-export type DateType = Dayjs;
-export type DateInputType = Date | DateType | string | number;
+export type DateType = DateTime;
+export type DateInputType = Date | DateTime | string | number;
 
-export const dateFn = dayjs;
+/**
+ * Normalizes various date inputs into a Luxon DateTime object.
+ */
+export function dateFn(date?: DateInputType): DateTime {
+  if (date === undefined) return DateTime.now();
+  if (date instanceof DateTime) return date;
+  if (date instanceof Date) return DateTime.fromJSDate(date);
+  if (typeof date === "string") return DateTime.fromISO(date);
+  if (typeof date === "number") return DateTime.fromMillis(date);
+  return DateTime.now();
+}
 
 // ---------------------------------------------------------------------------
 // Basic Wrapping Utilities (Getters, Setters, Navigators)
-// These functions wrap common Day.js operations to maintain a consistent API
+// These functions wrap common operations to maintain a consistent API
 // and reduce direct framework dependency across the components.
 // ---------------------------------------------------------------------------
 
@@ -29,66 +38,83 @@ export function getStartOfMonth(date: DateType): DateType {
 }
 
 export function addDays(date: DateType, days: number): DateType {
-  return dateFn(date).add(days, "day");
+  return dateFn(date).plus({ days });
 }
 
 export function subDays(date: DateType, days: number): DateType {
-  return dateFn(date).subtract(days, "day");
+  return dateFn(date).minus({ days });
 }
 
 export function getDiffDays(
   date1: DateInputType,
   date2: DateInputType,
 ): number {
-  return dateFn(date1).diff(dateFn(date2), "day");
+  return Math.floor(dateFn(date1).diff(dateFn(date2), "day").days);
 }
 
 export function setDate(date: DateType, day: number): DateType {
-  return dateFn(date).date(day);
+  return date.set({ day });
 }
 
+// Adapting to 0-indexed behavior for backward compatibility across components
 export function setMonth(date: DateType, month: number): DateType {
-  return dateFn(date).month(month);
+  return date.set({ month: month + 1 });
 }
 
 export function setYear(date: DateType, year: number): DateType {
-  return dateFn(date).year(year);
+  return date.set({ year });
 }
 
 export function getDate(date: DateType): number {
-  return dateFn(date).date();
+  return date.day;
 }
 
+// Adapting to 0-indexed behavior for backward compatibility across components
 export function getMonth(date: DateType): number {
-  return dateFn(date).month();
+  return date.month - 1;
 }
 
 export function getYear(date: DateType): number {
-  return dateFn(date).year();
+  return date.year;
 }
 
 // ---------------------------------------------------------------------------
 // Comparisons & Formatting
 // ---------------------------------------------------------------------------
 
-export function isBeforeDate(date1: DateType, date2: DateType): boolean {
-  return dateFn(date1).isBefore(dateFn(date2), "day");
+export function isBeforeDate(
+  date1: DateInputType,
+  date2: DateInputType,
+): boolean {
+  return dateFn(date1).startOf("day") < dateFn(date2).startOf("day");
 }
 
-export function isAfterDate(date1: DateType, date2: DateType): boolean {
-  return dateFn(date1).isAfter(dateFn(date2), "day");
+export function isAfterDate(
+  date1: DateInputType,
+  date2: DateInputType,
+): boolean {
+  return dateFn(date1).startOf("day") > dateFn(date2).startOf("day");
 }
 
-export function isSameDate(date1: DateType, date2: DateType): boolean {
-  return dateFn(date1).isSame(dateFn(date2), "day");
+export function isSameDate(
+  date1: DateInputType,
+  date2: DateInputType,
+): boolean {
+  return dateFn(date1).hasSame(dateFn(dateFn(date2)), "day");
 }
 
-export function formatDate(date: DateInputType, format: string): string {
-  return dateFn(date).format(format);
+export function formatDate(
+  date: DateInputType,
+  format: string,
+  locale?: string,
+): string {
+  return dateFn(date)
+    .setLocale(locale || "en")
+    .toFormat(format);
 }
 
-export function convertToDate(dayjsDate: DateType): Date {
-  return dateFn(dayjsDate).toDate();
+export function convertToDate(luxonDate: DateType): Date {
+  return luxonDate.toJSDate();
 }
 
 // ---------------------------------------------------------------------------
@@ -96,14 +122,23 @@ export function convertToDate(dayjsDate: DateType): Date {
 // ---------------------------------------------------------------------------
 
 /**
+ * Determines the day of the week (0-6)
+ *
+ * @param date - A DateType representing the target date.
+ * @returns The numeric index of the day (0 = Sunday, 1 = Monday, etc.).
+ */
+export function getDayOfWeek(date: DateType): number {
+  return date.weekday === 7 ? 0 : date.weekday;
+}
+
+/**
  * Determines the day of the week (0-6) on which a given month starts.
- * Utilizes `dayjs` formatting ("d") to extract the numeric weekday.
  *
  * @param date - A DateType representing the target month.
  * @returns The numeric index of the starting day (0 = Sunday, 1 = Monday, etc.).
  */
 export function getMonthStartingDay(date: DateType): number {
-  return Number(dateFn(date).startOf("month").format("d"));
+  return getDayOfWeek(date.startOf("month"));
 }
 
 /**
@@ -114,10 +149,8 @@ export function getMonthStartingDay(date: DateType): number {
  * @returns True if the assembled date is the exact current calendar day.
  */
 export function checkIsToday(selectedDate: DateType, dates: number): boolean {
-  const cloneSelectedDate = dateFn(selectedDate).date(dates);
-
-  const isToday = dateFn().isSame(cloneSelectedDate, "day");
-  return isToday;
+  const cloneSelectedDate = selectedDate.set({ day: dates });
+  return DateTime.now().hasSame(dateFn(cloneSelectedDate), "day");
 }
 
 /**
@@ -134,15 +167,16 @@ export function getYearList(
   futureLength: number,
   selectedYear: number,
 ): number[] {
-  const yearLength = pastLength + futureLength;
-  const yearStarting = dateFn().year() - pastLength;
+  // length should include past years, future years, and the current year (+1)
+  const yearLength = pastLength + futureLength + 1;
+  const yearStarting = DateTime.now().year - pastLength;
   const yearList = Array.from(
     { length: yearLength },
     (_, index) => index + yearStarting,
   );
 
   if (!yearList.includes(selectedYear)) {
-    if (dateFn().year() <= selectedYear) {
+    if (DateTime.now().year <= selectedYear) {
       yearList.push(selectedYear);
     } else {
       return [selectedYear, ...yearList];

@@ -1,7 +1,7 @@
 import React, { CSSProperties, useCallback, useMemo } from "react";
 import cx from "classnames";
 import { CalendarContentProps } from "../../../types";
-import { DAY_LIST_NAME, CALENDAR_CONSTANTS } from "../../../constants";
+import { getDayListNames, LAYOUT_CONSTANTS } from "../../../constants";
 import {
   dateFn,
   convertToDate,
@@ -27,6 +27,17 @@ interface MonthViewProps extends Pick<
   | "onMoreClick"
   | "theme"
   | "classNames"
+  | "weekStartsOn"
+  | "weekEndsOn"
+  | "showAdjacentMonths"
+  | "renderEvent"
+  | "renderDateCell"
+  | "enableEnrichedEvents"
+  | "enrichedEventsByDate"
+  | "eventsAreSorted"
+  | "isEventOrderingEnabled"
+  | "sortedMonthView"
+  | "locale"
 > {}
 
 function MonthView({
@@ -40,19 +51,42 @@ function MonthView({
   events,
   is12Hour,
   classNames,
+  weekStartsOn,
+  weekEndsOn,
+  showAdjacentMonths,
+  renderEvent,
+  renderDateCell,
+  enableEnrichedEvents,
+  enrichedEventsByDate,
+  eventsAreSorted,
+  isEventOrderingEnabled,
+  sortedMonthView,
+  locale,
   ...restProps
 }: MonthViewProps) {
-  const { state, dispatch } = useCalendar();
+  const { state, dispatch, testId } = useCalendar();
   const { selectedDate } = state;
 
-  const calendarGrid = useMonthGrid(selectedDate, events);
+  const calendarGrid = useMonthGrid(
+    selectedDate,
+    events,
+    weekStartsOn,
+    weekEndsOn,
+    {
+      enableEnrichedEvents,
+      enrichedEventsByDate,
+      eventsAreSorted,
+      isEventOrderingEnabled,
+      sortedMonthView,
+    },
+  );
 
   const maxEvents = useMemo(
     () =>
       restProps.maxEvents ??
       calculateMaxEvents(
         typeof height === "number" ? height : 0,
-        calendarGrid.length || CALENDAR_CONSTANTS.MIN_ROWS,
+        calendarGrid.length || LAYOUT_CONSTANTS.MIN_ROWS,
       ),
     [restProps.maxEvents, height, calendarGrid.length],
   );
@@ -60,7 +94,7 @@ function MonthView({
   const onClickDateHandler = useCallback(
     (dateInput: DateType) => {
       const newDate = dateFn(dateInput);
-      if (selectable && !newDate.isSame(selectedDate, "day")) {
+      if (selectable && !newDate.hasSame(selectedDate, "day")) {
         onDateClick?.(convertToDate(newDate));
         dispatch({ type: "SET_DATE", payload: newDate });
       }
@@ -68,8 +102,14 @@ function MonthView({
     [selectedDate, onDateClick, selectable, dispatch],
   );
 
+  const headerDays = useMemo(() => {
+    const list = getDayListNames(dayType, locale);
+    const length = ((weekEndsOn - weekStartsOn + 7) % 7) + 1;
+    return Array.from({ length }, (_, i) => list[(weekStartsOn + i) % 7]);
+  }, [dayType, weekStartsOn, weekEndsOn, locale]);
+
   return (
-    <div className={styles.monthView}>
+    <div className={styles.monthView} data-testid={`${testId}-month-view`}>
       <table
         className={cx(styles.table, classNames?.table)}
         style={
@@ -80,7 +120,7 @@ function MonthView({
       >
         <thead>
           <tr>
-            {DAY_LIST_NAME[dayType].map((day: string) => (
+            {headerDays.map((day: string) => (
               <th
                 key={day}
                 className={cx(styles.tableHeader, classNames?.tableHeader)}
@@ -91,15 +131,15 @@ function MonthView({
           </tr>
         </thead>
         <tbody className={styles.tableBody}>
-          {calendarGrid.map((week: any[], weekIndex: number) => (
+          {calendarGrid.map((week, weekIndex) => (
             <tr key={weekIndex}>
-              {week.map((dayInfo: any, dayIndex: number) => (
+              {week.map((dayInfo, dayIndex) => (
                 <MonthEventItem
                   key={`date_${weekIndex}_${dayIndex}`}
                   isSelected={
                     selectable &&
                     dayInfo.isCurrentMonth &&
-                    dayInfo.displayDay === selectedDate.date()
+                    dayInfo.displayDay === selectedDate.day
                   }
                   isToday={dayInfo.isToday}
                   isCurrentMonth={dayInfo.isCurrentMonth}
@@ -108,8 +148,7 @@ function MonthView({
                   dateObj={dayInfo.currentDate}
                   data={dayInfo.events}
                   cellWidth={
-                    (typeof width === "number" ? width : 0) /
-                    CALENDAR_CONSTANTS.DAYS_IN_WEEK
+                    (typeof width === "number" ? width : 0) / headerDays.length
                   }
                   className={cx(styles.tableCell, classNames?.tableDate)}
                   dataClassName={classNames?.event}
@@ -121,6 +160,10 @@ function MonthView({
                   is12Hour={is12Hour}
                   onEventClick={onEventClick}
                   onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
+                  showAdjacentMonths={showAdjacentMonths}
+                  classNames={classNames}
+                  renderEvent={renderEvent}
+                  renderDateCell={renderDateCell}
                 />
               ))}
             </tr>

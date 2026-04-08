@@ -6,7 +6,7 @@
  * and spatial calculations like the maximum number of viewable events per cell.
  */
 
-import { CALENDAR_CONSTANTS } from "../constants";
+import { LAYOUT_CONSTANTS } from "../constants";
 import { CalendarEvent } from "../types";
 import { dateFn } from "./date";
 
@@ -17,7 +17,7 @@ import { dateFn } from "./date";
  * @returns The maximum number of events to display
  */
 export function calculateMaxEvents(height: number, rowsInView: number): number {
-  const { DATE_LABEL_HEIGHT, CELL_PADDING, EVENT_HEIGHT } = CALENDAR_CONSTANTS;
+  const { DATE_LABEL_HEIGHT, CELL_PADDING, EVENT_HEIGHT } = LAYOUT_CONSTANTS;
 
   const cellHeight = height / rowsInView;
   const availableHeight = cellHeight - DATE_LABEL_HEIGHT - CELL_PADDING;
@@ -29,7 +29,7 @@ export function calculateMaxEvents(height: number, rowsInView: number): number {
 /**
  * Helper to determine if an event is an all-day event.
  * An event is considered "all-day" if its start and end date strings
- * contain only a date (e.g. YYYY-MM-DD) and no time component (no 'T' or space).
+ * contain only a date (e.g. yyyy-MM-dd) and no time component (no 'T' or space).
  *
  * @param event - The calendar event to check.
  * @returns True if the event has no time payload.
@@ -61,5 +61,5 @@ export function isMultiDay(event: CalendarEvent): boolean {
   if (!event.endDate) return false;
   const start = dateFn(event.startDate).startOf("day");
   const end = dateFn(event.endDate).startOf("day");
-  return !start.isSame(end);
+  return !start.equals(dateFn(end));
 }
