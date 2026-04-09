@@ -11,7 +11,7 @@ class ResizeObserverMock {
   unobserve() {}
   disconnect() {}
 }
-global.ResizeObserver = ResizeObserverMock;
+globalThis.ResizeObserver = ResizeObserverMock;
 
 describe("Calendar Component Integration", () => {
   it("renders the Calendar without crashing", () => {

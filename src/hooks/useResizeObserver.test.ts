@@ -12,7 +12,7 @@ describe("useResizeObserver Hook", () => {
     observeSpy = vi.fn();
     disconnectSpy = vi.fn();
 
-    global.ResizeObserver = class ResizeObserverMock {
+    globalThis.ResizeObserver = class ResizeObserverMock {
       observe = observeSpy;
       unobserve = vi.fn();
       disconnect = disconnectSpy;
