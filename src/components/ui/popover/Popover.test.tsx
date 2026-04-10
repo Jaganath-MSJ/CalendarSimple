@@ -59,6 +59,33 @@ describe("Popover Component", () => {
     expect(screen.getByText("Event 2")).toBeInTheDocument();
   });
 
+  it("renders content into document.body via createPortal (Issue 5)", () => {
+    const { baseElement } = render(
+      <CalendarProvider
+        initialDate={dateObj}
+        initialView={ECalendarViewType.month}
+      >
+        <Popover
+          dateObj={dateObj}
+          events={events as never}
+          onClose={mockOnClose}
+          anchorEl={mockAnchorEl}
+          onEventClick={mockOnEventClick}
+          is12Hour={false}
+        />
+      </CalendarProvider>,
+    );
+
+    // The component wrapper (the parent div of Popover rendered by Testing Library)
+    // shouldn't contain the rendered text directly. It should be appended to document.body
+
+    // Test baseElement which typically maps to document.body in React Testing Library
+    expect(baseElement).toHaveTextContent("Event 1");
+    // Explicitly check that a Popover div is a direct descendant somewhere under body
+    const popoverContent = screen.getByTestId(/popover-content/);
+    expect(popoverContent.parentElement).toBe(document.body);
+  });
+
   it("calls onEventClick and onClose when an event is clicked", () => {
     render(
       <CalendarProvider
