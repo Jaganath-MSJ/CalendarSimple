@@ -6,7 +6,7 @@ import { dateFn } from "../../../utils";
 import * as CalendarContextModule from "../../../context/CalendarContext";
 
 // Provide a mock ResizeObserver since child components might need it
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
+globalThis.ResizeObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),

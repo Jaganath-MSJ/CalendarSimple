@@ -1,10 +1,41 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { generateTooltipText, getGmtOffset } from "./formatting";
+import { formatDate } from "./date";
 import { ECalendarViewType } from "../types";
+import { DATE_FORMATS } from "../constants";
 
 describe("formatting utils", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  describe("Token Correctness (Issues 6 & 11)", () => {
+    it("should format day correctly using 'd' instead of old Day.js 'D'", () => {
+      // 01 -> 1
+      const result = formatDate("2024-01-05", DATE_FORMATS.DAY_NUMBER);
+      expect(result).toBe("5");
+    });
+
+    it("should format year correctly using 'yyyy' instead of 'YYYY'", () => {
+      const result = formatDate("2024-01-01", DATE_FORMATS.DATE);
+      expect(result).toContain("2024");
+      expect(result).not.toContain("YYYY");
+    });
+
+    it("should format short day names correctly using 'EEE'", () => {
+      // 2024-01-01 is Monday
+      const result = formatDate("2024-01-01", DATE_FORMATS.SHORT_DAY);
+      expect(result).toBe("Mon");
+    });
+  });
+
+  describe("ISO String Generation (Issue 3)", () => {
+    it("should correctly escape 'T' in string formatting if used directly", () => {
+      // Use literal 'T'
+      const customFormat = "yyyy-MM-dd'T'HH:mm:ss";
+      const result = formatDate("2024-01-01T15:30:00", customFormat);
+      expect(result).toBe("2024-01-01T15:30:00");
+    });
   });
 
   describe("generateTooltipText", () => {

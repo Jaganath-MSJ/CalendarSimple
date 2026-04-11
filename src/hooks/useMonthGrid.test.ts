@@ -21,6 +21,27 @@ describe("useMonthGrid Hook", () => {
     expect(firstWeek[4].displayDay).toBe(1); // Feb 1
   });
 
+  it("handles custom 5-day week bounds without array out-of-bounds crash (Issue 2)", () => {
+    const customStart = 1; // Monday
+    const customEnd = 5; // Friday
+
+    const { result } = renderHook(() =>
+      useMonthGrid(selectedDate, [], customStart, customEnd),
+    );
+    const grid = result.current;
+    expect(grid.length).toBeGreaterThanOrEqual(4);
+
+    // Each row should only be exactly 5 days long
+    const firstWeek = grid[0];
+    expect(firstWeek).toHaveLength(5);
+
+    // Assert there are no undefined entries in the row
+    firstWeek.forEach((dayInfo) => {
+      expect(dayInfo).toBeDefined();
+      expect(dayInfo.currentDate).toBeDefined();
+    });
+  });
+
   it("assigns events to slots in Tetris pattern", () => {
     const events: CalendarEvent[] = [
       { id: "1", title: "A", startDate: "2024-02-01", endDate: "2024-02-03" },
