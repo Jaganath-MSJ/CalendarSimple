@@ -21,41 +21,20 @@ import MonthView from "./components/views/month_view/MonthView";
 import ScheduleView from "./components/views/schedule_view/ScheduleView";
 import CustomDaysView from "./components/views/custom_days_view/CustomDaysView";
 import { CalendarProvider, useCalendar } from "./context/CalendarContext";
+import View from "./components/views/View";
+import useCalendarProps from "./hooks/useCalendarProps";
 
-function CalendarContent({
-  events,
-  is12Hour,
-  dayType,
-  pastYearLength,
-  futureYearLength,
-  width,
-  height,
-  onEventClick,
-  onNavigate,
-  onViewChange,
-  showCurrentTime,
-  maxEvents,
-  autoScrollToCurrentTime,
-  weekStartsOn,
-  weekEndsOn,
-  minHour,
-  maxHour,
-  customDays,
-  theme,
-  classNames,
-  showAllDayRow,
-  renderScheduleSeparator,
-  eventOverlapOffset,
-  enableEnrichedEvents,
-  enrichedEventsByDate,
-  eventsAreSorted,
-  isEventOrderingEnabled,
-  sortedMonthView,
-  testId,
-  locale,
-  localeMessages,
-  ...restProps
-}: CalendarContentProps) {
+function CalendarContent(props: CalendarContentProps) {
+  const {
+    testId,
+    classNames,
+    renderHeader,
+    width,
+    height,
+    onNavigate,
+    onViewChange,
+  } = useCalendarProps(props);
+
   const {
     state: { view, selectedDate },
     dispatch,
@@ -63,72 +42,17 @@ function CalendarContent({
 
   // Sync view from props to context
   useEffect(() => {
-    if (restProps.view) {
-      dispatch({ type: "SET_VIEW", payload: restProps.view });
+    if (props.view) {
+      dispatch({ type: "SET_VIEW", payload: props.view });
     }
-  }, [restProps.view, dispatch]);
+  }, [props.view, dispatch]);
 
   // Sync external date prop to context if it changes
   useEffect(() => {
-    if (restProps.selectedDate) {
-      dispatch({ type: "SET_DATE", payload: dateFn(restProps.selectedDate) });
+    if (props.selectedDate) {
+      dispatch({ type: "SET_DATE", payload: dateFn(props.selectedDate) });
     }
-  }, [restProps.selectedDate, dispatch]);
-
-  const getViewComponent = (view: ECalendarViewType) => {
-    const commonProps = {
-      events,
-      is12Hour,
-      dayType,
-      onEventClick,
-      theme,
-      classNames,
-      showCurrentTime,
-      showAllDayRow,
-      maxEvents,
-      autoScrollToCurrentTime,
-      weekStartsOn,
-      weekEndsOn,
-      minHour,
-      maxHour,
-      renderEvent: restProps.renderEvent,
-      renderScheduleSeparator,
-      eventOverlapOffset,
-      renderHourCell: restProps.renderHourCell,
-      renderDateCell: restProps.renderDateCell,
-      enableEnrichedEvents,
-      enrichedEventsByDate,
-      eventsAreSorted,
-      isEventOrderingEnabled,
-      sortedMonthView,
-      locale,
-      localeMessages,
-    };
-    switch (view) {
-      case ECalendarViewType.day:
-        return <DayView {...commonProps} />;
-      case ECalendarViewType.week:
-        return <WeekView {...commonProps} />;
-      case ECalendarViewType.month:
-        return (
-          <MonthView
-            {...commonProps}
-            {...restProps}
-            onDateClick={restProps.onDateClick}
-            onMoreClick={restProps.onMoreClick}
-            width={width}
-            height={height}
-          />
-        );
-      case ECalendarViewType.schedule:
-        return <ScheduleView {...commonProps} />;
-      case ECalendarViewType.customDays:
-        if (!customDays || customDays < 1 || customDays > 10) return null;
-        return <CustomDaysView {...commonProps} customDays={customDays} />;
-      default:
-        return null;
-    }
-  };
+  }, [props.selectedDate, dispatch]);
 
   return (
     <section
@@ -141,8 +65,8 @@ function CalendarContent({
       }
       className={cx(styles.calendar, classNames?.root)}
     >
-      {restProps.renderHeader ? (
-        restProps.renderHeader({
+      {renderHeader ? (
+        renderHeader({
           currentDate: selectedDate.toJSDate(),
           view,
           onNavigate: (date: Date) => {
@@ -158,20 +82,9 @@ function CalendarContent({
           },
         })
       ) : (
-        <Header
-          headerClassName={classNames?.header}
-          events={events}
-          onNavigate={onNavigate}
-          onViewChange={onViewChange}
-          pastYearLength={pastYearLength}
-          futureYearLength={futureYearLength}
-          customDays={customDays}
-          resetDateOnViewChange={restProps.resetDateOnViewChange}
-          locale={locale}
-          localeMessages={localeMessages}
-        />
+        <Header />
       )}
-      {getViewComponent(view)}
+      <View />
     </section>
   );
 }
@@ -179,7 +92,7 @@ function CalendarContent({
 function Calendar(props: CalendarProps = defaultCalendarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const allProps = { ...defaultCalendarProps, ...props };
+  const allProps: CalendarProps = { ...defaultCalendarProps, ...props };
   const { width: observedWidth, height: observedHeight } = useResizeObserver(
     containerRef,
     !!allProps.width && !!allProps.height,
@@ -199,7 +112,7 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
 
   // Filter out events where the end date is before the start date
   const validEvents = useEvents(
-    allProps.events,
+    allProps.events || [],
     allProps.eventsAreSorted,
     allProps.enableEnrichedEvents,
   );
@@ -207,9 +120,10 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
   return (
     <CalendarProvider
       initialDate={initialDate}
-      initialView={allProps.view}
+      initialView={allProps.view || ECalendarViewType.month}
       initialCustomDays={allProps.customDays}
       testId={allProps.testId}
+      config={{ ...allProps, width, height }}
     >
       <div
         ref={containerRef}
@@ -220,16 +134,44 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
           flexDirection: "column",
           overflow: "hidden",
         }}
+        className={cx(
+          allProps.children ? styles.calendar : undefined,
+          allProps.children ? allProps.classNames?.root : undefined,
+        )}
       >
-        <CalendarContent
-          {...allProps}
-          width={width}
-          height={height}
-          events={validEvents}
-        />
+        {allProps.children ? (
+          allProps.children
+        ) : (
+          <CalendarContent
+            {...(allProps as unknown as CalendarContentProps)}
+            width={width}
+            height={height}
+            events={validEvents}
+          />
+        )}
       </div>
     </CalendarProvider>
   );
 }
 
-export default memo(Calendar);
+const MemoizedCalendar = memo(
+  Calendar,
+) as unknown as React.NamedExoticComponent<CalendarProps> & {
+  Header: typeof Header;
+  View: typeof View;
+  DayView: typeof DayView;
+  WeekView: typeof WeekView;
+  MonthView: typeof MonthView;
+  ScheduleView: typeof ScheduleView;
+  CustomDaysView: typeof CustomDaysView;
+};
+
+MemoizedCalendar.Header = Header;
+MemoizedCalendar.View = View;
+MemoizedCalendar.DayView = DayView;
+MemoizedCalendar.WeekView = WeekView;
+MemoizedCalendar.MonthView = MonthView;
+MemoizedCalendar.ScheduleView = ScheduleView;
+MemoizedCalendar.CustomDaysView = CustomDaysView;
+
+export default MemoizedCalendar;

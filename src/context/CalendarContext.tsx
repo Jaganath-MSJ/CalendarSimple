@@ -7,30 +7,32 @@ import React, {
   Dispatch,
 } from "react";
 import { dateFn, DateType } from "../utils";
-import { ECalendarViewType } from "../types";
+import { ECalendarViewType, CalendarProps } from "../types";
 import { CALENDAR_ACTIONS } from "../constants";
 
-interface CalendarState {
+export interface CalendarState {
   selectedDate: DateType;
   view: ECalendarViewType;
   customDays?: number;
 }
 
-type CalendarAction =
+export type CalendarAction =
   | { type: typeof CALENDAR_ACTIONS.SET_DATE; payload: DateType }
   | { type: typeof CALENDAR_ACTIONS.SET_VIEW; payload: ECalendarViewType }
   | { type: typeof CALENDAR_ACTIONS.NEXT }
   | { type: typeof CALENDAR_ACTIONS.PREV }
   | { type: typeof CALENDAR_ACTIONS.TODAY };
 
-const CalendarContext = createContext<
-  | {
-      state: CalendarState;
-      dispatch: Dispatch<CalendarAction>;
-      testId?: string;
-    }
-  | undefined
->(undefined);
+export interface CalendarContextValue {
+  state: CalendarState;
+  dispatch: Dispatch<CalendarAction>;
+  testId?: string;
+  config: Omit<CalendarProps, "children" | "selectedDate" | "view">;
+}
+
+export const CalendarContext = createContext<CalendarContextValue | undefined>(
+  undefined,
+);
 
 function calendarReducer(
   state: CalendarState,
@@ -83,12 +85,13 @@ function calendarReducer(
   }
 }
 
-interface CalendarProviderProps {
+export interface CalendarProviderProps {
   children: ReactNode;
   initialDate: DateType;
   initialView: ECalendarViewType;
   initialCustomDays?: number;
   testId?: string;
+  config?: Omit<CalendarProps, "children" | "selectedDate" | "view">;
 }
 
 export function CalendarProvider({
@@ -97,6 +100,7 @@ export function CalendarProvider({
   initialView,
   initialCustomDays,
   testId,
+  config,
 }: CalendarProviderProps) {
   const [state, dispatch] = useReducer(calendarReducer, {
     selectedDate: initialDate,
@@ -104,7 +108,17 @@ export function CalendarProvider({
     customDays: initialCustomDays,
   });
 
-  const value = useMemo(() => ({ state, dispatch, testId }), [state, testId]);
+  const value = useMemo(
+    () => ({
+      state,
+      dispatch,
+      testId,
+      config:
+        config ||
+        ({} as Omit<CalendarProps, "children" | "selectedDate" | "view">),
+    }),
+    [state, testId, config],
+  );
 
   return (
     <CalendarContext.Provider value={value}>

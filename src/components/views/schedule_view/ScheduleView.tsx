@@ -11,32 +11,36 @@ import styles from "./ScheduleView.module.css";
 import { DATE_FORMATS, LAYOUT_CONSTANTS } from "../../../constants";
 import useScheduleView from "../../../hooks/useScheduleView";
 import { useCalendar } from "../../../context/CalendarContext";
+import useCalendarProps from "../../../hooks/useCalendarProps";
 
-interface ScheduleViewProps extends Pick<
-  CalendarContentProps,
-  | "events"
-  | "is12Hour"
-  | "dayType"
-  | "onEventClick"
-  | "theme"
-  | "classNames"
-  | "autoScrollToCurrentTime"
-  | "renderEvent"
-  | "renderScheduleSeparator"
-  | "locale"
-> {}
+export type ScheduleViewProps = Partial<
+  Pick<
+    CalendarContentProps,
+    | "events"
+    | "is12Hour"
+    | "dayType"
+    | "onEventClick"
+    | "theme"
+    | "classNames"
+    | "autoScrollToCurrentTime"
+    | "renderEvent"
+    | "renderScheduleSeparator"
+    | "locale"
+  >
+>;
 
-export default function ScheduleView({
-  events,
-  onEventClick,
-  is12Hour,
-  theme,
-  classNames,
-  autoScrollToCurrentTime,
-  renderEvent,
-  renderScheduleSeparator,
-  locale,
-}: ScheduleViewProps) {
+export default function ScheduleView(props: ScheduleViewProps) {
+  const {
+    events,
+    onEventClick,
+    is12Hour,
+    theme,
+    classNames,
+    autoScrollToCurrentTime,
+    renderEvent,
+    renderScheduleSeparator,
+    locale,
+  } = useCalendarProps(props);
   const { testId } = useCalendar();
   const { todayRef, groupedEvents, renderEventTime, renderEventTitle } =
     useScheduleView({

@@ -210,7 +210,10 @@ function App() {
         autoScrollToCurrentTime
         // width={400}
         // height={400}
-      />
+      >
+        <Calendar.Header />
+        <Calendar.View />
+      </Calendar>
     </div>
   );
 }

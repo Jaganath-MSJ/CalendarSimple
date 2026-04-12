@@ -38,6 +38,8 @@ export interface RenderDateCellProps {
 }
 
 export interface CalendarProps {
+  children?: ReactNode;
+
   // --- Data & State ---
   events?: CalendarEvent[];
   selectedDate?: Date;

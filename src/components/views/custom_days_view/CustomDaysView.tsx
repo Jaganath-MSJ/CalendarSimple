@@ -8,60 +8,64 @@ import { CalendarContentProps } from "../../../types";
 import { getDayListNames, DATE_FORMATS } from "../../../constants";
 import styles from "./CustomDaysView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
+import useCalendarProps from "../../../hooks/useCalendarProps";
 import TimeColumn from "../../core/time_column/TimeColumn";
 import DayColumn from "../../core/day_column/DayColumn";
 import AllDayBanner from "../../core/all_day_banner/AllDayBanner";
 
-interface CustomViewProps extends Pick<
-  CalendarContentProps,
-  | "events"
-  | "is12Hour"
-  | "dayType"
-  | "onEventClick"
-  | "theme"
-  | "classNames"
-  | "showCurrentTime"
-  | "maxEvents"
-  | "autoScrollToCurrentTime"
-  | "minHour"
-  | "maxHour"
-  | "customDays"
-  | "renderEvent"
-  | "renderHourCell"
-  | "renderDateCell"
-  | "showAllDayRow"
-  | "eventOverlapOffset"
-  | "enableEnrichedEvents"
-  | "enrichedEventsByDate"
-  | "eventsAreSorted"
-  | "isEventOrderingEnabled"
-  | "locale"
-> {}
+export type CustomViewProps = Partial<
+  Pick<
+    CalendarContentProps,
+    | "events"
+    | "is12Hour"
+    | "dayType"
+    | "onEventClick"
+    | "theme"
+    | "classNames"
+    | "showCurrentTime"
+    | "maxEvents"
+    | "autoScrollToCurrentTime"
+    | "minHour"
+    | "maxHour"
+    | "customDays"
+    | "renderEvent"
+    | "renderHourCell"
+    | "renderDateCell"
+    | "showAllDayRow"
+    | "eventOverlapOffset"
+    | "enableEnrichedEvents"
+    | "enrichedEventsByDate"
+    | "eventsAreSorted"
+    | "isEventOrderingEnabled"
+    | "locale"
+  >
+>;
 
-function CustomView({
-  events,
-  onEventClick,
-  dayType,
-  is12Hour,
-  theme,
-  classNames,
-  showCurrentTime,
-  maxEvents,
-  autoScrollToCurrentTime,
-  minHour,
-  maxHour,
-  customDays = 3,
-  renderEvent,
-  renderHourCell,
-  renderDateCell,
-  showAllDayRow,
-  eventOverlapOffset,
-  enableEnrichedEvents,
-  enrichedEventsByDate,
-  eventsAreSorted,
-  isEventOrderingEnabled,
-  locale,
-}: CustomViewProps) {
+function CustomView(props: CustomViewProps) {
+  const {
+    events,
+    onEventClick,
+    dayType,
+    is12Hour,
+    theme,
+    classNames,
+    showCurrentTime,
+    maxEvents,
+    autoScrollToCurrentTime,
+    minHour,
+    maxHour,
+    customDays = 3,
+    renderEvent,
+    renderHourCell,
+    renderDateCell,
+    showAllDayRow,
+    eventOverlapOffset,
+    enableEnrichedEvents,
+    enrichedEventsByDate,
+    eventsAreSorted,
+    isEventOrderingEnabled,
+    locale,
+  } = useCalendarProps(props);
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, testId } = useCalendar();
   const { selectedDate } = state;

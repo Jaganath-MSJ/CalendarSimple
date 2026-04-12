@@ -26,6 +26,7 @@ import styles from "./Header.module.css";
 import LeftArrow from "../../assets/LeftArrow";
 import RightArrow from "../../assets/RightArrow";
 import { useCalendar } from "../../context/CalendarContext";
+import useCalendarProps from "../../hooks/useCalendarProps";
 
 enum EMonthOption {
   add = "add",
@@ -37,33 +38,40 @@ enum EYearOption {
   year = "year",
 }
 
-interface HeaderProps extends Pick<
-  CalendarContentProps,
-  | "pastYearLength"
-  | "futureYearLength"
-  | "onNavigate"
-  | "onViewChange"
-  | "events"
-  | "customDays"
-  | "resetDateOnViewChange"
-  | "locale"
-  | "localeMessages"
-> {
+export type HeaderProps = Partial<
+  Pick<
+    CalendarContentProps,
+    | "pastYearLength"
+    | "futureYearLength"
+    | "onNavigate"
+    | "onViewChange"
+    | "events"
+    | "customDays"
+    | "resetDateOnViewChange"
+    | "locale"
+    | "localeMessages"
+  >
+> & {
   headerClassName?: string;
-}
+};
 
-function Header({
-  headerClassName,
-  pastYearLength,
-  futureYearLength,
-  onNavigate,
-  onViewChange,
-  customDays,
-  events,
-  resetDateOnViewChange,
-  locale,
-  localeMessages,
-}: HeaderProps) {
+function Header(props: HeaderProps) {
+  const {
+    pastYearLength,
+    futureYearLength,
+    onNavigate,
+    onViewChange,
+    customDays,
+    events,
+    resetDateOnViewChange,
+    locale,
+    localeMessages,
+    classNames,
+  } = useCalendarProps(props) as CalendarContentProps & {
+    headerClassName?: string;
+  };
+
+  const finalHeaderClassName = props.headerClassName || classNames?.header;
   const { state, dispatch, testId } = useCalendar();
   const { selectedDate, view } = state;
 
@@ -172,7 +180,7 @@ function Header({
 
   return (
     <div
-      className={cx(styles.header, headerClassName)}
+      className={cx(styles.header, finalHeaderClassName)}
       data-testid={`${testId}-header`}
     >
       <div className={styles.navigation}>

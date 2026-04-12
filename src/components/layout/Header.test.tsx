@@ -24,6 +24,8 @@ describe("Header Component", () => {
     vi.spyOn(CalendarContextModule, "useCalendar").mockReturnValue({
       state: mockState,
       dispatch: mockDispatch as never,
+      testId: undefined,
+      config: {},
     });
   });
 

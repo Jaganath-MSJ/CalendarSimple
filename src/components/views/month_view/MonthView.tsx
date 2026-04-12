@@ -12,58 +12,63 @@ import useMonthGrid from "../../../hooks/useMonthGrid";
 import MonthEventItem from "../../core/month_event_item/MonthEventItem";
 import styles from "./MonthView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
+import useCalendarProps from "../../../hooks/useCalendarProps";
 
-interface MonthViewProps extends Pick<
-  CalendarContentProps,
-  | "events"
-  | "is12Hour"
-  | "selectable"
-  | "maxEvents"
-  | "dayType"
-  | "width"
-  | "height"
-  | "onDateClick"
-  | "onEventClick"
-  | "onMoreClick"
-  | "theme"
-  | "classNames"
-  | "weekStartsOn"
-  | "weekEndsOn"
-  | "showAdjacentMonths"
-  | "renderEvent"
-  | "renderDateCell"
-  | "enableEnrichedEvents"
-  | "enrichedEventsByDate"
-  | "eventsAreSorted"
-  | "isEventOrderingEnabled"
-  | "sortedMonthView"
-  | "locale"
-> {}
+export type MonthViewProps = Partial<
+  Pick<
+    CalendarContentProps,
+    | "events"
+    | "is12Hour"
+    | "selectable"
+    | "maxEvents"
+    | "dayType"
+    | "width"
+    | "height"
+    | "onDateClick"
+    | "onEventClick"
+    | "onMoreClick"
+    | "theme"
+    | "classNames"
+    | "weekStartsOn"
+    | "weekEndsOn"
+    | "showAdjacentMonths"
+    | "renderEvent"
+    | "renderDateCell"
+    | "enableEnrichedEvents"
+    | "enrichedEventsByDate"
+    | "eventsAreSorted"
+    | "isEventOrderingEnabled"
+    | "sortedMonthView"
+    | "locale"
+  >
+>;
 
-function MonthView({
-  dayType,
-  width,
-  height,
-  onDateClick,
-  onEventClick,
-  onMoreClick,
-  selectable,
-  events,
-  is12Hour,
-  classNames,
-  weekStartsOn,
-  weekEndsOn,
-  showAdjacentMonths,
-  renderEvent,
-  renderDateCell,
-  enableEnrichedEvents,
-  enrichedEventsByDate,
-  eventsAreSorted,
-  isEventOrderingEnabled,
-  sortedMonthView,
-  locale,
-  ...restProps
-}: MonthViewProps) {
+function MonthView(props: MonthViewProps) {
+  const {
+    dayType,
+    width,
+    height,
+    onDateClick,
+    onEventClick,
+    onMoreClick,
+    selectable,
+    events,
+    is12Hour,
+    classNames,
+    weekStartsOn,
+    weekEndsOn,
+    showAdjacentMonths,
+    renderEvent,
+    renderDateCell,
+    enableEnrichedEvents,
+    enrichedEventsByDate,
+    eventsAreSorted,
+    isEventOrderingEnabled,
+    sortedMonthView,
+    locale,
+    theme,
+    maxEvents: propsMaxEvents,
+  } = useCalendarProps(props);
   const { state, dispatch, testId } = useCalendar();
   const { selectedDate } = state;
 
@@ -83,12 +88,12 @@ function MonthView({
 
   const maxEvents = useMemo(
     () =>
-      restProps.maxEvents ??
+      propsMaxEvents ??
       calculateMaxEvents(
         typeof height === "number" ? height : 0,
         calendarGrid.length || LAYOUT_CONSTANTS.MIN_ROWS,
       ),
-    [restProps.maxEvents, height, calendarGrid.length],
+    [propsMaxEvents, height, calendarGrid.length],
   );
 
   const onClickDateHandler = useCallback(
@@ -154,7 +159,7 @@ function MonthView({
                   dataClassName={classNames?.event}
                   selectedClassName={classNames?.selected}
                   todayClassName={classNames?.today}
-                  theme={restProps.theme}
+                  theme={theme}
                   maxEvents={maxEvents}
                   totalEvents={dayInfo.totalEvents}
                   is12Hour={is12Hour}

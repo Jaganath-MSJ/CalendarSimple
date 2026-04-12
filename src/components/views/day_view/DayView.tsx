@@ -8,58 +8,62 @@ import { CalendarContentProps } from "../../../types";
 import { getDayListNames, DATE_FORMATS } from "../../../constants";
 import styles from "./DayView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
+import useCalendarProps from "../../../hooks/useCalendarProps";
 import TimeColumn from "../../core/time_column/TimeColumn";
 import DayColumn from "../../core/day_column/DayColumn";
 import AllDayBanner from "../../core/all_day_banner/AllDayBanner";
 
-interface DayViewProps extends Pick<
-  CalendarContentProps,
-  | "events"
-  | "is12Hour"
-  | "dayType"
-  | "onEventClick"
-  | "theme"
-  | "classNames"
-  | "showCurrentTime"
-  | "maxEvents"
-  | "autoScrollToCurrentTime"
-  | "minHour"
-  | "maxHour"
-  | "renderEvent"
-  | "renderHourCell"
-  | "renderDateCell"
-  | "showAllDayRow"
-  | "eventOverlapOffset"
-  | "enableEnrichedEvents"
-  | "enrichedEventsByDate"
-  | "eventsAreSorted"
-  | "isEventOrderingEnabled"
-  | "locale"
-> {}
+export type DayViewProps = Partial<
+  Pick<
+    CalendarContentProps,
+    | "events"
+    | "is12Hour"
+    | "dayType"
+    | "onEventClick"
+    | "theme"
+    | "classNames"
+    | "showCurrentTime"
+    | "maxEvents"
+    | "autoScrollToCurrentTime"
+    | "minHour"
+    | "maxHour"
+    | "renderEvent"
+    | "renderHourCell"
+    | "renderDateCell"
+    | "showAllDayRow"
+    | "eventOverlapOffset"
+    | "enableEnrichedEvents"
+    | "enrichedEventsByDate"
+    | "eventsAreSorted"
+    | "isEventOrderingEnabled"
+    | "locale"
+  >
+>;
 
-function DayView({
-  events,
-  onEventClick,
-  dayType,
-  is12Hour,
-  theme,
-  classNames,
-  showCurrentTime,
-  maxEvents,
-  autoScrollToCurrentTime,
-  minHour,
-  maxHour,
-  renderEvent,
-  renderHourCell,
-  renderDateCell,
-  showAllDayRow,
-  eventOverlapOffset,
-  enableEnrichedEvents,
-  enrichedEventsByDate,
-  eventsAreSorted,
-  isEventOrderingEnabled,
-  locale,
-}: DayViewProps) {
+function DayView(props: DayViewProps) {
+  const {
+    events,
+    onEventClick,
+    dayType,
+    is12Hour,
+    theme,
+    classNames,
+    showCurrentTime,
+    maxEvents,
+    autoScrollToCurrentTime,
+    minHour,
+    maxHour,
+    renderEvent,
+    renderHourCell,
+    renderDateCell,
+    showAllDayRow,
+    eventOverlapOffset,
+    enableEnrichedEvents,
+    enrichedEventsByDate,
+    eventsAreSorted,
+    isEventOrderingEnabled,
+    locale,
+  } = useCalendarProps(props);
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, testId } = useCalendar();
   const { selectedDate } = state;
