@@ -1,6 +1,10 @@
 import React, { CSSProperties } from "react";
 import cx from "classnames";
-import { formatDate, generateTooltipText } from "../../../utils";
+import {
+  formatDate,
+  generateTooltipText,
+  getContrastColor,
+} from "../../../utils";
 import { CalendarContentProps } from "../../../types";
 import { DayEventLayout } from "../../../hooks/useDayEventLayout";
 import { LAYOUT_CONSTANTS, DATE_FORMATS } from "../../../constants";
@@ -29,6 +33,10 @@ export function DayWeekEventItem({
     item.height >= LAYOUT_CONSTANTS.TINY_EVENT_HEIGHT;
   const isTiny = item.height < LAYOUT_CONSTANTS.TINY_EVENT_HEIGHT;
 
+  const eventBgColor =
+    item.event.style?.backgroundColor || LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
+  const textColor = getContrastColor(String(eventBgColor));
+
   return (
     <div
       className={cx(styles.eventItem, classNames?.event, {
@@ -44,6 +52,7 @@ export function DayWeekEventItem({
           zIndex: item.zIndex,
           "--event-width": `${item.width}%`,
           backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+          color: textColor,
           position: "absolute",
           ...item.event.style,
         } as CSSProperties

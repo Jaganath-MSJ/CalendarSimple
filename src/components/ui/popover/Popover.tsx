@@ -15,6 +15,7 @@ import {
   isBeforeDate,
   isAfterDate,
   generateTooltipText,
+  getContrastColor,
 } from "../../../utils";
 import {
   CalendarContentProps,
@@ -145,6 +146,10 @@ function Popover({
             is12Hour,
           );
 
+          const eventBgColor =
+            item.style?.backgroundColor || LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
+          const textColor = getContrastColor(String(eventBgColor));
+
           return (
             <div
               key={item.id || `pop-${idx}`}
@@ -156,6 +161,7 @@ function Popover({
               data-testid={`${testId}-${item.id}-popover-item`}
               style={{
                 backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                color: textColor,
                 ...item.style,
               }}
               onClick={(e) => {

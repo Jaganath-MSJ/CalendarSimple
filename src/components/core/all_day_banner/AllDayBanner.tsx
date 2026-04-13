@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import cx from "classnames";
-import { DateType, getGmtOffset, generateTooltipText } from "../../../utils";
+import {
+  DateType,
+  getGmtOffset,
+  generateTooltipText,
+  getContrastColor,
+} from "../../../utils";
 import {
   CalendarEvent,
   CalendarContentProps,
@@ -132,6 +137,11 @@ export default function AllDayBanner({
             const widthPct = ((endIndex - startIndex + 1) / totalCols) * 100;
             const topPx = row * 24 + 2;
 
+            const eventBgColor =
+              event.style?.backgroundColor ||
+              LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
+            const textColor = getContrastColor(String(eventBgColor));
+
             return (
               <div
                 key={event.id || `banner-evt-${idx}`}
@@ -144,6 +154,7 @@ export default function AllDayBanner({
                   left: `${leftPct}%`,
                   width: `calc(${widthPct}% - 4px)`,
                   backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                  color: textColor,
                   ...event.style,
                 }}
                 data-testid={`${testId}-${event.id}-all-day-event`}

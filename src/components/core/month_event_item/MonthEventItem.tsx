@@ -1,11 +1,16 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import cx from "classnames";
 import {
   CalendarContentProps,
   EventListType,
   ECalendarViewType,
 } from "../../../types";
-import { getDiffDays, generateTooltipText, DateType } from "../../../utils";
+import {
+  getDiffDays,
+  generateTooltipText,
+  DateType,
+  getContrastColor,
+} from "../../../utils";
 import styles from "./MonthEventItem.module.css";
 import Popover from "../../ui/popover/Popover";
 import { LAYOUT_CONSTANTS, defaultTheme } from "../../../constants";
@@ -65,6 +70,10 @@ function MonthEventItem({
   const { testId } = useCalendar();
   const [showPopover, setShowPopover] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+
+  const handleClosePopover = useCallback(() => {
+    setShowPopover(false);
+  }, []);
 
   const styleSource = isSelected
     ? { ...defaultTheme.selected, ...theme?.selected }
@@ -141,7 +150,19 @@ function MonthEventItem({
                     ECalendarViewType.month,
                     is12Hour,
                   );
-                  const width = `${cellWidth * diffDates - LAYOUT_CONSTANTS.EVENT_ITEM_PADDING}px`;
+
+                  const eventBgColor =
+                    item.style?.backgroundColor ||
+                    LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
+                  const textColor = getContrastColor(String(eventBgColor));
+
+                  // If cellWidth is 0, we can't calculate a proper spanning width.
+                  // Fallback to a percentage or just let it be 0 until measured.
+                  const calculatedWidth =
+                    cellWidth > 0
+                      ? `${cellWidth * diffDates - LAYOUT_CONSTANTS.EVENT_ITEM_PADDING}px`
+                      : "100%";
+
                   const id = item.id || `${item.startDate}-${index}`;
 
                   return (
@@ -151,8 +172,9 @@ function MonthEventItem({
                       id={item.id}
                       data-testid={`${testId}-${id}-month-event-item`}
                       style={{
-                        width,
+                        width: calculatedWidth,
                         backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                        color: textColor,
                         ...item.style,
                       }}
                       title={tooltipText}
@@ -186,7 +208,7 @@ function MonthEventItem({
                         dateObj={dateObj}
                         events={allDayEvents}
                         onEventClick={onEventClick}
-                        onClose={() => setShowPopover(false)}
+                        onClose={handleClosePopover}
                         anchorEl={anchorEl}
                         is12Hour={is12Hour}
                         renderEvent={renderEvent}
