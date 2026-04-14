@@ -9,32 +9,10 @@ import { CalendarEvent, RenderDateCellProps } from "../../../types";
 describe("MonthView Component", () => {
   const mockDate = dateFn("2024-03-01T12:00:00Z");
 
-  beforeEach(() => {
-    vi.spyOn(CalendarContextModule, "useCalendar").mockReturnValue({
-      state: {
-        selectedDate: mockDate,
-        view: "month",
-      },
-      dispatch: vi.fn(),
-    } as never);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  const defaultProps = {
+  const defaultConfig = {
     events: [],
-    dayType: "half" as const,
     width: 800,
     height: 600,
-    weekStartsOn: 0,
-    weekEndsOn: 6,
-    is12Hour: false,
-    selectable: true,
-    theme: {},
-    eventProps: {},
-    classNames: {},
     locale: "en",
     localeMessages: {
       today: "Today",
@@ -44,6 +22,32 @@ describe("MonthView Component", () => {
       schedule: "Schedule",
       days: "Days",
     },
+  };
+
+  beforeEach(() => {
+    vi.spyOn(CalendarContextModule, "useCalendar").mockReturnValue({
+      state: {
+        selectedDate: mockDate,
+        view: "month",
+      },
+      config: defaultConfig,
+      dispatch: vi.fn(),
+    } as never);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const defaultProps = {
+    dayType: "half" as const,
+    weekStartsOn: 0,
+    weekEndsOn: 6,
+    is12Hour: false,
+    selectable: true,
+    theme: {},
+    eventProps: {},
+    classNames: {},
     showAdjacentMonths: true,
     enableEnrichedEvents: false,
     eventsAreSorted: false,
@@ -82,7 +86,15 @@ describe("MonthView Component", () => {
         endDate: "2024-03-15",
       },
     ];
-    render(<MonthView {...defaultProps} events={events as never} />);
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: {
+        selectedDate: mockDate,
+        view: "month",
+      },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+    render(<MonthView {...defaultProps} />);
 
     expect(screen.getByText("Test Event")).toBeInTheDocument();
   });
@@ -104,10 +116,18 @@ describe("MonthView Component", () => {
       },
     ];
 
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: {
+        selectedDate: mockDate,
+        view: "month",
+      },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
     render(
       <MonthView
         {...defaultProps}
-        events={events as never}
         renderEvent={customRenderEvent}
         renderDateCell={customRenderDateCell}
       />,

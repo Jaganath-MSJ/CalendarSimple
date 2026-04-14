@@ -17,13 +17,10 @@ import useCalendarProps from "../../../hooks/useCalendarProps";
 export type MonthViewProps = Partial<
   Pick<
     CalendarContentProps,
-    | "events"
     | "is12Hour"
     | "selectable"
     | "maxEvents"
     | "dayType"
-    | "width"
-    | "height"
     | "onDateClick"
     | "onEventClick"
     | "onMoreClick"
@@ -39,7 +36,6 @@ export type MonthViewProps = Partial<
     | "eventsAreSorted"
     | "isEventOrderingEnabled"
     | "sortedMonthView"
-    | "locale"
   >
 >;
 

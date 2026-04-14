@@ -7,7 +7,21 @@ import MonthView from "./month_view/MonthView";
 import ScheduleView from "./schedule_view/ScheduleView";
 import CustomDaysView from "./custom_days_view/CustomDaysView";
 
-export default function View(props: Partial<CalendarContentProps>) {
+export type ViewProps = Partial<
+  Omit<
+    CalendarContentProps,
+    | "events"
+    | "locale"
+    | "pastYearLength"
+    | "futureYearLength"
+    | "onNavigate"
+    | "onViewChange"
+    | "resetDateOnViewChange"
+    | "localeMessages"
+  >
+>;
+
+export default function View(props: ViewProps) {
   const {
     state: { view, customDays },
   } = useCalendar();

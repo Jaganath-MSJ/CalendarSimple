@@ -16,7 +16,6 @@ import AllDayBanner from "../../core/all_day_banner/AllDayBanner";
 export type WeekViewProps = Partial<
   Pick<
     CalendarContentProps,
-    | "events"
     | "is12Hour"
     | "dayType"
     | "onEventClick"
@@ -38,7 +37,6 @@ export type WeekViewProps = Partial<
     | "enrichedEventsByDate"
     | "eventsAreSorted"
     | "isEventOrderingEnabled"
-    | "locale"
   >
 >;
 

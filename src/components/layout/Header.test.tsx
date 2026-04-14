@@ -21,11 +21,16 @@ describe("Header Component", () => {
       view: ECalendarViewType.month,
     };
 
+    const defaultConfig = {
+      events: [],
+      locale: "en",
+    };
+
     vi.spyOn(CalendarContextModule, "useCalendar").mockReturnValue({
       state: mockState,
       dispatch: mockDispatch as never,
       testId: undefined,
-      config: {},
+      config: defaultConfig,
     });
   });
 
@@ -34,13 +39,11 @@ describe("Header Component", () => {
   });
 
   const defaultProps = {
-    events: [],
     pastYearLength: 10,
     futureYearLength: 10,
     resetDateOnViewChange: false,
     onNavigate: vi.fn(),
     onViewChange: vi.fn(),
-    locale: "en",
     localeMessages: {},
   };
 

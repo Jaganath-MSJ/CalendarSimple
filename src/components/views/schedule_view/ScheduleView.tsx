@@ -16,7 +16,6 @@ import useCalendarProps from "../../../hooks/useCalendarProps";
 export type ScheduleViewProps = Partial<
   Pick<
     CalendarContentProps,
-    | "events"
     | "is12Hour"
     | "dayType"
     | "onEventClick"
@@ -25,7 +24,6 @@ export type ScheduleViewProps = Partial<
     | "autoScrollToCurrentTime"
     | "renderEvent"
     | "renderScheduleSeparator"
-    | "locale"
   >
 >;
 

@@ -9,6 +9,19 @@ import { CalendarEvent } from "../../../types";
 describe("ScheduleView Component", () => {
   const mockDate = dateFn("2024-03-01T12:00:00Z");
 
+  const defaultConfig = {
+    events: [],
+    locale: "en",
+    localeMessages: {
+      today: "Today",
+      day: "Day",
+      week: "Week",
+      month: "Month",
+      schedule: "Schedule",
+      days: "Days",
+    },
+  };
+
   beforeEach(() => {
     // Mock getBoundingClientRect for any potential coordinate lookups
     Element.prototype.getBoundingClientRect = vi.fn(() => ({
@@ -28,6 +41,7 @@ describe("ScheduleView Component", () => {
         selectedDate: mockDate,
         view: "schedule",
       },
+      config: defaultConfig,
       dispatch: vi.fn(),
     } as never);
   });
@@ -37,20 +51,10 @@ describe("ScheduleView Component", () => {
   });
 
   const defaultProps = {
-    events: [],
     is12Hour: false,
     theme: {},
     eventProps: {},
     classNames: {},
-    locale: "en",
-    localeMessages: {
-      today: "Today",
-      day: "Day",
-      week: "Week",
-      month: "Month",
-      schedule: "Schedule",
-      days: "Days",
-    },
     autoScrollToCurrentTime: false,
     dayType: "half" as const,
   };
@@ -82,7 +86,15 @@ describe("ScheduleView Component", () => {
       },
     ];
 
-    render(<ScheduleView {...defaultProps} events={events as never} />);
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: {
+        selectedDate: mockDate,
+        view: "schedule",
+      },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+    render(<ScheduleView {...defaultProps} />);
 
     // Check if the date groupings are rendered (1st date)
     expect(screen.getByText("1")).toBeInTheDocument();
@@ -105,13 +117,16 @@ describe("ScheduleView Component", () => {
     ];
     const mockOnEventClick = vi.fn();
 
-    render(
-      <ScheduleView
-        {...defaultProps}
-        events={events as never}
-        onEventClick={mockOnEventClick}
-      />,
-    );
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: {
+        selectedDate: mockDate,
+        view: "schedule",
+      },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(<ScheduleView {...defaultProps} onEventClick={mockOnEventClick} />);
 
     const eventItem = screen.getByText("Clickable Event");
     fireEvent.click(eventItem);
@@ -132,13 +147,16 @@ describe("ScheduleView Component", () => {
       <div data-testid="custom-schedule-event">{event.title}</div>
     );
 
-    render(
-      <ScheduleView
-        {...defaultProps}
-        events={events as never}
-        renderEvent={customRenderEvent}
-      />,
-    );
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: {
+        selectedDate: mockDate,
+        view: "schedule",
+      },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(<ScheduleView {...defaultProps} renderEvent={customRenderEvent} />);
 
     expect(screen.getByTestId("custom-schedule-event")).toBeInTheDocument();
     expect(screen.getByText("Test Event")).toBeInTheDocument();
@@ -164,10 +182,18 @@ describe("ScheduleView Component", () => {
       <hr data-testid={`sep-${date.getDate()}`} />
     );
 
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: {
+        selectedDate: mockDate,
+        view: "schedule",
+      },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
     render(
       <ScheduleView
         {...defaultProps}
-        events={events as never}
         renderScheduleSeparator={renderScheduleSeparator}
       />,
     );

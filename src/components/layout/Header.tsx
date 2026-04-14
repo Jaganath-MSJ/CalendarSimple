@@ -45,10 +45,8 @@ export type HeaderProps = Partial<
     | "futureYearLength"
     | "onNavigate"
     | "onViewChange"
-    | "events"
     | "customDays"
     | "resetDateOnViewChange"
-    | "locale"
     | "localeMessages"
   >
 > & {
