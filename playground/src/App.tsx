@@ -186,12 +186,12 @@ function App() {
         style: { backgroundColor: "emerald" },
       },
 
-      // 16. Day last sec
+      // 16. Day last second
       {
         id: "TC16",
-        startDate: formatDateTime(setTime(addDays(startOfToday, 1), 23, 59)),
+        startDate: formatDateTime(setTime(addDays(startOfToday, 0), 11, 0)),
         endDate: formatDateTime(setTime(addDays(startOfToday, 2), 0, 1)),
-        title: "Day last sec",
+        title: "Day last second",
       },
     ];
   };
@@ -227,7 +227,7 @@ function App() {
           events={eventsList}
           selectedDate={new Date()}
           selectable
-          view={ECalendarViewType.month}
+          view={ECalendarViewType.week}
           is12Hour
           showCurrentTime
           autoScrollToCurrentTime

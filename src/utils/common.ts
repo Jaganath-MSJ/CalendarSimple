@@ -8,7 +8,7 @@
 
 import { LAYOUT_CONSTANTS } from "../constants";
 import { CalendarEvent } from "../types";
-import { dateFn } from "./date";
+import { dateFn, DateType } from "./date";
 
 /**
  * Calculates the maximum number of events that can be displayed in a cell based on the calendar height.
@@ -62,4 +62,32 @@ export function isMultiDay(event: CalendarEvent): boolean {
   const start = dateFn(event.startDate).startOf("day");
   const end = dateFn(event.endDate).startOf("day");
   return !start.equals(dateFn(end));
+}
+
+/**
+ * Calculates the overlap duration in hours of an event with a specific calendar day boundary (00:00 to 23:59).
+ *
+ * @param event - The calendar event.
+ * @param date - The day to check the overlap against.
+ * @returns The overlap duration in hours (e.g., 2.5). Returns 24 for all-day events.
+ */
+export function getEventOverlapInHours(
+  event: CalendarEvent,
+  date: DateType,
+): number {
+  if (isAllDayEvent(event)) return 24;
+
+  const dayStart = dateFn(date).startOf("day");
+  const dayEnd = dateFn(date).endOf("day");
+
+  const eventStart = dateFn(event.startDate);
+  const eventEnd = event.endDate ? dateFn(event.endDate) : eventStart;
+
+  const overlapStart = eventStart > dayStart ? eventStart : dayStart;
+  const overlapEnd = eventEnd < dayEnd ? eventEnd : dayEnd;
+
+  const overlapMs = overlapEnd.valueOf() - overlapStart.valueOf();
+  if (overlapMs <= 0) return 0;
+
+  return overlapMs / (1000 * 60 * 60);
 }

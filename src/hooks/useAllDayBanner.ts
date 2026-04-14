@@ -13,7 +13,11 @@
 import { useMemo } from "react";
 import { dateFn, DateType } from "../utils/date";
 import { CalendarEvent } from "../types";
-import { isAllDayEvent, isMultiDay } from "../utils/common";
+import {
+  isAllDayEvent,
+  isMultiDay,
+  getEventOverlapInHours,
+} from "../utils/common";
 
 /**
  * Represents the layout information for an event displayed in the all-day banner.
@@ -83,17 +87,41 @@ export default function useAllDayBanner(
     );
 
     // -------------------------------------------------------------------------
-    // 2. Event Identification: Intersecting Events
+    // 2. Event Identification: Intersecting Events (via hybrid slices)
     // -------------------------------------------------------------------------
-    const intersectingEvents = multiDayEvents.filter((e) => {
-      const eStart = dateFn(e.startDate).startOf("day");
-      const eEnd = e.endDate ? dateFn(e.endDate).startOf("day") : eStart;
-      // Intersects if start is before viewEnd AND end is after viewStart
-      return (
-        (eStart < viewEnd || eStart.equals(viewEnd)) &&
-        (eEnd > viewStart || eEnd.equals(viewStart))
-      );
+    const processedEvents = multiDayEvents.map((event) => {
+      const exactStart = dateFn(event.startDate);
+      const exactEnd = event.endDate ? dateFn(event.endDate) : exactStart;
+
+      let bannerStartDay = exactStart.startOf("day");
+      if (
+        !isAllDayEvent(event) &&
+        getEventOverlapInHours(event, bannerStartDay) < 12
+      ) {
+        bannerStartDay = bannerStartDay.plus({ days: 1 });
+      }
+
+      let bannerEndDay = exactEnd.startOf("day");
+      if (
+        !isAllDayEvent(event) &&
+        getEventOverlapInHours(event, bannerEndDay) < 12
+      ) {
+        bannerEndDay = bannerEndDay.minus({ days: 1 });
+      }
+
+      return { event, bannerStartDay, bannerEndDay };
     });
+
+    const intersectingEvents = processedEvents.filter(
+      ({ bannerStartDay, bannerEndDay }) => {
+        if (bannerStartDay > bannerEndDay) return false;
+        // Intersects if start is before viewEnd AND end is after viewStart
+        return (
+          (bannerStartDay < viewEnd || bannerStartDay.equals(viewEnd)) &&
+          (bannerEndDay > viewStart || bannerEndDay.equals(viewStart))
+        );
+      },
+    );
 
     // -------------------------------------------------------------------------
     // 3. Event Sorting: Start Date asc, then Duration desc
@@ -103,11 +131,15 @@ export default function useAllDayBanner(
     // reducing visual fragmentation and allowing shorter events to tile underneath nicely.
     // -------------------------------------------------------------------------
     intersectingEvents.sort((a, b) => {
-      const startA = dateFn(a.startDate).valueOf();
-      const startB = dateFn(b.startDate).valueOf();
+      const startA = dateFn(a.event.startDate).valueOf();
+      const startB = dateFn(b.event.startDate).valueOf();
       if (startA === startB) {
-        const durA = a.endDate ? dateFn(a.endDate).valueOf() - startA : 0;
-        const durB = b.endDate ? dateFn(b.endDate).valueOf() - startB : 0;
+        const durA = a.event.endDate
+          ? dateFn(a.event.endDate).valueOf() - startA
+          : 0;
+        const durB = b.event.endDate
+          ? dateFn(b.event.endDate).valueOf() - startB
+          : 0;
         return durB - durA; // longest first
       }
       return startA - startB;
@@ -122,24 +154,19 @@ export default function useAllDayBanner(
     // The goal here is to calculate the start and end column index for each event
     // and assign a vertical "row" index so no overlapping events share a row.
     // -------------------------------------------------------------------------
-    intersectingEvents.forEach((event) => {
-      const eStart = dateFn(event.startDate).startOf("day");
-      const eEnd = event.endDate
-        ? dateFn(event.endDate).startOf("day")
-        : eStart;
-
+    intersectingEvents.forEach(({ event, bannerStartDay, bannerEndDay }) => {
       // Calculate bound indices for the current visible view
       let startIndex = days.findIndex((d) =>
-        dateFn(d).startOf("day").equals(eStart),
+        dateFn(d).startOf("day").equals(bannerStartDay),
       );
-      if (startIndex === -1 && eStart < viewStart) {
+      if (startIndex === -1 && bannerStartDay < viewStart) {
         startIndex = 0;
       }
 
       let endIndex = days.findIndex((d) =>
-        dateFn(d).startOf("day").equals(eEnd),
+        dateFn(d).startOf("day").equals(bannerEndDay),
       );
-      if (endIndex === -1 && eEnd > viewEnd) {
+      if (endIndex === -1 && bannerEndDay > viewEnd) {
         endIndex = days.length - 1;
       }
 
@@ -147,8 +174,8 @@ export default function useAllDayBanner(
       if (startIndex === -1) startIndex = 0;
       if (endIndex === -1) endIndex = days.length - 1;
 
-      const isClippedLeft = eStart < viewStart;
-      const isClippedRight = eEnd > viewEnd;
+      const isClippedLeft = bannerStartDay < viewStart;
+      const isClippedRight = bannerEndDay > viewEnd;
 
       // Row stacking: Find the lowest row index where the event fits without overlap
       let rowIndex = 0;

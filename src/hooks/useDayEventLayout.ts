@@ -14,7 +14,7 @@
 import { CalendarEvent } from "../types";
 import { useMemo } from "react";
 import { dateFn, DateType, formatDate } from "../utils/date";
-import { isAllDayEvent, isMultiDay } from "../utils/common";
+import { isAllDayEvent, getEventOverlapInHours } from "../utils/common";
 import { DATE_FORMATS } from "../constants";
 
 export interface UseDayEventLayoutOptions {
@@ -86,49 +86,50 @@ export default function useDayEventLayout(
       // -------------------------------------------------------------------------
       const getEventsForDay = () => {
         const filterFn = (event: CalendarEvent) => {
-          const eventDate = dateFn(event.startDate).startOf("day");
           const currentDay = dateFn(currentDate).startOf("day");
 
-          const startMins =
-            dateFn(event.startDate).hour * 60 + dateFn(event.startDate).minute;
-          let endMins = event.endDate
-            ? dateFn(event.endDate).hour * 60 + dateFn(event.endDate).minute
-            : startMins + 1;
-          if (endMins <= startMins && event.endDate) endMins += 1440;
+          // Check if event overlaps this calendar day at all
+          const eventStart = dateFn(event.startDate).startOf("day");
+          const eventEnd = event.endDate
+            ? dateFn(event.endDate).endOf("day")
+            : eventStart.endOf("day");
 
-          const isWithinBounds =
-            endMins > minHour * 60 && startMins < maxHour * 60;
+          const overlapsCurrentDay =
+            currentDay >= eventStart.startOf("day") &&
+            currentDay <= eventEnd.startOf("day");
 
-          // If showAllDayRow is false, we should keep all-day and multi-day events,
-          // but only if they overlap with currentDay
-          const isMulti = isMultiDay(event);
+          if (!overlapsCurrentDay) return false;
+
           const isAllDay = isAllDayEvent(event);
 
           if (showAllDayRow) {
-            return (
-              eventDate.equals(currentDay) &&
-              !isMulti &&
-              !isAllDay &&
-              isWithinBounds
+            if (isAllDay) return false;
+            if (getEventOverlapInHours(event, currentDay) >= 12) return false;
+
+            // To ensure we restrict to visible operating hours
+            const actStartMs = Math.max(
+              dateFn(event.startDate).valueOf(),
+              currentDay.valueOf(),
             );
-          } else {
-            // If hiding the all-day row, we want to show all-day/multi-day events in the grid.
-            // We must check if the event spans over 'currentDay'.
-            const eventStart = dateFn(event.startDate).startOf("day");
-            const eventEnd = event.endDate
-              ? dateFn(event.endDate).endOf("day")
-              : eventStart.endOf("day");
-            const overlapsCurrentDay =
-              currentDay >= eventStart.startOf("day") &&
-              currentDay <= eventEnd.startOf("day");
+            const actEndMs = Math.min(
+              event.endDate ? dateFn(event.endDate).valueOf() : actStartMs,
+              currentDay.endOf("day").valueOf() + 1,
+            );
 
-            if (!overlapsCurrentDay) return false;
+            const startMins = Math.floor(
+              (actStartMs - currentDay.valueOf()) / 60000,
+            );
+            const endMins = Math.floor(
+              (actEndMs - currentDay.valueOf()) / 60000,
+            );
 
-            // For normal timed events, still check bounds
-            if (!isMulti && !isAllDay && !isWithinBounds) return false;
-
-            return true;
+            const isWithinBounds =
+              endMins > minHour * 60 && startMins < maxHour * 60;
+            return isWithinBounds;
           }
+
+          // If hiding the all-day row, we want to show all events that overlap this day
+          return true;
         };
 
         if (enableEnrichedEvents && enrichedEventsByDate) {
@@ -142,30 +143,37 @@ export default function useDayEventLayout(
 
       if (eventsForDay.length === 0) return [];
 
-      // Helper to get minutes from start of day
-      const getMinutes = (dateStr: string) => {
-        const d = dateFn(dateStr);
-        return d.hour * 60 + d.minute;
-      };
-
       // -------------------------------------------------------------------------
       // 2. Data Preparation: Convert dates to minutes from start of day
       // -------------------------------------------------------------------------
       const processedEvents: ProcessedEvent[] = eventsForDay.map(
         (event, index) => {
-          const isMulti = isMultiDay(event);
+          const currentDayStartMs = dateFn(currentDate)
+            .startOf("day")
+            .valueOf();
+          const currentDayEndMs = dateFn(currentDate).endOf("day").valueOf();
+
           const isAllDay = isAllDayEvent(event);
+          const overlapHours = getEventOverlapInHours(event, currentDate);
 
-          let start = getMinutes(event.startDate);
-          let end = event.endDate ? getMinutes(event.endDate) : start + 1;
+          const actStartMs = Math.max(
+            dateFn(event.startDate).valueOf(),
+            currentDayStartMs,
+          );
+          const actEndMs = Math.min(
+            event.endDate ? dateFn(event.endDate).valueOf() : actStartMs,
+            currentDayEndMs + 1, // Add 1ms to include exact midnight
+          );
 
-          if (!showAllDayRow && (isMulti || isAllDay)) {
+          let start = Math.floor((actStartMs - currentDayStartMs) / 60000);
+          let end = Math.floor((actEndMs - currentDayStartMs) / 60000);
+
+          if (start === end) end += 1;
+
+          if (!showAllDayRow && (isAllDay || overlapHours >= 12)) {
             // Force it to span the entire visible grid (minHour to maxHour)
             start = minHour * 60;
             end = maxHour * 60;
-          } else if (!isMulti && !isAllDay) {
-            // For normal timed events, if it crosses midnight, cap appropriately
-            if (end <= start && event.endDate) end += 1440;
           }
 
           // Clamp start and end to boundaries for the algorithm
