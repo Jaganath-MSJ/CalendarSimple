@@ -60,6 +60,7 @@ export interface CalendarProps {
   weekStartsOn?: number; // 0 (Sunday) to 6 (Saturday)
   weekEndsOn?: number; // 0 to 6
   showAdjacentMonths?: boolean;
+  showWeekNumbers?: boolean;
   customDays?: number;
   resetDateOnViewChange?: boolean;
   showAllDayRow?: boolean;
@@ -125,6 +126,7 @@ export interface CalendarContentProps extends RequiredSome<
   | "weekStartsOn"
   | "weekEndsOn"
   | "showAdjacentMonths"
+  | "showWeekNumbers"
   | "resetDateOnViewChange"
   | "showAllDayRow"
   | "width"

@@ -6,6 +6,7 @@ export interface CalendarClassNames {
   table?: string;
   tableHeader?: string;
   tableDate?: string;
+  weekNumber?: string;
 
   // Shared events
   event?: string;

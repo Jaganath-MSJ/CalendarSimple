@@ -48,6 +48,7 @@ export type HeaderProps = Partial<
     | "customDays"
     | "resetDateOnViewChange"
     | "localeMessages"
+    | "showWeekNumbers"
   >
 > & {
   headerClassName?: string;
@@ -65,6 +66,7 @@ function Header(props: HeaderProps) {
     locale,
     localeMessages,
     classNames,
+    showWeekNumbers,
   } = useCalendarProps(props) as CalendarContentProps & {
     headerClassName?: string;
   };
@@ -125,18 +127,28 @@ function Header(props: HeaderProps) {
   };
 
   const getHeaderTitle = () => {
+    const weekSuffix =
+      view === ECalendarViewType.week && showWeekNumbers
+        ? `  ·  W${selectedDate.weekNumber}`
+        : "";
+
     if (view === ECalendarViewType.day) {
       return formatDate(selectedDate, DATE_FORMATS.MONTH_DAY_YEAR, locale);
     }
     if (view === ECalendarViewType.week) {
       const startOfWeek = selectedDate.startOf("week");
       const endOfWeek = selectedDate.endOf("week");
+      let baseString;
       if (startOfWeek.month !== endOfWeek.month) {
         if (startOfWeek.year !== endOfWeek.year) {
-          return `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
+          baseString = `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
+        } else {
+          baseString = `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH, locale)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
         }
-        return `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH, locale)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
+      } else {
+        baseString = formatDate(selectedDate, DATE_FORMATS.MONTH_YEAR, locale);
       }
+      return `${baseString}${weekSuffix}`;
     }
     if (view === ECalendarViewType.customDays) {
       const days = customDays || 3;

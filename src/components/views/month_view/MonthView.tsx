@@ -36,6 +36,7 @@ export type MonthViewProps = Partial<
     | "eventsAreSorted"
     | "isEventOrderingEnabled"
     | "sortedMonthView"
+    | "showWeekNumbers"
   >
 >;
 
@@ -63,6 +64,7 @@ function MonthView(props: MonthViewProps) {
     sortedMonthView,
     locale,
     theme,
+    showWeekNumbers,
     maxEvents: propsMaxEvents,
   } = useCalendarProps(props);
   const { state, dispatch, testId } = useCalendar();
@@ -116,11 +118,17 @@ function MonthView(props: MonthViewProps) {
         style={
           {
             "--calendar-rows": calendarGrid.length,
+            "--week-number-width": showWeekNumbers ? "36px" : "0px",
           } as CSSProperties
         }
       >
         <thead>
           <tr>
+            {showWeekNumbers && (
+              <th
+                className={cx(styles.weekNumberHeader, classNames?.weekNumber)}
+              />
+            )}
             {headerDays.map((day: string) => (
               <th
                 key={day}
@@ -132,43 +140,60 @@ function MonthView(props: MonthViewProps) {
           </tr>
         </thead>
         <tbody className={styles.tableBody}>
-          {calendarGrid.map((week, weekIndex) => (
-            <tr key={weekIndex}>
-              {week.map((dayInfo, dayIndex) => (
-                <MonthEventItem
-                  key={`date_${weekIndex}_${dayIndex}`}
-                  isSelected={
-                    selectable &&
-                    dayInfo.isCurrentMonth &&
-                    dayInfo.displayDay === selectedDate.day
-                  }
-                  isToday={dayInfo.isToday}
-                  isCurrentMonth={dayInfo.isCurrentMonth}
-                  onClick={onClickDateHandler}
-                  date={dayInfo.displayDay}
-                  dateObj={dayInfo.currentDate}
-                  data={dayInfo.events}
-                  cellWidth={
-                    (typeof width === "number" ? width : 0) / headerDays.length
-                  }
-                  className={cx(styles.tableCell, classNames?.tableDate)}
-                  dataClassName={classNames?.event}
-                  selectedClassName={classNames?.selected}
-                  todayClassName={classNames?.today}
-                  theme={theme}
-                  maxEvents={maxEvents}
-                  totalEvents={dayInfo.totalEvents}
-                  is12Hour={is12Hour}
-                  onEventClick={onEventClick}
-                  onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
-                  showAdjacentMonths={showAdjacentMonths}
-                  classNames={classNames}
-                  renderEvent={renderEvent}
-                  renderDateCell={renderDateCell}
-                />
-              ))}
-            </tr>
-          ))}
+          {calendarGrid.map((week, weekIndex) => {
+            const isRowEntirelyAdjacent = week.every((d) => !d.isCurrentMonth);
+
+            return (
+              <tr key={weekIndex}>
+                {showWeekNumbers && (
+                  <td
+                    className={cx(
+                      styles.weekNumberCell,
+                      classNames?.weekNumber,
+                    )}
+                  >
+                    {!showAdjacentMonths && isRowEntirelyAdjacent
+                      ? null
+                      : week[0]?.currentDate.weekNumber}
+                  </td>
+                )}
+                {week.map((dayInfo, dayIndex) => (
+                  <MonthEventItem
+                    key={`date_${weekIndex}_${dayIndex}`}
+                    isSelected={
+                      selectable &&
+                      dayInfo.isCurrentMonth &&
+                      dayInfo.displayDay === selectedDate.day
+                    }
+                    isToday={dayInfo.isToday}
+                    isCurrentMonth={dayInfo.isCurrentMonth}
+                    onClick={onClickDateHandler}
+                    date={dayInfo.displayDay}
+                    dateObj={dayInfo.currentDate}
+                    data={dayInfo.events}
+                    cellWidth={
+                      (typeof width === "number" ? width : 0) /
+                      headerDays.length
+                    }
+                    className={cx(styles.tableCell, classNames?.tableDate)}
+                    dataClassName={classNames?.event}
+                    selectedClassName={classNames?.selected}
+                    todayClassName={classNames?.today}
+                    theme={theme}
+                    maxEvents={maxEvents}
+                    totalEvents={dayInfo.totalEvents}
+                    is12Hour={is12Hour}
+                    onEventClick={onEventClick}
+                    onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
+                    showAdjacentMonths={showAdjacentMonths}
+                    classNames={classNames}
+                    renderEvent={renderEvent}
+                    renderDateCell={renderDateCell}
+                  />
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

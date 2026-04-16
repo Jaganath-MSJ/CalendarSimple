@@ -53,6 +53,25 @@
 .tableCell {
   vertical-align: top;
   height: calc(100% / var(--calendar-rows));
-  width: calc(100% / 7);
+  width: calc((100% - var(--week-number-width, 0px)) / 7);
   padding: 4px;
+}
+
+.weekNumberHeader {
+  width: var(--week-number-width, 36px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f9fafb;
+}
+
+.weekNumberCell {
+  vertical-align: middle;
+  text-align: center;
+  color: var(--text-secondary);
+  background-color: #f9fafb;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
