@@ -8,6 +8,7 @@ The calendar is designed to provide users with multiple perspectives of their sc
 
 - **Month View (`"month"`)**: The default view, displaying a traditional grid of the entire month. Events are stacked on each day, and if there are too many events to fit, a customizable "+X more" button appears.
   - **Adjacent Months**: Use the `showAdjacentMonths` prop to toggle the visibility of dates from the previous and next months in the current month's grid.
+  - **Week Numbers**: Pass `showWeekNumbers={true}` to display the ISO week number for each row in the month view grid.
   - **Week Boundaries**: You can configure which days of the week begin and end the layout (e.g., standard Monday-Friday work week) via `weekStartsOn` and `weekEndsOn`.
 - **Week View (`"week"`)**: Displays a 7-day column layout (or custom range using `weekStartsOn`/`weekEndsOn`) with a time grid. Events are rendered as blocks spanning their respective time slots, making it easy to identify overlapping schedules and free time.
   - **All-Day Row**: Automatically extracts all-day and multi-day events to a top banner. This can be disabled using `showAllDayRow={false}` which pushes them into the time grid as 24-hour blocks.

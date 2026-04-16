@@ -5,7 +5,7 @@
 ![npm downloads](https://img.shields.io/npm/dm/calendar-simple)
 ![license](https://img.shields.io/npm/l/calendar-simple)
 
-A lightweight, customizable, and responsive calendar component for React applications. Built with TypeScript and Day.js, `calendar-simple` provides a flexible solution for date selection and event management in your React projects.
+A lightweight, customizable, and responsive calendar component for React applications. Built with TypeScript and Luxon, `calendar-simple` provides a flexible solution for date selection and event management in your React projects.
 
 **[Live Demo](http://calendarsimple.netlify.app)**
 
@@ -248,7 +248,8 @@ const FrenchCalendar = () => (
 | `maxHour`                 | `number`                                               | Maximum hour (0-24) to display in day and week view time grids.                             | `24`              |
 | `weekStartsOn`            | `number`                                               | Start day of the week (0 = Sunday, 1 = Monday, etc.).                                       | `0`               |
 | `weekEndsOn`              | `number`                                               | End day of the week (0 = Sunday, 1 = Monday, etc.).                                         | `6`               |
-| `showAdjacentMonths`      | `boolean`                                              | Show dates from the previous and next months in the month view grid.                        | `false`           |
+| `showAdjacentMonths`      | `boolean`                                              | Show dates from the previous and next months in the month view grid.                        | `true`            |
+| `showWeekNumbers`         | `boolean`                                              | Display ISO week numbers in the month view grid.                                            | `false`           |
 | `customDays`              | `number`                                               | The number of days to display in the `customDays` view.                                     | `3`               |
 | `showAllDayRow`           | `boolean`                                              | Toggles visibility of the all-day event row at the top of Day/Week views.                   | `true`            |
 | `eventOverlapOffset`      | `number`                                               | Percentage offset for stacking overlapping events in time grids (0 for tiled).              | `0`               |
@@ -340,6 +341,7 @@ interface CalendarClassNames {
   table?: string;
   tableHeader?: string;
   tableDate?: string;
+  weekNumber?: string;
 
   // Shared events
   event?: string;

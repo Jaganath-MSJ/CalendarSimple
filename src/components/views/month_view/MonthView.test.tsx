@@ -54,6 +54,7 @@ describe("MonthView Component", () => {
     isEventOrderingEnabled: false,
     autoScrollToCurrentTime: false,
     sortedMonthView: false,
+    showWeekNumbers: false,
   };
 
   it("renders month grid headers correctly", () => {
@@ -135,5 +136,42 @@ describe("MonthView Component", () => {
 
     expect(screen.getAllByTestId("custom-date").length).toBeGreaterThan(28);
     expect(screen.getByTestId("custom-event")).toBeInTheDocument();
+  });
+
+  it("renders week number column when showWeekNumbers is true", () => {
+    const { container } = render(
+      <MonthView {...defaultProps} showWeekNumbers={true} />,
+    );
+    // With showWeekNumbers, thead has 8 <th> cells: 1 week-number + 7 day headers
+    const headerCells = container.querySelectorAll("thead th");
+    expect(headerCells.length).toBe(8);
+    // Each tbody row also gets an extra <td> with the ISO week number
+    const firstBodyRow = container.querySelector("tbody tr");
+    const bodyCells = firstBodyRow?.querySelectorAll("td");
+    expect(bodyCells?.length).toBe(8); // 1 week-number + 7 day cells
+  });
+
+  it("does not render week number column when showWeekNumbers is false", () => {
+    const { container } = render(
+      <MonthView {...defaultProps} showWeekNumbers={false} />,
+    );
+    const headerCells = container.querySelectorAll("thead th");
+    expect(headerCells.length).toBe(7); // just 7 day headers
+    const firstBodyRow = container.querySelector("tbody tr");
+    const bodyCells = firstBodyRow?.querySelectorAll("td");
+    expect(bodyCells?.length).toBe(7);
+  });
+
+  it("applies classNames.weekNumber to week number header and body cells", () => {
+    const { container } = render(
+      <MonthView
+        {...defaultProps}
+        showWeekNumbers={true}
+        classNames={{ weekNumber: "custom-wk" }}
+      />,
+    );
+    const customCells = container.querySelectorAll(".custom-wk");
+    // At least 1 <th> + at least 1 <td> body cell should carry the class
+    expect(customCells.length).toBeGreaterThanOrEqual(2);
   });
 });
