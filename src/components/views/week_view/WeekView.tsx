@@ -37,6 +37,8 @@ export type WeekViewProps = Partial<
     | "enrichedEventsByDate"
     | "eventsAreSorted"
     | "isEventOrderingEnabled"
+    | "creatable"
+    | "onSlotClick"
   >
 >;
 
@@ -65,6 +67,8 @@ function WeekView(props: WeekViewProps) {
     eventsAreSorted,
     isEventOrderingEnabled,
     locale,
+    creatable,
+    onSlotClick,
   } = useCalendarProps(props);
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, testId } = useCalendar();
@@ -196,6 +200,7 @@ function WeekView(props: WeekViewProps) {
               >
                 <DayColumn
                   dayEvents={weekEvents[dayIndex]}
+                  date={date}
                   onEventClick={onEventClick}
                   is12Hour={is12Hour}
                   classNames={classNames}
@@ -205,6 +210,8 @@ function WeekView(props: WeekViewProps) {
                   maxHour={maxHour}
                   renderEvent={renderEvent}
                   renderHourCell={renderHourCell}
+                  creatable={creatable}
+                  onSlotClick={onSlotClick}
                 />
               </div>
             );

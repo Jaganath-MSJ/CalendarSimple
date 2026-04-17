@@ -1,5 +1,6 @@
 import React from "react";
 import cx from "classnames";
+import { DateTime } from "luxon";
 import { CalendarContentProps } from "../../../types";
 import { DayEventLayout } from "../../../hooks/useDayEventLayout";
 import { DayWeekEventItem } from "../day_event_item/DayWeekEventItem";
@@ -16,13 +17,17 @@ interface DayColumnProps extends Pick<
   | "maxHour"
   | "renderEvent"
   | "renderHourCell"
+  | "creatable"
+  | "onSlotClick"
 > {
   dayEvents: DayEventLayout[];
+  date: DateTime;
   isToday?: boolean;
 }
 
 function DayColumn({
   dayEvents,
+  date,
   onEventClick,
   is12Hour,
   classNames,
@@ -32,6 +37,8 @@ function DayColumn({
   maxHour,
   renderEvent,
   renderHourCell,
+  creatable,
+  onSlotClick,
 }: DayColumnProps) {
   const hours = Array.from(
     { length: maxHour - minHour },
@@ -41,7 +48,28 @@ function DayColumn({
   return (
     <>
       {hours.map((hour) => (
-        <div key={hour} className={cx(styles.eventSlot, classNames?.timeSlot)}>
+        <div
+          key={hour}
+          className={cx(styles.eventSlot, classNames?.timeSlot, {
+            [styles.creatable]: creatable,
+          })}
+          onClick={
+            creatable && onSlotClick
+              ? () => {
+                  const start = date.set({
+                    hour,
+                    minute: 0,
+                    second: 0,
+                    millisecond: 0,
+                  });
+                  onSlotClick(
+                    start.toJSDate(),
+                    start.plus({ hours: 1 }).toJSDate(),
+                  );
+                }
+              : undefined
+          }
+        >
           {renderHourCell?.(new Date(new Date().setHours(hour, 0, 0, 0)))}
         </div>
       ))}

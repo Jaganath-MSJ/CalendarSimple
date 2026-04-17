@@ -35,6 +35,8 @@ export type DayViewProps = Partial<
     | "enrichedEventsByDate"
     | "eventsAreSorted"
     | "isEventOrderingEnabled"
+    | "creatable"
+    | "onSlotClick"
   >
 >;
 
@@ -61,6 +63,8 @@ function DayView(props: DayViewProps) {
     eventsAreSorted,
     isEventOrderingEnabled,
     locale,
+    creatable,
+    onSlotClick,
   } = useCalendarProps(props);
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, testId } = useCalendar();
@@ -163,6 +167,7 @@ function DayView(props: DayViewProps) {
         >
           <DayColumn
             dayEvents={dayEvents}
+            date={selectedDate}
             onEventClick={onEventClick}
             is12Hour={is12Hour}
             classNames={classNames}
@@ -172,6 +177,8 @@ function DayView(props: DayViewProps) {
             maxHour={maxHour}
             renderEvent={renderEvent}
             renderHourCell={renderHourCell}
+            creatable={creatable}
+            onSlotClick={onSlotClick}
           />
         </div>
       </div>

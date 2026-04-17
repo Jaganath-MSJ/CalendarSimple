@@ -37,6 +37,8 @@ export type MonthViewProps = Partial<
     | "isEventOrderingEnabled"
     | "sortedMonthView"
     | "showWeekNumbers"
+    | "creatable"
+    | "onSlotClick"
   >
 >;
 
@@ -65,6 +67,8 @@ function MonthView(props: MonthViewProps) {
     locale,
     theme,
     showWeekNumbers,
+    creatable,
+    onSlotClick,
     maxEvents: propsMaxEvents,
   } = useCalendarProps(props);
   const { state, dispatch, testId } = useCalendar();
@@ -101,8 +105,14 @@ function MonthView(props: MonthViewProps) {
         onDateClick?.(convertToDate(newDate));
         dispatch({ type: "SET_DATE", payload: newDate });
       }
+      if (creatable) {
+        onSlotClick?.(
+          newDate.startOf("day").toJSDate(),
+          newDate.endOf("day").toJSDate(),
+        );
+      }
     },
-    [selectedDate, onDateClick, selectable, dispatch],
+    [selectedDate, onDateClick, selectable, dispatch, creatable, onSlotClick],
   );
 
   const headerDays = useMemo(() => {

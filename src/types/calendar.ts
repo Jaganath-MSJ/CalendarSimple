@@ -77,6 +77,8 @@ export interface CalendarProps {
   onMoreClick?: (date: Date, hiddenEvents?: CalendarEvent[]) => void;
   onNavigate?: (date: Date) => void;
   onViewChange?: (view: ECalendarViewType) => void;
+  creatable?: boolean;
+  onSlotClick?: (startDate: Date, endDate: Date) => void;
 
   // --- Appearance ---
   theme?: CalendarTheme;
@@ -116,6 +118,7 @@ export interface CalendarContentProps extends RequiredSome<
   | "view"
   | "is12Hour"
   | "selectable"
+  | "creatable"
   | "dayType"
   | "pastYearLength"
   | "futureYearLength"
@@ -138,6 +141,7 @@ export interface CalendarContentProps extends RequiredSome<
   | "eventsAreSorted"
   | "isEventOrderingEnabled"
   | "sortedMonthView"
+  | "testId"
   | "locale"
   | "localeMessages"
 > {}

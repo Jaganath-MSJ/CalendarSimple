@@ -36,6 +36,8 @@ export type CustomViewProps = Partial<
     | "enrichedEventsByDate"
     | "eventsAreSorted"
     | "isEventOrderingEnabled"
+    | "creatable"
+    | "onSlotClick"
   >
 >;
 
@@ -63,6 +65,8 @@ function CustomView(props: CustomViewProps) {
     eventsAreSorted,
     isEventOrderingEnabled,
     locale,
+    creatable,
+    onSlotClick,
   } = useCalendarProps(props);
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, testId } = useCalendar();
@@ -186,6 +190,7 @@ function CustomView(props: CustomViewProps) {
               >
                 <DayColumn
                   dayEvents={viewEvents[dayIndex]}
+                  date={date}
                   onEventClick={onEventClick}
                   is12Hour={is12Hour}
                   classNames={classNames}
@@ -195,6 +200,8 @@ function CustomView(props: CustomViewProps) {
                   maxHour={maxHour}
                   renderEvent={renderEvent}
                   renderHourCell={renderHourCell}
+                  creatable={creatable}
+                  onSlotClick={onSlotClick}
                 />
               </div>
             );

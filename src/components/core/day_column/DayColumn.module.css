@@ -2,3 +2,7 @@
   height: 60px; /* Match timeSlot height */
   border-bottom: 1px solid #f0f0f0;
 }
+
+.creatable {
+  cursor: pointer;
+}
