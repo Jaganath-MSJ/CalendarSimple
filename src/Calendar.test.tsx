@@ -109,6 +109,39 @@ describe("Calendar Component Integration", () => {
     expect(onViewChange).toHaveBeenCalledWith(ECalendarViewType.week);
   });
 
+  it("renders children directly when children prop is provided", () => {
+    render(
+      <Calendar>
+        <div data-testid="custom-child">custom content</div>
+      </Calendar>,
+    );
+    // The custom child must appear
+    expect(screen.getByTestId("custom-child")).toBeInTheDocument();
+    expect(screen.getByText("custom content")).toBeInTheDocument();
+    // The default header is NOT rendered (no "Today" button, no view selector)
+    expect(screen.queryByText("Today")).not.toBeInTheDocument();
+  });
+
+  it("supports compound component pattern with Calendar.Header and Calendar.MonthView", () => {
+    render(
+      <Calendar
+        events={[]}
+        view={ECalendarViewType.month}
+        selectedDate={new Date("2024-03-01")}
+      >
+        <Calendar.Header />
+        <Calendar.MonthView />
+      </Calendar>,
+    );
+    // Header renders a view selector (3 selects: view, month, year)
+    expect(
+      screen.getByTestId("calendar-header-view-select"),
+    ).toBeInTheDocument();
+    // MonthView renders abbreviated day-name column headers
+    expect(screen.getByText("Sun")).toBeInTheDocument();
+    expect(screen.getByText("Sat")).toBeInTheDocument();
+  });
+
   describe("Localization Support", () => {
     it("renders the header months in the specified locale", () => {
       const date = dateFn("2024-01-15");

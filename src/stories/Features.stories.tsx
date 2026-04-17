@@ -172,3 +172,32 @@ export const ShowAdjacentMonthsDisabled: Story = {
     showAdjacentMonths: false,
   },
 };
+
+export const CompoundComponentPattern: Story = {
+  render: (args: React.ComponentProps<typeof Calendar>) => (
+    <Calendar {...args}>
+      <div
+        style={{
+          border: "2px dashed #ccc",
+          borderRadius: "6px",
+          padding: "8px",
+          width: "100%",
+          height: "100%",
+          boxSizing: "border-box",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Calendar.Header />
+        <Calendar.MonthView />
+      </div>
+    </Calendar>
+  ),
+  args: {
+    view: ECalendarViewType.month,
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    width: 800,
+    height: 600,
+  },
+};
