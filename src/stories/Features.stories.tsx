@@ -173,6 +173,51 @@ export const ShowAdjacentMonthsDisabled: Story = {
   },
 };
 
+// Story 10: Click-to-Create — Time-Grid Views
+export const ClickToCreateTimeGrid: Story = {
+  args: {
+    view: ECalendarViewType.week,
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    creatable: true,
+    onSlotClick: (startDate: Date, endDate: Date) => {
+      alert(
+        `Create event:\nStart: ${startDate.toLocaleTimeString()}\nEnd: ${endDate.toLocaleTimeString()}`,
+      );
+    },
+  },
+};
+
+// Story 11: Click-to-Create — Month View
+export const ClickToCreateMonth: Story = {
+  args: {
+    view: ECalendarViewType.month,
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    creatable: true,
+    onSlotClick: (startDate: Date, endDate: Date) => {
+      alert(`Create all-day event on: ${startDate.toLocaleDateString()}`);
+    },
+  },
+};
+
+// Story 12: Click-to-Create alongside selectable
+export const ClickToCreateWithSelectable: Story = {
+  args: {
+    view: ECalendarViewType.month,
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    selectable: true,
+    creatable: true,
+    onDateClick: (date: Date) => {
+      console.log(`Date selected: ${date.toLocaleDateString()}`);
+    },
+    onSlotClick: (startDate: Date, endDate: Date) => {
+      alert(`Create event on: ${startDate.toLocaleDateString()}`);
+    },
+  },
+};
+
 export const CompoundComponentPattern: Story = {
   render: (args: React.ComponentProps<typeof Calendar>) => (
     <Calendar {...args}>

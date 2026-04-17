@@ -83,6 +83,7 @@ Make your calendar reactive to user input by hooking into these extensive callba
   - **Auto-Reset Date**: If you pass `resetDateOnViewChange={true}`, the calendar will automatically snap back to the current day ("Today") whenever the user manually switches the view.
 - `onNavigate(date: Date)`: Fired when the user clicks the "Next" or "Previous" buttons to flip through months/weeks, or uses the Month/Year dropdowns.
 - `onMoreClick(date: Date, hiddenEvents?: CalendarEvent[])`: In the month view, if a day has too many events, a "+X more" text appears. Clicking it fires this callback, returning the specific date and an array of the events that were pushed out of view.
+- `creatable` + `onSlotClick(startDate: Date, endDate: Date)`: Enable creation intent by passing `creatable={true}`. Clicking an empty hour slot in Day, Week, or Custom Days views fires `onSlotClick` with the slot's start time and `start + 1 hour` as the end time. In the Month view, clicking a date cell fires `onSlotClick(startOfDay, endOfDay)`. Slots show a pointer cursor when `creatable` is active. Clicking an existing event still fires `onEventClick` as normal — slot clicks do not bubble through events. `creatable` and `selectable` can be used together.
 
 ## 📱 Responsive Layout
 

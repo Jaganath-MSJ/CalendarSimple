@@ -174,4 +174,39 @@ describe("MonthView Component", () => {
     // At least 1 <th> + at least 1 <td> body cell should carry the class
     expect(customCells.length).toBeGreaterThanOrEqual(2);
   });
+
+  it("fires onSlotClick with start/end of day when creatable=true and a date cell is clicked", () => {
+    const onSlotClick = vi.fn();
+    render(<MonthView {...defaultProps} creatable onSlotClick={onSlotClick} />);
+
+    const midMonthDays = screen.getAllByText("15");
+    fireEvent.click(midMonthDays[0]);
+
+    expect(onSlotClick).toHaveBeenCalledTimes(1);
+    const [startDate, endDate] = onSlotClick.mock.calls[0] as [Date, Date];
+    expect(startDate.getHours()).toBe(0);
+    expect(startDate.getMinutes()).toBe(0);
+    expect(endDate.getHours()).toBe(23);
+    expect(endDate.getMinutes()).toBe(59);
+  });
+
+  it("fires onDateClick independently when selectable=true even when creatable=true", () => {
+    const onDateClick = vi.fn();
+    const onSlotClick = vi.fn();
+    render(
+      <MonthView
+        {...defaultProps}
+        selectable
+        onDateClick={onDateClick}
+        creatable
+        onSlotClick={onSlotClick}
+      />,
+    );
+
+    const midMonthDays = screen.getAllByText("15");
+    fireEvent.click(midMonthDays[0]);
+
+    expect(onSlotClick).toHaveBeenCalledTimes(1);
+    expect(onDateClick).toHaveBeenCalledTimes(1);
+  });
 });
