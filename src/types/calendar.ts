@@ -46,6 +46,10 @@ export interface CalendarProps {
   view?: ECalendarViewType;
   testId?: string;
 
+  // --- Loading State ---
+  isLoading?: boolean;
+  renderLoading?: () => ReactNode;
+
   // --- Configuration ---
   is12Hour?: boolean;
   selectable?: boolean;

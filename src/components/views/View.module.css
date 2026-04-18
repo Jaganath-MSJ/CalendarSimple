@@ -1,0 +1,26 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Applied for 150ms after isLoading transitions false to fade content in */
+.fadeIn {
+  animation: fadeIn 150ms ease;
+}
+
+/* Wraps view when isLoading + events exist — blocks all pointer events */
+.loadingOverlay {
+  pointer-events: none;
+}
+
+/* Wraps renderLoading() output to fill the view body area */
+.viewBody {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}

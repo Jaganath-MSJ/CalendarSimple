@@ -63,6 +63,7 @@ export const defaultCalendarProps = {
   isEventOrderingEnabled: true,
   sortedMonthView: true,
   testId: "calendar",
+  isLoading: false,
 };
 
 export const DATE_FORMATS = {
