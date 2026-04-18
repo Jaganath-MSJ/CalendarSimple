@@ -246,3 +246,78 @@ export const CompoundComponentPattern: Story = {
     height: 600,
   },
 };
+
+export const LoadingSkeletonMonth: Story = {
+  name: "Loading Skeleton – Month View",
+  args: {
+    isLoading: true,
+    events: [],
+    view: ECalendarViewType.month,
+  },
+};
+
+export const LoadingSkeletonWeek: Story = {
+  name: "Loading Skeleton – Week View",
+  args: {
+    isLoading: true,
+    events: [],
+    view: ECalendarViewType.week,
+  },
+};
+
+export const LoadingSkeletonDay: Story = {
+  name: "Loading Skeleton – Day View",
+  args: {
+    isLoading: true,
+    events: [],
+    view: ECalendarViewType.day,
+  },
+};
+
+export const LoadingSkeletonSchedule: Story = {
+  name: "Loading Skeleton – Schedule View",
+  args: {
+    isLoading: true,
+    events: [],
+    view: ECalendarViewType.schedule,
+  },
+};
+
+export const LoadingWithExistingEvents: Story = {
+  name: "Loading – Events Exist (interactions blocked)",
+  args: {
+    isLoading: true,
+    events: [
+      {
+        id: "1",
+        title: "Existing meeting",
+        startDate: today.set({ hour: 10 }).toFormat("yyyy-MM-dd'T'HH:mm:ss"),
+        endDate: today.set({ hour: 11 }).toFormat("yyyy-MM-dd'T'HH:mm:ss"),
+      },
+    ],
+    view: ECalendarViewType.month,
+  },
+};
+
+export const LoadingCustomRenderer: Story = {
+  name: "Loading – Custom renderLoading",
+  args: {
+    isLoading: true,
+    events: [],
+    view: ECalendarViewType.month,
+    renderLoading: () => (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100%",
+          fontSize: "18px",
+          color: "#6b7280",
+        }}
+      >
+        Fetching your calendar…
+      </div>
+    ),
+  },
+};

@@ -40,6 +40,7 @@ describe("DayColumn Component", () => {
     showCurrentTime: false,
     minHour: 0,
     maxHour: 24,
+    creatable: false,
   };
 
   it("renders correctly with given events and hours", () => {
