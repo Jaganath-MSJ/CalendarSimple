@@ -117,6 +117,8 @@ function CustomView(props: CustomViewProps) {
 
   return (
     <div
+      role="region"
+      aria-label={`${customDays} days view`}
       className={styles.customView}
       ref={containerRef}
       data-testid={`${testId}-custom-days-view`}

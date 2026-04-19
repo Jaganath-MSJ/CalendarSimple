@@ -127,6 +127,8 @@ function WeekView(props: WeekViewProps) {
 
   return (
     <div
+      role="region"
+      aria-label="Week view"
       className={styles.weekView}
       ref={containerRef}
       data-testid={`${testId}-week-view`}

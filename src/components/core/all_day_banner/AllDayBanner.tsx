@@ -17,6 +17,7 @@ import useAllDayBanner, {
 import styles from "./AllDayBanner.module.css";
 import { LAYOUT_CONSTANTS } from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
+import { handleKeyboardActivation } from "../../../utils/keyboard";
 
 interface AllDayBannerProps extends Pick<
   CalendarContentProps,
@@ -71,6 +72,8 @@ export default function AllDayBanner({
   if (layoutEvents.length === 0) {
     return (
       <div
+        role="region"
+        aria-label="All-day events"
         className={styles.bannerWrapper}
         data-testid={`${testId}-all-day-banner`}
       >
@@ -86,6 +89,8 @@ export default function AllDayBanner({
 
   return (
     <div
+      role="region"
+      aria-label="All-day events"
       className={styles.bannerWrapper}
       data-testid={`${testId}-all-day-banner`}
     >
@@ -93,14 +98,20 @@ export default function AllDayBanner({
         <span className={styles.timezoneLabel}>{gmtLabel}</span>
         {showExpandCollapse && (
           <div
+            role="button"
+            tabIndex={0}
             className={cx(styles.expandIcon, {
               [styles.expanded]: isExpanded,
             })}
             data-testid={`${testId}-all-day-expand-icon`}
-            onClick={() => setIsExpanded(!isExpanded)}
-            title={
-              isExpanded ? "Collapse all day events" : "Expand all day events"
+            aria-label={
+              isExpanded ? "Collapse all-day events" : "Expand all-day events"
             }
+            aria-expanded={isExpanded}
+            onClick={() => setIsExpanded((prev) => !prev)}
+            onKeyDown={handleKeyboardActivation(() =>
+              setIsExpanded((prev) => !prev),
+            )}
           >
             <svg
               width="16"
@@ -145,6 +156,8 @@ export default function AllDayBanner({
             return (
               <div
                 key={event.id || `banner-evt-${idx}`}
+                role="button"
+                tabIndex={0}
                 className={cx(styles.bannerChip, classNames?.event, {
                   [styles.clippedLeft]: isClippedLeft,
                   [styles.clippedRight]: isClippedRight,
@@ -158,7 +171,16 @@ export default function AllDayBanner({
                   ...event.style,
                 }}
                 data-testid={`${testId}-${event.id}-all-day-event`}
+                aria-label={generateTooltipText(
+                  event,
+                  ECalendarViewType.week,
+                  is12Hour,
+                  locale,
+                )}
                 onClick={() => onEventClick?.(event)}
+                onKeyDown={handleKeyboardActivation(() =>
+                  onEventClick?.(event),
+                )}
                 title={generateTooltipText(
                   event,
                   ECalendarViewType.week,
@@ -185,6 +207,8 @@ export default function AllDayBanner({
             return (
               <div
                 key={`more-${idx}`}
+                role="button"
+                tabIndex={0}
                 className={styles.moreChip}
                 style={{
                   top: `${topPx}px`,
@@ -192,7 +216,9 @@ export default function AllDayBanner({
                   width: `calc(${widthPct}% - 4px)`,
                 }}
                 data-testid={`${testId}-${idx}-all-day-more-chip`}
+                aria-label={`${count} more all-day events, click to expand`}
                 onClick={() => setIsExpanded(true)}
+                onKeyDown={handleKeyboardActivation(() => setIsExpanded(true))}
               >
                 + {count} more
               </div>

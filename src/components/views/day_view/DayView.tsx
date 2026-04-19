@@ -112,6 +112,8 @@ function DayView(props: DayViewProps) {
 
   return (
     <div
+      role="region"
+      aria-label="Day view"
       className={styles.dayView}
       ref={containerRef}
       data-testid={`${testId}-day-view`}

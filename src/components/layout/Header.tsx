@@ -193,10 +193,11 @@ function Header(props: HeaderProps) {
       className={cx(styles.header, finalHeaderClassName)}
       data-testid={`${testId}-header`}
     >
-      <div className={styles.navigation}>
+      <nav className={styles.navigation} aria-label="Calendar navigation">
         <button
           className={styles.todayButton}
           data-testid={`${testId}-header-today-btn`}
+          aria-label={localeMessages?.today || "Today"}
           onClick={() => {
             dispatch({ type: CALENDAR_ACTIONS.TODAY });
             onNavigate?.(convertToDate(dateFn()));
@@ -208,6 +209,7 @@ function Header(props: HeaderProps) {
           <button
             className={styles.iconButton}
             data-testid={`${testId}-header-prev-btn`}
+            aria-label="Previous period"
             onClick={() => onMonthArrowClick(EMonthOption.sub)}
           >
             <LeftArrow />
@@ -215,19 +217,21 @@ function Header(props: HeaderProps) {
           <button
             className={styles.iconButton}
             data-testid={`${testId}-header-next-btn`}
+            aria-label="Next period"
             onClick={() => onMonthArrowClick(EMonthOption.add)}
           >
             <RightArrow />
           </button>
         </div>
         <h2 className={styles.dateTitle}>{getHeaderTitle()}</h2>
-      </div>
+      </nav>
 
       <div className={styles.controls}>
         <select
           className={styles.select}
           value={view}
           data-testid={`${testId}-header-view-select`}
+          aria-label="Select calendar view"
           onChange={onViewDropdownClick}
         >
           {VIEW_OPTIONS.map((option) => (
@@ -248,6 +252,7 @@ function Header(props: HeaderProps) {
           name={CALENDAR_STRINGS.MONTH}
           value={getMonth(selectedDate)}
           data-testid={`${testId}-header-month-select`}
+          aria-label="Select month"
           onChange={(e) => onDropdownClick(e, EYearOption.month)}
         >
           {getMonthList(locale).map((month: MonthListType) => (
@@ -262,6 +267,7 @@ function Header(props: HeaderProps) {
           name={CALENDAR_STRINGS.YEAR}
           value={getYear(selectedDate)}
           data-testid={`${testId}-header-year-select`}
+          aria-label="Select year"
           onChange={(e) => onDropdownClick(e, EYearOption.year)}
         >
           {getYearList(

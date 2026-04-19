@@ -10,6 +10,7 @@ import { DayEventLayout } from "../../../hooks/useDayEventLayout";
 import { LAYOUT_CONSTANTS, DATE_FORMATS } from "../../../constants";
 import styles from "./DayWeekEventItem.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
+import { handleKeyboardActivation } from "../../../utils/keyboard";
 
 interface DayWeekEventItemProps extends Pick<
   CalendarContentProps,
@@ -39,6 +40,8 @@ export function DayWeekEventItem({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       className={cx(styles.eventItem, classNames?.event, {
         [styles.eventItemSmall]: isSmall,
         [styles.eventItemTiny]: isTiny,
@@ -58,7 +61,9 @@ export function DayWeekEventItem({
         } as CSSProperties
       }
       id={item.event.id}
+      aria-label={`${item.event.title}, ${tooltipText}`}
       onClick={() => onEventClick?.(item.event)}
+      onKeyDown={handleKeyboardActivation(() => onEventClick?.(item.event))}
       title={tooltipText}
     >
       {renderEvent ? (

@@ -7,6 +7,7 @@ import {
   checkIsToday,
   generateTooltipText,
 } from "../../../utils";
+import { handleKeyboardActivation } from "../../../utils/keyboard";
 import styles from "./ScheduleView.module.css";
 import { DATE_FORMATS, LAYOUT_CONSTANTS } from "../../../constants";
 import useScheduleView from "../../../hooks/useScheduleView";
@@ -50,6 +51,8 @@ export default function ScheduleView(props: ScheduleViewProps) {
 
   return (
     <div
+      role="region"
+      aria-label="Schedule view"
       className={styles.scheduleView}
       data-testid={`${testId}-schedule-view`}
     >
@@ -89,12 +92,23 @@ export default function ScheduleView(props: ScheduleViewProps) {
                     return (
                       <div
                         key={event.id || index}
+                        role="button"
+                        tabIndex={0}
                         className={cx(
                           styles.eventItemContainer,
                           classNames?.event,
                         )}
                         data-testid={`${testId}-${event.id}-schedule-event`}
+                        aria-label={generateTooltipText(
+                          event,
+                          ECalendarViewType.schedule,
+                          is12Hour,
+                          locale,
+                        )}
                         onClick={() => onEventClick?.(event)}
+                        onKeyDown={handleKeyboardActivation(() =>
+                          onEventClick?.(event),
+                        )}
                         title={generateTooltipText(
                           event,
                           ECalendarViewType.schedule,

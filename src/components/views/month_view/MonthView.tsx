@@ -1,12 +1,17 @@
 import React, { CSSProperties, useCallback, useMemo } from "react";
 import cx from "classnames";
 import { CalendarContentProps } from "../../../types";
-import { getDayListNames, LAYOUT_CONSTANTS } from "../../../constants";
+import {
+  getDayListNames,
+  LAYOUT_CONSTANTS,
+  DATE_FORMATS,
+} from "../../../constants";
 import {
   dateFn,
   convertToDate,
   DateType,
   calculateMaxEvents,
+  formatDate,
 } from "../../../utils";
 import useMonthGrid from "../../../hooks/useMonthGrid";
 import MonthEventItem from "../../core/month_event_item/MonthEventItem";
@@ -121,10 +126,17 @@ function MonthView(props: MonthViewProps) {
     return Array.from({ length }, (_, i) => list[(weekStartsOn + i) % 7]);
   }, [dayType, weekStartsOn, weekEndsOn, locale]);
 
+  const tableAriaLabel = formatDate(
+    selectedDate,
+    DATE_FORMATS.MONTH_YEAR,
+    locale,
+  );
+
   return (
     <div className={styles.monthView} data-testid={`${testId}-month-view`}>
       <table
         className={cx(styles.table, classNames?.table)}
+        aria-label={tableAriaLabel}
         style={
           {
             "--calendar-rows": calendarGrid.length,
@@ -136,12 +148,14 @@ function MonthView(props: MonthViewProps) {
           <tr>
             {showWeekNumbers && (
               <th
+                scope="col"
                 className={cx(styles.weekNumberHeader, classNames?.weekNumber)}
               />
             )}
             {headerDays.map((day: string) => (
               <th
                 key={day}
+                scope="col"
                 className={cx(styles.tableHeader, classNames?.tableHeader)}
               >
                 {day}

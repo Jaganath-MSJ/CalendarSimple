@@ -5,6 +5,7 @@ import { CalendarContentProps } from "../../../types";
 import { DayEventLayout } from "../../../hooks/useDayEventLayout";
 import { DayWeekEventItem } from "../day_event_item/DayWeekEventItem";
 import CurrentTimeLine from "../current_time_line/CurrentTimeLine";
+import { handleKeyboardActivation } from "../../../utils/keyboard";
 import styles from "./DayColumn.module.css";
 
 interface DayColumnProps extends Pick<
@@ -47,32 +48,43 @@ function DayColumn({
 
   return (
     <>
-      {hours.map((hour) => (
-        <div
-          key={hour}
-          className={cx(styles.eventSlot, classNames?.timeSlot, {
-            [styles.creatable]: creatable,
-          })}
-          onClick={
-            creatable && onSlotClick
-              ? () => {
-                  const start = date.set({
-                    hour,
-                    minute: 0,
-                    second: 0,
-                    millisecond: 0,
-                  });
-                  onSlotClick(
-                    start.toJSDate(),
-                    start.plus({ hours: 1 }).toJSDate(),
-                  );
-                }
-              : undefined
-          }
-        >
-          {renderHourCell?.(new Date(new Date().setHours(hour, 0, 0, 0)))}
-        </div>
-      ))}
+      {hours.map((hour) => {
+        const isInteractive = creatable && !!onSlotClick;
+        const slotStart = date.set({
+          hour,
+          minute: 0,
+          second: 0,
+          millisecond: 0,
+        });
+        const slotLabel = `Create event at ${slotStart.toFormat(
+          "h:mm a, MMMM d",
+        )}`;
+        const handleClick = isInteractive
+          ? () =>
+              onSlotClick!(
+                slotStart.toJSDate(),
+                slotStart.plus({ hours: 1 }).toJSDate(),
+              )
+          : undefined;
+
+        return (
+          <div
+            key={hour}
+            role={isInteractive ? "button" : undefined}
+            tabIndex={isInteractive ? 0 : undefined}
+            aria-label={isInteractive ? slotLabel : undefined}
+            className={cx(styles.eventSlot, classNames?.timeSlot, {
+              [styles.creatable]: creatable,
+            })}
+            onClick={handleClick}
+            onKeyDown={
+              isInteractive ? handleKeyboardActivation(handleClick!) : undefined
+            }
+          >
+            {renderHourCell?.(new Date(new Date().setHours(hour, 0, 0, 0)))}
+          </div>
+        );
+      })}
       {dayEvents.map((item, index) => (
         <DayWeekEventItem
           key={item.event.id || index}
