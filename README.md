@@ -16,6 +16,8 @@ A lightweight, customizable, and responsive calendar component for React applica
 - **📱 Responsive**: Automatically adjusts layout based on container dimensions.
 - **🎨 Theming & Customization**: Fully customizable colors via the `theme` prop and individual element styling via `classNames`.
 - **🧩 Custom Renderers**: Ultimate flexibility to completely replace events, headers, and grid cells with custom React components.
+- **⌨️ Keyboard Navigation**: Full keyboard accessibility with Enter/Space activation, Tab focus trap in popovers, and Escape to close dialogs.
+- **♿ ARIA & Accessibility**: Comprehensive semantic HTML, ARIA roles, labels, and attributes for screen reader support.
 - **🕒 Time Formatting**: Options for 12-hour (AM/PM) and 24-hour time formats.
 - **👆 Interactive**: Granular control with click handlers for dates, specific events, view changes, "more" indicators, and empty slot creation intent.
 - **🕒 Current Time & Timezone**: Display a real-time indicator with automatic local timezone GMT offset, and optionally auto-scroll to the current time on load.

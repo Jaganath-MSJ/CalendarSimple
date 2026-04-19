@@ -99,6 +99,40 @@ When rendering thousands of events simultaneously, you can utilize the internal 
 - **`isEventOrderingEnabled`**: Setting this to `false` is an ultra-fast path for massive data payloads. It bypasses iterative sweep-line calculations and Tetris overlapping resolutions to assign items linearly, keeping performance instantaneous at the expense of visual collision spacing.
 - **`sortedMonthView`**: Exposes the ability to enforce a custom priority/sorting-function inside the Month View for Tetris slot allocations, or turn them off completely.
 
+## ⌨️ Keyboard Navigation & ♿ Accessibility
+
+The calendar is built with accessibility as a first-class feature, ensuring it's usable by everyone, including users with keyboard-only navigation or assistive technologies.
+
+### Keyboard Navigation
+
+- **Enter & Space Activation**: All interactive elements (buttons, date cells, event items) can be activated using the Enter or Space keys, in addition to mouse clicks.
+- **Tab Navigation**: Use Tab to move focus through interactive elements and Shift+Tab to move backward. All focusable elements follow standard tab order.
+- **Popover Focus Trap**: When a popover opens (e.g., "+X more" button in Month view), focus is automatically trapped within it. Tab cycles through items within the popover, and the last item returns focus to the first.
+- **Escape to Close**: Pressing Escape closes open popovers and dialogs, with focus automatically returned to the triggering element.
+- **Focus Indicators**: All keyboard-navigable elements display a visible focus outline (`2px solid #005fcc`) when focused via keyboard, making navigation clear and discoverable.
+
+### ARIA & Semantic HTML
+
+- **Semantic Roles**: Interactive elements use proper `role="button"` attributes when they're not native buttons. Dialog popovers use `role="dialog"` with `aria-modal="true"`.
+- **Descriptive Labels**: All interactive elements have `aria-label` attributes describing their purpose (e.g., "Next period", "Expand all-day events", "Collapse all-day events").
+- **Region Labels**: All major view containers (Month, Week, Day, Schedule, Custom Days) are marked with `role="region"` and descriptive `aria-label` to help screen reader users understand content structure.
+- **State Attributes**: Expandable/collapsible elements use `aria-expanded` to communicate their state. Dialogs use `aria-modal="true"` to indicate modal behavior.
+- **Table Semantics**: The Month view's table headers use `scope="col"` for proper table header association.
+- **Navigation Semantics**: The Header is wrapped in a `<nav>` element with `aria-label="Calendar navigation"` for clear semantic structure.
+
+### Screen Reader Compatibility
+
+- All events and interactive elements have meaningful labels that screen readers announce.
+- Date cells in the Month view announce their date and any events on that date.
+- Popover dialogs announce their contents and are properly marked as modal.
+- Dropdown selectors (Month, Year, View) include descriptive `aria-label` attributes.
+
+### Implementation Notes
+
+- The keyboard activation utility (`handleKeyboardActivation()`) is automatically used on all interactive divs to provide keyboard support without requiring additional configuration.
+- Focus management respects browser standards and CSS custom properties for theming the focus color.
+- All accessibility features are built-in and require no additional configuration — they work out of the box.
+
 ## 🛡️ TypeScript Support
 
 `calendar-simple` was built ground-up in TypeScript. All props, callback payloads, and internal data structures are exported, ensuring your IDE provides full intellisense and compile-time safety.

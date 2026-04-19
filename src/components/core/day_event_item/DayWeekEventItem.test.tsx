@@ -85,4 +85,155 @@ describe("DayWeekEventItem Component", () => {
     expect(screen.getByTestId("custom-event")).toBeInTheDocument();
     expect(screen.getByText("Meeting Custom")).toBeInTheDocument();
   });
+
+  it("renders with role=button", () => {
+    const mockItem = {
+      event: {
+        id: "evt1",
+        title: "Daily Standup",
+        startDate: "2024-03-15T10:00:00",
+        endDate: "2024-03-15T10:30:00",
+      },
+      top: 100,
+      height: 50,
+      left: 0,
+      width: 100,
+      zIndex: 1,
+    };
+    render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+      >
+        <DayWeekEventItem {...defaultProps} item={mockItem} />
+      </CalendarProvider>,
+    );
+    expect(
+      screen.getByRole("button", { name: /Daily Standup/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("has tabIndex=0", () => {
+    const mockItem = {
+      event: {
+        id: "evt1",
+        title: "Daily Standup",
+        startDate: "2024-03-15T10:00:00",
+        endDate: "2024-03-15T10:30:00",
+      },
+      top: 100,
+      height: 50,
+      left: 0,
+      width: 100,
+      zIndex: 1,
+    };
+    render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+      >
+        <DayWeekEventItem {...defaultProps} item={mockItem} />
+      </CalendarProvider>,
+    );
+    const btn = screen.getByRole("button", { name: /Daily Standup/i });
+    expect(btn).toHaveAttribute("tabindex", "0");
+  });
+
+  it("calls onEventClick on Enter key", () => {
+    const onEventClick = vi.fn();
+    const mockItem = {
+      event: {
+        id: "evt1",
+        title: "Daily Standup",
+        startDate: "2024-03-15T10:00:00",
+        endDate: "2024-03-15T10:30:00",
+      },
+      top: 100,
+      height: 50,
+      left: 0,
+      width: 100,
+      zIndex: 1,
+    };
+    render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+      >
+        <DayWeekEventItem
+          {...defaultProps}
+          item={mockItem}
+          onEventClick={onEventClick}
+        />
+      </CalendarProvider>,
+    );
+    const btn = screen.getByRole("button", { name: /Daily Standup/i });
+    fireEvent.keyDown(btn, { key: "Enter" });
+    expect(onEventClick).toHaveBeenCalledTimes(1);
+    expect(onEventClick).toHaveBeenCalledWith(mockItem.event);
+  });
+
+  it("calls onEventClick on Space key", () => {
+    const onEventClick = vi.fn();
+    const mockItem = {
+      event: {
+        id: "evt1",
+        title: "Daily Standup",
+        startDate: "2024-03-15T10:00:00",
+        endDate: "2024-03-15T10:30:00",
+      },
+      top: 100,
+      height: 50,
+      left: 0,
+      width: 100,
+      zIndex: 1,
+    };
+    render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+      >
+        <DayWeekEventItem
+          {...defaultProps}
+          item={mockItem}
+          onEventClick={onEventClick}
+        />
+      </CalendarProvider>,
+    );
+    const btn = screen.getByRole("button", { name: /Daily Standup/i });
+    fireEvent.keyDown(btn, { key: " " });
+    expect(onEventClick).toHaveBeenCalledTimes(1);
+    expect(onEventClick).toHaveBeenCalledWith(mockItem.event);
+  });
+
+  it("does not call onEventClick on other keys (ArrowDown)", () => {
+    const onEventClick = vi.fn();
+    const mockItem = {
+      event: {
+        id: "evt1",
+        title: "Daily Standup",
+        startDate: "2024-03-15T10:00:00",
+        endDate: "2024-03-15T10:30:00",
+      },
+      top: 100,
+      height: 50,
+      left: 0,
+      width: 100,
+      zIndex: 1,
+    };
+    render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+      >
+        <DayWeekEventItem
+          {...defaultProps}
+          item={mockItem}
+          onEventClick={onEventClick}
+        />
+      </CalendarProvider>,
+    );
+    const btn = screen.getByRole("button", { name: /Daily Standup/i });
+    fireEvent.keyDown(btn, { key: "ArrowDown" });
+    expect(onEventClick).not.toHaveBeenCalled();
+  });
 });

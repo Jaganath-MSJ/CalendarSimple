@@ -122,3 +122,93 @@ describe("Header Component", () => {
     expect(options.length).toBe(5);
   });
 });
+
+describe("Header accessibility", () => {
+  beforeEach(() => {
+    vi.spyOn(CalendarContextModule, "useCalendar").mockReturnValue({
+      state: {
+        selectedDate: dateFn("2024-03-01"),
+        view: ECalendarViewType.month,
+      },
+      dispatch: vi.fn() as never,
+      testId: undefined,
+      config: {
+        events: [],
+        locale: "en",
+        localeMessages: {
+          today: "Today",
+          day: "Day",
+          week: "Week",
+          month: "Month",
+          schedule: "Schedule",
+          days: "Days",
+        },
+      },
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const defaultProps = {
+    pastYearLength: 10,
+    futureYearLength: 10,
+    resetDateOnViewChange: false,
+    localeMessages: {
+      today: "Today",
+      day: "Day",
+      week: "Week",
+      month: "Month",
+      schedule: "Schedule",
+      days: "Days",
+    },
+  };
+
+  it("renders a navigation landmark with label 'Calendar navigation'", () => {
+    render(<Header {...defaultProps} />);
+    expect(
+      screen.getByRole("navigation", { name: /calendar navigation/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("Today button has accessible label", () => {
+    render(<Header {...defaultProps} />);
+    expect(screen.getByRole("button", { name: /today/i })).toBeInTheDocument();
+  });
+
+  it("Previous button has aria-label 'Previous period'", () => {
+    render(<Header {...defaultProps} />);
+    expect(
+      screen.getByRole("button", { name: /previous period/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("Next button has aria-label 'Next period'", () => {
+    render(<Header {...defaultProps} />);
+    expect(
+      screen.getByRole("button", { name: /next period/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("View select has aria-label 'Select calendar view'", () => {
+    render(<Header {...defaultProps} />);
+    expect(
+      screen.getByRole("combobox", { name: /select calendar view/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("Month select has aria-label 'Select month'", () => {
+    render(<Header {...defaultProps} />);
+    expect(
+      screen.getByRole("combobox", { name: /select month/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("Year select has aria-label 'Select year'", () => {
+    render(<Header {...defaultProps} />);
+    expect(
+      screen.getByRole("combobox", { name: /select year/i }),
+    ).toBeInTheDocument();
+  });
+});

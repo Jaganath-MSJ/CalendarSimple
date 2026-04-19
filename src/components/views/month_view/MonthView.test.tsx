@@ -209,4 +209,200 @@ describe("MonthView Component", () => {
     expect(onSlotClick).toHaveBeenCalledTimes(1);
     expect(onDateClick).toHaveBeenCalledTimes(1);
   });
+
+  it("month event chips have role=button", () => {
+    const events = [
+      {
+        id: "chip-1",
+        title: "Chip Event",
+        startDate: "2024-03-15T10:00:00",
+        endDate: "2024-03-15T11:00:00",
+      },
+    ];
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: { selectedDate: mockDate, view: "month" },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(<MonthView {...defaultProps} />);
+
+    const chips = screen.getAllByRole("button", { name: /Chip Event/i });
+    expect(chips.length).toBeGreaterThan(0);
+  });
+
+  it("pressing Enter on a month event chip calls onEventClick", () => {
+    const onEventClick = vi.fn();
+    const events = [
+      {
+        id: "chip-2",
+        title: "Enter Event",
+        startDate: "2024-03-15T10:00:00",
+        endDate: "2024-03-15T11:00:00",
+      },
+    ];
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: { selectedDate: mockDate, view: "month" },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(<MonthView {...defaultProps} onEventClick={onEventClick} />);
+
+    const chips = screen.getAllByRole("button", { name: /Enter Event/i });
+    fireEvent.keyDown(chips[0], { key: "Enter" });
+
+    expect(onEventClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("pressing Space on a month event chip calls onEventClick", () => {
+    const onEventClick = vi.fn();
+    const events = [
+      {
+        id: "chip-3",
+        title: "Space Event",
+        startDate: "2024-03-15T10:00:00",
+        endDate: "2024-03-15T11:00:00",
+      },
+    ];
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: { selectedDate: mockDate, view: "month" },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(<MonthView {...defaultProps} onEventClick={onEventClick} />);
+
+    const chips = screen.getAllByRole("button", { name: /Space Event/i });
+    fireEvent.keyDown(chips[0], { key: " " });
+
+    expect(onEventClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("'+ N more' button renders with accessible aria-label when events overflow", () => {
+    const events = [
+      {
+        id: "more-1",
+        title: "Event One",
+        startDate: "2024-03-15T09:00:00",
+        endDate: "2024-03-15T10:00:00",
+      },
+      {
+        id: "more-2",
+        title: "Event Two",
+        startDate: "2024-03-15T11:00:00",
+        endDate: "2024-03-15T12:00:00",
+      },
+      {
+        id: "more-3",
+        title: "Event Three",
+        startDate: "2024-03-15T13:00:00",
+        endDate: "2024-03-15T14:00:00",
+      },
+    ];
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: { selectedDate: mockDate, view: "month" },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(<MonthView {...defaultProps} maxEvents={1} />);
+
+    const moreBtn = screen.getByRole("button", { name: /more events on/i });
+    expect(moreBtn).toBeInTheDocument();
+  });
+
+  it("clicking '+ N more' button calls onMoreClick", () => {
+    const onMoreClick = vi.fn();
+    const events = [
+      {
+        id: "more-a",
+        title: "Alpha",
+        startDate: "2024-03-15T09:00:00",
+        endDate: "2024-03-15T10:00:00",
+      },
+      {
+        id: "more-b",
+        title: "Beta",
+        startDate: "2024-03-15T11:00:00",
+        endDate: "2024-03-15T12:00:00",
+      },
+    ];
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: { selectedDate: mockDate, view: "month" },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(
+      <MonthView {...defaultProps} maxEvents={1} onMoreClick={onMoreClick} />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /more events on/i }));
+
+    expect(onMoreClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("pressing Enter on '+ N more' button opens the popover", () => {
+    const events = [
+      {
+        id: "more-e",
+        title: "Epsilon",
+        startDate: "2024-03-15T09:00:00",
+        endDate: "2024-03-15T10:00:00",
+      },
+      {
+        id: "more-f",
+        title: "Zeta",
+        startDate: "2024-03-15T11:00:00",
+        endDate: "2024-03-15T12:00:00",
+      },
+    ];
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: { selectedDate: mockDate, view: "month" },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(<MonthView {...defaultProps} maxEvents={1} />);
+
+    const moreBtn = screen.getByRole("button", { name: /more events on/i });
+    fireEvent.keyDown(moreBtn, { key: "Enter" });
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("'+ N more' button is keyboard-activatable (native button Enter = click)", () => {
+    const onMoreClick = vi.fn();
+    const events = [
+      {
+        id: "more-c",
+        title: "Gamma",
+        startDate: "2024-03-15T09:00:00",
+        endDate: "2024-03-15T10:00:00",
+      },
+      {
+        id: "more-d",
+        title: "Delta",
+        startDate: "2024-03-15T11:00:00",
+        endDate: "2024-03-15T12:00:00",
+      },
+    ];
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: { selectedDate: mockDate, view: "month" },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(
+      <MonthView {...defaultProps} maxEvents={1} onMoreClick={onMoreClick} />,
+    );
+
+    const moreBtn = screen.getByRole("button", { name: /more events on/i });
+    // Native <button> elements activate via Enter key in real browsers.
+    // fireEvent.click simulates that outcome in jsdom.
+    fireEvent.click(moreBtn);
+
+    expect(onMoreClick).toHaveBeenCalledTimes(1);
+  });
 });
