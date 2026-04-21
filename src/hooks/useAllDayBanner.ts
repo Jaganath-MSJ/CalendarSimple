@@ -109,7 +109,7 @@ export default function useAllDayBanner(
         bannerEndDay = bannerEndDay.minus({ days: 1 });
       }
 
-      return { event, bannerStartDay, bannerEndDay };
+      return { event, bannerStartDay, bannerEndDay, exactStart, exactEnd };
     });
 
     const intersectingEvents = processedEvents.filter(
@@ -154,60 +154,65 @@ export default function useAllDayBanner(
     // The goal here is to calculate the start and end column index for each event
     // and assign a vertical "row" index so no overlapping events share a row.
     // -------------------------------------------------------------------------
-    intersectingEvents.forEach(({ event, bannerStartDay, bannerEndDay }) => {
-      // Calculate bound indices for the current visible view
-      let startIndex = days.findIndex((d) =>
-        dateFn(d).startOf("day").equals(bannerStartDay),
-      );
-      if (startIndex === -1 && bannerStartDay < viewStart) {
-        startIndex = 0;
-      }
-
-      let endIndex = days.findIndex((d) =>
-        dateFn(d).startOf("day").equals(bannerEndDay),
-      );
-      if (endIndex === -1 && bannerEndDay > viewEnd) {
-        endIndex = days.length - 1;
-      }
-
-      // It might happen that the event is completely outside the days, but we already filtered for intersections.
-      if (startIndex === -1) startIndex = 0;
-      if (endIndex === -1) endIndex = days.length - 1;
-
-      const isClippedLeft = bannerStartDay < viewStart;
-      const isClippedRight = bannerEndDay > viewEnd;
-
-      // Row stacking: Find the lowest row index where the event fits without overlap
-      let rowIndex = 0;
-      while (true) {
-        if (!rows[rowIndex]) {
-          rows[rowIndex] = [];
-          break;
+    intersectingEvents.forEach(
+      ({ event, bannerStartDay, bannerEndDay, exactStart, exactEnd }) => {
+        // Calculate bound indices for the current visible view
+        let startIndex = days.findIndex((d) =>
+          dateFn(d).startOf("day").equals(bannerStartDay),
+        );
+        if (startIndex === -1 && bannerStartDay < viewStart) {
+          startIndex = 0;
         }
-        const hasOverlap = rows[rowIndex].some((existingEvent) => {
-          return (
-            startIndex <= existingEvent.endIndex &&
-            endIndex >= existingEvent.startIndex
-          );
-        });
-        if (!hasOverlap) {
-          break;
+
+        let endIndex = days.findIndex((d) =>
+          dateFn(d).startOf("day").equals(bannerEndDay),
+        );
+        if (endIndex === -1 && bannerEndDay > viewEnd) {
+          endIndex = days.length - 1;
         }
-        rowIndex++;
-      }
 
-      const layoutEvent: BannerLayoutEvent = {
-        event,
-        startIndex,
-        endIndex,
-        isClippedLeft,
-        isClippedRight,
-        row: rowIndex,
-      };
+        // It might happen that the event is completely outside the days, but we already filtered for intersections.
+        if (startIndex === -1) startIndex = 0;
+        if (endIndex === -1) endIndex = days.length - 1;
 
-      rows[rowIndex].push(layoutEvent);
-      layoutEvents.push(layoutEvent);
-    });
+        const isClippedLeft =
+          bannerStartDay < viewStart ||
+          exactStart.startOf("day") < bannerStartDay;
+        const isClippedRight =
+          bannerEndDay > viewEnd || exactEnd.startOf("day") > bannerEndDay;
+
+        // Row stacking: Find the lowest row index where the event fits without overlap
+        let rowIndex = 0;
+        while (true) {
+          if (!rows[rowIndex]) {
+            rows[rowIndex] = [];
+            break;
+          }
+          const hasOverlap = rows[rowIndex].some((existingEvent) => {
+            return (
+              startIndex <= existingEvent.endIndex &&
+              endIndex >= existingEvent.startIndex
+            );
+          });
+          if (!hasOverlap) {
+            break;
+          }
+          rowIndex++;
+        }
+
+        const layoutEvent: BannerLayoutEvent = {
+          event,
+          startIndex,
+          endIndex,
+          isClippedLeft,
+          isClippedRight,
+          row: rowIndex,
+        };
+
+        rows[rowIndex].push(layoutEvent);
+        layoutEvents.push(layoutEvent);
+      },
+    );
 
     const rowCount = rows.length;
 

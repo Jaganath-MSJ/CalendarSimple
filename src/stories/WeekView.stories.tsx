@@ -150,3 +150,43 @@ export const CustomWeekStartEnd: Story = {
     weekEndsOn: 5, // Friday
   },
 };
+
+// Test story for AllDayBanner clipped arrow fix
+// Events with < 12h overlap on boundary days should still show arrows
+const boundaryTestDate = DateTime.fromISO("2026-04-21"); // Tuesday
+
+export const MultiDayArrowTest: Story = {
+  args: {
+    events: [
+      {
+        id: "1",
+        title: "Right arrow test: ends Apr28T00:00 (0h overlap)",
+        startDate: "2026-04-21T11:00:00",
+        endDate: "2026-04-28T00:00:00",
+        style: { backgroundColor: "#EF4444" },
+      },
+      {
+        id: "2",
+        title: "Right arrow test: ends Apr28T05:00 (5h overlap)",
+        startDate: "2026-04-21T11:00:00",
+        endDate: "2026-04-28T05:00:00",
+        style: { backgroundColor: "#F97316" },
+      },
+      {
+        id: "3",
+        title: "Left arrow test: starts Apr20T23:45 (barely touches)",
+        startDate: "2026-04-20T23:45:00",
+        endDate: "2026-04-24T10:00:00",
+        style: { backgroundColor: "#3B82F6" },
+      },
+      {
+        id: "4",
+        title: "Left arrow test: starts Apr20T13:00 (11h overlap)",
+        startDate: "2026-04-20T13:00:00",
+        endDate: "2026-04-24T14:00:00",
+        style: { backgroundColor: "#06B6D4" },
+      },
+    ],
+    selectedDate: boundaryTestDate.toJSDate(),
+  },
+};
