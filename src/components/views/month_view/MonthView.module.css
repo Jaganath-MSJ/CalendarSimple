@@ -75,3 +75,15 @@
   border-right: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
 }
+
+@media (max-width: 768px) {
+  .tableHeader {
+    height: 30px;
+    font-size: 0.75rem;
+    letter-spacing: 0;
+  }
+
+  .tableCell {
+    padding: 2px;
+  }
+}
