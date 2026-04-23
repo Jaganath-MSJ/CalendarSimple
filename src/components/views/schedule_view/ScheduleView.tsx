@@ -41,16 +41,22 @@ export default function ScheduleView(props: ScheduleViewProps) {
     locale,
   } = useCalendarProps(props);
   const { testId } = useCalendar();
-  const { todayRef, groupedEvents, renderEventTime, renderEventTitle } =
-    useScheduleView({
-      events,
-      autoScrollToCurrentTime,
-      is12Hour,
-      locale,
-    });
+  const {
+    todayRef,
+    containerRef,
+    groupedEvents,
+    renderEventTime,
+    renderEventTitle,
+  } = useScheduleView({
+    events,
+    autoScrollToCurrentTime,
+    is12Hour,
+    locale,
+  });
 
   return (
     <div
+      ref={containerRef}
       role="region"
       aria-label="Schedule view"
       className={styles.scheduleView}

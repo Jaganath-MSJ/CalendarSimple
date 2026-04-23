@@ -96,6 +96,8 @@ export default function View(props: ViewProps) {
   const activeView = renderActiveView();
   if (!activeView) return null;
   return (
-    <div className={cx({ [styles.fadeIn]: showFadeIn })}>{activeView}</div>
+    <div className={cx(styles.views, { [styles.fadeIn]: showFadeIn })}>
+      {activeView}
+    </div>
   );
 }

@@ -43,6 +43,7 @@ export default function useScheduleView({
   locale,
 }: UseScheduleViewProps) {
   const todayRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const groupedEvents = useMemo(() => {
     // -------------------------------------------------------------------------
@@ -79,8 +80,10 @@ export default function useScheduleView({
   }, [events]);
 
   useEffect(() => {
-    if (autoScrollToCurrentTime && todayRef.current) {
-      todayRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (autoScrollToCurrentTime && todayRef.current && containerRef.current) {
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const elementRect = todayRef.current.getBoundingClientRect();
+      containerRef.current.scrollTop += elementRect.top - containerRect.top;
     }
   }, [autoScrollToCurrentTime, groupedEvents]);
 
@@ -159,6 +162,7 @@ export default function useScheduleView({
 
   return {
     todayRef,
+    containerRef,
     groupedEvents,
     renderEventTime,
     renderEventTitle,
