@@ -67,3 +67,15 @@
 .eventsColumn {
   position: relative;
 }
+
+/* ── Tablet & Phone (768px): reduce day header font for narrow screens ── */
+@media (max-width: 768px) {
+  .dayNumber {
+    font-size: 16px;
+    margin-top: 2px;
+  }
+
+  .dayHeader {
+    padding: 6px 0;
+  }
+}
