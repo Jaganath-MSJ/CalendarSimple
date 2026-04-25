@@ -1,7 +1,7 @@
 .dayView {
   display: flex;
   flex-direction: column;
-  height: calc(100% - 68px);
+  height: 100%;
   overflow-y: auto;
   overflow-x: auto;
   border: 1px solid #e0e0e0;
