@@ -87,8 +87,44 @@ Make your calendar reactive to user input by hooking into these extensive callba
 
 ## 📱 Responsive Layout
 
-- The calendar utilizes CSS Grid and Flexbox to fluidly adapt to the width and height of its parent container.
-- If no explicitly fixed `width` or `height` props are provided, it relies on a ResizeObserver hook to monitor the DOM wrapper and recalculates internal sizes automatically, ensuring events and columns always align perfectly to the available space.
+The calendar has two layers of responsive behavior:
+
+### 1. Container-width adaptation (ResizeObserver)
+
+When no `width` or `height` props are provided, a `ResizeObserver` monitors the DOM wrapper and feeds pixel dimensions back into the layout engine. Events, columns, and spanning multi-day chips recalculate automatically as the container resizes.
+
+### 2. CSS media-query breakpoints
+
+Built-in `@media` rules fire at two viewport widths:
+
+**768 px — Tablet**
+
+| View              | What changes                                                                                                      |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Header            | Controls collapse into two rows; Today button and view selects use smaller font/padding                           |
+| Month             | Day-name header row shrinks to 30 px; cell padding tightens to 2 px                                               |
+| Month events      | Chip height reduces to 1.25 rem; font shrinks to 0.6875 rem                                                       |
+| Week / CustomDays | Columns fix to `100px` wide (instead of `flex: 1`), triggering horizontal scroll when columns exceed the viewport |
+| CustomDays        | Also gains `overflow-x: auto` (was missing before this release)                                                   |
+| Day               | Day-number font reduces from 20 px to 16 px; header padding tightens                                              |
+
+**480 px — Phone**
+
+| View              | What changes                                                                                                                             |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Month events      | Chips become 6 px colored dot-bars (`font-size: 0`, no text); "+N more" button hidden                                                    |
+| Week / CustomDays | Each column expands to `calc(100vw − 90px)` — one day fills the screen, remainder accessible by scroll                                   |
+| Schedule          | Horizontal padding halves (16 px → 8 px); time column narrows from 140 px to 100 px; date number, event time, and title fonts all reduce |
+
+### Usage tip
+
+Drop the `width` prop and let the parent container control width for breakpoints to activate naturally:
+
+```tsx
+<div style={{ width: "100%", height: "600px" }}>
+  <Calendar events={events} />
+</div>
+```
 
 ## ⚡ Performance Options
 

@@ -13,7 +13,7 @@ A lightweight, customizable, and responsive calendar component for React applica
 
 - **🗓️ Multiple Views**: Support for Month, Week, Day, and Schedule views, giving users different perspectives of their events.
 - **✨ Event Handling**: Built-in support for displaying and managing events with custom styling.
-- **📱 Responsive**: Automatically adjusts layout based on container dimensions.
+- **📱 Responsive**: Adapts to any container size. At **768px** (tablet) controls stack into two rows, columns compact, and fonts reduce. At **480px** (phone) month events collapse to dot-only colored bars and week/custom-day columns become single-column with horizontal scroll.
 - **🎨 Theming & Customization**: Fully customizable colors via the `theme` prop and individual element styling via `classNames`.
 - **🧩 Custom Renderers**: Ultimate flexibility to completely replace events, headers, and grid cells with custom React components.
 - **⌨️ Keyboard Navigation**: Full keyboard accessibility with Enter/Space activation, Tab focus trap in popovers, and Escape to close dialogs.
@@ -368,6 +368,29 @@ interface CalendarClassNames {
   scheduleTitle?: string;
 }
 ```
+
+## Responsive & Mobile
+
+The calendar ships with built-in CSS breakpoints for tablet and phone screen widths. No extra configuration is needed — simply let the calendar fill its container.
+
+### Breakpoint Summary
+
+| Breakpoint | Target | What changes                                                                                                                                                                                   |
+| ---------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `≤ 768px`  | Tablet | Header controls stack into two rows; Month day-name headers shrink to 30 px; event chips reduce in size; Week/CustomDays columns fix to 100 px with horizontal scroll; Day header font reduces |
+| `≤ 480px`  | Phone  | Month events become 6 px colored dot-bars (no text, no "+N more"); Week/CustomDays show one column at `100vw − 90px` width (rest scroll); Schedule padding and time-column narrow              |
+
+### Fluid container usage
+
+For breakpoints to activate, the calendar's containing element must be narrower than the breakpoint. Drop the `width` prop and let the parent define the size:
+
+```tsx
+<div style={{ width: "100%", height: "600px" }}>
+  <Calendar events={events} />
+</div>
+```
+
+If you pass an explicit `width={800}` prop, internal sizing uses that value, but CSS media queries still fire based on the actual **viewport** width.
 
 ## Contributing
 
