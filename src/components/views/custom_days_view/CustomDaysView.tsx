@@ -1,11 +1,16 @@
 import React, { useMemo, useEffect, useRef } from "react";
 import cx from "classnames";
-import { getDayOfWeek, dateFn, formatDate } from "../../../utils";
+import {
+  getDayOfWeek,
+  dateFn,
+  formatDate,
+  getDayListNames,
+} from "../../../utils";
 import useDayEventLayout, {
   DayEventLayout,
 } from "../../../hooks/useDayEventLayout";
 import { CalendarContentProps } from "../../../types";
-import { getDayListNames, DATE_FORMATS } from "../../../constants";
+import { DATE_FORMATS, TIME_CONSTANTS } from "../../../constants";
 import styles from "./CustomDaysView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
 import useCalendarProps from "../../../hooks/useCalendarProps";
@@ -103,7 +108,7 @@ function CustomView(props: CustomViewProps) {
       const now = dateFn();
       const hours = now.hour;
       const minutes = now.minute;
-      const totalMinutes = hours * 60 + minutes;
+      const totalMinutes = hours * TIME_CONSTANTS.MINUTES_IN_HOUR + minutes;
 
       const container = containerRef.current;
       const targetScroll = Math.max(

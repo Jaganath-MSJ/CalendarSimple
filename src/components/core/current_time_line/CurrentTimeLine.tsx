@@ -4,6 +4,7 @@ import styles from "./CurrentTimeLine.module.css";
 import { dateFn } from "../../../utils";
 import { CalendarContentProps } from "../../../types";
 import { useCalendar } from "../../../context/CalendarContext";
+import { TIME_CONSTANTS } from "../../../constants";
 
 interface CurrentTimeLineProps extends Pick<
   CalendarContentProps,
@@ -20,7 +21,7 @@ const CurrentTimeLine = ({
   const { testId } = useCalendar();
   const [position, setPosition] = useState(() => {
     const now = dateFn();
-    return (now.hour - minHour) * 60 + now.minute;
+    return (now.hour - minHour) * TIME_CONSTANTS.MINUTES_IN_HOUR + now.minute;
   });
 
   useEffect(() => {
@@ -29,17 +30,21 @@ const CurrentTimeLine = ({
       const hours = now.hour;
       const minutes = now.minute;
       // eventSlot height is 60px per hour
-      const totalMinutes = (hours - minHour) * 60 + minutes;
+      const totalMinutes =
+        (hours - minHour) * TIME_CONSTANTS.MINUTES_IN_HOUR + minutes;
       setPosition(totalMinutes);
     };
 
     updatePosition();
-    const interval = setInterval(updatePosition, 60000); // update every minute
+    const interval = setInterval(updatePosition, TIME_CONSTANTS.MS_PER_MINUTE);
 
     return () => clearInterval(interval);
   }, [minHour]);
 
-  if (position < 0 || position > (maxHour - minHour) * 60) {
+  if (
+    position < 0 ||
+    position > (maxHour - minHour) * TIME_CONSTANTS.MINUTES_IN_HOUR
+  ) {
     return null;
   }
 

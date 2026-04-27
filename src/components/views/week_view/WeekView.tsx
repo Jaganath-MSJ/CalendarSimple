@@ -1,11 +1,16 @@
 import React, { useMemo, useEffect, useRef } from "react";
 import cx from "classnames";
-import { getDayOfWeek, dateFn, formatDate } from "../../../utils";
+import {
+  getDayOfWeek,
+  dateFn,
+  formatDate,
+  getDayListNames,
+} from "../../../utils";
 import useDayEventLayout, {
   DayEventLayout,
 } from "../../../hooks/useDayEventLayout";
 import { CalendarContentProps } from "../../../types";
-import { getDayListNames, DATE_FORMATS } from "../../../constants";
+import { DATE_FORMATS, TIME_CONSTANTS } from "../../../constants";
 import styles from "./WeekView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
 import useCalendarProps from "../../../hooks/useCalendarProps";
@@ -78,13 +83,13 @@ function WeekView(props: WeekViewProps) {
     const diff =
       currentDay >= weekStartsOn
         ? weekStartsOn - currentDay
-        : weekStartsOn - currentDay - 7;
+        : weekStartsOn - currentDay - TIME_CONSTANTS.DAYS_IN_WEEK;
     return selectedDate.plus({ days: diff }).startOf("day");
   }, [selectedDate, weekStartsOn]);
 
   const weekDays = useMemo(() => {
     let length = weekEndsOn - weekStartsOn + 1;
-    if (length <= 0) length += 7;
+    if (length <= 0) length += TIME_CONSTANTS.DAYS_IN_WEEK;
     return Array.from({ length }, (_, i) => startOfWeek.plus({ days: i }));
   }, [startOfWeek, weekStartsOn, weekEndsOn]);
 
@@ -113,7 +118,7 @@ function WeekView(props: WeekViewProps) {
       const now = dateFn();
       const hours = now.hour;
       const minutes = now.minute;
-      const totalMinutes = hours * 60 + minutes;
+      const totalMinutes = hours * TIME_CONSTANTS.MINUTES_IN_HOUR + minutes;
 
       const container = containerRef.current;
       const targetScroll = Math.max(

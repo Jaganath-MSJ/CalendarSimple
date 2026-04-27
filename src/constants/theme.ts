@@ -20,9 +20,15 @@ export const LAYOUT_CONSTANTS = {
   EVENT_HEIGHT: 26,
   DEFAULT_ROWS: 6,
   MIN_ROWS: 4,
-  DAYS_IN_WEEK: 7,
-  EVENT_ITEM_PADDING: 16, // used in width calculation
+  ALL_DAY_ROW_HEIGHT: 24,
+  EVENT_ITEM_PADDING: 16,
   SMALL_EVENT_HEIGHT: 40,
   TINY_EVENT_HEIGHT: 20,
   DEFAULT_EVENT_COLOR: "#3b82f6",
-};
+} as const;
+
+export const KEYBOARD_SHORTCUTS = {
+  OPEN: "Enter",
+  ACTIVATE: " ",
+  CLOSE: "Escape",
+} as const;

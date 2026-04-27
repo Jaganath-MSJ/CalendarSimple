@@ -7,7 +7,6 @@ import {
 } from "../../types";
 import {
   CALENDAR_STRINGS,
-  getMonthList,
   DATE_FORMATS,
   CALENDAR_ACTIONS,
   VIEW_OPTIONS,
@@ -21,6 +20,7 @@ import {
   formatDate,
   getMonth,
   getYear,
+  getMonthList,
 } from "../../utils";
 import styles from "./Header.module.css";
 import LeftArrow from "../../assets/LeftArrow";

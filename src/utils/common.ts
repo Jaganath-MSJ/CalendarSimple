@@ -6,7 +6,7 @@
  * and spatial calculations like the maximum number of viewable events per cell.
  */
 
-import { LAYOUT_CONSTANTS } from "../constants";
+import { LAYOUT_CONSTANTS, TIME_CONSTANTS } from "../constants";
 import { CalendarEvent } from "../types";
 import { dateFn, DateType } from "./date";
 
@@ -75,7 +75,7 @@ export function getEventOverlapInHours(
   event: CalendarEvent,
   date: DateType,
 ): number {
-  if (isAllDayEvent(event)) return 24;
+  if (isAllDayEvent(event)) return TIME_CONSTANTS.HOURS_IN_DAY;
 
   const dayStart = dateFn(date).startOf("day");
   const dayEnd = dateFn(date).endOf("day");
@@ -89,5 +89,5 @@ export function getEventOverlapInHours(
   const overlapMs = overlapEnd.valueOf() - overlapStart.valueOf();
   if (overlapMs <= 0) return 0;
 
-  return overlapMs / (1000 * 60 * 60);
+  return overlapMs / TIME_CONSTANTS.MS_PER_HOUR;
 }

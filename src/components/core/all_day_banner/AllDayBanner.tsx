@@ -146,7 +146,7 @@ export default function AllDayBanner({
 
             const leftPct = (startIndex / totalCols) * 100;
             const widthPct = ((endIndex - startIndex + 1) / totalCols) * 100;
-            const topPx = row * 24 + 2;
+            const topPx = row * LAYOUT_CONSTANTS.ALL_DAY_ROW_HEIGHT + 2;
 
             const eventBgColor =
               event.style?.backgroundColor ||
@@ -202,7 +202,8 @@ export default function AllDayBanner({
             if (count === 0) return null;
             const leftPct = (idx / totalCols) * 100;
             const widthPct = (1 / totalCols) * 100;
-            const topPx = effectiveMaxRows * 24 + 2;
+            const topPx =
+              effectiveMaxRows * LAYOUT_CONSTANTS.ALL_DAY_ROW_HEIGHT + 2;
 
             return (
               <div

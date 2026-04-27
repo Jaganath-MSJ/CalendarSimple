@@ -18,6 +18,7 @@ import {
   isMultiDay,
   getEventOverlapInHours,
 } from "../utils/common";
+import { LAYOUT_CONSTANTS } from "../constants";
 
 /**
  * Represents the layout information for an event displayed in the all-day banner.
@@ -245,10 +246,19 @@ export default function useAllDayBanner(
       : layoutEvents.filter((ev) => ev.row < effectiveMaxRows);
 
     const containerHeight = isExpanded
-      ? Math.max(rowCount * 24 + 4, 28)
+      ? Math.max(
+          rowCount * LAYOUT_CONSTANTS.ALL_DAY_ROW_HEIGHT + 4,
+          LAYOUT_CONSTANTS.DATE_LABEL_HEIGHT,
+        )
       : hasHiddenEvents
-        ? Math.max((effectiveMaxRows + 1) * 24 + 4, 28)
-        : Math.max(rowCount * 24 + 4, 28);
+        ? Math.max(
+            (effectiveMaxRows + 1) * LAYOUT_CONSTANTS.ALL_DAY_ROW_HEIGHT + 4,
+            LAYOUT_CONSTANTS.DATE_LABEL_HEIGHT,
+          )
+        : Math.max(
+            rowCount * LAYOUT_CONSTANTS.ALL_DAY_ROW_HEIGHT + 4,
+            LAYOUT_CONSTANTS.DATE_LABEL_HEIGHT,
+          );
 
     const showExpandCollapse = hasHiddenEvents || isExpanded;
 

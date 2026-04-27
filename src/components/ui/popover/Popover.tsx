@@ -23,7 +23,11 @@ import {
   ECalendarViewType,
   EventListType,
 } from "../../../types";
-import { DATE_FORMATS, LAYOUT_CONSTANTS } from "../../../constants";
+import {
+  DATE_FORMATS,
+  LAYOUT_CONSTANTS,
+  KEYBOARD_SHORTCUTS,
+} from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
 import { handleKeyboardActivation } from "../../../utils/keyboard";
 
@@ -139,7 +143,7 @@ function Popover({
   }, []);
 
   const handlePopoverKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Escape") {
+    if (e.key === KEYBOARD_SHORTCUTS.CLOSE) {
       e.stopPropagation();
       handleClose();
       return;

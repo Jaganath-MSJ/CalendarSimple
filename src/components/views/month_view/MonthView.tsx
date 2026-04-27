@@ -2,9 +2,9 @@ import React, { CSSProperties, useCallback, useMemo } from "react";
 import cx from "classnames";
 import { CalendarContentProps } from "../../../types";
 import {
-  getDayListNames,
   LAYOUT_CONSTANTS,
   DATE_FORMATS,
+  TIME_CONSTANTS,
 } from "../../../constants";
 import {
   dateFn,
@@ -12,6 +12,7 @@ import {
   DateType,
   calculateMaxEvents,
   formatDate,
+  getDayListNames,
 } from "../../../utils";
 import useMonthGrid from "../../../hooks/useMonthGrid";
 import MonthEventItem from "../../core/month_event_item/MonthEventItem";
@@ -122,8 +123,14 @@ function MonthView(props: MonthViewProps) {
 
   const headerDays = useMemo(() => {
     const list = getDayListNames(dayType, locale);
-    const length = ((weekEndsOn - weekStartsOn + 7) % 7) + 1;
-    return Array.from({ length }, (_, i) => list[(weekStartsOn + i) % 7]);
+    const length =
+      ((weekEndsOn - weekStartsOn + TIME_CONSTANTS.DAYS_IN_WEEK) %
+        TIME_CONSTANTS.DAYS_IN_WEEK) +
+      1;
+    return Array.from(
+      { length },
+      (_, i) => list[(weekStartsOn + i) % TIME_CONSTANTS.DAYS_IN_WEEK],
+    );
   }, [dayType, weekStartsOn, weekEndsOn, locale]);
 
   const tableAriaLabel = formatDate(

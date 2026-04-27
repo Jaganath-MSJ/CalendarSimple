@@ -15,7 +15,7 @@ import { CalendarEvent } from "../types";
 import { useMemo } from "react";
 import { dateFn, DateType, formatDate } from "../utils/date";
 import { isAllDayEvent, getEventOverlapInHours } from "../utils/common";
-import { DATE_FORMATS } from "../constants";
+import { DATE_FORMATS, TIME_CONSTANTS } from "../constants";
 
 export interface UseDayEventLayoutOptions {
   enableEnrichedEvents?: boolean;
@@ -117,14 +117,16 @@ export default function useDayEventLayout(
             );
 
             const startMins = Math.floor(
-              (actStartMs - currentDay.valueOf()) / 60000,
+              (actStartMs - currentDay.valueOf()) /
+                TIME_CONSTANTS.MS_PER_MINUTE,
             );
             const endMins = Math.floor(
-              (actEndMs - currentDay.valueOf()) / 60000,
+              (actEndMs - currentDay.valueOf()) / TIME_CONSTANTS.MS_PER_MINUTE,
             );
 
             const isWithinBounds =
-              endMins > minHour * 60 && startMins < maxHour * 60;
+              endMins > minHour * TIME_CONSTANTS.MINUTES_IN_HOUR &&
+              startMins < maxHour * TIME_CONSTANTS.MINUTES_IN_HOUR;
             return isWithinBounds;
           }
 
@@ -172,13 +174,19 @@ export default function useDayEventLayout(
 
           if (!showAllDayRow && (isAllDay || overlapHours >= 12)) {
             // Force it to span the entire visible grid (minHour to maxHour)
-            start = minHour * 60;
-            end = maxHour * 60;
+            start = minHour * TIME_CONSTANTS.MINUTES_IN_HOUR;
+            end = maxHour * TIME_CONSTANTS.MINUTES_IN_HOUR;
           }
 
           // Clamp start and end to boundaries for the algorithm
-          const clampedStart = Math.max(start, minHour * 60);
-          const clampedEnd = Math.min(end, maxHour * 60);
+          const clampedStart = Math.max(
+            start,
+            minHour * TIME_CONSTANTS.MINUTES_IN_HOUR,
+          );
+          const clampedEnd = Math.min(
+            end,
+            maxHour * TIME_CONSTANTS.MINUTES_IN_HOUR,
+          );
 
           return {
             id: `${index}-${event.title}`,
@@ -305,7 +313,7 @@ export default function useDayEventLayout(
       function toLayout(event: ProcessedEvent): DayEventLayout {
         const rawHeight = event.end - event.start;
         // Shift top by the minHour offset
-        const top = event.start - minHour * 60;
+        const top = event.start - minHour * TIME_CONSTANTS.MINUTES_IN_HOUR;
 
         return {
           event: event.original,

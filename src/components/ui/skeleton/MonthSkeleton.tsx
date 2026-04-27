@@ -1,9 +1,10 @@
 import React from "react";
 import styles from "./Skeleton.module.css";
+import { TIME_CONSTANTS } from "../../../constants";
 
 export default function MonthSkeleton() {
   const rows = 5;
-  const cols = 7;
+  const cols = TIME_CONSTANTS.DAYS_IN_WEEK;
 
   return (
     <div className={styles.monthSkeleton} data-testid="month-skeleton">

@@ -6,7 +6,7 @@
  * such as tooltip strings and dynamic GMT offsets.
  */
 
-import { DATE_FORMATS } from "../constants";
+import { DATE_FORMATS, TIME_CONSTANTS } from "../constants";
 import { CalendarEvent, ECalendarViewType } from "../types";
 import { formatDate, dateFn } from "./date";
 import { isAllDayEvent } from "./common";
@@ -33,7 +33,7 @@ export function generateTooltipText(
     !dateFn(event.startDate).hasSame(dateFn(event.endDate), "day");
   const isAllDay = isAllDayEvent(event);
 
-  let formatStr = timeFormat;
+  let formatStr: string = timeFormat;
 
   if (viewType === ECalendarViewType.month || isAllDay) {
     formatStr = DATE_FORMATS.DATE;
@@ -61,8 +61,8 @@ export function getGmtOffset() {
   const offset = new Date().getTimezoneOffset();
   const sign = offset > 0 ? "-" : "+"; // timeZoneOffset returns negative if ahead of UTC
   const absOffset = Math.abs(offset);
-  const hours = Math.floor(absOffset / 60);
-  const minutes = absOffset % 60;
+  const hours = Math.floor(absOffset / TIME_CONSTANTS.MINUTES_IN_HOUR);
+  const minutes = absOffset % TIME_CONSTANTS.MINUTES_IN_HOUR;
 
   if (minutes === 0) {
     return `GMT${sign}${hours.toString().padStart(2, "0")}`;
