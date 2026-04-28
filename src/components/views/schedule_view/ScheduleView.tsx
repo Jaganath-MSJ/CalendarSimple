@@ -6,8 +6,8 @@ import {
   dateFn,
   checkIsToday,
   generateTooltipText,
+  handleKeyboardActivation,
 } from "../../../utils";
-import { handleKeyboardActivation } from "../../../utils/keyboard";
 import styles from "./ScheduleView.module.css";
 import { DATE_FORMATS, LAYOUT_CONSTANTS } from "../../../constants";
 import useScheduleView from "../../../hooks/useScheduleView";

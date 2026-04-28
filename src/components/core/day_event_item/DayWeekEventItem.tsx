@@ -4,13 +4,13 @@ import {
   formatDate,
   generateTooltipText,
   getContrastColor,
+  handleKeyboardActivation,
 } from "../../../utils";
 import { CalendarContentProps } from "../../../types";
 import { DayEventLayout } from "../../../hooks/useDayEventLayout";
 import { LAYOUT_CONSTANTS, DATE_FORMATS } from "../../../constants";
 import styles from "./DayWeekEventItem.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
-import { handleKeyboardActivation } from "../../../utils/keyboard";
 
 interface DayWeekEventItemProps extends Pick<
   CalendarContentProps,

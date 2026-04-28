@@ -17,6 +17,7 @@ import {
   isAfterDate,
   generateTooltipText,
   getContrastColor,
+  handleKeyboardActivation,
 } from "../../../utils";
 import {
   CalendarContentProps,
@@ -29,7 +30,6 @@ import {
   KEYBOARD_SHORTCUTS,
 } from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
-import { handleKeyboardActivation } from "../../../utils/keyboard";
 
 interface PopoverProps extends Pick<
   CalendarContentProps,

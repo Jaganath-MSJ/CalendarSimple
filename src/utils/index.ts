@@ -8,4 +8,3 @@ export * from "./date";
 export * from "./common";
 export * from "./formatting";
 export * from "./contrast";
-export * from "./locale";

@@ -5,6 +5,7 @@ import {
   getGmtOffset,
   generateTooltipText,
   getContrastColor,
+  handleKeyboardActivation,
 } from "../../../utils";
 import {
   CalendarEvent,
@@ -17,7 +18,6 @@ import useAllDayBanner, {
 import styles from "./AllDayBanner.module.css";
 import { LAYOUT_CONSTANTS } from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
-import { handleKeyboardActivation } from "../../../utils/keyboard";
 
 interface AllDayBannerProps extends Pick<
   CalendarContentProps,

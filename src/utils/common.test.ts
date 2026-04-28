@@ -1,6 +1,12 @@
-import { describe, it, expect } from "vitest";
-import { calculateMaxEvents, isAllDayEvent, isMultiDay } from "./common";
+import { describe, it, expect, vi } from "vitest";
+import {
+  calculateMaxEvents,
+  isAllDayEvent,
+  isMultiDay,
+  handleKeyboardActivation,
+} from "./common";
 import { LAYOUT_CONSTANTS } from "../constants";
+import { KeyboardEvent } from "react";
 
 describe("common utils", () => {
   describe("calculateMaxEvents", () => {
@@ -65,6 +71,39 @@ describe("common utils", () => {
           endDate: "2024-01-02T10:00:00",
         }),
       ).toBe(false);
+    });
+  });
+
+  describe("handleKeyboardActivation", () => {
+    const makeEvent = (key: string) =>
+      ({
+        key,
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
+      }) as unknown as KeyboardEvent;
+
+    it("calls handler and prevents default on Enter", () => {
+      const handler = vi.fn();
+      const e = makeEvent("Enter");
+      handleKeyboardActivation(handler)(e);
+      expect(handler).toHaveBeenCalledWith(e);
+      expect(e.preventDefault).toHaveBeenCalled();
+      expect(e.stopPropagation).toHaveBeenCalled();
+    });
+
+    it("calls handler and prevents default on Space", () => {
+      const handler = vi.fn();
+      const e = makeEvent(" ");
+      handleKeyboardActivation(handler)(e);
+      expect(handler).toHaveBeenCalledWith(e);
+    });
+
+    it("does not call handler for other keys", () => {
+      const handler = vi.fn();
+      const e = makeEvent("Tab");
+      handleKeyboardActivation(handler)(e);
+      expect(handler).not.toHaveBeenCalled();
+      expect(e.preventDefault).not.toHaveBeenCalled();
     });
   });
 

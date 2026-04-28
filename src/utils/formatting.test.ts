@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { generateTooltipText, getGmtOffset } from "./formatting";
+import {
+  generateTooltipText,
+  getGmtOffset,
+  getDayListNames,
+  getMonthList,
+} from "./formatting";
 import { formatDate } from "./date";
-import { ECalendarViewType } from "../types";
+import { ECalendarViewType, EDayType } from "../types";
 import { DATE_FORMATS } from "../constants";
 
 describe("formatting utils", () => {
@@ -59,6 +64,40 @@ describe("formatting utils", () => {
     it("should include time with 12h format if requested", () => {
       const result = generateTooltipText(event, ECalendarViewType.week, true);
       expect(result).toBe("Meeting (10:00 AM - 11:00 AM)");
+    });
+  });
+
+  describe("getDayListNames", () => {
+    it("returns 7 items starting with Sunday", () => {
+      const days = getDayListNames(EDayType.full);
+      expect(days).toHaveLength(7);
+      expect(days[0]).toBe("Sunday");
+      expect(days[6]).toBe("Saturday");
+    });
+
+    it("returns short names when EDayType.short is passed", () => {
+      const days = getDayListNames(EDayType.short);
+      expect(days[0]).toBe("Sun");
+      expect(days[6]).toBe("Sat");
+    });
+
+    it("respects locale", () => {
+      const days = getDayListNames(EDayType.full, "fr");
+      expect(days[0]).toBe("dimanche");
+    });
+  });
+
+  describe("getMonthList", () => {
+    it("returns 12 months with correct label and value", () => {
+      const months = getMonthList();
+      expect(months).toHaveLength(12);
+      expect(months[0]).toEqual({ label: "January", value: 0 });
+      expect(months[11]).toEqual({ label: "December", value: 11 });
+    });
+
+    it("respects locale", () => {
+      const months = getMonthList("fr");
+      expect(months[0].label).toBe("janvier");
     });
   });
 

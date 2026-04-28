@@ -6,7 +6,12 @@
  * and spatial calculations like the maximum number of viewable events per cell.
  */
 
-import { LAYOUT_CONSTANTS, TIME_CONSTANTS } from "../constants";
+import { KeyboardEvent } from "react";
+import {
+  KEYBOARD_SHORTCUTS,
+  LAYOUT_CONSTANTS,
+  TIME_CONSTANTS,
+} from "../constants";
 import { CalendarEvent } from "../types";
 import { dateFn, DateType } from "./date";
 
@@ -90,4 +95,17 @@ export function getEventOverlapInHours(
   if (overlapMs <= 0) return 0;
 
   return overlapMs / TIME_CONSTANTS.MS_PER_HOUR;
+}
+
+export function handleKeyboardActivation(handler: (e: KeyboardEvent) => void) {
+  return (e: KeyboardEvent) => {
+    if (
+      e.key === KEYBOARD_SHORTCUTS.OPEN ||
+      e.key === KEYBOARD_SHORTCUTS.ACTIVATE
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      handler(e);
+    }
+  };
 }

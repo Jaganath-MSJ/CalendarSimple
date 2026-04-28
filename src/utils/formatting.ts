@@ -6,8 +6,14 @@
  * such as tooltip strings and dynamic GMT offsets.
  */
 
+import { Info } from "luxon";
 import { DATE_FORMATS, TIME_CONSTANTS } from "../constants";
-import { CalendarEvent, ECalendarViewType } from "../types";
+import {
+  CalendarEvent,
+  ECalendarViewType,
+  EDayType,
+  MonthListType,
+} from "../types";
 import { formatDate, dateFn } from "./date";
 import { isAllDayEvent } from "./common";
 
@@ -68,4 +74,18 @@ export function getGmtOffset() {
     return `GMT${sign}${hours.toString().padStart(2, "0")}`;
   }
   return `GMT${sign}${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+}
+
+export function getDayListNames(dayType: EDayType, locale?: string): string[] {
+  const format = dayType === EDayType.full ? "long" : "short";
+  const days = Info.weekdays(format, { locale: locale || "en" });
+  // Luxon returns Mon-Sun. We need Sun-Sat to match expected 0-6 index.
+  return [days[6], ...days.slice(0, 6)];
+}
+
+export function getMonthList(locale?: string): MonthListType[] {
+  return Info.months("long", { locale: locale || "en" }).map((label, i) => ({
+    label,
+    value: i,
+  }));
 }

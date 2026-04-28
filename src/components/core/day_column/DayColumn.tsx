@@ -5,7 +5,7 @@ import { CalendarContentProps } from "../../../types";
 import { DayEventLayout } from "../../../hooks/useDayEventLayout";
 import { DayWeekEventItem } from "../day_event_item/DayWeekEventItem";
 import CurrentTimeLine from "../current_time_line/CurrentTimeLine";
-import { handleKeyboardActivation } from "../../../utils/keyboard";
+import { handleKeyboardActivation } from "../../../utils";
 import styles from "./DayColumn.module.css";
 
 interface DayColumnProps extends Pick<

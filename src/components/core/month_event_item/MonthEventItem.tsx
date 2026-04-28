@@ -11,6 +11,7 @@ import {
   DateType,
   getContrastColor,
   formatDate,
+  handleKeyboardActivation,
 } from "../../../utils";
 import styles from "./MonthEventItem.module.css";
 import Popover from "../../ui/popover/Popover";
@@ -20,7 +21,6 @@ import {
   DATE_FORMATS,
 } from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
-import { handleKeyboardActivation } from "../../../utils/keyboard";
 
 interface MonthEventItemProps extends Pick<
   CalendarContentProps,
