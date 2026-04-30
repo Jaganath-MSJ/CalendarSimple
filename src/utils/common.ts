@@ -97,6 +97,13 @@ export function getEventOverlapInHours(
   return overlapMs / TIME_CONSTANTS.MS_PER_HOUR;
 }
 
+/**
+ * Wraps a handler so it only fires on Enter or Space — the standard keyboard activation keys.
+ * Prevents default and stops propagation to avoid scroll or form submission side effects.
+ *
+ * @param handler - The callback to invoke on activation.
+ * @returns A keyboard event handler suitable for `onKeyDown`.
+ */
 export function handleKeyboardActivation(handler: (e: KeyboardEvent) => void) {
   return (e: KeyboardEvent) => {
     if (

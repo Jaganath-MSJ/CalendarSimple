@@ -1,10 +1,15 @@
+/**
+ * @file Default calendar prop values and shared configuration constants.
+ */
 import { ECalendarViewType, EDayType } from "../types";
 
+/** Test ID strings used to locate header dropdown elements in tests and automation. */
 export const CALENDAR_STRINGS = {
   MONTH: "monthDropdown",
   YEAR: "yearDropdown",
 };
 
+/** View options shown in the header view switcher dropdown (excludes CustomDays, which is dynamic). */
 export const VIEW_OPTIONS = [
   { label: "Day", value: ECalendarViewType.day },
   { label: "Week", value: ECalendarViewType.week },
@@ -12,6 +17,7 @@ export const VIEW_OPTIONS = [
   { label: "Schedule", value: ECalendarViewType.schedule },
 ];
 
+/** Default values merged into `CalendarProps` by `useCalendarProps` when the consumer omits a prop. */
 export const defaultCalendarProps = {
   events: [],
   view: ECalendarViewType.month,
@@ -51,6 +57,7 @@ export const defaultCalendarProps = {
   isLoading: false,
 };
 
+/** Action type strings dispatched to the calendar reducer. */
 export const CALENDAR_ACTIONS = {
   SET_DATE: "SET_DATE",
   SET_VIEW: "SET_VIEW",
@@ -59,6 +66,7 @@ export const CALENDAR_ACTIONS = {
   TODAY: "TODAY",
 } as const;
 
+/** Common time unit values used in duration and overlap calculations. */
 export const TIME_CONSTANTS = {
   MINUTES_IN_HOUR: 60,
   HOURS_IN_DAY: 24,
@@ -67,6 +75,7 @@ export const TIME_CONSTANTS = {
   MS_PER_HOUR: 3_600_000,
 } as const;
 
+/** Luxon format strings used throughout the calendar for date and time display. */
 export const DATE_FORMATS = {
   DATE: "yyyy-MM-dd",
   TIME: "HH:mm",

@@ -1,3 +1,8 @@
+/**
+ * @file Default theme values and layout/keyboard constants.
+ */
+
+/** Fallback color theme applied when no `theme` prop is provided. */
 export const defaultTheme = {
   default: {
     color: "#000",
@@ -13,6 +18,7 @@ export const defaultTheme = {
   },
 };
 
+/** Pixel dimensions used by layout algorithms to calculate cell sizes and event positioning. */
 export const LAYOUT_CONSTANTS = {
   HEADER_HEIGHT: 122,
   DATE_LABEL_HEIGHT: 28,
@@ -27,6 +33,7 @@ export const LAYOUT_CONSTANTS = {
   DEFAULT_EVENT_COLOR: "#3b82f6",
 } as const;
 
+/** Keyboard key values that trigger interactive calendar actions. */
 export const KEYBOARD_SHORTCUTS = {
   OPEN: "Enter",
   ACTIVATE: " ",
