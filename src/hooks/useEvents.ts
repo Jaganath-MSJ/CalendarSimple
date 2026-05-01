@@ -15,6 +15,8 @@ import { CalendarEvent } from "../types/events";
  * Hook to filter and return only valid calendar events.
  *
  * @param events - The raw array of calendar events to process.
+ * @param eventsAreSorted - When `true`, skips validation (caller guarantees events are pre-sorted and valid).
+ * @param enableEnrichedEvents - When `true`, skips validation (caller supplies pre-enriched events via `enrichedEventsByDate`).
  * @returns A memoized array containing only logically valid events.
  */
 export default function useEvents(
