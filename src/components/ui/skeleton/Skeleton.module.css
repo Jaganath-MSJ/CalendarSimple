@@ -34,26 +34,26 @@
 .headerCell {
   height: 40px;
   background-color: #f9fafb;
-  border-right: 1px solid #e5e7eb;
+  border-inline-end: 1px solid #e5e7eb;
   border-bottom: 1px solid #e5e7eb;
   padding: 4px 8px;
   vertical-align: middle;
 }
 
 .headerCell:last-child {
-  border-right: none;
+  border-inline-end: none;
 }
 
 .cell {
   vertical-align: top;
-  border-right: 1px solid #e5e7eb;
+  border-inline-end: 1px solid #e5e7eb;
   border-bottom: 1px solid #e5e7eb;
   padding: 4px;
   height: 100px;
 }
 
 .cell:last-child {
-  border-right: none;
+  border-inline-end: none;
 }
 
 /* ── TimeGridSkeleton ──────────────────────────────────── */
@@ -68,7 +68,7 @@
 .timeColumn {
   width: 60px;
   flex-shrink: 0;
-  border-right: 1px solid #e0e0e0;
+  border-inline-end: 1px solid #e0e0e0;
   padding: 8px 4px;
   display: flex;
   flex-direction: column;

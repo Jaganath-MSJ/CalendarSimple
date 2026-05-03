@@ -27,9 +27,9 @@
 .timeHeaderSpacer {
   width: 60px;
   flex-shrink: 0;
-  border-right: 1px solid #e0e0e0;
+  border-inline-end: 1px solid #e0e0e0;
   position: sticky;
-  left: 0;
+  inset-inline-start: 0;
   z-index: 15;
   background-color: #f9f9f9;
 }
@@ -38,11 +38,11 @@
   flex: 1;
   text-align: center;
   padding: 10px 0;
-  border-right: 1px solid #e0e0e0;
+  border-inline-end: 1px solid #e0e0e0;
 }
 
 .dayHeader:last-child {
-  border-right: none;
+  border-inline-end: none;
 }
 
 .dayName {
@@ -76,11 +76,11 @@
 .dayColumn {
   flex: 1;
   position: relative;
-  border-right: 1px solid #e0e0e0;
+  border-inline-end: 1px solid #e0e0e0;
 }
 
 .dayColumn:last-child {
-  border-right: none;
+  border-inline-end: none;
 }
 
 /* ── Tablet (768px): ~3 day columns visible, rest accessible by scroll ── */

@@ -1,7 +1,7 @@
 .eventItem {
   position: absolute;
-  left: 5px;
-  right: 5px;
+  inset-inline-start: 5px;
+  inset-inline-end: 5px;
   padding: 4px 5px;
   background-color: #3b82f6;
   color: white;

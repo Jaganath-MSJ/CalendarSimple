@@ -51,7 +51,7 @@ export function DayWeekEventItem({
         {
           top: `${item.top}px`,
           height: `${item.height}px`,
-          left: `${item.left}%`,
+          insetInlineStart: `${item.left}%`,
           zIndex: item.zIndex,
           "--event-width": `${item.width}%`,
           backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,

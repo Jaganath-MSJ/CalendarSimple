@@ -185,6 +185,12 @@ export interface CalendarProps {
   /** Luxon locale code (e.g. `'en'`, `'fr'`, `'es-MX'`). Controls date formatting language. */
   locale?: string;
 
+  /**
+   * Layout direction. When omitted, falls back to `'rtl'` if `locale` is in the RTL locale list
+   * (ar, he, fa, ur, ps, sd, ckb, yi); otherwise `'ltr'`.
+   */
+  direction?: "ltr" | "rtl";
+
   /** Overrides for built-in UI strings (navigation buttons, view names, etc.). */
   localeMessages?: {
     today?: string;

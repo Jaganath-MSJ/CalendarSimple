@@ -37,7 +37,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 2px 2px 4px auto; /* Align to top-right like common calendars */
+  margin-block: 2px 4px;
+  margin-inline: auto 2px; /* Align to top-end (right in LTR, left in RTL) */
   color: var(--text-primary);
   border-radius: 50%;
   transition:
@@ -113,7 +114,7 @@
   background: transparent;
   border: none;
   width: 100%;
-  text-align: left;
+  text-align: start;
   border-radius: 4px;
   transition: background-color 0.2s;
 }
@@ -150,7 +151,8 @@
     font-size: 0.625rem;
     width: 16px;
     height: 16px;
-    margin: 1px 1px 2px auto;
+    margin-block: 1px 2px;
+    margin-inline: auto 1px;
   }
 
   .eventItem {

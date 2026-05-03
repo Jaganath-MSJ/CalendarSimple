@@ -1,9 +1,9 @@
 .timeColumn {
   width: 60px;
   flex-shrink: 0;
-  border-right: 1px solid #e0e0e0;
+  border-inline-end: 1px solid #e0e0e0;
   position: sticky;
-  left: 0;
+  inset-inline-start: 0;
   z-index: 5;
   background-color: var(--bg-color, #fff);
 }

@@ -75,8 +75,8 @@ describe("formatting utils", () => {
       expect(days[6]).toBe("Saturday");
     });
 
-    it("returns short names when EDayType.short is passed", () => {
-      const days = getDayListNames(EDayType.short);
+    it("returns short names when EDayType.half is passed", () => {
+      const days = getDayListNames(EDayType.half);
       expect(days[0]).toBe("Sun");
       expect(days[6]).toBe("Sat");
     });

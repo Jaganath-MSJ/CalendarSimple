@@ -7,9 +7,9 @@
 .timeHeaderSpacer {
   width: 60px;
   flex-shrink: 0;
-  border-right: 1px solid #e0e0e0;
+  border-inline-end: 1px solid #e0e0e0;
   position: sticky;
-  left: 0;
+  inset-inline-start: 0;
   z-index: 15;
   background-color: var(--bg-color, #fff);
   display: flex;
@@ -73,11 +73,11 @@
 
 .bannerGridCell {
   flex: 1;
-  border-right: 1px solid #e0e0e0;
+  border-inline-end: 1px solid #e0e0e0;
 }
 
 .bannerGridCell:last-child {
-  border-right: none;
+  border-inline-end: none;
 }
 
 .bannerRow {
@@ -109,9 +109,9 @@
 
 .bannerChip.clippedLeft {
   clip-path: polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%);
-  padding-left: 14px;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+  padding-inline-start: 14px;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
 }
 
 .bannerChip.clippedRight {
@@ -122,9 +122,9 @@
     calc(100% - 10px) 100%,
     0 100%
   );
-  padding-right: 14px;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+  padding-inline-end: 14px;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
 }
 
 .bannerChip.clippedLeft.clippedRight {
@@ -136,9 +136,22 @@
     10px 100%,
     0 50%
   );
-  padding-left: 14px;
-  padding-right: 14px;
+  padding-inline: 14px;
   border-radius: 0;
+}
+
+[dir="rtl"] .bannerChip.clippedLeft {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 50%,
+    calc(100% - 10px) 100%,
+    0 100%
+  );
+}
+
+[dir="rtl"] .bannerChip.clippedRight {
+  clip-path: polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%);
 }
 
 .title {

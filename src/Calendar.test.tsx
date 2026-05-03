@@ -142,6 +142,38 @@ describe("Calendar Component Integration", () => {
     expect(screen.getByText("Sat")).toBeInTheDocument();
   });
 
+  describe("RTL Direction Support", () => {
+    it("renders dir='rtl' on the root when direction='rtl'", () => {
+      const { container } = render(<Calendar direction="rtl" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("dir", "rtl");
+    });
+
+    it("renders dir='rtl' when locale is Arabic and no direction prop", () => {
+      const { container } = render(<Calendar locale="ar" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("dir", "rtl");
+    });
+
+    it("renders dir='ltr' when direction='ltr' overrides Arabic locale", () => {
+      const { container } = render(<Calendar locale="ar" direction="ltr" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("dir", "ltr");
+    });
+
+    it("defaults to dir='ltr' with no locale or direction", () => {
+      const { container } = render(<Calendar />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("dir", "ltr");
+    });
+
+    it("renders dir='rtl' for Hebrew locale", () => {
+      const { container } = render(<Calendar locale="he" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("dir", "rtl");
+    });
+  });
+
   describe("Localization Support", () => {
     it("renders the header months in the specified locale", () => {
       const date = dateFn("2024-01-15");

@@ -4,6 +4,7 @@ import {
   isAllDayEvent,
   isMultiDay,
   handleKeyboardActivation,
+  resolveDirection,
 } from "./common";
 import { LAYOUT_CONSTANTS } from "../constants";
 import { KeyboardEvent } from "react";
@@ -105,6 +106,47 @@ describe("common utils", () => {
       expect(handler).not.toHaveBeenCalled();
       expect(e.preventDefault).not.toHaveBeenCalled();
     });
+  });
+
+  describe("resolveDirection", () => {
+    it("returns explicit 'rtl' even when locale is LTR", () => {
+      expect(resolveDirection("rtl", "en")).toBe("rtl");
+    });
+
+    it("returns explicit 'ltr' even when locale is RTL", () => {
+      expect(resolveDirection("ltr", "ar")).toBe("ltr");
+    });
+
+    it("infers 'rtl' from Arabic locale", () => {
+      expect(resolveDirection(undefined, "ar")).toBe("rtl");
+    });
+
+    it("infers 'rtl' from BCP-47 region tag (ar-SA)", () => {
+      expect(resolveDirection(undefined, "ar-SA")).toBe("rtl");
+    });
+
+    it("infers 'rtl' from underscore variant (he_IL)", () => {
+      expect(resolveDirection(undefined, "he_IL")).toBe("rtl");
+    });
+
+    it("is case-insensitive on locale", () => {
+      expect(resolveDirection(undefined, "AR")).toBe("rtl");
+    });
+
+    it("infers 'ltr' from English", () => {
+      expect(resolveDirection(undefined, "en")).toBe("ltr");
+    });
+
+    it("defaults to 'ltr' when both args are undefined", () => {
+      expect(resolveDirection(undefined, undefined)).toBe("ltr");
+    });
+
+    it.each(["he", "fa", "ur", "ps", "sd", "ckb", "yi"])(
+      "infers 'rtl' from locale '%s'",
+      (loc) => {
+        expect(resolveDirection(undefined, loc)).toBe("rtl");
+      },
+    );
   });
 
   describe("isMultiDay", () => {

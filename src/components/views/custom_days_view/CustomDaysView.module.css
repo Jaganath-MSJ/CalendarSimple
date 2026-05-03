@@ -24,19 +24,19 @@
 .timeHeaderSpacer {
   width: 60px;
   flex-shrink: 0;
-  border-right: 1px solid var(--calendar-border-color, #e0e0e0);
+  border-inline-end: 1px solid var(--calendar-border-color, #e0e0e0);
 }
 
 .dayHeader {
   flex: 1;
   padding: 10px 5px;
   text-align: center;
-  border-right: 1px solid var(--calendar-border-color, #e0e0e0);
+  border-inline-end: 1px solid var(--calendar-border-color, #e0e0e0);
   min-width: 0;
 }
 
 .dayHeader:last-child {
-  border-right: none;
+  border-inline-end: none;
 }
 
 .dayName {
@@ -73,13 +73,13 @@
 
 .dayColumn {
   flex: 1;
-  border-right: 1px solid var(--calendar-border-color, #f0f0f0);
+  border-inline-end: 1px solid var(--calendar-border-color, #f0f0f0);
   position: relative;
   min-width: 0;
 }
 
 .dayColumn:last-child {
-  border-right: none;
+  border-inline-end: none;
 }
 
 /* ── Tablet (768px): fixed column width → visible columns, rest scroll ── */

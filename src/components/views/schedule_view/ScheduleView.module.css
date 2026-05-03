@@ -55,7 +55,7 @@
   font-weight: 500;
   color: #202124;
   min-width: 28px;
-  text-align: right;
+  text-align: end;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -63,7 +63,7 @@
   width: 28px;
   border-radius: 50%;
   padding-bottom: 2px;
-  padding-left: 1px;
+  padding-inline-start: 1px;
 }
 
 .dateNumber.today {

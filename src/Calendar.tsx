@@ -10,7 +10,7 @@ import {
   LAYOUT_CONSTANTS,
   CALENDAR_ACTIONS,
 } from "./constants";
-import { dateFn } from "./utils";
+import { dateFn, resolveDirection } from "./utils";
 import useResizeObserver from "./hooks/useResizeObserver";
 import useEvents from "./hooks/useEvents";
 import styles from "./Calendar.module.css";
@@ -33,7 +33,11 @@ function CalendarContent(props: CalendarContentProps) {
     height,
     onNavigate,
     onViewChange,
+    direction,
+    locale,
   } = useCalendarProps(props);
+
+  const dir = resolveDirection(direction, locale);
 
   const {
     state: { view, selectedDate },
@@ -57,6 +61,7 @@ function CalendarContent(props: CalendarContentProps) {
   return (
     <section
       data-testid={`${testId}-container`}
+      dir={dir}
       style={
         {
           "--calendar-width": `${width}px`,
@@ -117,6 +122,8 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
     allProps.enableEnrichedEvents,
   );
 
+  const dir = resolveDirection(allProps.direction, allProps.locale);
+
   return (
     <CalendarProvider
       initialDate={initialDate}
@@ -127,6 +134,7 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
     >
       <div
         ref={containerRef}
+        dir={dir}
         style={{
           width: allProps.width ?? "100%",
           height: allProps.height ?? "100%",

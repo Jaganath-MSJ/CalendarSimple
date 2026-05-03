@@ -10,6 +10,7 @@ import { KeyboardEvent } from "react";
 import {
   KEYBOARD_SHORTCUTS,
   LAYOUT_CONSTANTS,
+  RTL_LOCALES,
   TIME_CONSTANTS,
 } from "../constants";
 import { CalendarEvent } from "../types";
@@ -95,6 +96,19 @@ export function getEventOverlapInHours(
   if (overlapMs <= 0) return 0;
 
   return overlapMs / TIME_CONSTANTS.MS_PER_HOUR;
+}
+
+/**
+ * Resolves layout direction. Explicit `direction` prop wins; otherwise infers from
+ * the locale's primary subtag. Defaults to `'ltr'` when both are undefined.
+ */
+export function resolveDirection(
+  direction: "ltr" | "rtl" | undefined,
+  locale: string | undefined,
+): "ltr" | "rtl" {
+  if (direction === "ltr" || direction === "rtl") return direction;
+  const base = (locale ?? "en").toLowerCase().split(/[-_]/)[0];
+  return (RTL_LOCALES as readonly string[]).includes(base) ? "rtl" : "ltr";
 }
 
 /**

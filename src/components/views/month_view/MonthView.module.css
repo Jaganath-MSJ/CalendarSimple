@@ -18,14 +18,14 @@
 
 .tableHeader,
 .tableCell {
-  border-right: 1px solid var(--border-color);
+  border-inline-end: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
   box-sizing: border-box;
 }
 
 .tableHeader:last-child,
 .tableCell:last-child {
-  border-right: none;
+  border-inline-end: none;
 }
 
 .table tr:last-child .tableCell {
@@ -73,7 +73,7 @@
   background-color: #f9fafb;
   font-size: 0.875rem;
   font-weight: 500;
-  border-right: 1px solid var(--border-color);
+  border-inline-end: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
 }
 
