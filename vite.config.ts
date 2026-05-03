@@ -45,7 +45,7 @@ export default defineConfig({
       dts({
         include: ["src"],
         exclude: ["node_modules", "dist"],
-        rollupTypes: true,
+        rollupTypes: false,
       }),
   ],
 });

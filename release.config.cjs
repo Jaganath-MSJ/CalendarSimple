@@ -1,3 +1,4 @@
+/* global process, module */
 const branch = process.env.GITHUB_REF_NAME;
 
 const config = {

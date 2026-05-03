@@ -1,14 +1,25 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import cx from "classnames";
 import {
   CalendarContentProps,
   EventListType,
   ECalendarViewType,
 } from "../../../types";
-import { getDiffDays, generateTooltipText, DateType } from "../../../utils";
+import {
+  getDiffDays,
+  generateTooltipText,
+  DateType,
+  getContrastColor,
+  formatDate,
+  handleKeyboardActivation,
+} from "../../../utils";
 import styles from "./MonthEventItem.module.css";
 import Popover from "../../ui/popover/Popover";
-import { LAYOUT_CONSTANTS, defaultTheme } from "../../../constants";
+import {
+  LAYOUT_CONSTANTS,
+  defaultTheme,
+  DATE_FORMATS,
+} from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
 
 interface MonthEventItemProps extends Pick<
@@ -62,9 +73,15 @@ function MonthEventItem({
   renderEvent,
   renderDateCell,
 }: MonthEventItemProps) {
-  const { testId } = useCalendar();
+  const { testId, config } = useCalendar();
+  const locale = config.locale;
   const [showPopover, setShowPopover] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+
+  const handleClosePopover = useCallback(() => {
+    setShowPopover(false);
+    setAnchorEl(null);
+  }, []);
 
   const styleSource = isSelected
     ? { ...defaultTheme.selected, ...theme?.selected }
@@ -102,6 +119,15 @@ function MonthEventItem({
       style={style}
       data-testid={`${testId}-${date}-month-cell`}
       onClick={() => onClick?.(dateObj)}
+      tabIndex={onClick ? 0 : undefined}
+      aria-label={
+        onClick
+          ? formatDate(dateObj, DATE_FORMATS.MONTH_DAY_YEAR, locale)
+          : undefined
+      }
+      onKeyDown={
+        onClick ? handleKeyboardActivation(() => onClick(dateObj)) : undefined
+      }
       className={cx(styles.dateData, className, {
         [styles.currentMonth]: !isCurrentMonth,
         [cx(styles.selected, selectedClassName)]: isSelected,
@@ -141,25 +167,44 @@ function MonthEventItem({
                     ECalendarViewType.month,
                     is12Hour,
                   );
-                  const width = `${cellWidth * diffDates - LAYOUT_CONSTANTS.EVENT_ITEM_PADDING}px`;
+
+                  const eventBgColor =
+                    item.style?.backgroundColor ||
+                    LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
+                  const textColor = getContrastColor(String(eventBgColor));
+
+                  // If cellWidth is 0, we can't calculate a proper spanning width.
+                  // Fallback to a percentage or just let it be 0 until measured.
+                  const calculatedWidth =
+                    cellWidth > 0
+                      ? `${cellWidth * diffDates - LAYOUT_CONSTANTS.EVENT_ITEM_PADDING}px`
+                      : "100%";
+
                   const id = item.id || `${item.startDate}-${index}`;
 
                   return (
                     <div
                       key={id}
+                      role="button"
+                      tabIndex={0}
                       className={cx(styles.eventItem, classNames?.event)}
                       id={item.id}
                       data-testid={`${testId}-${id}-month-event-item`}
                       style={{
-                        width,
+                        width: calculatedWidth,
                         backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                        color: textColor,
                         ...item.style,
                       }}
                       title={tooltipText}
+                      aria-label={`${item.title}, ${tooltipText}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         onEventClick?.(item);
                       }}
+                      onKeyDown={handleKeyboardActivation(() =>
+                        onEventClick?.(item),
+                      )}
                     >
                       {renderEvent ? renderEvent(item) : item.title}
                     </div>
@@ -170,6 +215,7 @@ function MonthEventItem({
                     <button
                       className={styles.moreEvents}
                       data-testid={`${testId}-${date}-more-events`}
+                      aria-label={`${hiddenEventsCount} more events on ${formatDate(dateObj, DATE_FORMATS.MONTH_DAY_YEAR, locale)}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         if (!showPopover) {
@@ -178,6 +224,13 @@ function MonthEventItem({
                         }
                         onMoreClick?.(dateObj);
                       }}
+                      onKeyDown={handleKeyboardActivation((e) => {
+                        if (!showPopover) {
+                          setAnchorEl(e.currentTarget as HTMLButtonElement);
+                          setShowPopover(true);
+                        }
+                        onMoreClick?.(dateObj);
+                      })}
                     >
                       + {hiddenEventsCount} more
                     </button>
@@ -186,7 +239,7 @@ function MonthEventItem({
                         dateObj={dateObj}
                         events={allDayEvents}
                         onEventClick={onEventClick}
-                        onClose={() => setShowPopover(false)}
+                        onClose={handleClosePopover}
                         anchorEl={anchorEl}
                         is12Hour={is12Hour}
                         renderEvent={renderEvent}

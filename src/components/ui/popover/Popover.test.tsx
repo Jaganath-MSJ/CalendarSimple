@@ -37,6 +37,94 @@ describe("Popover Component", () => {
     vi.restoreAllMocks();
   });
 
+  // ─── Accessibility tests ───────────────────────────────────────────────────
+
+  describe("Accessibility (Phase 2)", () => {
+    let a11yAnchorEl: HTMLButtonElement;
+
+    const a11yEvents = [
+      {
+        id: "a11y-1",
+        title: "Morning Standup",
+        startDate: "2024-03-01T09:00:00",
+        endDate: "2024-03-01T09:30:00",
+      },
+      {
+        id: "a11y-2",
+        title: "Design Review",
+        startDate: "2024-03-01T14:00:00",
+        endDate: "2024-03-01T15:00:00",
+      },
+    ];
+
+    beforeEach(() => {
+      vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+        cb(0);
+        return 0;
+      });
+      a11yAnchorEl = document.createElement("button");
+      document.body.appendChild(a11yAnchorEl);
+    });
+
+    afterEach(() => {
+      document.body.removeChild(a11yAnchorEl);
+      vi.restoreAllMocks();
+    });
+
+    const renderPopover = (
+      overrides?: Partial<Parameters<typeof Popover>[0]>,
+    ) =>
+      render(
+        <CalendarProvider
+          initialDate={dateObj}
+          initialView={ECalendarViewType.month}
+        >
+          <Popover
+            dateObj={dateObj}
+            events={a11yEvents as never}
+            onClose={mockOnClose}
+            anchorEl={a11yAnchorEl}
+            onEventClick={mockOnEventClick}
+            is12Hour={false}
+            {...overrides}
+          />
+        </CalendarProvider>,
+      );
+
+    it("has role=dialog on the popover container", () => {
+      renderPopover();
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+
+    it("has aria-modal=true on the popover container", () => {
+      renderPopover();
+      const dialog = screen.getByRole("dialog");
+      expect(dialog).toHaveAttribute("aria-modal", "true");
+    });
+
+    it("closes on Escape key press", () => {
+      renderPopover();
+      fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
+    });
+
+    it("event items inside popover have role=button", () => {
+      renderPopover();
+      const buttons = screen.getAllByRole("button", {
+        name: /morning standup|design review/i,
+      });
+      expect(buttons.length).toBe(2);
+    });
+
+    it("pressing Enter on a popover event item calls onEventClick and onClose", () => {
+      renderPopover();
+      const item = screen.getByRole("button", { name: /morning standup/i });
+      fireEvent.keyDown(item, { key: "Enter" });
+      expect(mockOnEventClick).toHaveBeenCalledTimes(1);
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it("renders correctly with given events", () => {
     render(
       <CalendarProvider

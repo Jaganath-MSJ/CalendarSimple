@@ -144,6 +144,40 @@ describe("useMonthGrid Hook", () => {
     }
   });
 
+  it("preserves original event order when sortedMonthView is false", () => {
+    // A is shorter but listed first in input; B is longer but listed second.
+    // With sortedMonthView: true (default), B would land in slot 0 because it's longer.
+    // With sortedMonthView: false, the week-level sort is skipped, so A stays in slot 0.
+    const events: CalendarEvent[] = [
+      {
+        id: "A",
+        title: "Short",
+        startDate: "2024-02-01",
+        endDate: "2024-02-01",
+      },
+      {
+        id: "B",
+        title: "Long",
+        startDate: "2024-02-01",
+        endDate: "2024-02-05",
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useMonthGrid(selectedDate, events, weekStartsOn, weekEndsOn, {
+        sortedMonthView: false,
+        eventsAreSorted: true, // skip the pre-sort so input order is fully preserved
+      }),
+    );
+
+    // Feb 2024 starts Thursday. Week 0: Sun Jan 28 … Sat Feb 3.
+    // Feb 1 is at index 4 (Thursday).
+    const feb1 = result.current[0][4];
+    expect(feb1.displayDay).toBe(1);
+    expect(feb1.events[0]?.id).toBe("A"); // input-order slot 0
+    expect(feb1.events[1]?.id).toBe("B"); // input-order slot 1
+  });
+
   it("handles strictly zero-duration events", () => {
     const events: CalendarEvent[] = [
       {

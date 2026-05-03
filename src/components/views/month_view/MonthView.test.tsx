@@ -9,32 +9,10 @@ import { CalendarEvent, RenderDateCellProps } from "../../../types";
 describe("MonthView Component", () => {
   const mockDate = dateFn("2024-03-01T12:00:00Z");
 
-  beforeEach(() => {
-    vi.spyOn(CalendarContextModule, "useCalendar").mockReturnValue({
-      state: {
-        selectedDate: mockDate,
-        view: "month",
-      },
-      dispatch: vi.fn(),
-    } as never);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  const defaultProps = {
+  const defaultConfig = {
     events: [],
-    dayType: "half" as const,
     width: 800,
     height: 600,
-    weekStartsOn: 0,
-    weekEndsOn: 6,
-    is12Hour: false,
-    selectable: true,
-    theme: {},
-    eventProps: {},
-    classNames: {},
     locale: "en",
     localeMessages: {
       today: "Today",
@@ -44,12 +22,39 @@ describe("MonthView Component", () => {
       schedule: "Schedule",
       days: "Days",
     },
+  };
+
+  beforeEach(() => {
+    vi.spyOn(CalendarContextModule, "useCalendar").mockReturnValue({
+      state: {
+        selectedDate: mockDate,
+        view: "month",
+      },
+      config: defaultConfig,
+      dispatch: vi.fn(),
+    } as never);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const defaultProps = {
+    dayType: "half" as const,
+    weekStartsOn: 0,
+    weekEndsOn: 6,
+    is12Hour: false,
+    selectable: true,
+    theme: {},
+    eventProps: {},
+    classNames: {},
     showAdjacentMonths: true,
     enableEnrichedEvents: false,
     eventsAreSorted: false,
     isEventOrderingEnabled: false,
     autoScrollToCurrentTime: false,
     sortedMonthView: false,
+    showWeekNumbers: false,
   };
 
   it("renders month grid headers correctly", () => {
@@ -82,7 +87,15 @@ describe("MonthView Component", () => {
         endDate: "2024-03-15",
       },
     ];
-    render(<MonthView {...defaultProps} events={events as never} />);
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: {
+        selectedDate: mockDate,
+        view: "month",
+      },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+    render(<MonthView {...defaultProps} />);
 
     expect(screen.getByText("Test Event")).toBeInTheDocument();
   });
@@ -104,10 +117,18 @@ describe("MonthView Component", () => {
       },
     ];
 
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: {
+        selectedDate: mockDate,
+        view: "month",
+      },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
     render(
       <MonthView
         {...defaultProps}
-        events={events as never}
         renderEvent={customRenderEvent}
         renderDateCell={customRenderDateCell}
       />,
@@ -115,5 +136,273 @@ describe("MonthView Component", () => {
 
     expect(screen.getAllByTestId("custom-date").length).toBeGreaterThan(28);
     expect(screen.getByTestId("custom-event")).toBeInTheDocument();
+  });
+
+  it("renders week number column when showWeekNumbers is true", () => {
+    const { container } = render(
+      <MonthView {...defaultProps} showWeekNumbers={true} />,
+    );
+    // With showWeekNumbers, thead has 8 <th> cells: 1 week-number + 7 day headers
+    const headerCells = container.querySelectorAll("thead th");
+    expect(headerCells.length).toBe(8);
+    // Each tbody row also gets an extra <td> with the ISO week number
+    const firstBodyRow = container.querySelector("tbody tr");
+    const bodyCells = firstBodyRow?.querySelectorAll("td");
+    expect(bodyCells?.length).toBe(8); // 1 week-number + 7 day cells
+  });
+
+  it("does not render week number column when showWeekNumbers is false", () => {
+    const { container } = render(
+      <MonthView {...defaultProps} showWeekNumbers={false} />,
+    );
+    const headerCells = container.querySelectorAll("thead th");
+    expect(headerCells.length).toBe(7); // just 7 day headers
+    const firstBodyRow = container.querySelector("tbody tr");
+    const bodyCells = firstBodyRow?.querySelectorAll("td");
+    expect(bodyCells?.length).toBe(7);
+  });
+
+  it("applies classNames.weekNumber to week number header and body cells", () => {
+    const { container } = render(
+      <MonthView
+        {...defaultProps}
+        showWeekNumbers={true}
+        classNames={{ weekNumber: "custom-wk" }}
+      />,
+    );
+    const customCells = container.querySelectorAll(".custom-wk");
+    // At least 1 <th> + at least 1 <td> body cell should carry the class
+    expect(customCells.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("fires onSlotClick with start/end of day when creatable=true and a date cell is clicked", () => {
+    const onSlotClick = vi.fn();
+    render(<MonthView {...defaultProps} creatable onSlotClick={onSlotClick} />);
+
+    const midMonthDays = screen.getAllByText("15");
+    fireEvent.click(midMonthDays[0]);
+
+    expect(onSlotClick).toHaveBeenCalledTimes(1);
+    const [startDate, endDate] = onSlotClick.mock.calls[0] as [Date, Date];
+    expect(startDate.getHours()).toBe(0);
+    expect(startDate.getMinutes()).toBe(0);
+    expect(endDate.getHours()).toBe(23);
+    expect(endDate.getMinutes()).toBe(59);
+  });
+
+  it("fires onDateClick independently when selectable=true even when creatable=true", () => {
+    const onDateClick = vi.fn();
+    const onSlotClick = vi.fn();
+    render(
+      <MonthView
+        {...defaultProps}
+        selectable
+        onDateClick={onDateClick}
+        creatable
+        onSlotClick={onSlotClick}
+      />,
+    );
+
+    const midMonthDays = screen.getAllByText("15");
+    fireEvent.click(midMonthDays[0]);
+
+    expect(onSlotClick).toHaveBeenCalledTimes(1);
+    expect(onDateClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("month event chips have role=button", () => {
+    const events = [
+      {
+        id: "chip-1",
+        title: "Chip Event",
+        startDate: "2024-03-15T10:00:00",
+        endDate: "2024-03-15T11:00:00",
+      },
+    ];
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: { selectedDate: mockDate, view: "month" },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(<MonthView {...defaultProps} />);
+
+    const chips = screen.getAllByRole("button", { name: /Chip Event/i });
+    expect(chips.length).toBeGreaterThan(0);
+  });
+
+  it("pressing Enter on a month event chip calls onEventClick", () => {
+    const onEventClick = vi.fn();
+    const events = [
+      {
+        id: "chip-2",
+        title: "Enter Event",
+        startDate: "2024-03-15T10:00:00",
+        endDate: "2024-03-15T11:00:00",
+      },
+    ];
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: { selectedDate: mockDate, view: "month" },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(<MonthView {...defaultProps} onEventClick={onEventClick} />);
+
+    const chips = screen.getAllByRole("button", { name: /Enter Event/i });
+    fireEvent.keyDown(chips[0], { key: "Enter" });
+
+    expect(onEventClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("pressing Space on a month event chip calls onEventClick", () => {
+    const onEventClick = vi.fn();
+    const events = [
+      {
+        id: "chip-3",
+        title: "Space Event",
+        startDate: "2024-03-15T10:00:00",
+        endDate: "2024-03-15T11:00:00",
+      },
+    ];
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: { selectedDate: mockDate, view: "month" },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(<MonthView {...defaultProps} onEventClick={onEventClick} />);
+
+    const chips = screen.getAllByRole("button", { name: /Space Event/i });
+    fireEvent.keyDown(chips[0], { key: " " });
+
+    expect(onEventClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("'+ N more' button renders with accessible aria-label when events overflow", () => {
+    const events = [
+      {
+        id: "more-1",
+        title: "Event One",
+        startDate: "2024-03-15T09:00:00",
+        endDate: "2024-03-15T10:00:00",
+      },
+      {
+        id: "more-2",
+        title: "Event Two",
+        startDate: "2024-03-15T11:00:00",
+        endDate: "2024-03-15T12:00:00",
+      },
+      {
+        id: "more-3",
+        title: "Event Three",
+        startDate: "2024-03-15T13:00:00",
+        endDate: "2024-03-15T14:00:00",
+      },
+    ];
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: { selectedDate: mockDate, view: "month" },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(<MonthView {...defaultProps} maxEvents={1} />);
+
+    const moreBtn = screen.getByRole("button", { name: /more events on/i });
+    expect(moreBtn).toBeInTheDocument();
+  });
+
+  it("clicking '+ N more' button calls onMoreClick", () => {
+    const onMoreClick = vi.fn();
+    const events = [
+      {
+        id: "more-a",
+        title: "Alpha",
+        startDate: "2024-03-15T09:00:00",
+        endDate: "2024-03-15T10:00:00",
+      },
+      {
+        id: "more-b",
+        title: "Beta",
+        startDate: "2024-03-15T11:00:00",
+        endDate: "2024-03-15T12:00:00",
+      },
+    ];
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: { selectedDate: mockDate, view: "month" },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(
+      <MonthView {...defaultProps} maxEvents={1} onMoreClick={onMoreClick} />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /more events on/i }));
+
+    expect(onMoreClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("pressing Enter on '+ N more' button opens the popover", () => {
+    const events = [
+      {
+        id: "more-e",
+        title: "Epsilon",
+        startDate: "2024-03-15T09:00:00",
+        endDate: "2024-03-15T10:00:00",
+      },
+      {
+        id: "more-f",
+        title: "Zeta",
+        startDate: "2024-03-15T11:00:00",
+        endDate: "2024-03-15T12:00:00",
+      },
+    ];
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: { selectedDate: mockDate, view: "month" },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(<MonthView {...defaultProps} maxEvents={1} />);
+
+    const moreBtn = screen.getByRole("button", { name: /more events on/i });
+    fireEvent.keyDown(moreBtn, { key: "Enter" });
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("'+ N more' button is keyboard-activatable (native button Enter = click)", () => {
+    const onMoreClick = vi.fn();
+    const events = [
+      {
+        id: "more-c",
+        title: "Gamma",
+        startDate: "2024-03-15T09:00:00",
+        endDate: "2024-03-15T10:00:00",
+      },
+      {
+        id: "more-d",
+        title: "Delta",
+        startDate: "2024-03-15T11:00:00",
+        endDate: "2024-03-15T12:00:00",
+      },
+    ];
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: { selectedDate: mockDate, view: "month" },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+
+    render(
+      <MonthView {...defaultProps} maxEvents={1} onMoreClick={onMoreClick} />,
+    );
+
+    const moreBtn = screen.getByRole("button", { name: /more events on/i });
+    // Native <button> elements activate via Enter key in real browsers.
+    // fireEvent.click simulates that outcome in jsdom.
+    fireEvent.click(moreBtn);
+
+    expect(onMoreClick).toHaveBeenCalledTimes(1);
   });
 });

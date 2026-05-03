@@ -185,6 +185,14 @@ function App() {
         title: "Full Day (Datetime)",
         style: { backgroundColor: "emerald" },
       },
+
+      // 16. Day last second
+      {
+        id: "TC16",
+        startDate: formatDateTime(setTime(addDays(startOfToday, 0), 11, 0)),
+        endDate: formatDateTime(setTime(addDays(startOfToday, 2), 0, 1)),
+        title: "Day last second",
+      },
     ];
   };
 
@@ -193,24 +201,53 @@ function App() {
   return (
     <div
       style={{
-        width: "calc(100vw - 100px)",
-        height: "calc(100vh - 100px)",
+        width: "100%",
+        minHeight: "100vh",
+        padding: "40px 20px",
         display: "flex",
-        justifyContent: "center",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        gap: "40px",
         alignItems: "center",
+        backgroundColor: "#f5f5f5",
+        boxSizing: "border-box",
       }}
     >
-      <Calendar
-        events={eventsList}
-        selectedDate={new Date()}
-        selectable
-        view={ECalendarViewType.week}
-        is12Hour
-        showCurrentTime
-        autoScrollToCurrentTime
-        // width={400}
-        // height={400}
-      />
+      <div
+        style={{
+          width: "calc(100% - 40px)",
+          height: "800px",
+          backgroundColor: "#fff",
+          borderRadius: "12px",
+          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+          overflow: "hidden",
+        }}
+      >
+        <Calendar
+          events={eventsList}
+          selectedDate={new Date()}
+          selectable
+          view={ECalendarViewType.week}
+          is12Hour
+          showCurrentTime
+          autoScrollToCurrentTime
+        >
+          <Calendar.Header />
+          <Calendar.View />
+        </Calendar>
+      </div>
+      <div
+        style={{
+          width: "calc(100% - 40px)",
+          height: "800px",
+          backgroundColor: "#fff",
+          borderRadius: "12px",
+          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+          overflow: "hidden",
+        }}
+      >
+        <Calendar view={ECalendarViewType.month} />
+      </div>
     </div>
   );
 }

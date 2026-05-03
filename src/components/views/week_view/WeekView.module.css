@@ -1,7 +1,7 @@
 .weekView {
   display: flex;
   flex-direction: column;
-  height: calc(100% - 68px);
+  height: 100%;
   overflow-y: auto;
   overflow-x: auto;
   border: 1px solid #e0e0e0;
@@ -81,4 +81,38 @@
 
 .dayColumn:last-child {
   border-right: none;
+}
+
+/* ── Tablet (768px): ~3 day columns visible, rest accessible by scroll ── */
+@media (max-width: 768px) {
+  .dayHeader {
+    min-width: 100px;
+    flex: 0 0 100px;
+  }
+
+  .dayColumn {
+    min-width: 100px;
+    flex: 0 0 100px;
+  }
+
+  .dayName {
+    font-size: 10px;
+  }
+
+  .dayNumber {
+    font-size: 15px;
+  }
+}
+
+/* ── Phone (480px): 1 day column fills the viewport, scroll for others ── */
+@media (max-width: 480px) {
+  .dayHeader {
+    min-width: calc(100vw - 90px);
+    flex: 0 0 calc(100vw - 90px);
+  }
+
+  .dayColumn {
+    min-width: calc(100vw - 90px);
+    flex: 0 0 calc(100vw - 90px);
+  }
 }

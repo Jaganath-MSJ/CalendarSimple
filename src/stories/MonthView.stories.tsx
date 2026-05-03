@@ -108,3 +108,19 @@ export const CustomWeekStartEnd: Story = {
     weekEndsOn: 5, // Friday
   },
 };
+
+export const ShowWeekNumbers: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    showWeekNumbers: true,
+  },
+};
+
+export const SortedMonthView: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    sortedMonthView: true,
+  },
+};

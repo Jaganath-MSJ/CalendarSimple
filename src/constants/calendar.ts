@@ -1,25 +1,15 @@
-import { Info } from "luxon";
-import { ECalendarViewType, EDayType, MonthListType } from "../types";
+/**
+ * @file Default calendar prop values and shared configuration constants.
+ */
+import { ECalendarViewType, EDayType } from "../types";
 
-export function getDayListNames(dayType: EDayType, locale?: string): string[] {
-  const format = dayType === EDayType.full ? "long" : "short";
-  const days = Info.weekdays(format, { locale: locale || "en" });
-  // Luxon returns Mon-Sun. We need Sun-Sat to match expected 0-6 index.
-  return [days[6], ...days.slice(0, 6)];
-}
-
-export function getMonthList(locale?: string): MonthListType[] {
-  return Info.months("long", { locale: locale || "en" }).map((label, i) => ({
-    label,
-    value: i,
-  }));
-}
-
+/** Test ID strings used to locate header dropdown elements in tests and automation. */
 export const CALENDAR_STRINGS = {
   MONTH: "monthDropdown",
   YEAR: "yearDropdown",
 };
 
+/** View options shown in the header view switcher dropdown (excludes CustomDays, which is dynamic). */
 export const VIEW_OPTIONS = [
   { label: "Day", value: ECalendarViewType.day },
   { label: "Week", value: ECalendarViewType.week },
@@ -27,6 +17,7 @@ export const VIEW_OPTIONS = [
   { label: "Schedule", value: ECalendarViewType.schedule },
 ];
 
+/** Default values merged into `CalendarProps` by `useCalendarProps` when the consumer omits a prop. */
 export const defaultCalendarProps = {
   events: [],
   view: ECalendarViewType.month,
@@ -41,6 +32,7 @@ export const defaultCalendarProps = {
   },
   is12Hour: false,
   selectable: false,
+  creatable: false,
   dayType: EDayType.half,
   pastYearLength: 5,
   futureYearLength: 5,
@@ -53,6 +45,7 @@ export const defaultCalendarProps = {
   theme: {},
   classNames: {},
   showAdjacentMonths: true,
+  showWeekNumbers: false,
   resetDateOnViewChange: false,
   showAllDayRow: true,
   eventOverlapOffset: 0,
@@ -61,8 +54,28 @@ export const defaultCalendarProps = {
   isEventOrderingEnabled: true,
   sortedMonthView: true,
   testId: "calendar",
+  isLoading: false,
 };
 
+/** Action type strings dispatched to the calendar reducer. */
+export const CALENDAR_ACTIONS = {
+  SET_DATE: "SET_DATE",
+  SET_VIEW: "SET_VIEW",
+  NEXT: "NEXT",
+  PREV: "PREV",
+  TODAY: "TODAY",
+} as const;
+
+/** Common time unit values used in duration and overlap calculations. */
+export const TIME_CONSTANTS = {
+  MINUTES_IN_HOUR: 60,
+  HOURS_IN_DAY: 24,
+  DAYS_IN_WEEK: 7,
+  MS_PER_MINUTE: 60_000,
+  MS_PER_HOUR: 3_600_000,
+} as const;
+
+/** Luxon format strings used throughout the calendar for date and time display. */
 export const DATE_FORMATS = {
   DATE: "yyyy-MM-dd",
   TIME: "HH:mm",
@@ -77,12 +90,4 @@ export const DATE_FORMATS = {
   SHORT_MONTH: "MMM",
   SHORT_DAY: "EEE",
   DAY_DATE_SHORT_MONTH: "EEE, d MMM",
-};
-
-export const CALENDAR_ACTIONS = {
-  SET_DATE: "SET_DATE",
-  SET_VIEW: "SET_VIEW",
-  NEXT: "NEXT",
-  PREV: "PREV",
-  TODAY: "TODAY",
 } as const;

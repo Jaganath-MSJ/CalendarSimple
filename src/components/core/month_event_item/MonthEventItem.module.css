@@ -30,17 +30,19 @@
 }
 
 .dateLabel {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  padding: 0.25rem;
-  border-radius: 50%;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.25rem;
+  margin: 2px 2px 4px auto; /* Align to top-right like common calendars */
   color: var(--text-primary);
+  border-radius: 50%;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 .selected .dateLabel {
@@ -51,6 +53,9 @@
 .today .dateLabel {
   background-color: var(--primary-color);
   color: white;
+  box-shadow:
+    0 0 0 2px white,
+    0 0 0 4px var(--primary-color); /* Double ring effect for premium feel */
 }
 
 .dataContainer {
@@ -116,4 +121,51 @@
 .moreEvents:hover {
   background-color: var(--bg-hover);
   color: var(--text-primary);
+}
+
+/* ── Tablet (768px): tighter sizes, text still readable ── */
+@media (max-width: 768px) {
+  .dateLabel {
+    font-size: 0.6875rem;
+    width: 20px;
+    height: 20px;
+  }
+
+  .eventItem {
+    font-size: 0.6875rem;
+    padding: 0.1rem 0.25rem;
+    height: 1.25rem;
+    line-height: 1rem;
+  }
+
+  .moreEvents {
+    font-size: 0.6875rem;
+    padding: 0.1rem 0.25rem;
+  }
+}
+
+/* ── Phone (480px): dot-only events — colored bar, no text ── */
+@media (max-width: 480px) {
+  .dateLabel {
+    font-size: 0.625rem;
+    width: 16px;
+    height: 16px;
+    margin: 1px 1px 2px auto;
+  }
+
+  .eventItem {
+    font-size: 0;
+    padding: 0 2px;
+    height: 6px;
+    line-height: 0;
+    border-radius: 3px;
+  }
+
+  .moreEvents {
+    display: none;
+  }
+
+  .spacer {
+    height: 8px;
+  }
 }

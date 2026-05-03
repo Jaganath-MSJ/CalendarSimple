@@ -15,27 +15,8 @@ globalThis.ResizeObserver = vi.fn().mockImplementation(() => ({
 describe("CustomDaysView Component", () => {
   const mockDate = dateFn("2024-03-01T12:00:00Z"); // March 1, 2024 (Friday)
 
-  beforeEach(() => {
-    vi.spyOn(CalendarContextModule, "useCalendar").mockReturnValue({
-      state: {
-        selectedDate: mockDate,
-        view: "customDays",
-      },
-      dispatch: vi.fn(),
-    } as never);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  const defaultProps = {
+  const defaultConfig = {
     events: [],
-    dayType: "half" as const,
-    is12Hour: false,
-    theme: {},
-    eventProps: {},
-    classNames: {},
     locale: "en",
     localeMessages: {
       today: "Today",
@@ -45,6 +26,29 @@ describe("CustomDaysView Component", () => {
       schedule: "Schedule",
       days: "Days",
     },
+  };
+
+  beforeEach(() => {
+    vi.spyOn(CalendarContextModule, "useCalendar").mockReturnValue({
+      state: {
+        selectedDate: mockDate,
+        view: "customDays",
+      },
+      config: defaultConfig,
+      dispatch: vi.fn(),
+    } as never);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const defaultProps = {
+    dayType: "half" as const,
+    is12Hour: false,
+    theme: {},
+    eventProps: {},
+    classNames: {},
     showCurrentTime: true,
     maxEvents: 3,
     autoScrollToCurrentTime: false,
@@ -88,7 +92,15 @@ describe("CustomDaysView Component", () => {
         endDate: "2024-03-02T11:00:00",
       },
     ];
-    render(<CustomDaysView {...defaultProps} events={events as never} />);
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: {
+        selectedDate: mockDate,
+        view: "customDays",
+      },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+    render(<CustomDaysView {...defaultProps} />);
 
     expect(screen.getByText("Test Custom Day Event")).toBeInTheDocument();
   });

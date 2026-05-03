@@ -3,6 +3,7 @@ import React, {
   useEffect,
   useLayoutEffect,
   useState,
+  useCallback,
   CSSProperties,
 } from "react";
 import cx from "classnames";
@@ -15,13 +16,19 @@ import {
   isBeforeDate,
   isAfterDate,
   generateTooltipText,
+  getContrastColor,
+  handleKeyboardActivation,
 } from "../../../utils";
 import {
   CalendarContentProps,
   ECalendarViewType,
   EventListType,
 } from "../../../types";
-import { DATE_FORMATS, LAYOUT_CONSTANTS } from "../../../constants";
+import {
+  DATE_FORMATS,
+  LAYOUT_CONSTANTS,
+  KEYBOARD_SHORTCUTS,
+} from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
 
 interface PopoverProps extends Pick<
@@ -48,6 +55,13 @@ function Popover({
   const [stylePosition, setStylePosition] = useState<CSSProperties>({
     visibility: "hidden",
   });
+
+  const handleClose = useCallback(() => {
+    onClose();
+    requestAnimationFrame(() => {
+      (anchorEl as HTMLElement | null)?.focus();
+    });
+  }, [onClose, anchorEl]);
 
   useLayoutEffect(() => {
     if (popoverRef.current && anchorEl) {
@@ -108,7 +122,7 @@ function Popover({
         popoverRef.current &&
         !popoverRef.current.contains(event.target as Node)
       ) {
-        onClose();
+        handleClose();
       }
     }
 
@@ -116,14 +130,53 @@ function Popover({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [onClose]);
+  }, [handleClose]);
+
+  useEffect(() => {
+    const frameId = requestAnimationFrame(() => {
+      const firstItem = popoverRef.current?.querySelector<HTMLElement>(
+        '[role="button"], button, [tabindex="0"]',
+      );
+      firstItem?.focus();
+    });
+    return () => cancelAnimationFrame(frameId);
+  }, []);
+
+  const handlePopoverKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === KEYBOARD_SHORTCUTS.CLOSE) {
+      e.stopPropagation();
+      handleClose();
+      return;
+    }
+    if (e.key === "Tab") {
+      const focusable = Array.from(
+        popoverRef.current?.querySelectorAll<HTMLElement>(
+          '[role="button"], button, [tabindex="0"]',
+        ) ?? [],
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  };
 
   const content = (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Events on ${formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH)}`}
       className={styles.popover}
       ref={popoverRef}
       style={stylePosition}
       onClick={(e) => e.stopPropagation()}
+      onKeyDown={handlePopoverKeyDown}
       data-testid={`${testId}-popover-content`}
     >
       <div className={styles.popoverHeader}>
@@ -145,9 +198,15 @@ function Popover({
             is12Hour,
           );
 
+          const eventBgColor =
+            item.style?.backgroundColor || LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
+          const textColor = getContrastColor(String(eventBgColor));
+
           return (
             <div
               key={item.id || `pop-${idx}`}
+              role="button"
+              tabIndex={0}
               className={cx(styles.popoverItem, {
                 [styles.startBefore]: isStartBefore,
                 [styles.endAfter]: isEndAfter,
@@ -156,13 +215,19 @@ function Popover({
               data-testid={`${testId}-${item.id}-popover-item`}
               style={{
                 backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                color: textColor,
                 ...item.style,
               }}
+              aria-label={tooltipText}
               onClick={(e) => {
                 e.stopPropagation();
                 onEventClick?.(item);
-                onClose();
+                handleClose();
               }}
+              onKeyDown={handleKeyboardActivation(() => {
+                onEventClick?.(item);
+                handleClose();
+              })}
               title={tooltipText}
             >
               {renderEvent ? renderEvent(item) : item.title}

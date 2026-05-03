@@ -8,6 +8,7 @@ The calendar is designed to provide users with multiple perspectives of their sc
 
 - **Month View (`"month"`)**: The default view, displaying a traditional grid of the entire month. Events are stacked on each day, and if there are too many events to fit, a customizable "+X more" button appears.
   - **Adjacent Months**: Use the `showAdjacentMonths` prop to toggle the visibility of dates from the previous and next months in the current month's grid.
+  - **Week Numbers**: Pass `showWeekNumbers={true}` to display the ISO week number for each row in the month view grid.
   - **Week Boundaries**: You can configure which days of the week begin and end the layout (e.g., standard Monday-Friday work week) via `weekStartsOn` and `weekEndsOn`.
 - **Week View (`"week"`)**: Displays a 7-day column layout (or custom range using `weekStartsOn`/`weekEndsOn`) with a time grid. Events are rendered as blocks spanning their respective time slots, making it easy to identify overlapping schedules and free time.
   - **All-Day Row**: Automatically extracts all-day and multi-day events to a top banner. This can be disabled using `showAllDayRow={false}` which pushes them into the time grid as 24-hour blocks.
@@ -82,11 +83,48 @@ Make your calendar reactive to user input by hooking into these extensive callba
   - **Auto-Reset Date**: If you pass `resetDateOnViewChange={true}`, the calendar will automatically snap back to the current day ("Today") whenever the user manually switches the view.
 - `onNavigate(date: Date)`: Fired when the user clicks the "Next" or "Previous" buttons to flip through months/weeks, or uses the Month/Year dropdowns.
 - `onMoreClick(date: Date, hiddenEvents?: CalendarEvent[])`: In the month view, if a day has too many events, a "+X more" text appears. Clicking it fires this callback, returning the specific date and an array of the events that were pushed out of view.
+- `creatable` + `onSlotClick(startDate: Date, endDate: Date)`: Enable creation intent by passing `creatable={true}`. Clicking an empty hour slot in Day, Week, or Custom Days views fires `onSlotClick` with the slot's start time and `start + 1 hour` as the end time. In the Month view, clicking a date cell fires `onSlotClick(startOfDay, endOfDay)`. Slots show a pointer cursor when `creatable` is active. Clicking an existing event still fires `onEventClick` as normal — slot clicks do not bubble through events. `creatable` and `selectable` can be used together.
 
 ## 📱 Responsive Layout
 
-- The calendar utilizes CSS Grid and Flexbox to fluidly adapt to the width and height of its parent container.
-- If no explicitly fixed `width` or `height` props are provided, it relies on a ResizeObserver hook to monitor the DOM wrapper and recalculates internal sizes automatically, ensuring events and columns always align perfectly to the available space.
+The calendar has two layers of responsive behavior:
+
+### 1. Container-width adaptation (ResizeObserver)
+
+When no `width` or `height` props are provided, a `ResizeObserver` monitors the DOM wrapper and feeds pixel dimensions back into the layout engine. Events, columns, and spanning multi-day chips recalculate automatically as the container resizes.
+
+### 2. CSS media-query breakpoints
+
+Built-in `@media` rules fire at two viewport widths:
+
+**768 px — Tablet**
+
+| View              | What changes                                                                                                      |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Header            | Controls collapse into two rows; Today button and view selects use smaller font/padding                           |
+| Month             | Day-name header row shrinks to 30 px; cell padding tightens to 2 px                                               |
+| Month events      | Chip height reduces to 1.25 rem; font shrinks to 0.6875 rem                                                       |
+| Week / CustomDays | Columns fix to `100px` wide (instead of `flex: 1`), triggering horizontal scroll when columns exceed the viewport |
+| CustomDays        | Also gains `overflow-x: auto` (was missing before this release)                                                   |
+| Day               | Day-number font reduces from 20 px to 16 px; header padding tightens                                              |
+
+**480 px — Phone**
+
+| View              | What changes                                                                                                                             |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Month events      | Chips become 6 px colored dot-bars (`font-size: 0`, no text); "+N more" button hidden                                                    |
+| Week / CustomDays | Each column expands to `calc(100vw − 90px)` — one day fills the screen, remainder accessible by scroll                                   |
+| Schedule          | Horizontal padding halves (16 px → 8 px); time column narrows from 140 px to 100 px; date number, event time, and title fonts all reduce |
+
+### Usage tip
+
+Drop the `width` prop and let the parent container control width for breakpoints to activate naturally:
+
+```tsx
+<div style={{ width: "100%", height: "600px" }}>
+  <Calendar events={events} />
+</div>
+```
 
 ## ⚡ Performance Options
 
@@ -96,6 +134,40 @@ When rendering thousands of events simultaneously, you can utilize the internal 
 - **`eventsAreSorted`**: Skips the expensive initial `[...events].sort()` operations algorithmically when you feed the calendar a pre-sorted dataset.
 - **`isEventOrderingEnabled`**: Setting this to `false` is an ultra-fast path for massive data payloads. It bypasses iterative sweep-line calculations and Tetris overlapping resolutions to assign items linearly, keeping performance instantaneous at the expense of visual collision spacing.
 - **`sortedMonthView`**: Exposes the ability to enforce a custom priority/sorting-function inside the Month View for Tetris slot allocations, or turn them off completely.
+
+## ⌨️ Keyboard Navigation & ♿ Accessibility
+
+The calendar is built with accessibility as a first-class feature, ensuring it's usable by everyone, including users with keyboard-only navigation or assistive technologies.
+
+### Keyboard Navigation
+
+- **Enter & Space Activation**: All interactive elements (buttons, date cells, event items) can be activated using the Enter or Space keys, in addition to mouse clicks.
+- **Tab Navigation**: Use Tab to move focus through interactive elements and Shift+Tab to move backward. All focusable elements follow standard tab order.
+- **Popover Focus Trap**: When a popover opens (e.g., "+X more" button in Month view), focus is automatically trapped within it. Tab cycles through items within the popover, and the last item returns focus to the first.
+- **Escape to Close**: Pressing Escape closes open popovers and dialogs, with focus automatically returned to the triggering element.
+- **Focus Indicators**: All keyboard-navigable elements display a visible focus outline (`2px solid #005fcc`) when focused via keyboard, making navigation clear and discoverable.
+
+### ARIA & Semantic HTML
+
+- **Semantic Roles**: Interactive elements use proper `role="button"` attributes when they're not native buttons. Dialog popovers use `role="dialog"` with `aria-modal="true"`.
+- **Descriptive Labels**: All interactive elements have `aria-label` attributes describing their purpose (e.g., "Next period", "Expand all-day events", "Collapse all-day events").
+- **Region Labels**: All major view containers (Month, Week, Day, Schedule, Custom Days) are marked with `role="region"` and descriptive `aria-label` to help screen reader users understand content structure.
+- **State Attributes**: Expandable/collapsible elements use `aria-expanded` to communicate their state. Dialogs use `aria-modal="true"` to indicate modal behavior.
+- **Table Semantics**: The Month view's table headers use `scope="col"` for proper table header association.
+- **Navigation Semantics**: The Header is wrapped in a `<nav>` element with `aria-label="Calendar navigation"` for clear semantic structure.
+
+### Screen Reader Compatibility
+
+- All events and interactive elements have meaningful labels that screen readers announce.
+- Date cells in the Month view announce their date and any events on that date.
+- Popover dialogs announce their contents and are properly marked as modal.
+- Dropdown selectors (Month, Year, View) include descriptive `aria-label` attributes.
+
+### Implementation Notes
+
+- The keyboard activation utility (`handleKeyboardActivation()`) is automatically used on all interactive divs to provide keyboard support without requiring additional configuration.
+- Focus management respects browser standards and CSS custom properties for theming the focus color.
+- All accessibility features are built-in and require no additional configuration — they work out of the box.
 
 ## 🛡️ TypeScript Support
 

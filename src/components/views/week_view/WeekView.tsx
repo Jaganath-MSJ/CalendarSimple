@@ -1,69 +1,80 @@
 import React, { useMemo, useEffect, useRef } from "react";
 import cx from "classnames";
-import { getDayOfWeek, dateFn, formatDate } from "../../../utils";
+import {
+  getDayOfWeek,
+  dateFn,
+  formatDate,
+  getDayListNames,
+} from "../../../utils";
 import useDayEventLayout, {
   DayEventLayout,
 } from "../../../hooks/useDayEventLayout";
 import { CalendarContentProps } from "../../../types";
-import { getDayListNames, DATE_FORMATS } from "../../../constants";
+import { DATE_FORMATS, TIME_CONSTANTS } from "../../../constants";
 import styles from "./WeekView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
+import useCalendarProps from "../../../hooks/useCalendarProps";
 import TimeColumn from "../../core/time_column/TimeColumn";
 import DayColumn from "../../core/day_column/DayColumn";
 import AllDayBanner from "../../core/all_day_banner/AllDayBanner";
 
-interface WeekViewProps extends Pick<
-  CalendarContentProps,
-  | "events"
-  | "is12Hour"
-  | "dayType"
-  | "onEventClick"
-  | "theme"
-  | "classNames"
-  | "showCurrentTime"
-  | "maxEvents"
-  | "autoScrollToCurrentTime"
-  | "weekStartsOn"
-  | "weekEndsOn"
-  | "minHour"
-  | "maxHour"
-  | "renderEvent"
-  | "renderHourCell"
-  | "renderDateCell"
-  | "showAllDayRow"
-  | "eventOverlapOffset"
-  | "enableEnrichedEvents"
-  | "enrichedEventsByDate"
-  | "eventsAreSorted"
-  | "isEventOrderingEnabled"
-  | "locale"
-> {}
+export type WeekViewProps = Partial<
+  Pick<
+    CalendarContentProps,
+    | "is12Hour"
+    | "dayType"
+    | "onEventClick"
+    | "theme"
+    | "classNames"
+    | "showCurrentTime"
+    | "maxEvents"
+    | "autoScrollToCurrentTime"
+    | "weekStartsOn"
+    | "weekEndsOn"
+    | "minHour"
+    | "maxHour"
+    | "renderEvent"
+    | "renderHourCell"
+    | "renderDateCell"
+    | "showAllDayRow"
+    | "eventOverlapOffset"
+    | "enableEnrichedEvents"
+    | "enrichedEventsByDate"
+    | "eventsAreSorted"
+    | "isEventOrderingEnabled"
+    | "creatable"
+    | "onSlotClick"
+  >
+>;
 
-function WeekView({
-  events,
-  onEventClick,
-  dayType,
-  is12Hour,
-  theme,
-  classNames,
-  showCurrentTime,
-  maxEvents,
-  autoScrollToCurrentTime,
-  weekStartsOn,
-  weekEndsOn,
-  minHour,
-  maxHour,
-  renderEvent,
-  renderHourCell,
-  renderDateCell,
-  showAllDayRow,
-  eventOverlapOffset,
-  enableEnrichedEvents,
-  enrichedEventsByDate,
-  eventsAreSorted,
-  isEventOrderingEnabled,
-  locale,
-}: WeekViewProps) {
+function WeekView(props: WeekViewProps) {
+  const {
+    events,
+    onEventClick,
+    dayType,
+    is12Hour,
+    theme,
+    classNames,
+    showCurrentTime,
+    maxEvents,
+    autoScrollToCurrentTime,
+    weekStartsOn,
+    weekEndsOn,
+    minHour,
+    maxHour,
+    renderEvent,
+    renderHourCell,
+    renderDateCell,
+    showAllDayRow,
+    eventOverlapOffset,
+    enableEnrichedEvents,
+    enrichedEventsByDate,
+    eventsAreSorted,
+    isEventOrderingEnabled,
+    locale,
+    creatable,
+    onSlotClick,
+  } = useCalendarProps(props);
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, testId } = useCalendar();
   const { selectedDate } = state;
@@ -72,13 +83,13 @@ function WeekView({
     const diff =
       currentDay >= weekStartsOn
         ? weekStartsOn - currentDay
-        : weekStartsOn - currentDay - 7;
+        : weekStartsOn - currentDay - TIME_CONSTANTS.DAYS_IN_WEEK;
     return selectedDate.plus({ days: diff }).startOf("day");
   }, [selectedDate, weekStartsOn]);
 
   const weekDays = useMemo(() => {
     let length = weekEndsOn - weekStartsOn + 1;
-    if (length <= 0) length += 7;
+    if (length <= 0) length += TIME_CONSTANTS.DAYS_IN_WEEK;
     return Array.from({ length }, (_, i) => startOfWeek.plus({ days: i }));
   }, [startOfWeek, weekStartsOn, weekEndsOn]);
 
@@ -107,7 +118,7 @@ function WeekView({
       const now = dateFn();
       const hours = now.hour;
       const minutes = now.minute;
-      const totalMinutes = hours * 60 + minutes;
+      const totalMinutes = hours * TIME_CONSTANTS.MINUTES_IN_HOUR + minutes;
 
       const container = containerRef.current;
       const targetScroll = Math.max(
@@ -121,6 +132,8 @@ function WeekView({
 
   return (
     <div
+      role="region"
+      aria-label="Week view"
       className={styles.weekView}
       ref={containerRef}
       data-testid={`${testId}-week-view`}
@@ -194,6 +207,7 @@ function WeekView({
               >
                 <DayColumn
                   dayEvents={weekEvents[dayIndex]}
+                  date={date}
                   onEventClick={onEventClick}
                   is12Hour={is12Hour}
                   classNames={classNames}
@@ -203,6 +217,8 @@ function WeekView({
                   maxHour={maxHour}
                   renderEvent={renderEvent}
                   renderHourCell={renderHourCell}
+                  creatable={creatable}
+                  onSlotClick={onSlotClick}
                 />
               </div>
             );

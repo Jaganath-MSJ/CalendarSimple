@@ -5,7 +5,7 @@
 ![npm downloads](https://img.shields.io/npm/dm/calendar-simple)
 ![license](https://img.shields.io/npm/l/calendar-simple)
 
-A lightweight, customizable, and responsive calendar component for React applications. Built with TypeScript and Day.js, `calendar-simple` provides a flexible solution for date selection and event management in your React projects.
+A lightweight, customizable, and responsive calendar component for React applications. Built with TypeScript and Luxon, `calendar-simple` provides a flexible solution for date selection and event management in your React projects.
 
 **[Live Demo](http://calendarsimple.netlify.app)**
 
@@ -13,11 +13,13 @@ A lightweight, customizable, and responsive calendar component for React applica
 
 - **🗓️ Multiple Views**: Support for Month, Week, Day, and Schedule views, giving users different perspectives of their events.
 - **✨ Event Handling**: Built-in support for displaying and managing events with custom styling.
-- **📱 Responsive**: Automatically adjusts layout based on container dimensions.
+- **📱 Responsive**: Adapts to any container size. At **768px** (tablet) controls stack into two rows, columns compact, and fonts reduce. At **480px** (phone) month events collapse to dot-only colored bars and week/custom-day columns become single-column with horizontal scroll.
 - **🎨 Theming & Customization**: Fully customizable colors via the `theme` prop and individual element styling via `classNames`.
 - **🧩 Custom Renderers**: Ultimate flexibility to completely replace events, headers, and grid cells with custom React components.
+- **⌨️ Keyboard Navigation**: Full keyboard accessibility with Enter/Space activation, Tab focus trap in popovers, and Escape to close dialogs.
+- **♿ ARIA & Accessibility**: Comprehensive semantic HTML, ARIA roles, labels, and attributes for screen reader support.
 - **🕒 Time Formatting**: Options for 12-hour (AM/PM) and 24-hour time formats.
-- **👆 Interactive**: Granular control with click handlers for dates, specific events, view changes, and "more" indicators.
+- **👆 Interactive**: Granular control with click handlers for dates, specific events, view changes, "more" indicators, and empty slot creation intent.
 - **🕒 Current Time & Timezone**: Display a real-time indicator with automatic local timezone GMT offset, and optionally auto-scroll to the current time on load.
 - **🌍 Localization**: Full support for internationalization using Luxon. Translate UI text and date formats to any language.
 - **🛡️ TypeScript**: Written in TypeScript for robust type safety and developer experience.
@@ -222,49 +224,52 @@ const FrenchCalendar = () => (
 
 ### Props
 
-| Prop                      | Type                                                   | Description                                                                                 | Default           |
-| ------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------- | ----------------- |
-| `events`                  | `CalendarEvent[]`                                      | Array of event data objects to display.                                                     | `[]`              |
-| `selectedDate`            | `Date`                                                 | The currently selected date object.                                                         | `undefined`       |
-| `view`                    | `ECalendarViewType`                                    | The current view: `"month"`, `"week"`, `"day"`, `"schedule"`, or `"customDays"`.            | `"month"`         |
-| `selectable`              | `boolean`                                              | Enables visual selection state.                                                             | `false`           |
-| `is12Hour`                | `boolean`                                              | Display time in 12-hour AM/PM format instead of 24-hour format.                             | `false`           |
-| `onDateClick`             | `(date: Date) => void`                                 | Callback function fired when a date is clicked.                                             | `undefined`       |
-| `onEventClick`            | `(event: CalendarEvent) => void`                       | Callback function fired when an event is clicked.                                           | `undefined`       |
-| `onMoreClick`             | `(date: Date, hiddenEvents?: CalendarEvent[]) => void` | Callback fired when the "+X more" indicator is clicked.                                     | `undefined`       |
-| `onNavigate`              | `(date: Date) => void`                                 | Callback fired when the calendar date range is changed (e.g. next month).                   | `undefined`       |
-| `onViewChange`            | `(view: ECalendarViewType) => void`                    | Callback fired when the calendar view is changed via header buttons.                        | `undefined`       |
-| `width`                   | `number \| string`                                     | Width of the calendar container.                                                            | `auto-calculated` |
-| `height`                  | `number \| string`                                     | Height of the calendar container.                                                           | `auto-calculated` |
-| `theme`                   | `CalendarTheme`                                        | Configuration object for custom colors.                                                     | `{}`              |
-| `classNames`              | `CalendarClassNames`                                   | Custom CSS classes for various internal elements.                                           | `{}`              |
-| `dayType`                 | `EDayType`                                             | Format for day names: `"full"` (Monday) or `"half"` (Mon).                                  | `"half"`          |
-| `pastYearLength`          | `number`                                               | Number of past years to show in the year dropdown.                                          | `5`               |
-| `futureYearLength`        | `number`                                               | Number of future years to show in the year dropdown.                                        | `5`               |
-| `maxEvents`               | `number`                                               | Maximum events to show per day cell before collapsing.                                      | Auto-calc         |
-| `showCurrentTime`         | `boolean`                                              | Displays a line indicating the current time in day and week views.                          | `false`           |
-| `autoScrollToCurrentTime` | `boolean`                                              | Automatically scrolls to the current time line when the view is initially loaded.           | `false`           |
-| `minHour`                 | `number`                                               | Minimum hour (0-24) to display in day and week view time grids.                             | `0`               |
-| `maxHour`                 | `number`                                               | Maximum hour (0-24) to display in day and week view time grids.                             | `24`              |
-| `weekStartsOn`            | `number`                                               | Start day of the week (0 = Sunday, 1 = Monday, etc.).                                       | `0`               |
-| `weekEndsOn`              | `number`                                               | End day of the week (0 = Sunday, 1 = Monday, etc.).                                         | `6`               |
-| `showAdjacentMonths`      | `boolean`                                              | Show dates from the previous and next months in the month view grid.                        | `false`           |
-| `customDays`              | `number`                                               | The number of days to display in the `customDays` view.                                     | `3`               |
-| `showAllDayRow`           | `boolean`                                              | Toggles visibility of the all-day event row at the top of Day/Week views.                   | `true`            |
-| `eventOverlapOffset`      | `number`                                               | Percentage offset for stacking overlapping events in time grids (0 for tiled).              | `0`               |
-| `resetDateOnViewChange`   | `boolean`                                              | Resets the calendar to Today when the user changes views via the header.                    | `false`           |
-| `renderEvent`             | `(event: CalendarEvent) => ReactNode`                  | Custom renderer for event items.                                                            | `undefined`       |
-| `renderHeader`            | `(props: RenderHeaderProps) => ReactNode`              | Custom renderer for the calendar header.                                                    | `undefined`       |
-| `renderHourCell`          | `(date: Date) => ReactNode`                            | Custom renderer for background of hour slots (Day/Week/Custom views).                       | `undefined`       |
-| `renderDateCell`          | `(props: RenderDateCellProps) => ReactNode`            | Custom renderer for day headers and month date cells.                                       | `undefined`       |
-| `renderScheduleSeparator` | `(date: Date) => ReactNode`                            | Custom renderer for the separator between daily event groups in the Schedule view.          | `undefined`       |
-| `enableEnrichedEvents`    | `boolean`                                              | Enables O(1) dictionary lookups instead of filtering across all events.                     | `false`           |
-| `enrichedEventsByDate`    | `Record<string, CalendarEvent[]>`                      | Pre-mapped event payload used when `enableEnrichedEvents` is active.                        | `undefined`       |
-| `eventsAreSorted`         | `boolean`                                              | Skips algorithmic sorting logic assuming the input `events` are already ordered.            | `false`           |
-| `isEventOrderingEnabled`  | `boolean`                                              | Enables collision/overlap resolution mapping (Tetris slot-stacking for views).              | `true`            |
-| `sortedMonthView`         | `boolean \| function`                                  | Sorts the items logically before Tetris slot-stacking overlapping occurrences.              | `true`            |
-| `locale`                  | `string`                                               | The Luxon locale code (e.g., `'en-US'`, `'fr-FR'`, `'ja-JP'`).                              | `'en'`            |
-| `localeMessages`          | `object`                                               | Custom translations for built-in text: `today`, `day`, `week`, `month`, `schedule`, `days`. | `{}`              |
+| Prop                      | Type                                                   | Description                                                                                                                 | Default           |
+| ------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| `events`                  | `CalendarEvent[]`                                      | Array of event data objects to display.                                                                                     | `[]`              |
+| `selectedDate`            | `Date`                                                 | The currently selected date object.                                                                                         | `undefined`       |
+| `view`                    | `ECalendarViewType`                                    | The current view: `"month"`, `"week"`, `"day"`, `"schedule"`, or `"customDays"`.                                            | `"month"`         |
+| `selectable`              | `boolean`                                              | Enables visual selection state.                                                                                             | `false`           |
+| `is12Hour`                | `boolean`                                              | Display time in 12-hour AM/PM format instead of 24-hour format.                                                             | `false`           |
+| `onDateClick`             | `(date: Date) => void`                                 | Callback function fired when a date is clicked.                                                                             | `undefined`       |
+| `onEventClick`            | `(event: CalendarEvent) => void`                       | Callback function fired when an event is clicked.                                                                           | `undefined`       |
+| `onMoreClick`             | `(date: Date, hiddenEvents?: CalendarEvent[]) => void` | Callback fired when the "+X more" indicator is clicked.                                                                     | `undefined`       |
+| `onNavigate`              | `(date: Date) => void`                                 | Callback fired when the calendar date range is changed (e.g. next month).                                                   | `undefined`       |
+| `onViewChange`            | `(view: ECalendarViewType) => void`                    | Callback fired when the calendar view is changed via header buttons.                                                        | `undefined`       |
+| `creatable`               | `boolean`                                              | Enables click-to-create intent. Slots show a pointer cursor when active.                                                    | `false`           |
+| `onSlotClick`             | `(startDate: Date, endDate: Date) => void`             | Fired when an empty slot is clicked. In time-grid views: `hour:00` → `hour+1:00`. In Month view: `startOfDay` → `endOfDay`. | `undefined`       |
+| `width`                   | `number \| string`                                     | Width of the calendar container.                                                                                            | `auto-calculated` |
+| `height`                  | `number \| string`                                     | Height of the calendar container.                                                                                           | `auto-calculated` |
+| `theme`                   | `CalendarTheme`                                        | Configuration object for custom colors.                                                                                     | `{}`              |
+| `classNames`              | `CalendarClassNames`                                   | Custom CSS classes for various internal elements.                                                                           | `{}`              |
+| `dayType`                 | `EDayType`                                             | Format for day names: `"full"` (Monday) or `"half"` (Mon).                                                                  | `"half"`          |
+| `pastYearLength`          | `number`                                               | Number of past years to show in the year dropdown.                                                                          | `5`               |
+| `futureYearLength`        | `number`                                               | Number of future years to show in the year dropdown.                                                                        | `5`               |
+| `maxEvents`               | `number`                                               | Maximum events to show per day cell before collapsing.                                                                      | Auto-calc         |
+| `showCurrentTime`         | `boolean`                                              | Displays a line indicating the current time in day and week views.                                                          | `false`           |
+| `autoScrollToCurrentTime` | `boolean`                                              | Automatically scrolls to the current time line when the view is initially loaded.                                           | `false`           |
+| `minHour`                 | `number`                                               | Minimum hour (0-24) to display in day and week view time grids.                                                             | `0`               |
+| `maxHour`                 | `number`                                               | Maximum hour (0-24) to display in day and week view time grids.                                                             | `24`              |
+| `weekStartsOn`            | `number`                                               | Start day of the week (0 = Sunday, 1 = Monday, etc.).                                                                       | `0`               |
+| `weekEndsOn`              | `number`                                               | End day of the week (0 = Sunday, 1 = Monday, etc.).                                                                         | `6`               |
+| `showAdjacentMonths`      | `boolean`                                              | Show dates from the previous and next months in the month view grid.                                                        | `true`            |
+| `showWeekNumbers`         | `boolean`                                              | Display ISO week numbers in the month view grid.                                                                            | `false`           |
+| `customDays`              | `number`                                               | The number of days to display in the `customDays` view.                                                                     | `3`               |
+| `showAllDayRow`           | `boolean`                                              | Toggles visibility of the all-day event row at the top of Day/Week views.                                                   | `true`            |
+| `eventOverlapOffset`      | `number`                                               | Percentage offset for stacking overlapping events in time grids (0 for tiled).                                              | `0`               |
+| `resetDateOnViewChange`   | `boolean`                                              | Resets the calendar to Today when the user changes views via the header.                                                    | `false`           |
+| `renderEvent`             | `(event: CalendarEvent) => ReactNode`                  | Custom renderer for event items.                                                                                            | `undefined`       |
+| `renderHeader`            | `(props: RenderHeaderProps) => ReactNode`              | Custom renderer for the calendar header.                                                                                    | `undefined`       |
+| `renderHourCell`          | `(date: Date) => ReactNode`                            | Custom renderer for background of hour slots (Day/Week/Custom views).                                                       | `undefined`       |
+| `renderDateCell`          | `(props: RenderDateCellProps) => ReactNode`            | Custom renderer for day headers and month date cells.                                                                       | `undefined`       |
+| `renderScheduleSeparator` | `(date: Date) => ReactNode`                            | Custom renderer for the separator between daily event groups in the Schedule view.                                          | `undefined`       |
+| `enableEnrichedEvents`    | `boolean`                                              | Enables O(1) dictionary lookups instead of filtering across all events.                                                     | `false`           |
+| `enrichedEventsByDate`    | `Record<string, CalendarEvent[]>`                      | Pre-mapped event payload used when `enableEnrichedEvents` is active.                                                        | `undefined`       |
+| `eventsAreSorted`         | `boolean`                                              | Skips algorithmic sorting logic assuming the input `events` are already ordered.                                            | `false`           |
+| `isEventOrderingEnabled`  | `boolean`                                              | Enables collision/overlap resolution mapping (Tetris slot-stacking for views).                                              | `true`            |
+| `sortedMonthView`         | `boolean \| function`                                  | Sorts the items logically before Tetris slot-stacking overlapping occurrences.                                              | `true`            |
+| `locale`                  | `string`                                               | The Luxon locale code (e.g., `'en-US'`, `'fr-FR'`, `'ja-JP'`).                                                              | `'en'`            |
+| `localeMessages`          | `object`                                               | Custom translations for built-in text: `today`, `day`, `week`, `month`, `schedule`, `days`.                                 | `{}`              |
 
 ### Types
 
@@ -340,6 +345,7 @@ interface CalendarClassNames {
   table?: string;
   tableHeader?: string;
   tableDate?: string;
+  weekNumber?: string;
 
   // Shared events
   event?: string;
@@ -362,6 +368,29 @@ interface CalendarClassNames {
   scheduleTitle?: string;
 }
 ```
+
+## Responsive & Mobile
+
+The calendar ships with built-in CSS breakpoints for tablet and phone screen widths. No extra configuration is needed — simply let the calendar fill its container.
+
+### Breakpoint Summary
+
+| Breakpoint | Target | What changes                                                                                                                                                                                   |
+| ---------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `≤ 768px`  | Tablet | Header controls stack into two rows; Month day-name headers shrink to 30 px; event chips reduce in size; Week/CustomDays columns fix to 100 px with horizontal scroll; Day header font reduces |
+| `≤ 480px`  | Phone  | Month events become 6 px colored dot-bars (no text, no "+N more"); Week/CustomDays show one column at `100vw − 90px` width (rest scroll); Schedule padding and time-column narrow              |
+
+### Fluid container usage
+
+For breakpoints to activate, the calendar's containing element must be narrower than the breakpoint. Drop the `width` prop and let the parent define the size:
+
+```tsx
+<div style={{ width: "100%", height: "600px" }}>
+  <Calendar events={events} />
+</div>
+```
+
+If you pass an explicit `width={800}` prop, internal sizing uses that value, but CSS media queries still fire based on the actual **viewport** width.
 
 ## Contributing
 

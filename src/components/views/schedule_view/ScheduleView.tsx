@@ -6,48 +6,59 @@ import {
   dateFn,
   checkIsToday,
   generateTooltipText,
+  handleKeyboardActivation,
 } from "../../../utils";
 import styles from "./ScheduleView.module.css";
 import { DATE_FORMATS, LAYOUT_CONSTANTS } from "../../../constants";
 import useScheduleView from "../../../hooks/useScheduleView";
 import { useCalendar } from "../../../context/CalendarContext";
+import useCalendarProps from "../../../hooks/useCalendarProps";
 
-interface ScheduleViewProps extends Pick<
-  CalendarContentProps,
-  | "events"
-  | "is12Hour"
-  | "dayType"
-  | "onEventClick"
-  | "theme"
-  | "classNames"
-  | "autoScrollToCurrentTime"
-  | "renderEvent"
-  | "renderScheduleSeparator"
-  | "locale"
-> {}
+export type ScheduleViewProps = Partial<
+  Pick<
+    CalendarContentProps,
+    | "is12Hour"
+    | "dayType"
+    | "onEventClick"
+    | "theme"
+    | "classNames"
+    | "autoScrollToCurrentTime"
+    | "renderEvent"
+    | "renderScheduleSeparator"
+  >
+>;
 
-export default function ScheduleView({
-  events,
-  onEventClick,
-  is12Hour,
-  theme,
-  classNames,
-  autoScrollToCurrentTime,
-  renderEvent,
-  renderScheduleSeparator,
-  locale,
-}: ScheduleViewProps) {
+export default function ScheduleView(props: ScheduleViewProps) {
+  const {
+    events,
+    onEventClick,
+    is12Hour,
+    theme,
+    classNames,
+    autoScrollToCurrentTime,
+    renderEvent,
+    renderScheduleSeparator,
+    locale,
+  } = useCalendarProps(props);
   const { testId } = useCalendar();
-  const { todayRef, groupedEvents, renderEventTime, renderEventTitle } =
-    useScheduleView({
-      events,
-      autoScrollToCurrentTime,
-      is12Hour,
-      locale,
-    });
+  const {
+    todayRef,
+    containerRef,
+    groupedEvents,
+    renderEventTime,
+    renderEventTitle,
+  } = useScheduleView({
+    events,
+    autoScrollToCurrentTime,
+    is12Hour,
+    locale,
+  });
 
   return (
     <div
+      ref={containerRef}
+      role="region"
+      aria-label="Schedule view"
       className={styles.scheduleView}
       data-testid={`${testId}-schedule-view`}
     >
@@ -87,12 +98,23 @@ export default function ScheduleView({
                     return (
                       <div
                         key={event.id || index}
+                        role="button"
+                        tabIndex={0}
                         className={cx(
                           styles.eventItemContainer,
                           classNames?.event,
                         )}
                         data-testid={`${testId}-${event.id}-schedule-event`}
+                        aria-label={generateTooltipText(
+                          event,
+                          ECalendarViewType.schedule,
+                          is12Hour,
+                          locale,
+                        )}
                         onClick={() => onEventClick?.(event)}
+                        onKeyDown={handleKeyboardActivation(() =>
+                          onEventClick?.(event),
+                        )}
                         title={generateTooltipText(
                           event,
                           ECalendarViewType.schedule,

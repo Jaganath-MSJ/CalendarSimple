@@ -13,7 +13,12 @@
 import { useMemo } from "react";
 import { dateFn, DateType } from "../utils/date";
 import { CalendarEvent } from "../types";
-import { isAllDayEvent, isMultiDay } from "../utils/common";
+import {
+  isAllDayEvent,
+  isMultiDay,
+  getEventOverlapInHours,
+} from "../utils/common";
+import { LAYOUT_CONSTANTS } from "../constants";
 
 /**
  * Represents the layout information for an event displayed in the all-day banner.
@@ -83,17 +88,41 @@ export default function useAllDayBanner(
     );
 
     // -------------------------------------------------------------------------
-    // 2. Event Identification: Intersecting Events
+    // 2. Event Identification: Intersecting Events (via hybrid slices)
     // -------------------------------------------------------------------------
-    const intersectingEvents = multiDayEvents.filter((e) => {
-      const eStart = dateFn(e.startDate).startOf("day");
-      const eEnd = e.endDate ? dateFn(e.endDate).startOf("day") : eStart;
-      // Intersects if start is before viewEnd AND end is after viewStart
-      return (
-        (eStart < viewEnd || eStart.equals(viewEnd)) &&
-        (eEnd > viewStart || eEnd.equals(viewStart))
-      );
+    const processedEvents = multiDayEvents.map((event) => {
+      const exactStart = dateFn(event.startDate);
+      const exactEnd = event.endDate ? dateFn(event.endDate) : exactStart;
+
+      let bannerStartDay = exactStart.startOf("day");
+      if (
+        !isAllDayEvent(event) &&
+        getEventOverlapInHours(event, bannerStartDay) < 12
+      ) {
+        bannerStartDay = bannerStartDay.plus({ days: 1 });
+      }
+
+      let bannerEndDay = exactEnd.startOf("day");
+      if (
+        !isAllDayEvent(event) &&
+        getEventOverlapInHours(event, bannerEndDay) < 12
+      ) {
+        bannerEndDay = bannerEndDay.minus({ days: 1 });
+      }
+
+      return { event, bannerStartDay, bannerEndDay, exactStart, exactEnd };
     });
+
+    const intersectingEvents = processedEvents.filter(
+      ({ bannerStartDay, bannerEndDay }) => {
+        if (bannerStartDay > bannerEndDay) return false;
+        // Intersects if start is before viewEnd AND end is after viewStart
+        return (
+          (bannerStartDay < viewEnd || bannerStartDay.equals(viewEnd)) &&
+          (bannerEndDay > viewStart || bannerEndDay.equals(viewStart))
+        );
+      },
+    );
 
     // -------------------------------------------------------------------------
     // 3. Event Sorting: Start Date asc, then Duration desc
@@ -103,11 +132,15 @@ export default function useAllDayBanner(
     // reducing visual fragmentation and allowing shorter events to tile underneath nicely.
     // -------------------------------------------------------------------------
     intersectingEvents.sort((a, b) => {
-      const startA = dateFn(a.startDate).valueOf();
-      const startB = dateFn(b.startDate).valueOf();
+      const startA = dateFn(a.event.startDate).valueOf();
+      const startB = dateFn(b.event.startDate).valueOf();
       if (startA === startB) {
-        const durA = a.endDate ? dateFn(a.endDate).valueOf() - startA : 0;
-        const durB = b.endDate ? dateFn(b.endDate).valueOf() - startB : 0;
+        const durA = a.event.endDate
+          ? dateFn(a.event.endDate).valueOf() - startA
+          : 0;
+        const durB = b.event.endDate
+          ? dateFn(b.event.endDate).valueOf() - startB
+          : 0;
         return durB - durA; // longest first
       }
       return startA - startB;
@@ -122,65 +155,65 @@ export default function useAllDayBanner(
     // The goal here is to calculate the start and end column index for each event
     // and assign a vertical "row" index so no overlapping events share a row.
     // -------------------------------------------------------------------------
-    intersectingEvents.forEach((event) => {
-      const eStart = dateFn(event.startDate).startOf("day");
-      const eEnd = event.endDate
-        ? dateFn(event.endDate).startOf("day")
-        : eStart;
-
-      // Calculate bound indices for the current visible view
-      let startIndex = days.findIndex((d) =>
-        dateFn(d).startOf("day").equals(eStart),
-      );
-      if (startIndex === -1 && eStart < viewStart) {
-        startIndex = 0;
-      }
-
-      let endIndex = days.findIndex((d) =>
-        dateFn(d).startOf("day").equals(eEnd),
-      );
-      if (endIndex === -1 && eEnd > viewEnd) {
-        endIndex = days.length - 1;
-      }
-
-      // It might happen that the event is completely outside the days, but we already filtered for intersections.
-      if (startIndex === -1) startIndex = 0;
-      if (endIndex === -1) endIndex = days.length - 1;
-
-      const isClippedLeft = eStart < viewStart;
-      const isClippedRight = eEnd > viewEnd;
-
-      // Row stacking: Find the lowest row index where the event fits without overlap
-      let rowIndex = 0;
-      while (true) {
-        if (!rows[rowIndex]) {
-          rows[rowIndex] = [];
-          break;
+    intersectingEvents.forEach(
+      ({ event, bannerStartDay, bannerEndDay, exactStart, exactEnd }) => {
+        // Calculate bound indices for the current visible view
+        let startIndex = days.findIndex((d) =>
+          dateFn(d).startOf("day").equals(bannerStartDay),
+        );
+        if (startIndex === -1 && bannerStartDay < viewStart) {
+          startIndex = 0;
         }
-        const hasOverlap = rows[rowIndex].some((existingEvent) => {
-          return (
-            startIndex <= existingEvent.endIndex &&
-            endIndex >= existingEvent.startIndex
-          );
-        });
-        if (!hasOverlap) {
-          break;
+
+        let endIndex = days.findIndex((d) =>
+          dateFn(d).startOf("day").equals(bannerEndDay),
+        );
+        if (endIndex === -1 && bannerEndDay > viewEnd) {
+          endIndex = days.length - 1;
         }
-        rowIndex++;
-      }
 
-      const layoutEvent: BannerLayoutEvent = {
-        event,
-        startIndex,
-        endIndex,
-        isClippedLeft,
-        isClippedRight,
-        row: rowIndex,
-      };
+        // It might happen that the event is completely outside the days, but we already filtered for intersections.
+        if (startIndex === -1) startIndex = 0;
+        if (endIndex === -1) endIndex = days.length - 1;
 
-      rows[rowIndex].push(layoutEvent);
-      layoutEvents.push(layoutEvent);
-    });
+        const isClippedLeft =
+          bannerStartDay < viewStart ||
+          exactStart.startOf("day") < bannerStartDay;
+        const isClippedRight =
+          bannerEndDay > viewEnd || exactEnd.startOf("day") > bannerEndDay;
+
+        // Row stacking: Find the lowest row index where the event fits without overlap
+        let rowIndex = 0;
+        while (true) {
+          if (!rows[rowIndex]) {
+            rows[rowIndex] = [];
+            break;
+          }
+          const hasOverlap = rows[rowIndex].some((existingEvent) => {
+            return (
+              startIndex <= existingEvent.endIndex &&
+              endIndex >= existingEvent.startIndex
+            );
+          });
+          if (!hasOverlap) {
+            break;
+          }
+          rowIndex++;
+        }
+
+        const layoutEvent: BannerLayoutEvent = {
+          event,
+          startIndex,
+          endIndex,
+          isClippedLeft,
+          isClippedRight,
+          row: rowIndex,
+        };
+
+        rows[rowIndex].push(layoutEvent);
+        layoutEvents.push(layoutEvent);
+      },
+    );
 
     const rowCount = rows.length;
 
@@ -213,10 +246,19 @@ export default function useAllDayBanner(
       : layoutEvents.filter((ev) => ev.row < effectiveMaxRows);
 
     const containerHeight = isExpanded
-      ? Math.max(rowCount * 24 + 4, 28)
+      ? Math.max(
+          rowCount * LAYOUT_CONSTANTS.ALL_DAY_ROW_HEIGHT + 4,
+          LAYOUT_CONSTANTS.DATE_LABEL_HEIGHT,
+        )
       : hasHiddenEvents
-        ? Math.max((effectiveMaxRows + 1) * 24 + 4, 28)
-        : Math.max(rowCount * 24 + 4, 28);
+        ? Math.max(
+            (effectiveMaxRows + 1) * LAYOUT_CONSTANTS.ALL_DAY_ROW_HEIGHT + 4,
+            LAYOUT_CONSTANTS.DATE_LABEL_HEIGHT,
+          )
+        : Math.max(
+            rowCount * LAYOUT_CONSTANTS.ALL_DAY_ROW_HEIGHT + 4,
+            LAYOUT_CONSTANTS.DATE_LABEL_HEIGHT,
+          );
 
     const showExpandCollapse = hasHiddenEvents || isExpanded;
 

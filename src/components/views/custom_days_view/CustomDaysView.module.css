@@ -3,6 +3,7 @@
   flex-direction: column;
   height: 100%;
   overflow-y: auto;
+  overflow-x: auto;
   background-color: var(--calendar-bg, #fff);
   position: relative;
 }
@@ -79,4 +80,42 @@
 
 .dayColumn:last-child {
   border-right: none;
+}
+
+/* ── Tablet (768px): fixed column width → visible columns, rest scroll ── */
+@media (max-width: 768px) {
+  .dayHeader {
+    min-width: 100px;
+    flex: 0 0 100px;
+    padding: 8px 4px;
+  }
+
+  .dayColumn {
+    min-width: 100px;
+    flex: 0 0 100px;
+  }
+
+  .dayName {
+    font-size: 10px;
+  }
+
+  .dayNumber {
+    font-size: 15px;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+  }
+}
+
+/* ── Phone (480px): 1 column fills the viewport, scroll for others ── */
+@media (max-width: 480px) {
+  .dayHeader {
+    min-width: calc(100vw - 90px);
+    flex: 0 0 calc(100vw - 90px);
+  }
+
+  .dayColumn {
+    min-width: calc(100vw - 90px);
+    flex: 0 0 calc(100vw - 90px);
+  }
 }

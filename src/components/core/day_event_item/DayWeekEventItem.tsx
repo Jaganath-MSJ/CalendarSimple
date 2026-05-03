@@ -1,6 +1,11 @@
 import React, { CSSProperties } from "react";
 import cx from "classnames";
-import { formatDate, generateTooltipText } from "../../../utils";
+import {
+  formatDate,
+  generateTooltipText,
+  getContrastColor,
+  handleKeyboardActivation,
+} from "../../../utils";
 import { CalendarContentProps } from "../../../types";
 import { DayEventLayout } from "../../../hooks/useDayEventLayout";
 import { LAYOUT_CONSTANTS, DATE_FORMATS } from "../../../constants";
@@ -29,8 +34,14 @@ export function DayWeekEventItem({
     item.height >= LAYOUT_CONSTANTS.TINY_EVENT_HEIGHT;
   const isTiny = item.height < LAYOUT_CONSTANTS.TINY_EVENT_HEIGHT;
 
+  const eventBgColor =
+    item.event.style?.backgroundColor || LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
+  const textColor = getContrastColor(String(eventBgColor));
+
   return (
     <div
+      role="button"
+      tabIndex={0}
       className={cx(styles.eventItem, classNames?.event, {
         [styles.eventItemSmall]: isSmall,
         [styles.eventItemTiny]: isTiny,
@@ -44,12 +55,15 @@ export function DayWeekEventItem({
           zIndex: item.zIndex,
           "--event-width": `${item.width}%`,
           backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+          color: textColor,
           position: "absolute",
           ...item.event.style,
         } as CSSProperties
       }
       id={item.event.id}
+      aria-label={`${item.event.title}, ${tooltipText}`}
       onClick={() => onEventClick?.(item.event)}
+      onKeyDown={handleKeyboardActivation(() => onEventClick?.(item.event))}
       title={tooltipText}
     >
       {renderEvent ? (

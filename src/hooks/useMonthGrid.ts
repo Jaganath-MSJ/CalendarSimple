@@ -28,7 +28,7 @@ import {
   getDate,
 } from "../utils/date";
 import { CalendarEvent, EventListType } from "../types";
-import { DATE_FORMATS } from "../constants";
+import { DATE_FORMATS, TIME_CONSTANTS } from "../constants";
 
 interface InternalCalendarEvent extends CalendarEvent {
   _tempId?: string;
@@ -103,7 +103,10 @@ export default function useMonthGrid(
           );
         });
 
-    const length = ((weekEndsOn - weekStartsOn + 7) % 7) + 1;
+    const length =
+      ((weekEndsOn - weekStartsOn + TIME_CONSTANTS.DAYS_IN_WEEK) %
+        TIME_CONSTANTS.DAYS_IN_WEEK) +
+      1;
     const calendarArray = calendarize(selectedDate.toJSDate(), weekStartsOn);
 
     return calendarArray.map((week: number[], weekIndex: number) => {
@@ -121,7 +124,8 @@ export default function useMonthGrid(
           const startOfMonth = getStartOfMonth(selectedDate);
           const startDayOfWeek = getMonthStartingDay(selectedDate);
           const diffFromWeekStartToMonthStart =
-            (startDayOfWeek - weekStartsOn + 7) % 7;
+            (startDayOfWeek - weekStartsOn + TIME_CONSTANTS.DAYS_IN_WEEK) %
+            TIME_CONSTANTS.DAYS_IN_WEEK;
 
           if (weekIndex === 0) {
             currentDate = subDays(
@@ -130,7 +134,8 @@ export default function useMonthGrid(
             );
             displayDay = getDate(currentDate);
           } else {
-            const globalIndex = weekIndex * 7 + dayIndex;
+            const globalIndex =
+              weekIndex * TIME_CONSTANTS.DAYS_IN_WEEK + dayIndex;
             const daysFromStart = globalIndex - diffFromWeekStartToMonthStart;
 
             currentDate = addDays(startOfMonth, daysFromStart);

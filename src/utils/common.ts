@@ -6,9 +6,14 @@
  * and spatial calculations like the maximum number of viewable events per cell.
  */
 
-import { LAYOUT_CONSTANTS } from "../constants";
+import { KeyboardEvent } from "react";
+import {
+  KEYBOARD_SHORTCUTS,
+  LAYOUT_CONSTANTS,
+  TIME_CONSTANTS,
+} from "../constants";
 import { CalendarEvent } from "../types";
-import { dateFn } from "./date";
+import { dateFn, DateType } from "./date";
 
 /**
  * Calculates the maximum number of events that can be displayed in a cell based on the calendar height.
@@ -62,4 +67,52 @@ export function isMultiDay(event: CalendarEvent): boolean {
   const start = dateFn(event.startDate).startOf("day");
   const end = dateFn(event.endDate).startOf("day");
   return !start.equals(dateFn(end));
+}
+
+/**
+ * Calculates the overlap duration in hours of an event with a specific calendar day boundary (00:00 to 23:59).
+ *
+ * @param event - The calendar event.
+ * @param date - The day to check the overlap against.
+ * @returns The overlap duration in hours (e.g., 2.5). Returns 24 for all-day events.
+ */
+export function getEventOverlapInHours(
+  event: CalendarEvent,
+  date: DateType,
+): number {
+  if (isAllDayEvent(event)) return TIME_CONSTANTS.HOURS_IN_DAY;
+
+  const dayStart = dateFn(date).startOf("day");
+  const dayEnd = dateFn(date).endOf("day");
+
+  const eventStart = dateFn(event.startDate);
+  const eventEnd = event.endDate ? dateFn(event.endDate) : eventStart;
+
+  const overlapStart = eventStart > dayStart ? eventStart : dayStart;
+  const overlapEnd = eventEnd < dayEnd ? eventEnd : dayEnd;
+
+  const overlapMs = overlapEnd.valueOf() - overlapStart.valueOf();
+  if (overlapMs <= 0) return 0;
+
+  return overlapMs / TIME_CONSTANTS.MS_PER_HOUR;
+}
+
+/**
+ * Wraps a handler so it only fires on Enter or Space — the standard keyboard activation keys.
+ * Prevents default and stops propagation to avoid scroll or form submission side effects.
+ *
+ * @param handler - The callback to invoke on activation.
+ * @returns A keyboard event handler suitable for `onKeyDown`.
+ */
+export function handleKeyboardActivation(handler: (e: KeyboardEvent) => void) {
+  return (e: KeyboardEvent) => {
+    if (
+      e.key === KEYBOARD_SHORTCUTS.OPEN ||
+      e.key === KEYBOARD_SHORTCUTS.ACTIVATE
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      handler(e);
+    }
+  };
 }

@@ -172,3 +172,152 @@ export const ShowAdjacentMonthsDisabled: Story = {
     showAdjacentMonths: false,
   },
 };
+
+// Story 10: Click-to-Create — Time-Grid Views
+export const ClickToCreateTimeGrid: Story = {
+  args: {
+    view: ECalendarViewType.week,
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    creatable: true,
+    onSlotClick: (startDate: Date, endDate: Date) => {
+      alert(
+        `Create event:\nStart: ${startDate.toLocaleTimeString()}\nEnd: ${endDate.toLocaleTimeString()}`,
+      );
+    },
+  },
+};
+
+// Story 11: Click-to-Create — Month View
+export const ClickToCreateMonth: Story = {
+  args: {
+    view: ECalendarViewType.month,
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    creatable: true,
+    onSlotClick: (startDate: Date, endDate: Date) => {
+      alert(`Create all-day event on: ${startDate.toLocaleDateString()}`);
+    },
+  },
+};
+
+// Story 12: Click-to-Create alongside selectable
+export const ClickToCreateWithSelectable: Story = {
+  args: {
+    view: ECalendarViewType.month,
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    selectable: true,
+    creatable: true,
+    onDateClick: (date: Date) => {
+      console.log(`Date selected: ${date.toLocaleDateString()}`);
+    },
+    onSlotClick: (startDate: Date, endDate: Date) => {
+      alert(`Create event on: ${startDate.toLocaleDateString()}`);
+    },
+  },
+};
+
+export const CompoundComponentPattern: Story = {
+  render: (args: React.ComponentProps<typeof Calendar>) => (
+    <Calendar {...args}>
+      <div
+        style={{
+          border: "2px dashed #ccc",
+          borderRadius: "6px",
+          padding: "8px",
+          width: "100%",
+          height: "100%",
+          boxSizing: "border-box",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Calendar.Header />
+        <Calendar.MonthView />
+      </div>
+    </Calendar>
+  ),
+  args: {
+    view: ECalendarViewType.month,
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    width: 800,
+    height: 600,
+  },
+};
+
+export const LoadingSkeletonMonth: Story = {
+  name: "Loading Skeleton – Month View",
+  args: {
+    isLoading: true,
+    events: [],
+    view: ECalendarViewType.month,
+  },
+};
+
+export const LoadingSkeletonWeek: Story = {
+  name: "Loading Skeleton – Week View",
+  args: {
+    isLoading: true,
+    events: [],
+    view: ECalendarViewType.week,
+  },
+};
+
+export const LoadingSkeletonDay: Story = {
+  name: "Loading Skeleton – Day View",
+  args: {
+    isLoading: true,
+    events: [],
+    view: ECalendarViewType.day,
+  },
+};
+
+export const LoadingSkeletonSchedule: Story = {
+  name: "Loading Skeleton – Schedule View",
+  args: {
+    isLoading: true,
+    events: [],
+    view: ECalendarViewType.schedule,
+  },
+};
+
+export const LoadingWithExistingEvents: Story = {
+  name: "Loading – Events Exist (interactions blocked)",
+  args: {
+    isLoading: true,
+    events: [
+      {
+        id: "1",
+        title: "Existing meeting",
+        startDate: today.set({ hour: 10 }).toFormat("yyyy-MM-dd'T'HH:mm:ss"),
+        endDate: today.set({ hour: 11 }).toFormat("yyyy-MM-dd'T'HH:mm:ss"),
+      },
+    ],
+    view: ECalendarViewType.month,
+  },
+};
+
+export const LoadingCustomRenderer: Story = {
+  name: "Loading – Custom renderLoading",
+  args: {
+    isLoading: true,
+    events: [],
+    view: ECalendarViewType.month,
+    renderLoading: () => (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100%",
+          fontSize: "18px",
+          color: "#6b7280",
+        }}
+      >
+        Fetching your calendar…
+      </div>
+    ),
+  },
+};

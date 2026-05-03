@@ -15,12 +15,26 @@ globalThis.ResizeObserver = vi.fn().mockImplementation(() => ({
 describe("WeekView Component", () => {
   const mockDate = dateFn("2024-03-01T12:00:00Z"); // March 1, 2024 (Friday)
 
+  const defaultConfig = {
+    events: [],
+    locale: "en",
+    localeMessages: {
+      today: "Today",
+      day: "Day",
+      week: "Week",
+      month: "Month",
+      schedule: "Schedule",
+      days: "Days",
+    },
+  };
+
   beforeEach(() => {
     vi.spyOn(CalendarContextModule, "useCalendar").mockReturnValue({
       state: {
         selectedDate: mockDate,
         view: "week",
       },
+      config: defaultConfig,
       dispatch: vi.fn(),
     } as never);
   });
@@ -30,7 +44,6 @@ describe("WeekView Component", () => {
   });
 
   const defaultProps = {
-    events: [],
     dayType: "half" as const,
     is12Hour: false,
     theme: {},
@@ -48,15 +61,6 @@ describe("WeekView Component", () => {
     eventsAreSorted: false,
     isEventOrderingEnabled: false,
     classNames: {},
-    locale: "en",
-    localeMessages: {
-      today: "Today",
-      day: "Day",
-      week: "Week",
-      month: "Month",
-      schedule: "Schedule",
-      days: "Days",
-    },
   };
 
   it("renders the week headers correctly", () => {
@@ -89,7 +93,15 @@ describe("WeekView Component", () => {
         endDate: "2024-03-01T11:00:00",
       },
     ];
-    render(<WeekView {...defaultProps} events={events as never} />);
+    vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      state: {
+        selectedDate: mockDate,
+        view: "week",
+      },
+      config: { ...defaultConfig, events },
+      dispatch: vi.fn(),
+    } as never);
+    render(<WeekView {...defaultProps} />);
 
     expect(screen.getByText("Test Week Event")).toBeInTheDocument();
   });
