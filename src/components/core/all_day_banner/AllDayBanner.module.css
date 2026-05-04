@@ -1,17 +1,17 @@
 .bannerWrapper {
   display: flex;
   width: 100%;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .timeHeaderSpacer {
   width: 60px;
   flex-shrink: 0;
-  border-inline-end: 1px solid #e0e0e0;
+  border-inline-end: 1px solid var(--border-color);
   position: sticky;
   inset-inline-start: 0;
   z-index: 15;
-  background-color: var(--bg-color, #fff);
+  background-color: var(--bg-color);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -22,7 +22,7 @@
 .timezoneLabel {
   font-size: 10px;
   font-weight: 500;
-  color: #70757a;
+  color: var(--text-secondary);
   text-align: center;
   margin-top: 4px;
 }
@@ -35,14 +35,14 @@
   height: 24px;
   border-radius: 50%;
   cursor: pointer;
-  color: #5f6368;
+  color: var(--text-secondary);
   transition:
     background-color 0.2s,
     transform 0.2s;
 }
 
 .expandIcon:hover {
-  background-color: #f1f3f4;
+  background-color: var(--bg-hover);
 }
 
 .expandIcon.expanded {
@@ -73,7 +73,7 @@
 
 .bannerGridCell {
   flex: 1;
-  border-inline-end: 1px solid #e0e0e0;
+  border-inline-end: 1px solid var(--border-color);
 }
 
 .bannerGridCell:last-child {

@@ -12,14 +12,11 @@ import {
   getContrastColor,
   formatDate,
   handleKeyboardActivation,
+  resolveTheme,
 } from "../../../utils";
 import styles from "./MonthEventItem.module.css";
 import Popover from "../../ui/popover/Popover";
-import {
-  LAYOUT_CONSTANTS,
-  defaultTheme,
-  DATE_FORMATS,
-} from "../../../constants";
+import { LAYOUT_CONSTANTS, DATE_FORMATS } from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
 
 interface MonthEventItemProps extends Pick<
@@ -73,7 +70,7 @@ function MonthEventItem({
   renderEvent,
   renderDateCell,
 }: MonthEventItemProps) {
-  const { testId, config } = useCalendar();
+  const { testId, config, colorScheme } = useCalendar();
   const locale = config.locale;
   const [showPopover, setShowPopover] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -83,15 +80,16 @@ function MonthEventItem({
     setAnchorEl(null);
   }, []);
 
-  const styleSource = isSelected
-    ? { ...defaultTheme.selected, ...theme?.selected }
+  const resolved = resolveTheme(theme, colorScheme);
+  const themeSource = isSelected
+    ? resolved.selected
     : isToday
-      ? { ...defaultTheme.today, ...theme?.today }
-      : { ...defaultTheme.default, ...theme?.default };
+      ? resolved.today
+      : resolved.default;
 
   const style = {
-    color: styleSource?.color,
-    backgroundColor: styleSource?.bgColor,
+    color: themeSource?.color,
+    backgroundColor: themeSource?.bgColor,
   };
 
   // Determine which items to display

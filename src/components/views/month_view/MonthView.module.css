@@ -34,7 +34,7 @@
 
 .tableHeader {
   height: 40px;
-  background-color: #f9fafb;
+  background-color: var(--bg-hover);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -63,14 +63,14 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: #f9fafb;
+  background-color: var(--bg-hover);
 }
 
 .weekNumberCell {
   vertical-align: middle;
   text-align: center;
   color: var(--text-secondary);
-  background-color: #f9fafb;
+  background-color: var(--bg-hover);
   font-size: 0.875rem;
   font-weight: 500;
   border-inline-end: 1px solid var(--border-color);

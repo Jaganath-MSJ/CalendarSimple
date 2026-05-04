@@ -50,7 +50,7 @@ function Popover({
   is12Hour,
   renderEvent,
 }: PopoverProps) {
-  const { testId } = useCalendar();
+  const { testId, colorScheme } = useCalendar();
   const popoverRef = useRef<HTMLDivElement>(null);
   const [stylePosition, setStylePosition] = useState<CSSProperties>({
     visibility: "hidden",
@@ -178,6 +178,7 @@ function Popover({
       onClick={(e) => e.stopPropagation()}
       onKeyDown={handlePopoverKeyDown}
       data-testid={`${testId}-popover-content`}
+      data-color-scheme={colorScheme}
     >
       <div className={styles.popoverHeader}>
         {formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH)}

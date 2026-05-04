@@ -5,6 +5,9 @@ import { ReactNode } from "react";
 import { CalendarEvent } from "./events";
 import { CalendarTheme, CalendarClassNames } from "./theme";
 
+/** Color palette modes accepted by `CalendarProps.colorScheme`. */
+export type ColorScheme = "light" | "dark" | "auto";
+
 /**
  * Makes a specific subset of keys required while leaving the rest unchanged.
  * Used to enforce that `CalendarContentProps` always has defaults applied.
@@ -190,6 +193,18 @@ export interface CalendarProps {
    * (ar, he, fa, ur, ps, sd, ckb, yi); otherwise `'ltr'`.
    */
   direction?: "ltr" | "rtl";
+
+  /**
+   * Controls the color palette of the calendar.
+   * - `'auto'` (default): follows the OS `prefers-color-scheme` preference and updates live
+   *   when the user toggles their OS theme.
+   * - `'light'` / `'dark'`: forces the palette regardless of OS preference.
+   *
+   * The resolved scheme is applied as `data-color-scheme="light"|"dark"` on the calendar root,
+   * which switches the CSS custom-property palette via attribute-selector overrides in
+   * `src/styles/variables.css`. The `theme` prop (per-event inline color overrides) still wins.
+   */
+  colorScheme?: ColorScheme;
 
   /** Overrides for built-in UI strings (navigation buttons, view names, etc.). */
   localeMessages?: {

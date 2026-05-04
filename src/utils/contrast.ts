@@ -3,6 +3,7 @@
  * @description Utility functions for calculating color luminance and contrast.
  * Follows WCAG 2.1 Web Content Accessibility Guidelines.
  */
+import type { CalendarTheme, ThemeScheme } from "../types";
 
 interface RGB {
   r: number;
@@ -133,4 +134,25 @@ export function getContrastColor(bgColor?: string): string {
   const contrastWithDark = getContrastRatio(luminance, darkLuminance);
 
   return contrastWithWhite >= contrastWithDark ? "#FFFFFF" : "#212529";
+}
+
+/**
+ * Merges flat CalendarTheme values with the scheme-specific sub-object.
+ * Scheme-specific values win on a per-field basis.
+ *
+ * @param theme  - Raw theme from CalendarProps (may be undefined or {}).
+ * @param scheme - Resolved color scheme ("light" | "dark") from context.
+ * @returns A flat ThemeScheme with no nested keys.
+ */
+export function resolveTheme(
+  theme: CalendarTheme | undefined,
+  scheme: "light" | "dark",
+): ThemeScheme {
+  if (!theme) return {};
+  const override = theme[scheme];
+  return {
+    default: { ...theme.default, ...override?.default },
+    selected: { ...theme.selected, ...override?.selected },
+    today: { ...theme.today, ...override?.today },
+  };
 }

@@ -12,6 +12,7 @@ import React, {
 import { dateFn, DateType } from "../utils";
 import { ECalendarViewType, CalendarProps } from "../types";
 import { CALENDAR_ACTIONS } from "../constants";
+import useColorScheme from "../hooks/useColorScheme";
 
 /**
  * Mutable runtime state managed by the calendar reducer.
@@ -51,6 +52,8 @@ export interface CalendarContextValue {
   testId?: string;
   /** Static calendar configuration props (everything except `children`, `selectedDate`, and `view`). */
   config: Omit<CalendarProps, "children" | "selectedDate" | "view">;
+  /** Resolved color scheme ("light" or "dark") for portaled UI such as Popover. */
+  colorScheme: "light" | "dark";
 }
 
 export const CalendarContext = createContext<CalendarContextValue | undefined>(
@@ -153,6 +156,8 @@ export function CalendarProvider({
     customDays: initialCustomDays,
   });
 
+  const resolvedScheme = useColorScheme(config?.colorScheme);
+
   const value = useMemo(
     () => ({
       state,
@@ -161,8 +166,9 @@ export function CalendarProvider({
       config:
         config ||
         ({} as Omit<CalendarProps, "children" | "selectedDate" | "view">),
+      colorScheme: resolvedScheme,
     }),
-    [state, testId, config],
+    [state, testId, config, resolvedScheme],
   );
 
   return (

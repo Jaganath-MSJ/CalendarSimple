@@ -12,12 +12,12 @@
 }
 
 .dateData:hover {
-  background-color: #fafafa;
+  background-color: var(--bg-hover);
 }
 
 .currentMonth {
-  color: #9ca3af; /* muted text */
-  background-color: #f9fafb;
+  color: var(--text-secondary); /* muted text */
+  background-color: var(--bg-hover);
 }
 
 .cellContent {

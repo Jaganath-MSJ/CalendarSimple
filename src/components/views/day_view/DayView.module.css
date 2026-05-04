@@ -4,7 +4,7 @@
   height: 100%;
   overflow-y: auto;
   overflow-x: auto;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
 }
 
@@ -12,7 +12,7 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  background-color: var(--bg-color, #ffffff);
+  background-color: var(--bg-color);
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 6px -4px rgba(0, 0, 0, 0.1);
@@ -20,18 +20,18 @@
 
 .dayHeaderContainer {
   display: flex;
-  border-bottom: 1px solid #e0e0e0;
-  background-color: #f9f9f9;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-hover);
 }
 
 .timeHeaderSpacer {
   width: 60px;
   flex-shrink: 0;
-  border-inline-end: 1px solid #e0e0e0;
+  border-inline-end: 1px solid var(--border-color);
   position: sticky;
   inset-inline-start: 0;
   z-index: 15;
-  background-color: #f9f9f9;
+  background-color: var(--bg-hover);
 }
 
 .dayHeader {
@@ -42,7 +42,7 @@
 
 .dayName {
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
   text-transform: uppercase;
 }
 
@@ -53,7 +53,7 @@
 }
 
 .dayNumber.today {
-  color: #3b82f6;
+  color: var(--primary-color);
   font-weight: bold;
 }
 

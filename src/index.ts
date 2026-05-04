@@ -6,6 +6,9 @@ export type {
   CalendarProps,
   CalendarEvent,
   CalendarContentProps,
+  ColorScheme,
+  CalendarTheme,
+  ThemeScheme,
 } from "./types";
 export type { HeaderProps } from "./components/layout/Header";
 export type { ViewProps } from "./components/views/View";
