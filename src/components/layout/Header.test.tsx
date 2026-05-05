@@ -31,6 +31,7 @@ describe("Header Component", () => {
       dispatch: mockDispatch as never,
       testId: undefined,
       config: defaultConfig,
+      colorScheme: "light",
     });
   });
 
@@ -132,6 +133,7 @@ describe("Header accessibility", () => {
       },
       dispatch: vi.fn() as never,
       testId: undefined,
+      colorScheme: "light",
       config: {
         events: [],
         locale: "en",

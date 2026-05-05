@@ -218,7 +218,6 @@ function App() {
           width: "calc(100% - 40px)",
           height: "800px",
           backgroundColor: "#fff",
-          borderRadius: "12px",
           boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
           overflow: "hidden",
         }}
@@ -227,10 +226,11 @@ function App() {
           events={eventsList}
           selectedDate={new Date()}
           selectable
-          view={ECalendarViewType.week}
+          view={ECalendarViewType.month}
           is12Hour
           showCurrentTime
           autoScrollToCurrentTime
+          colorScheme="light"
         >
           <Calendar.Header />
           <Calendar.View />
@@ -241,12 +241,11 @@ function App() {
           width: "calc(100% - 40px)",
           height: "800px",
           backgroundColor: "#fff",
-          borderRadius: "12px",
           boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
           overflow: "hidden",
         }}
       >
-        <Calendar view={ECalendarViewType.month} />
+        <Calendar view={ECalendarViewType.month} colorScheme="light" />
       </div>
     </div>
   );

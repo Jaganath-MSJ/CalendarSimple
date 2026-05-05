@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
-import { expect, describe, it, vi } from "vitest";
+import { expect, describe, it, vi, afterEach } from "vitest";
 import { dateFn } from "./utils";
 import { ECalendarViewType } from "./types";
 import Calendar from "./Calendar";
@@ -171,6 +171,111 @@ describe("Calendar Component Integration", () => {
       const { container } = render(<Calendar locale="he" />);
       const root = container.firstChild as HTMLElement;
       expect(root).toHaveAttribute("dir", "rtl");
+    });
+  });
+
+  describe("Color Scheme Support", () => {
+    afterEach(() => {
+      Object.defineProperty(window, "matchMedia", {
+        writable: true,
+        configurable: true,
+        value: (query: string) => ({
+          matches: false,
+          media: query,
+          onchange: null,
+          addListener: () => {},
+          removeListener: () => {},
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          dispatchEvent: () => false,
+        }),
+      });
+    });
+
+    it("renders data-color-scheme='dark' on the root when colorScheme='dark'", () => {
+      const { container } = render(<Calendar colorScheme="dark" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("data-color-scheme", "dark");
+    });
+
+    it("renders data-color-scheme='light' on the root when colorScheme='light'", () => {
+      const { container } = render(<Calendar colorScheme="light" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("data-color-scheme", "light");
+    });
+
+    it("resolves colorScheme='auto' to 'light' when OS prefers light", () => {
+      const { container } = render(<Calendar colorScheme="auto" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("data-color-scheme", "light");
+    });
+
+    it("resolves colorScheme='auto' to 'dark' when OS prefers dark", () => {
+      Object.defineProperty(window, "matchMedia", {
+        writable: true,
+        configurable: true,
+        value: (query: string) => ({
+          matches: true,
+          media: query,
+          onchange: null,
+          addListener: () => {},
+          removeListener: () => {},
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          dispatchEvent: () => false,
+        }),
+      });
+      const { container } = render(<Calendar colorScheme="auto" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("data-color-scheme", "dark");
+    });
+
+    it("defaults to data-color-scheme='light' with no prop and light OS preference", () => {
+      const { container } = render(<Calendar />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("data-color-scheme", "light");
+    });
+
+    it("inner <section> also receives data-color-scheme", () => {
+      const { container } = render(<Calendar colorScheme="dark" />);
+      const section = container.querySelector(
+        "section[data-testid$='-container']",
+      );
+      expect(section).toHaveAttribute("data-color-scheme", "dark");
+    });
+
+    it("applies dark theme override to selected cell when colorScheme='dark'", () => {
+      const { getByTestId } = render(
+        <Calendar
+          colorScheme="dark"
+          view={ECalendarViewType.month}
+          selectedDate={new Date("2024-03-15")}
+          selectable
+          theme={{
+            selected: { bgColor: "#007bff", color: "#fff" },
+            dark: { selected: { bgColor: "#3b82f6" } },
+          }}
+        />,
+      );
+      const selectedCell = getByTestId("calendar-15-month-cell");
+      expect(selectedCell).toHaveStyle({ backgroundColor: "#3b82f6" });
+    });
+
+    it("applies flat theme value to selected cell when colorScheme='light'", () => {
+      const { getByTestId } = render(
+        <Calendar
+          colorScheme="light"
+          view={ECalendarViewType.month}
+          selectedDate={new Date("2024-03-15")}
+          selectable
+          theme={{
+            selected: { bgColor: "#007bff", color: "#fff" },
+            dark: { selected: { bgColor: "#3b82f6" } },
+          }}
+        />,
+      );
+      const selectedCell = getByTestId("calendar-15-month-cell");
+      expect(selectedCell).toHaveStyle({ backgroundColor: "#007bff" });
     });
   });
 
