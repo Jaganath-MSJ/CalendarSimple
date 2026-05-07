@@ -341,6 +341,12 @@ describe("MonthView Component", () => {
     fireEvent.click(screen.getByRole("button", { name: /more events on/i }));
 
     expect(onMoreClick).toHaveBeenCalledTimes(1);
+    expect(onMoreClick).toHaveBeenCalledWith(
+      expect.any(Date),
+      expect.arrayContaining([
+        expect.objectContaining({ id: "more-b", title: "Beta" }),
+      ]),
+    );
   });
 
   it("pressing Enter on '+ N more' button opens the popover", () => {
@@ -404,5 +410,11 @@ describe("MonthView Component", () => {
     fireEvent.click(moreBtn);
 
     expect(onMoreClick).toHaveBeenCalledTimes(1);
+    expect(onMoreClick).toHaveBeenCalledWith(
+      expect.any(Date),
+      expect.arrayContaining([
+        expect.objectContaining({ id: "more-d", title: "Delta" }),
+      ]),
+    );
   });
 });

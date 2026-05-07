@@ -42,7 +42,7 @@ interface MonthEventItemProps extends Pick<
   isToday: boolean;
   isCurrentMonth: boolean;
   onClick?: (date: DateType) => void;
-  onMoreClick?: (date: DateType) => void;
+  onMoreClick?: (date: DateType, hiddenEvents: EventListType[]) => void;
   totalEvents?: number;
 }
 
@@ -92,9 +92,13 @@ function MonthEventItem({
     backgroundColor: themeSource?.bgColor,
   };
 
+  const allDayEvents: EventListType[] =
+    data?.filter((e): e is EventListType => e !== null) || [];
+
   // Determine which items to display
   let visibleEvents = data;
   let hiddenEventsCount = 0;
+  let hiddenEventsList: EventListType[] = [];
 
   if (
     (maxEvents || maxEvents === 0) &&
@@ -107,10 +111,10 @@ function MonthEventItem({
       (e) => e !== null,
     ).length;
     hiddenEventsCount = totalEvents - visibleRealEventsCount;
+    hiddenEventsList = allDayEvents
+      .slice(visibleRealEventsCount)
+      .filter((e) => !e.isSpacer);
   }
-
-  const allDayEvents: EventListType[] =
-    data?.filter((e): e is EventListType => e !== null) || [];
 
   return (
     <td
@@ -220,14 +224,14 @@ function MonthEventItem({
                           setAnchorEl(e.currentTarget);
                           setShowPopover(true);
                         }
-                        onMoreClick?.(dateObj);
+                        onMoreClick?.(dateObj, hiddenEventsList);
                       }}
                       onKeyDown={handleKeyboardActivation((e) => {
                         if (!showPopover) {
                           setAnchorEl(e.currentTarget as HTMLButtonElement);
                           setShowPopover(true);
                         }
-                        onMoreClick?.(dateObj);
+                        onMoreClick?.(dateObj, hiddenEventsList);
                       })}
                     >
                       + {hiddenEventsCount} more
