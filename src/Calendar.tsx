@@ -139,6 +139,9 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
     >
       <div
         ref={containerRef}
+        data-testid={
+          allProps.children ? `${allProps.testId}-container` : undefined
+        }
         dir={dir}
         data-color-scheme={resolvedScheme}
         style={{
@@ -147,6 +150,12 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
+          ...(allProps.children
+            ? ({
+                "--calendar-width": `${width}px`,
+                "--calendar-height": `${height}px`,
+              } as CSSProperties)
+            : undefined),
         }}
         className={cx(
           allProps.children ? styles.calendar : undefined,

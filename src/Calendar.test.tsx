@@ -142,6 +142,16 @@ describe("Calendar Component Integration", () => {
     expect(screen.getByText("Sat")).toBeInTheDocument();
   });
 
+  it("compound-component mode exposes ${testId}-container on the root element", () => {
+    render(
+      <Calendar testId="cal">
+        <Calendar.Header />
+        <Calendar.View />
+      </Calendar>,
+    );
+    expect(screen.getByTestId("cal-container")).toBeInTheDocument();
+  });
+
   describe("RTL Direction Support", () => {
     it("renders dir='rtl' on the root when direction='rtl'", () => {
       const { container } = render(<Calendar direction="rtl" />);
