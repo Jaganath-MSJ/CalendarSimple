@@ -130,6 +130,18 @@ describe("View Component", () => {
     expect(screen.queryByTestId("month-skeleton")).not.toBeInTheDocument();
   });
 
+  // DI-3: non-empty events + isLoading → background-refresh overlay, not skeleton
+  it("renders overlay (not skeleton) when isLoading=true and events are present (DI-3)", () => {
+    mockCalendar(ECalendarViewType.month, {
+      isLoading: true,
+      events: [{ id: "1", title: "E", startDate: "2024-03-15" }],
+    });
+    render(<View />);
+    expect(screen.getByTestId("calendar-loading-overlay")).toBeInTheDocument();
+    expect(screen.getByTestId("month-view")).toBeInTheDocument();
+    expect(screen.queryByTestId("month-skeleton")).not.toBeInTheDocument();
+  });
+
   // ── renderLoading custom UI ──────────────────────────
   it("renders renderLoading() output when isLoading and no events", () => {
     mockCalendar(ECalendarViewType.month, {

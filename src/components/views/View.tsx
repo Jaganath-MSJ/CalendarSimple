@@ -89,7 +89,14 @@ export default function View(props: ViewProps) {
 
   // When loading but events exist — show them but block interactions
   if (isLoading) {
-    return <div className={styles.loadingOverlay}>{renderActiveView()}</div>;
+    return (
+      <div
+        className={styles.loadingOverlay}
+        data-testid="calendar-loading-overlay"
+      >
+        {renderActiveView()}
+      </div>
+    );
   }
 
   // Normal render with optional fade-in after loading completes

@@ -89,9 +89,17 @@ export interface CalendarProps {
   testId?: string;
 
   // --- Loading State ---
-  /** When `true`, renders the loading indicator instead of the calendar body. */
+  /**
+   * When `true`, activates loading mode. Behaviour depends on whether events are present:
+   * - **No events:** replaces the calendar body with a skeleton (or `renderLoading()` if provided).
+   * - **Events present:** keeps the calendar visible but wraps it in a non-interactive overlay
+   *   so existing data stays on screen during a background refresh (DI-3).
+   */
   isLoading?: boolean;
-  /** Custom loading indicator renderer. Falls back to a built-in spinner when omitted. */
+  /**
+   * Custom loading indicator renderer. Called only when `isLoading=true` and no events are
+   * present. Falls back to a built-in view-specific skeleton when omitted.
+   */
   renderLoading?: () => ReactNode;
 
   // --- Configuration ---
