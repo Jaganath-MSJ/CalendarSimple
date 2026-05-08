@@ -177,7 +177,13 @@ export interface CalendarProps {
   enrichedEventsByDate?: Record<string, CalendarEvent[]>;
   /** Enable O(1) event lookup via `enrichedEventsByDate`. */
   enableEnrichedEvents?: boolean;
-  /** Skip internal sort when events are already sorted by `startDate` ascending. */
+  /**
+   * Skip internal validation when events are already sorted by `startDate` ascending.
+   *
+   * **Known caveat:** the library does not re-sort the array. If unsorted events are
+   * passed with this flag set to `true`, they will render in the order provided.
+   * Only set this flag when the input is guaranteed to be sorted.
+   */
   eventsAreSorted?: boolean;
   /** Maintain stable visual ordering of overlapping events across re-renders. */
   isEventOrderingEnabled?: boolean;

@@ -15,7 +15,9 @@ import { CalendarEvent } from "../types/events";
  * Hook to filter and return only valid calendar events.
  *
  * @param events - The raw array of calendar events to process.
- * @param eventsAreSorted - When `true`, skips validation (caller guarantees events are pre-sorted and valid).
+ * @param eventsAreSorted - When `true`, skips validation and returns events as-is (caller guarantees
+ *   events are pre-sorted by `startDate` ascending). **Caveat:** unsorted input will render in the
+ *   provided order — the library never re-sorts the array.
  * @param enableEnrichedEvents - When `true`, skips validation (caller supplies pre-enriched events via `enrichedEventsByDate`).
  * @returns A memoized array containing only logically valid events.
  */

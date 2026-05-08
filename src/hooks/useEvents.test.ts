@@ -34,6 +34,18 @@ describe("useEvents Hook", () => {
     expect(result.current.map((e) => e.id)).toEqual(["1", "2", "3"]);
   });
 
+  // Known caveat (K-03): eventsAreSorted=true bypasses all sorting/validation.
+  // Unsorted input is returned in the original order — the library never re-sorts.
+  it("preserves input order when eventsAreSorted=true even if events are not sorted", () => {
+    const unsorted: CalendarEvent[] = [
+      { id: "b", title: "B", startDate: "2024-03-10" },
+      { id: "a", title: "A", startDate: "2024-03-01" },
+      { id: "c", title: "C", startDate: "2024-03-05" },
+    ];
+    const { result } = renderHook(() => useEvents(unsorted, true));
+    expect(result.current.map((e) => e.id)).toEqual(["b", "a", "c"]);
+  });
+
   it("returns all events if enableEnrichedEvents is true", () => {
     const { result } = renderHook(() => useEvents(events, false, true));
 
