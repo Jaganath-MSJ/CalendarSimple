@@ -36,6 +36,7 @@ export interface CalendarState {
 export type CalendarAction =
   | { type: typeof CALENDAR_ACTIONS.SET_DATE; payload: DateType }
   | { type: typeof CALENDAR_ACTIONS.SET_VIEW; payload: ECalendarViewType }
+  | { type: typeof CALENDAR_ACTIONS.SET_CUSTOM_DAYS; payload: number }
   | { type: typeof CALENDAR_ACTIONS.NEXT }
   | { type: typeof CALENDAR_ACTIONS.PREV }
   | { type: typeof CALENDAR_ACTIONS.TODAY };
@@ -81,6 +82,8 @@ function calendarReducer(
       };
     case CALENDAR_ACTIONS.SET_VIEW:
       return { ...state, view: action.payload };
+    case CALENDAR_ACTIONS.SET_CUSTOM_DAYS:
+      return { ...state, customDays: action.payload };
     case CALENDAR_ACTIONS.NEXT: {
       if (state.view === ECalendarViewType.customDays) {
         return {

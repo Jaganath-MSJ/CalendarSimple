@@ -76,6 +76,7 @@ export const RTL_LOCALES = [
 export const CALENDAR_ACTIONS = {
   SET_DATE: "SET_DATE",
   SET_VIEW: "SET_VIEW",
+  SET_CUSTOM_DAYS: "SET_CUSTOM_DAYS",
   NEXT: "NEXT",
   PREV: "PREV",
   TODAY: "TODAY",

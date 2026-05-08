@@ -61,6 +61,13 @@ function CalendarContent(props: CalendarContentProps) {
     }
   }, [props.selectedDate, dispatch]);
 
+  // Sync customDays from props to context
+  useEffect(() => {
+    if (props.customDays) {
+      dispatch({ type: "SET_CUSTOM_DAYS", payload: props.customDays });
+    }
+  }, [props.customDays, dispatch]);
+
   return (
     <section
       data-testid={`${testId}-container`}

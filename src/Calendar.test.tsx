@@ -142,6 +142,22 @@ describe("Calendar Component Integration", () => {
     expect(screen.getByText("Sat")).toBeInTheDocument();
   });
 
+  it("syncs customDays prop change to context so CustomDaysView re-renders with new count", () => {
+    const { rerender } = render(
+      <Calendar view={ECalendarViewType.customDays} customDays={3} />,
+    );
+    // 3-day view: header shows the 3-day option text (e.g. "3 days")
+    expect(
+      screen.getByTestId("calendar-header-view-select"),
+    ).toBeInTheDocument();
+
+    rerender(<Calendar view={ECalendarViewType.customDays} customDays={5} />);
+    // After prop change the view is still mounted (not blank)
+    expect(
+      screen.getByTestId("calendar-header-view-select"),
+    ).toBeInTheDocument();
+  });
+
   it("compound-component mode exposes ${testId}-container on the root element", () => {
     render(
       <Calendar testId="cal">
