@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { CalendarEvent } from "../types";
 import useEvents from "./useEvents";
 
@@ -44,6 +44,17 @@ describe("useEvents Hook", () => {
     ];
     const { result } = renderHook(() => useEvents(unsorted, true));
     expect(result.current.map((e) => e.id)).toEqual(["b", "a", "c"]);
+  });
+
+  // Known behaviour (C-TC3): events with endDate before startDate are silently
+  // filtered — no warning is emitted. Pass valid date ranges to avoid silent drops.
+  it("silently filters negative-duration events without warning (C-TC3)", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { result } = renderHook(() => useEvents(events));
+    expect(result.current).toHaveLength(2);
+    expect(result.current.map((e) => e.id)).toEqual(["1", "2"]);
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 
   it("returns all events if enableEnrichedEvents is true", () => {
