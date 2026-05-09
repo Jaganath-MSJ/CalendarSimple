@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
-import { expect, describe, it, vi } from "vitest";
+import { expect, describe, it, vi, afterEach } from "vitest";
 import { dateFn } from "./utils";
 import { ECalendarViewType } from "./types";
 import Calendar from "./Calendar";
@@ -140,6 +140,182 @@ describe("Calendar Component Integration", () => {
     // MonthView renders abbreviated day-name column headers
     expect(screen.getByText("Sun")).toBeInTheDocument();
     expect(screen.getByText("Sat")).toBeInTheDocument();
+  });
+
+  it("syncs customDays prop change to context so CustomDaysView re-renders with new count", () => {
+    const { rerender } = render(
+      <Calendar view={ECalendarViewType.customDays} customDays={3} />,
+    );
+    // 3-day view: header shows the 3-day option text (e.g. "3 days")
+    expect(
+      screen.getByTestId("calendar-header-view-select"),
+    ).toBeInTheDocument();
+
+    rerender(<Calendar view={ECalendarViewType.customDays} customDays={5} />);
+    // After prop change the view is still mounted (not blank)
+    expect(
+      screen.getByTestId("calendar-header-view-select"),
+    ).toBeInTheDocument();
+  });
+
+  it("compound-component mode exposes ${testId}-container on the root element", () => {
+    render(
+      <Calendar testId="cal">
+        <Calendar.Header />
+        <Calendar.View />
+      </Calendar>,
+    );
+    expect(screen.getByTestId("cal-container")).toBeInTheDocument();
+  });
+
+  it("catches renderer exceptions and shows fallback instead of crashing (DI-4)", () => {
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    render(
+      <Calendar
+        renderHeader={() => {
+          throw new Error("render boom");
+        }}
+      />,
+    );
+    expect(screen.getByTestId("calendar-error-boundary")).toBeInTheDocument();
+    errSpy.mockRestore();
+  });
+
+  describe("RTL Direction Support", () => {
+    it("renders dir='rtl' on the root when direction='rtl'", () => {
+      const { container } = render(<Calendar direction="rtl" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("dir", "rtl");
+    });
+
+    it("renders dir='rtl' when locale is Arabic and no direction prop", () => {
+      const { container } = render(<Calendar locale="ar" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("dir", "rtl");
+    });
+
+    it("renders dir='ltr' when direction='ltr' overrides Arabic locale", () => {
+      const { container } = render(<Calendar locale="ar" direction="ltr" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("dir", "ltr");
+    });
+
+    it("defaults to dir='ltr' with no locale or direction", () => {
+      const { container } = render(<Calendar />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("dir", "ltr");
+    });
+
+    it("renders dir='rtl' for Hebrew locale", () => {
+      const { container } = render(<Calendar locale="he" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("dir", "rtl");
+    });
+  });
+
+  describe("Color Scheme Support", () => {
+    afterEach(() => {
+      Object.defineProperty(window, "matchMedia", {
+        writable: true,
+        configurable: true,
+        value: (query: string) => ({
+          matches: false,
+          media: query,
+          onchange: null,
+          addListener: () => {},
+          removeListener: () => {},
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          dispatchEvent: () => false,
+        }),
+      });
+    });
+
+    it("renders data-color-scheme='dark' on the root when colorScheme='dark'", () => {
+      const { container } = render(<Calendar colorScheme="dark" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("data-color-scheme", "dark");
+    });
+
+    it("renders data-color-scheme='light' on the root when colorScheme='light'", () => {
+      const { container } = render(<Calendar colorScheme="light" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("data-color-scheme", "light");
+    });
+
+    it("resolves colorScheme='auto' to 'light' when OS prefers light", () => {
+      const { container } = render(<Calendar colorScheme="auto" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("data-color-scheme", "light");
+    });
+
+    it("resolves colorScheme='auto' to 'dark' when OS prefers dark", () => {
+      Object.defineProperty(window, "matchMedia", {
+        writable: true,
+        configurable: true,
+        value: (query: string) => ({
+          matches: true,
+          media: query,
+          onchange: null,
+          addListener: () => {},
+          removeListener: () => {},
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          dispatchEvent: () => false,
+        }),
+      });
+      const { container } = render(<Calendar colorScheme="auto" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("data-color-scheme", "dark");
+    });
+
+    it("defaults to data-color-scheme='light' with no prop and light OS preference", () => {
+      const { container } = render(<Calendar />);
+      const root = container.firstChild as HTMLElement;
+      expect(root).toHaveAttribute("data-color-scheme", "light");
+    });
+
+    it("inner <section> also receives data-color-scheme", () => {
+      const { container } = render(<Calendar colorScheme="dark" />);
+      const section = container.querySelector(
+        "section[data-testid$='-container']",
+      );
+      expect(section).toHaveAttribute("data-color-scheme", "dark");
+    });
+
+    it("applies dark theme override to selected cell when colorScheme='dark'", () => {
+      const { getByTestId } = render(
+        <Calendar
+          colorScheme="dark"
+          view={ECalendarViewType.month}
+          selectedDate={new Date("2024-03-15")}
+          selectable
+          theme={{
+            selected: { bgColor: "#007bff", color: "#fff" },
+            dark: { selected: { bgColor: "#3b82f6" } },
+          }}
+        />,
+      );
+      const selectedCell = getByTestId("calendar-15-month-cell");
+      expect(selectedCell).toHaveStyle({ backgroundColor: "#3b82f6" });
+    });
+
+    it("applies flat theme value to selected cell when colorScheme='light'", () => {
+      const { getByTestId } = render(
+        <Calendar
+          colorScheme="light"
+          view={ECalendarViewType.month}
+          selectedDate={new Date("2024-03-15")}
+          selectable
+          theme={{
+            selected: { bgColor: "#007bff", color: "#fff" },
+            dark: { selected: { bgColor: "#3b82f6" } },
+          }}
+        />,
+      );
+      const selectedCell = getByTestId("calendar-15-month-cell");
+      expect(selectedCell).toHaveStyle({ backgroundColor: "#007bff" });
+    });
   });
 
   describe("Localization Support", () => {

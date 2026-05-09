@@ -10,6 +10,14 @@ const meta: Meta<typeof Calendar> = {
     layout: "centered",
   },
   tags: ["autodocs"],
+  argTypes: {
+    colorScheme: {
+      control: "radio",
+      options: ["light", "dark", "auto"],
+      description:
+        "Color palette. `'auto'` (default) follows the OS `prefers-color-scheme` and updates live.",
+    },
+  },
   args: {
     width: 800,
     height: 600,
@@ -396,6 +404,121 @@ export const ScheduleViewCustomSeparator: Story = {
       description: {
         story:
           "Use `renderScheduleSeparator` to provide a custom component that remains visible between days in the Schedule view. This example adds a stylized line with a date label.",
+      },
+    },
+  },
+};
+
+const colorSchemeEvents: CalendarEvent[] = [
+  {
+    id: "cs1",
+    startDate: today.plus({ hours: 2 }).toISO()!,
+    endDate: today.plus({ hours: 3 }).toISO()!,
+    title: "Team Standup",
+    style: { backgroundColor: "#3b82f6", color: "#fff" },
+  },
+  {
+    id: "cs2",
+    startDate: today.plus({ days: 1, hours: 10 }).toISO()!,
+    endDate: today.plus({ days: 1, hours: 12 }).toISO()!,
+    title: "Design Review",
+    style: { backgroundColor: "#8b5cf6", color: "#fff" },
+  },
+  {
+    id: "cs3",
+    startDate: today.plus({ days: 2 }).toFormat("yyyy-MM-dd"),
+    title: "All-day: Conference",
+    style: { backgroundColor: "#10b981", color: "#fff" },
+  },
+];
+
+/** Forces the light palette regardless of OS preference. */
+export const ColorSchemeLight: Story = {
+  args: {
+    view: ECalendarViewType.week,
+    events: colorSchemeEvents,
+    selectedDate: today.toJSDate(),
+    colorScheme: "light",
+  },
+};
+
+/** Forces the dark palette regardless of OS preference. */
+export const ColorSchemeDark: Story = {
+  args: {
+    view: ECalendarViewType.week,
+    events: colorSchemeEvents,
+    selectedDate: today.toJSDate(),
+    colorScheme: "dark",
+  },
+  parameters: {
+    backgrounds: { default: "dark" },
+  },
+};
+
+/**
+ * Auto mode (default): follows the OS `prefers-color-scheme` preference.
+ * To verify the live-update behavior, change the OS theme (or use Chrome DevTools →
+ * Rendering → "Emulate CSS prefers-color-scheme") and watch the calendar reflow.
+ */
+export const ColorSchemeAuto: Story = {
+  args: {
+    view: ECalendarViewType.week,
+    events: colorSchemeEvents,
+    selectedDate: today.toJSDate(),
+    colorScheme: "auto",
+  },
+};
+
+/** Month view in dark mode — verifies grid borders, week number column, and adjacent-month cells. */
+export const ColorSchemeDarkMonth: Story = {
+  args: {
+    view: ECalendarViewType.month,
+    events: colorSchemeEvents,
+    selectedDate: today.toJSDate(),
+    colorScheme: "dark",
+    showWeekNumbers: true,
+  },
+  parameters: {
+    backgrounds: { default: "dark" },
+  },
+};
+
+/** Schedule view in dark mode — verifies date number, event row, and divider colors. */
+export const ColorSchemeDarkSchedule: Story = {
+  args: {
+    view: ECalendarViewType.schedule,
+    events: colorSchemeEvents,
+    selectedDate: today.toJSDate(),
+    colorScheme: "dark",
+  },
+  parameters: {
+    backgrounds: { default: "dark" },
+  },
+};
+
+/** Per-scheme theme overrides: dark mode uses a different selected/today color than light mode. */
+export const ColorSchemePerSchemTheme: Story = {
+  args: {
+    view: ECalendarViewType.month,
+    events: colorSchemeEvents,
+    selectedDate: today.toJSDate(),
+    colorScheme: "dark",
+    selectable: true,
+    theme: {
+      selected: { bgColor: "#007bff", color: "#fff" },
+      today: { bgColor: "#e6f2ff", color: "#007bff" },
+      dark: {
+        selected: { bgColor: "#3b82f6", color: "#f9fafb" },
+        today: { bgColor: "#1e3a5f", color: "#60a5fa" },
+      },
+    },
+  },
+  parameters: {
+    backgrounds: { default: "dark" },
+    docs: {
+      description: {
+        story:
+          "Pass `theme.dark` (or `theme.light`) to override specific state colors for that scheme. Toggle `colorScheme` between `light` and `dark` to see the different palettes applied to the selected and today cells.",
       },
     },
   },

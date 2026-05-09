@@ -7,6 +7,7 @@ import {
   checkIsToday,
   generateTooltipText,
   handleKeyboardActivation,
+  resolveTheme,
 } from "../../../utils";
 import styles from "./ScheduleView.module.css";
 import { DATE_FORMATS, LAYOUT_CONSTANTS } from "../../../constants";
@@ -40,7 +41,7 @@ export default function ScheduleView(props: ScheduleViewProps) {
     renderScheduleSeparator,
     locale,
   } = useCalendarProps(props);
-  const { testId } = useCalendar();
+  const { testId, colorScheme } = useCalendar();
   const {
     todayRef,
     containerRef,
@@ -73,10 +74,11 @@ export default function ScheduleView(props: ScheduleViewProps) {
             const isLastGroup = groupIndex === allKeys.length - 1;
 
             const isToday = checkIsToday(dateObj, dateObj.day);
+            const resolvedTheme = resolveTheme(theme, colorScheme);
             const todayStyle = isToday
               ? {
-                  color: theme?.today?.color,
-                  backgroundColor: theme?.today?.bgColor,
+                  color: resolvedTheme.today?.color,
+                  backgroundColor: resolvedTheme.today?.bgColor,
                 }
               : undefined;
 

@@ -12,14 +12,11 @@ import {
   getContrastColor,
   formatDate,
   handleKeyboardActivation,
+  resolveTheme,
 } from "../../../utils";
 import styles from "./MonthEventItem.module.css";
 import Popover from "../../ui/popover/Popover";
-import {
-  LAYOUT_CONSTANTS,
-  defaultTheme,
-  DATE_FORMATS,
-} from "../../../constants";
+import { LAYOUT_CONSTANTS, DATE_FORMATS } from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
 
 interface MonthEventItemProps extends Pick<
@@ -45,7 +42,7 @@ interface MonthEventItemProps extends Pick<
   isToday: boolean;
   isCurrentMonth: boolean;
   onClick?: (date: DateType) => void;
-  onMoreClick?: (date: DateType) => void;
+  onMoreClick?: (date: DateType, hiddenEvents: EventListType[]) => void;
   totalEvents?: number;
 }
 
@@ -73,7 +70,7 @@ function MonthEventItem({
   renderEvent,
   renderDateCell,
 }: MonthEventItemProps) {
-  const { testId, config } = useCalendar();
+  const { testId, config, colorScheme } = useCalendar();
   const locale = config.locale;
   const [showPopover, setShowPopover] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -83,20 +80,25 @@ function MonthEventItem({
     setAnchorEl(null);
   }, []);
 
-  const styleSource = isSelected
-    ? { ...defaultTheme.selected, ...theme?.selected }
+  const resolved = resolveTheme(theme, colorScheme);
+  const themeSource = isSelected
+    ? resolved.selected
     : isToday
-      ? { ...defaultTheme.today, ...theme?.today }
-      : { ...defaultTheme.default, ...theme?.default };
+      ? resolved.today
+      : resolved.default;
 
   const style = {
-    color: styleSource?.color,
-    backgroundColor: styleSource?.bgColor,
+    color: themeSource?.color,
+    backgroundColor: themeSource?.bgColor,
   };
+
+  const allDayEvents: EventListType[] =
+    data?.filter((e): e is EventListType => e !== null) || [];
 
   // Determine which items to display
   let visibleEvents = data;
   let hiddenEventsCount = 0;
+  let hiddenEventsList: EventListType[] = [];
 
   if (
     (maxEvents || maxEvents === 0) &&
@@ -109,10 +111,10 @@ function MonthEventItem({
       (e) => e !== null,
     ).length;
     hiddenEventsCount = totalEvents - visibleRealEventsCount;
+    hiddenEventsList = allDayEvents
+      .slice(visibleRealEventsCount)
+      .filter((e) => !e.isSpacer);
   }
-
-  const allDayEvents: EventListType[] =
-    data?.filter((e): e is EventListType => e !== null) || [];
 
   return (
     <td
@@ -222,14 +224,14 @@ function MonthEventItem({
                           setAnchorEl(e.currentTarget);
                           setShowPopover(true);
                         }
-                        onMoreClick?.(dateObj);
+                        onMoreClick?.(dateObj, hiddenEventsList);
                       }}
                       onKeyDown={handleKeyboardActivation((e) => {
                         if (!showPopover) {
                           setAnchorEl(e.currentTarget as HTMLButtonElement);
                           setShowPopover(true);
                         }
-                        onMoreClick?.(dateObj);
+                        onMoreClick?.(dateObj, hiddenEventsList);
                       })}
                     >
                       + {hiddenEventsCount} more

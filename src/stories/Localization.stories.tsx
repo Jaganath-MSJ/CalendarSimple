@@ -13,8 +13,13 @@ const meta: Meta<typeof Calendar> = {
   argTypes: {
     locale: {
       control: "select",
-      options: ["en", "fr", "es", "ar", "ja", "de", "it", "zh"],
+      options: ["en", "fr", "es", "ar", "he", "ja", "de", "it", "zh"],
       description: "Luxon locale code",
+    },
+    direction: {
+      control: "radio",
+      options: ["ltr", "rtl"],
+      description: "Layout direction. Auto-derived from locale when omitted.",
     },
     view: {
       control: "select",
@@ -80,18 +85,64 @@ export const French: Story = {
   },
 };
 
+/**
+ * Arabic locale auto-derives `direction: "rtl"`. The calendar layout flips:
+ * navigation arrows mirror, time column moves to the right, day columns flow right-to-left.
+ */
 export const ArabicRTL: Story = {
   args: {
     view: ECalendarViewType.week,
     events: mockEvents,
     selectedDate: today.toJSDate(),
     locale: "ar",
+    weekStartsOn: 6,
+    weekEndsOn: 5,
     localeMessages: {
       today: "اليوم",
       day: "يوم",
       week: "أسبوع",
       month: "شهر",
       schedule: "جدول",
+    },
+  },
+};
+
+/**
+ * Arabic content with explicit LTR layout — proves the `direction` prop overrides
+ * the locale auto-fallback.
+ */
+export const ArabicLTR: Story = {
+  args: {
+    view: ECalendarViewType.week,
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    locale: "ar",
+    direction: "ltr",
+    weekStartsOn: 6,
+    weekEndsOn: 5,
+    localeMessages: {
+      today: "اليوم",
+      day: "يوم",
+      week: "أسبوع",
+      month: "شهر",
+      schedule: "جدول",
+    },
+  },
+};
+
+/** Hebrew locale auto-derives RTL; shows month view flipped. */
+export const HebrewRTL: Story = {
+  args: {
+    view: ECalendarViewType.month,
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    locale: "he",
+    localeMessages: {
+      today: "היום",
+      day: "יום",
+      week: "שבוע",
+      month: "חודש",
+      schedule: "לוח",
     },
   },
 };

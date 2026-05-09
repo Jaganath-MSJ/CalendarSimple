@@ -5,6 +5,7 @@ import {
   dateFn,
   formatDate,
   getDayListNames,
+  resolveTheme,
 } from "../../../utils";
 import useDayEventLayout, {
   DayEventLayout,
@@ -74,7 +75,7 @@ function CustomView(props: CustomViewProps) {
     onSlotClick,
   } = useCalendarProps(props);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { state, testId } = useCalendar();
+  const { state, testId, colorScheme } = useCalendar();
   const { selectedDate } = state;
 
   const viewDays = useMemo(() => {
@@ -133,10 +134,11 @@ function CustomView(props: CustomViewProps) {
           <div className={styles.timeHeaderSpacer} />
           {viewDays.map((date, index) => {
             const isToday = dateFn().hasSame(date, "day");
+            const resolvedTheme = resolveTheme(theme, colorScheme);
             const todayStyle = isToday
               ? {
-                  color: theme?.today?.color,
-                  backgroundColor: theme?.today?.bgColor,
+                  color: resolvedTheme.today?.color,
+                  backgroundColor: resolvedTheme.today?.bgColor,
                 }
               : undefined;
 

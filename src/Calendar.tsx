@@ -10,9 +10,10 @@ import {
   LAYOUT_CONSTANTS,
   CALENDAR_ACTIONS,
 } from "./constants";
-import { dateFn } from "./utils";
+import { dateFn, resolveDirection } from "./utils";
 import useResizeObserver from "./hooks/useResizeObserver";
 import useEvents from "./hooks/useEvents";
+import useColorScheme from "./hooks/useColorScheme";
 import styles from "./Calendar.module.css";
 import Header from "./components/layout/Header";
 import DayView from "./components/views/day_view/DayView";
@@ -23,6 +24,7 @@ import CustomDaysView from "./components/views/custom_days_view/CustomDaysView";
 import { CalendarProvider, useCalendar } from "./context/CalendarContext";
 import View from "./components/views/View";
 import useCalendarProps from "./hooks/useCalendarProps";
+import CalendarErrorBoundary from "./components/ui/CalendarErrorBoundary";
 
 function CalendarContent(props: CalendarContentProps) {
   const {
@@ -33,7 +35,13 @@ function CalendarContent(props: CalendarContentProps) {
     height,
     onNavigate,
     onViewChange,
+    direction,
+    locale,
+    colorScheme,
   } = useCalendarProps(props);
+
+  const dir = resolveDirection(direction, locale);
+  const resolvedScheme = useColorScheme(colorScheme);
 
   const {
     state: { view, selectedDate },
@@ -54,9 +62,18 @@ function CalendarContent(props: CalendarContentProps) {
     }
   }, [props.selectedDate, dispatch]);
 
+  // Sync customDays from props to context
+  useEffect(() => {
+    if (props.customDays) {
+      dispatch({ type: "SET_CUSTOM_DAYS", payload: props.customDays });
+    }
+  }, [props.customDays, dispatch]);
+
   return (
     <section
       data-testid={`${testId}-container`}
+      dir={dir}
+      data-color-scheme={resolvedScheme}
       style={
         {
           "--calendar-width": `${width}px`,
@@ -117,6 +134,9 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
     allProps.enableEnrichedEvents,
   );
 
+  const dir = resolveDirection(allProps.direction, allProps.locale);
+  const resolvedScheme = useColorScheme(allProps.colorScheme);
+
   return (
     <CalendarProvider
       initialDate={initialDate}
@@ -127,28 +147,41 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
     >
       <div
         ref={containerRef}
+        data-testid={
+          allProps.children ? `${allProps.testId}-container` : undefined
+        }
+        dir={dir}
+        data-color-scheme={resolvedScheme}
         style={{
           width: allProps.width ?? "100%",
           height: allProps.height ?? "100%",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
+          ...(allProps.children
+            ? ({
+                "--calendar-width": `${width}px`,
+                "--calendar-height": `${height}px`,
+              } as CSSProperties)
+            : undefined),
         }}
         className={cx(
           allProps.children ? styles.calendar : undefined,
           allProps.children ? allProps.classNames?.root : undefined,
         )}
       >
-        {allProps.children ? (
-          allProps.children
-        ) : (
-          <CalendarContent
-            {...(allProps as unknown as CalendarContentProps)}
-            width={width}
-            height={height}
-            events={validEvents}
-          />
-        )}
+        <CalendarErrorBoundary>
+          {allProps.children ? (
+            allProps.children
+          ) : (
+            <CalendarContent
+              {...(allProps as unknown as CalendarContentProps)}
+              width={width}
+              height={height}
+              events={validEvents}
+            />
+          )}
+        </CalendarErrorBoundary>
       </div>
     </CalendarProvider>
   );

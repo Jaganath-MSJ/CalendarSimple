@@ -11,7 +11,11 @@ export interface CalendarEvent {
   id?: string;
   /** ISO 8601 start date. Use `YYYY-MM-DD` for all-day events, `YYYY-MM-DDTHH:mm:ss` for timed events. */
   startDate: string;
-  /** ISO 8601 end date. Omit for single-day events; set to a later date for multi-day spanning events. */
+  /**
+   * ISO 8601 end date. Omit for single-day events; set to a later date for multi-day
+   * spanning events. If set to a date before `startDate`, the event is silently filtered
+   * by `useEvents` (negative-duration guard, C-TC3).
+   */
   endDate?: string;
   /** Display title shown on the event chip. */
   title: string;

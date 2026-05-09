@@ -212,7 +212,9 @@ function Header(props: HeaderProps) {
             aria-label="Previous period"
             onClick={() => onMonthArrowClick(EMonthOption.sub)}
           >
-            <LeftArrow />
+            <span className={styles.iconButtonIcon}>
+              <LeftArrow />
+            </span>
           </button>
           <button
             className={styles.iconButton}
@@ -220,7 +222,9 @@ function Header(props: HeaderProps) {
             aria-label="Next period"
             onClick={() => onMonthArrowClick(EMonthOption.add)}
           >
-            <RightArrow />
+            <span className={styles.iconButtonIcon}>
+              <RightArrow />
+            </span>
           </button>
         </div>
         <h2 className={styles.dateTitle}>{getHeaderTitle()}</h2>

@@ -215,7 +215,9 @@ function MonthView(props: MonthViewProps) {
                     totalEvents={dayInfo.totalEvents}
                     is12Hour={is12Hour}
                     onEventClick={onEventClick}
-                    onMoreClick={(d) => onMoreClick?.(convertToDate(d))}
+                    onMoreClick={(d, hiddenEvs) =>
+                      onMoreClick?.(convertToDate(d), hiddenEvs)
+                    }
                     showAdjacentMonths={showAdjacentMonths}
                     classNames={classNames}
                     renderEvent={renderEvent}

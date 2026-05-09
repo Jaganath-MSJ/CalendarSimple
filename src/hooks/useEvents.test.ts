@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { CalendarEvent } from "../types";
 import useEvents from "./useEvents";
 
@@ -32,6 +32,29 @@ describe("useEvents Hook", () => {
 
     expect(result.current).toHaveLength(3);
     expect(result.current.map((e) => e.id)).toEqual(["1", "2", "3"]);
+  });
+
+  // Known caveat (K-03): eventsAreSorted=true bypasses all sorting/validation.
+  // Unsorted input is returned in the original order — the library never re-sorts.
+  it("preserves input order when eventsAreSorted=true even if events are not sorted", () => {
+    const unsorted: CalendarEvent[] = [
+      { id: "b", title: "B", startDate: "2024-03-10" },
+      { id: "a", title: "A", startDate: "2024-03-01" },
+      { id: "c", title: "C", startDate: "2024-03-05" },
+    ];
+    const { result } = renderHook(() => useEvents(unsorted, true));
+    expect(result.current.map((e) => e.id)).toEqual(["b", "a", "c"]);
+  });
+
+  // Known behaviour (C-TC3): events with endDate before startDate are silently
+  // filtered — no warning is emitted. Pass valid date ranges to avoid silent drops.
+  it("silently filters negative-duration events without warning (C-TC3)", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { result } = renderHook(() => useEvents(events));
+    expect(result.current).toHaveLength(2);
+    expect(result.current.map((e) => e.id)).toEqual(["1", "2"]);
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 
   it("returns all events if enableEnrichedEvents is true", () => {

@@ -5,6 +5,7 @@ import {
   dateFn,
   formatDate,
   getDayListNames,
+  resolveTheme,
 } from "../../../utils";
 import useDayEventLayout, {
   DayEventLayout,
@@ -76,7 +77,7 @@ function WeekView(props: WeekViewProps) {
     onSlotClick,
   } = useCalendarProps(props);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { state, testId } = useCalendar();
+  const { state, testId, colorScheme } = useCalendar();
   const { selectedDate } = state;
   const startOfWeek = useMemo(() => {
     const currentDay = getDayOfWeek(selectedDate);
@@ -143,10 +144,11 @@ function WeekView(props: WeekViewProps) {
           <div className={styles.timeHeaderSpacer} />
           {weekDays.map((date, index) => {
             const isToday = dateFn().hasSame(date, "day");
+            const resolvedTheme = resolveTheme(theme, colorScheme);
             const todayStyle = isToday
               ? {
-                  color: theme?.today?.color,
-                  backgroundColor: theme?.today?.bgColor,
+                  color: resolvedTheme.today?.color,
+                  backgroundColor: resolvedTheme.today?.bgColor,
                 }
               : undefined;
 

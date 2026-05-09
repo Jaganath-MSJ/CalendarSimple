@@ -166,6 +166,39 @@ describe("CalendarContext", () => {
     vi.useRealTimers();
   });
 
+  it("SET_CUSTOM_DAYS action updates customDays in state", () => {
+    const TestSetCustomDays = () => {
+      const { state, dispatch } = useCalendar();
+      return (
+        <div>
+          <span data-testid="custom-days">{state.customDays ?? "none"}</span>
+          <button
+            onClick={() =>
+              dispatch({ type: CALENDAR_ACTIONS.SET_CUSTOM_DAYS, payload: 5 })
+            }
+            data-testid="set-custom-days"
+          >
+            Set 5 Days
+          </button>
+        </div>
+      );
+    };
+
+    render(
+      <CalendarProvider
+        initialDate={initialDate}
+        initialView={ECalendarViewType.customDays}
+        initialCustomDays={3}
+      >
+        <TestSetCustomDays />
+      </CalendarProvider>,
+    );
+
+    expect(screen.getByTestId("custom-days").textContent).toBe("3");
+    fireEvent.click(screen.getByTestId("set-custom-days"));
+    expect(screen.getByTestId("custom-days").textContent).toBe("5");
+  });
+
   it("throws error when useCalendar is used outside of provider", () => {
     // Suppress console.error in test output
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});

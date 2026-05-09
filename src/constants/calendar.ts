@@ -57,10 +57,26 @@ export const defaultCalendarProps = {
   isLoading: false,
 };
 
+/**
+ * Locale primary subtags that default to RTL layout when no explicit `direction` prop is given.
+ * Match is case-insensitive and handles BCP-47 region/script tags (e.g. ar-SA → ar).
+ */
+export const RTL_LOCALES = [
+  "ar", // Arabic
+  "he", // Hebrew
+  "fa", // Persian / Farsi
+  "ur", // Urdu
+  "ps", // Pashto
+  "sd", // Sindhi
+  "ckb", // Central Kurdish (Sorani)
+  "yi", // Yiddish
+] as const;
+
 /** Action type strings dispatched to the calendar reducer. */
 export const CALENDAR_ACTIONS = {
   SET_DATE: "SET_DATE",
   SET_VIEW: "SET_VIEW",
+  SET_CUSTOM_DAYS: "SET_CUSTOM_DAYS",
   NEXT: "NEXT",
   PREV: "PREV",
   TODAY: "TODAY",

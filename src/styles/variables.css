@@ -15,6 +15,25 @@
   --cal-focus-color: #005fcc;
 }
 
+/*
+ * Dark palette. Activated when the calendar root has `data-color-scheme="dark"`,
+ * which is set by `useColorScheme` based on the `colorScheme` prop or the OS
+ * `prefers-color-scheme` preference.
+ *
+ * Shadows and radii intentionally inherit from `:root` — they're already
+ * theme-agnostic (rgba black shadows read fine on dark backgrounds).
+ */
+[data-color-scheme="dark"] {
+  --primary-color: #60a5fa;
+  --primary-hover: #3b82f6;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --bg-color: #1f2937;
+  --bg-hover: #374151;
+  --border-color: #374151;
+  --cal-focus-color: #93c5fd;
+}
+
 /* Keyboard focus indicators */
 [role="button"]:focus-visible,
 button:focus-visible,

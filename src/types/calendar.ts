@@ -5,6 +5,9 @@ import { ReactNode } from "react";
 import { CalendarEvent } from "./events";
 import { CalendarTheme, CalendarClassNames } from "./theme";
 
+/** Color palette modes accepted by `CalendarProps.colorScheme`. */
+export type ColorScheme = "light" | "dark" | "auto";
+
 /**
  * Makes a specific subset of keys required while leaving the rest unchanged.
  * Used to enforce that `CalendarContentProps` always has defaults applied.
@@ -86,9 +89,17 @@ export interface CalendarProps {
   testId?: string;
 
   // --- Loading State ---
-  /** When `true`, renders the loading indicator instead of the calendar body. */
+  /**
+   * When `true`, activates loading mode. Behaviour depends on whether events are present:
+   * - **No events:** replaces the calendar body with a skeleton (or `renderLoading()` if provided).
+   * - **Events present:** keeps the calendar visible but wraps it in a non-interactive overlay
+   *   so existing data stays on screen during a background refresh (DI-3).
+   */
   isLoading?: boolean;
-  /** Custom loading indicator renderer. Falls back to a built-in spinner when omitted. */
+  /**
+   * Custom loading indicator renderer. Called only when `isLoading=true` and no events are
+   * present. Falls back to a built-in view-specific skeleton when omitted.
+   */
   renderLoading?: () => ReactNode;
 
   // --- Configuration ---
@@ -174,7 +185,13 @@ export interface CalendarProps {
   enrichedEventsByDate?: Record<string, CalendarEvent[]>;
   /** Enable O(1) event lookup via `enrichedEventsByDate`. */
   enableEnrichedEvents?: boolean;
-  /** Skip internal sort when events are already sorted by `startDate` ascending. */
+  /**
+   * Skip internal validation when events are already sorted by `startDate` ascending.
+   *
+   * **Known caveat:** the library does not re-sort the array. If unsorted events are
+   * passed with this flag set to `true`, they will render in the order provided.
+   * Only set this flag when the input is guaranteed to be sorted.
+   */
   eventsAreSorted?: boolean;
   /** Maintain stable visual ordering of overlapping events across re-renders. */
   isEventOrderingEnabled?: boolean;
@@ -184,6 +201,24 @@ export interface CalendarProps {
   // --- Localization ---
   /** Luxon locale code (e.g. `'en'`, `'fr'`, `'es-MX'`). Controls date formatting language. */
   locale?: string;
+
+  /**
+   * Layout direction. When omitted, falls back to `'rtl'` if `locale` is in the RTL locale list
+   * (ar, he, fa, ur, ps, sd, ckb, yi); otherwise `'ltr'`.
+   */
+  direction?: "ltr" | "rtl";
+
+  /**
+   * Controls the color palette of the calendar.
+   * - `'auto'` (default): follows the OS `prefers-color-scheme` preference and updates live
+   *   when the user toggles their OS theme.
+   * - `'light'` / `'dark'`: forces the palette regardless of OS preference.
+   *
+   * The resolved scheme is applied as `data-color-scheme="light"|"dark"` on the calendar root,
+   * which switches the CSS custom-property palette via attribute-selector overrides in
+   * `src/styles/variables.css`. The `theme` prop (per-event inline color overrides) still wins.
+   */
+  colorScheme?: ColorScheme;
 
   /** Overrides for built-in UI strings (navigation buttons, view names, etc.). */
   localeMessages?: {

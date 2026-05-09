@@ -5,6 +5,7 @@ import {
   dateFn,
   formatDate,
   getDayListNames,
+  resolveTheme,
 } from "../../../utils";
 import useDayEventLayout, {
   DayEventLayout,
@@ -72,7 +73,7 @@ function DayView(props: DayViewProps) {
     onSlotClick,
   } = useCalendarProps(props);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { state, testId } = useCalendar();
+  const { state, testId, colorScheme } = useCalendar();
   const { selectedDate } = state;
   const dayEvents = useDayEventLayout(
     events,
@@ -91,10 +92,11 @@ function DayView(props: DayViewProps) {
 
   const isToday = dateFn().hasSame(selectedDate, "day");
 
+  const resolvedTheme = resolveTheme(theme, colorScheme);
   const todayStyle = isToday
     ? {
-        color: theme?.today?.color,
-        backgroundColor: theme?.today?.bgColor,
+        color: resolvedTheme.today?.color,
+        backgroundColor: resolvedTheme.today?.bgColor,
       }
     : undefined;
 
