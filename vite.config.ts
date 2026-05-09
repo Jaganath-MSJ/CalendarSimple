@@ -1,6 +1,7 @@
 /// <reference types="vitest" />
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
+import { visualizer } from "rollup-plugin-visualizer";
 import { resolve } from "path";
 
 export default defineConfig({
@@ -47,5 +48,11 @@ export default defineConfig({
         exclude: ["node_modules", "dist"],
         rollupTypes: false,
       }),
+    visualizer({
+      filename: "dist/stats.html",
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+    }),
   ],
 });
