@@ -168,6 +168,19 @@ describe("Calendar Component Integration", () => {
     expect(screen.getByTestId("cal-container")).toBeInTheDocument();
   });
 
+  it("catches renderer exceptions and shows fallback instead of crashing (DI-4)", () => {
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    render(
+      <Calendar
+        renderHeader={() => {
+          throw new Error("render boom");
+        }}
+      />,
+    );
+    expect(screen.getByTestId("calendar-error-boundary")).toBeInTheDocument();
+    errSpy.mockRestore();
+  });
+
   describe("RTL Direction Support", () => {
     it("renders dir='rtl' on the root when direction='rtl'", () => {
       const { container } = render(<Calendar direction="rtl" />);

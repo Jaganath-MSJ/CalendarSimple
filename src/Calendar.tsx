@@ -24,6 +24,7 @@ import CustomDaysView from "./components/views/custom_days_view/CustomDaysView";
 import { CalendarProvider, useCalendar } from "./context/CalendarContext";
 import View from "./components/views/View";
 import useCalendarProps from "./hooks/useCalendarProps";
+import CalendarErrorBoundary from "./components/ui/CalendarErrorBoundary";
 
 function CalendarContent(props: CalendarContentProps) {
   const {
@@ -169,16 +170,18 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
           allProps.children ? allProps.classNames?.root : undefined,
         )}
       >
-        {allProps.children ? (
-          allProps.children
-        ) : (
-          <CalendarContent
-            {...(allProps as unknown as CalendarContentProps)}
-            width={width}
-            height={height}
-            events={validEvents}
-          />
-        )}
+        <CalendarErrorBoundary>
+          {allProps.children ? (
+            allProps.children
+          ) : (
+            <CalendarContent
+              {...(allProps as unknown as CalendarContentProps)}
+              width={width}
+              height={height}
+              events={validEvents}
+            />
+          )}
+        </CalendarErrorBoundary>
       </div>
     </CalendarProvider>
   );
