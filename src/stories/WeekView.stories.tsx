@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import dayjs from "dayjs";
+import { DateTime } from "luxon";
 import Calendar, { EDayType, ECalendarViewType, CalendarEvent } from "../";
 
 const meta: Meta<typeof Calendar> = {
@@ -20,87 +20,99 @@ const meta: Meta<typeof Calendar> = {
 export default meta;
 type Story = StoryObj<typeof Calendar>;
 
-const today = dayjs();
+const today = DateTime.now();
 
 const mockEvents: CalendarEvent[] = [
   {
     id: "1",
-    startDate: today.hour(9).minute(0).format("YYYY-MM-DDTHH:mm:00"),
-    endDate: today.hour(10).minute(0).format("YYYY-MM-DDTHH:mm:00"),
+    startDate: today
+      .set({ hour: 9, minute: 0 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
+    endDate: today
+      .set({ hour: 10, minute: 0 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Morning Standup",
-    color: "#3B82F6",
+    style: { backgroundColor: "#3B82F6" },
   },
   {
     id: "2",
-    startDate: today.hour(10).minute(0).format("YYYY-MM-DDTHH:mm:00"),
-    endDate: today.hour(11).minute(30).format("YYYY-MM-DDTHH:mm:00"),
+    startDate: today
+      .set({ hour: 10, minute: 0 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
+    endDate: today
+      .set({ hour: 11, minute: 30 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Client Meeting",
-    color: "#10B981",
+    style: { backgroundColor: "#10B981" },
   },
   {
     id: "3",
     startDate: today
-      .add(1, "day")
-      .hour(13)
-      .minute(0)
-      .format("YYYY-MM-DDTHH:mm:00"),
+      .plus({ days: 1 })
+      .set({ hour: 13 })
+      .set({ minute: 0 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     endDate: today
-      .add(1, "day")
-      .hour(14)
-      .minute(0)
-      .format("YYYY-MM-DDTHH:mm:00"),
+      .plus({ days: 1 })
+      .set({ hour: 14 })
+      .set({ minute: 0 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Lunch with Team",
-    color: "#F59E0B",
+    style: { backgroundColor: "#F59E0B" },
   },
   {
     id: "4",
     startDate: today
-      .add(2, "day")
-      .hour(15)
-      .minute(0)
-      .format("YYYY-MM-DDTHH:mm:00"),
+      .plus({ days: 2 })
+      .set({ hour: 15 })
+      .set({ minute: 0 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     endDate: today
-      .add(2, "day")
-      .hour(16)
-      .minute(45)
-      .format("YYYY-MM-DDTHH:mm:00"),
+      .plus({ days: 2 })
+      .set({ hour: 16 })
+      .set({ minute: 45 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Design Review",
-    color: "#8B5CF6",
+    style: { backgroundColor: "#8B5CF6" },
   },
   {
     id: "5", // Overlapping event
-    startDate: today.hour(9).minute(30).format("YYYY-MM-DDTHH:mm:00"),
-    endDate: today.hour(10).minute(30).format("YYYY-MM-DDTHH:mm:00"),
+    startDate: today
+      .set({ hour: 9, minute: 30 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
+    endDate: today
+      .set({ hour: 10, minute: 30 })
+      .toFormat("yyyy-MM-dd'T'HH:mm:00"),
     title: "Urgent Sync",
-    color: "#EF4444",
+    style: { backgroundColor: "#EF4444" },
   },
 ];
 
 export const Default: Story = {
   args: {
     events: [],
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
   },
 };
 
 export const WithEvents: Story = {
   args: {
     events: mockEvents,
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
   },
 };
 
 export const OverlappingEvents: Story = {
   args: {
     events: mockEvents,
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
   },
 };
 
 export const Format12Hour: Story = {
   args: {
     events: mockEvents,
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
     is12Hour: true,
   },
 };
@@ -108,7 +120,7 @@ export const Format12Hour: Story = {
 export const FullDayNames: Story = {
   args: {
     events: mockEvents,
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
     dayType: EDayType.full,
   },
 };
@@ -116,7 +128,65 @@ export const FullDayNames: Story = {
 export const AutoScrollToCurrentTime: Story = {
   args: {
     events: mockEvents,
-    selectedDate: today.toDate(),
+    selectedDate: today.toJSDate(),
     autoScrollToCurrentTime: true,
+  },
+};
+
+export const WithTimeLimits: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    minHour: 8,
+    maxHour: 18,
+  },
+};
+
+export const CustomWeekStartEnd: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    weekStartsOn: 1, // Monday
+    weekEndsOn: 5, // Friday
+  },
+};
+
+// Test story for AllDayBanner clipped arrow fix
+// Events with < 12h overlap on boundary days should still show arrows
+const boundaryTestDate = DateTime.fromISO("2026-04-21"); // Tuesday
+
+export const MultiDayArrowTest: Story = {
+  args: {
+    events: [
+      {
+        id: "1",
+        title: "Right arrow test: ends Apr28T00:00 (0h overlap)",
+        startDate: "2026-04-21T11:00:00",
+        endDate: "2026-04-28T00:00:00",
+        style: { backgroundColor: "#EF4444" },
+      },
+      {
+        id: "2",
+        title: "Right arrow test: ends Apr28T05:00 (5h overlap)",
+        startDate: "2026-04-21T11:00:00",
+        endDate: "2026-04-28T05:00:00",
+        style: { backgroundColor: "#F97316" },
+      },
+      {
+        id: "3",
+        title: "Left arrow test: starts Apr20T23:45 (barely touches)",
+        startDate: "2026-04-20T23:45:00",
+        endDate: "2026-04-24T10:00:00",
+        style: { backgroundColor: "#3B82F6" },
+      },
+      {
+        id: "4",
+        title: "Left arrow test: starts Apr20T13:00 (11h overlap)",
+        startDate: "2026-04-20T13:00:00",
+        endDate: "2026-04-24T14:00:00",
+        style: { backgroundColor: "#06B6D4" },
+      },
+    ],
+    selectedDate: boundaryTestDate.toJSDate(),
   },
 };

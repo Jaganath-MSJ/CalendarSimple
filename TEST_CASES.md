@@ -13,8 +13,10 @@ These test cases verify that the specific props and configurations passed to the
 - **Month View (`ECalendarViewType.month`)**: Verify grid structures, trailing/leading month dates, and `+X more` truncation for dense days.
 - **Week View (`ECalendarViewType.week`)**: Verify 7-day columns align correctly with the Y-axis time grid.
 - **Day View (`ECalendarViewType.day`)**: Verify single-day column expands to full width and aligns with the Y-axis time grid.
+- **Custom Days View (`ECalendarViewType.customDays`)**: Verify the specified `customDays` number of columns renders sequentially, starting from the current date.
 - **Schedule View (`ECalendarViewType.schedule`)**: Verify a chronological list of events groups successfully by Date headers.
 - **View Switching Callback**: Set up an external UI switcher, trigger `onViewChange`, and verify the calendar safely transitions.
+  - **Reset Date**: Verify `resetDateOnViewChange={true}` correctly resets the calendar to the current real-world date upon view change.
 
 ### 1.2 Time Display Formatting
 
@@ -45,6 +47,7 @@ These test cases verify that the specific props and configurations passed to the
 
 ### 1.6 All-Day Banner Thresholds & Interactions
 
+- **Toggle Row Visibility (`showAllDayRow={false}`)**: Verify the all-day banner unmounts entirely and all-day events are shifted down as 24-hour blocks within the time grid.
 - **Custom Max Events (`maxEvents={N}`)**: Provide exactly `N+2` overlapping all-day events. Verify exactly `N` renders fully, and a `+2 more` pill appears left-aligned (matching Google Calendar styling). Ensure no visual overflow occurs.
 - **Event Tooltips**: Hover over truncated or fully rendered events inside the All-Day Banner. Verify the custom formatted tooltip text correctly displays the event details to the user.
 - **Clipped Edges**: Ensure events that span beyond the currently visible week or day have appropriate styling indicating they are clipped/continue off-screen.
@@ -56,13 +59,24 @@ These test cases verify that the specific props and configurations passed to the
 
 ### 1.8 Layout Limits
 
+- **Adjacent Months (`showAdjacentMonths={true|false}`)**: Verify visibility toggle of dates from previous and following months filling out the start and end rows of the Month view grid.
+- **Work Week Boundaries (`weekStartsOn`, `weekEndsOn`)**: Verify providing numeric ranges (e.g., 1-5 for Mon-Fri) strictly filters out rendering of weekend columns.
+- **Visible Time Range (`minHour`, `maxHour`)**: Filter bounds to (e.g., 8 to 18). Verify the time grid correctly truncates the top and bottom hours while preserving correct proportional sizing of event positions.
 - **Day Type (`dayType="full" | "half"`)**: Verify day columns render accordingly based on strict boundaries if this feature is activated on custom views.
 - **Responsive Sizing (`width`, `height`)**: Test explicitly passing fixed pixel values (e.g., `width={800}`) vs relying on the `useResizeObserver` for `100%` container stretching.
 
-### 1.9 Theming & Styling
+### 1.9 Theming & Customization
 
 - **Custom CSS Classes (`classNames`)**: Inject custom classes into `root`, `header`, `event`, and `timeSlot`. Inspect DOM to ensure class string concatenation is successful without overwriting defaults.
 - **Theme Colors (`theme`)**: Pass specific hex codes into `theme={{ default: { bgColor: "black", color: "white" } }}` and verify styling.
+- **Custom Render Props (`renderEvent`, `renderHeader`, `renderHourCell`, `renderDateCell`, `renderScheduleSeparator`)**: Replace default rendering (events, header, hour grid, date cells, schedule division lines) with custom React components and verify interaction callbacks/scaling integrity are preserved.
+
+### 1.10 Performance Options
+
+- **Enriched Events (`enableEnrichedEvents`, `enrichedEventsByDate`)**: Pass a pre-mapped dictionary of events directly to dates. Verify the layout renders the same UI via O(1) logic bypassing raw iteration.
+- **Pre-Sorted Events (`eventsAreSorted`)**: Pass a pre-sorted array of events and true marker. Verify that the time-slot assignments match logic without executing intensive background mapping validations.
+- **Unordered Placement Bypass (`isEventOrderingEnabled={false}`)**: Render thousands of heavy-payload events. Verify bypass disables Tetris and logic overlap, clamping DOM stack-ordering (z-index) properly without overflowing into sticky headers.
+- **Sorted Month Logic (`sortedMonthView`)**: Pass a customized sort-function priority and assert Tetris grid stacks visually prioritize matching the custom logical rule.
 
 ---
 
@@ -91,11 +105,12 @@ These scenarios ensure that the calendar's internal math, layout engine, and dat
 ### 2.4 Overlap & Layout Concurrency Constraints
 
 - **Absolute Overlap**: 2 events exactly share 1:00 PM - 2:00 PM. Verify they share 50% width horizontally.
+- **Layered Event Styling (`eventOverlapOffset={N}`)**: Verify overlapping events stagger horizontally to create a layered aesthetic rather than strictly splitting column width.
 - **Partial Overlap**: Event A (2:30P - 3:30P) and Event B (3:00P - 4:00P). Verify grid adjusts widths cleanly for overlapping segments and restores full width for non-overlapping segments (if supported).
 - **Nested Overlap**: Outer Event is 2 hours. Inner Event fully encompassed inside that 2 hours. Verify stacking contexts visually indicate grouping.
 - **Stress Concurrency**: 5 events starting simultaneously. Verify column horizontal math divides width by 5, avoiding container overflow.
 
 ### 2.5 Data Integrity (Missing Fields)
 
-- **Missing Title/ID**: Event objects without `id`, or `color`. Ensure auto-generated IDs and default labels ("No Title") are provided natively to prevent crash.
+- **Missing Title/ID**: Event objects without `id`, or `style`. Ensure auto-generated IDs and default labels ("No Title") are provided natively to prevent crash.
 - **Invalid Dates**: Non-standard string like `"fake-date"` passed. Ensure parsing functions exit cleanly and do not crash the component tree.

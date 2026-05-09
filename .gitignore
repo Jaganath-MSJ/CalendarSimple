@@ -27,3 +27,6 @@ yarn-error.log*
 docs
 
 storybook-static
+
+# Claude Code
+.claude/settings.local.json

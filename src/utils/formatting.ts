@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file formatting.ts
  * @description Utilities to format data for user interface presentation.
  *
@@ -6,8 +6,14 @@
  * such as tooltip strings and dynamic GMT offsets.
  */
 
-import { DATE_FORMATS } from "../constants";
-import { CalendarEvent, ECalendarViewType } from "../types";
+import { Info } from "luxon";
+import { DATE_FORMATS, TIME_CONSTANTS } from "../constants";
+import {
+  CalendarEvent,
+  ECalendarViewType,
+  EDayType,
+  MonthListType,
+} from "../types";
 import { formatDate, dateFn } from "./date";
 import { isAllDayEvent } from "./common";
 
@@ -25,13 +31,15 @@ export function generateTooltipText(
   event: CalendarEvent,
   viewType: ECalendarViewType,
   is12Hour?: boolean,
+  locale?: string,
 ): string {
   const timeFormat = is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME;
   const isMulti =
-    event.endDate && !dateFn(event.startDate).isSame(event.endDate, "day");
+    event.endDate &&
+    !dateFn(event.startDate).hasSame(dateFn(event.endDate), "day");
   const isAllDay = isAllDayEvent(event);
 
-  let formatStr = timeFormat;
+  let formatStr: string = timeFormat;
 
   if (viewType === ECalendarViewType.month || isAllDay) {
     formatStr = DATE_FORMATS.DATE;
@@ -40,9 +48,9 @@ export function generateTooltipText(
     formatStr = `${DATE_FORMATS.DATE} ${timeFormat}`;
   }
 
-  let tooltipText = `${event.title} (${formatDate(event.startDate, formatStr)}`;
+  let tooltipText = `${event.title} (${formatDate(event.startDate, formatStr, locale)}`;
   if (event.endDate) {
-    tooltipText += ` - ${formatDate(event.endDate, formatStr)}`;
+    tooltipText += ` - ${formatDate(event.endDate, formatStr, locale)}`;
   }
   tooltipText += `)`;
 
@@ -59,11 +67,25 @@ export function getGmtOffset() {
   const offset = new Date().getTimezoneOffset();
   const sign = offset > 0 ? "-" : "+"; // timeZoneOffset returns negative if ahead of UTC
   const absOffset = Math.abs(offset);
-  const hours = Math.floor(absOffset / 60);
-  const minutes = absOffset % 60;
+  const hours = Math.floor(absOffset / TIME_CONSTANTS.MINUTES_IN_HOUR);
+  const minutes = absOffset % TIME_CONSTANTS.MINUTES_IN_HOUR;
 
   if (minutes === 0) {
     return `GMT${sign}${hours.toString().padStart(2, "0")}`;
   }
   return `GMT${sign}${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+}
+
+export function getDayListNames(dayType: EDayType, locale?: string): string[] {
+  const format = dayType === EDayType.full ? "long" : "short";
+  const days = Info.weekdays(format, { locale: locale || "en" });
+  // Luxon returns Mon-Sun. We need Sun-Sat to match expected 0-6 index.
+  return [days[6], ...days.slice(0, 6)];
+}
+
+export function getMonthList(locale?: string): MonthListType[] {
+  return Info.months("long", { locale: locale || "en" }).map((label, i) => ({
+    label,
+    value: i,
+  }));
 }

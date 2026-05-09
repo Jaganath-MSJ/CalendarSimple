@@ -1,5 +1,7 @@
+/// <reference types="vitest" />
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
+import { visualizer } from "rollup-plugin-visualizer";
 import { resolve } from "path";
 
 export default defineConfig({
@@ -32,6 +34,11 @@ export default defineConfig({
     minify: "esbuild", // or 'terser'
     chunkSizeWarningLimit: 2000,
   },
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: "./src/setupTests.ts",
+  },
   plugins: [
     // Generates .d.ts files (equivalent to tsup's dts: true)
     process.env.npm_lifecycle_event !== "build-storybook" &&
@@ -39,7 +46,13 @@ export default defineConfig({
       dts({
         include: ["src"],
         exclude: ["node_modules", "dist"],
-        rollupTypes: true,
+        rollupTypes: false,
       }),
+    visualizer({
+      filename: "dist/stats.html",
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+    }),
   ],
 });
