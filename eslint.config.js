@@ -6,9 +6,9 @@ import tseslint from 'typescript-eslint'
 import eslintConfigPrettier from 'eslint-config-prettier'
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'playground', 'storybook-static', 'src/stories'] },
+  { ignores: ['dist', 'node_modules', 'playground', 'storybook-static', 'src/stories', 'eslint.config.js', 'vite.config.ts'] },
   js.configs.recommended,
-  ...tseslint.configs.recommended,
+  ...tseslint.configs.recommendedTypeChecked,
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     plugins: {
@@ -26,6 +26,10 @@ export default tseslint.config(
         ...globals.browser,
         ...globals.node,
       },
+      parserOptions: {
+        project: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
     rules: {
       ...reactPlugin.configs.recommended.rules,
@@ -37,6 +41,12 @@ export default tseslint.config(
       '@typescript-eslint/no-empty-object-type': 'off',
       'react-hooks/set-state-in-effect': 'off',
       'react-hooks/refs': 'warn',
+    },
+  },
+  {
+    files: ['**/*.test.ts', '**/*.test.tsx'],
+    rules: {
+      '@typescript-eslint/unbound-method': 'off',
     },
   },
   eslintConfigPrettier,

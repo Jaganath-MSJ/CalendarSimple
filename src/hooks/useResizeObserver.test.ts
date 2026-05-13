@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import useResizeObserver from "./useResizeObserver";
 import { RefObject } from "react";
@@ -51,19 +51,16 @@ describe("useResizeObserver Hook", () => {
 
     expect(observeSpy).toHaveBeenCalledWith(element);
 
-    // Simulate resize event
-    import("@testing-library/react").then(({ act }) => {
-      act(() => {
-        if (callbackRef) {
-          const entries = [
-            {
-              contentRect: { width: 500, height: 300 },
-            },
-          ] as never;
-          callbackRef(entries, {} as never);
-        }
-      });
-      expect(result.current).toEqual({ width: 500, height: 300 });
+    act(() => {
+      if (callbackRef) {
+        const entries = [
+          {
+            contentRect: { width: 500, height: 300 },
+          },
+        ] as never;
+        callbackRef(entries, {} as never);
+      }
     });
+    expect(result.current).toEqual({ width: 500, height: 300 });
   });
 });

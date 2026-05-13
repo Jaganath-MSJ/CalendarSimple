@@ -166,9 +166,7 @@ export function CalendarProvider({
       state,
       dispatch,
       testId,
-      config:
-        config ||
-        ({} as Omit<CalendarProps, "children" | "selectedDate" | "view">),
+      config: config || {},
       colorScheme: resolvedScheme,
     }),
     [state, testId, config, resolvedScheme],
