@@ -132,6 +132,7 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
     allProps.events || [],
     allProps.eventsAreSorted,
     allProps.enableEnrichedEvents,
+    allProps.enrichedEventsByDate,
   );
 
   const dir = resolveDirection(allProps.direction, allProps.locale);
