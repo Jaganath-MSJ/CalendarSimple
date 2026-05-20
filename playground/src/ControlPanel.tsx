@@ -5,6 +5,7 @@ import type {
   CalendarProps,
   ColorScheme,
   CalendarTheme,
+  CalendarClassNames,
 } from "calendar-simple";
 import { fixtureList } from "./TestFixtures";
 import styles from "./ControlPanel.module.css";
@@ -69,6 +70,26 @@ interface PanelState {
   width: string;
   height: string;
   testId: string;
+  cnRoot: string;
+  cnHeader: string;
+  cnTable: string;
+  cnTableHeader: string;
+  cnTableDate: string;
+  cnWeekNumber: string;
+  cnEvent: string;
+  cnSelected: string;
+  cnToday: string;
+  cnDayHeader: string;
+  cnDayName: string;
+  cnDayNumber: string;
+  cnTimeColumn: string;
+  cnTimeSlot: string;
+  cnDayColumn: string;
+  cnScheduleDateGroup: string;
+  cnScheduleDateNumber: string;
+  cnScheduleDateSubInfo: string;
+  cnScheduleTime: string;
+  cnScheduleTitle: string;
 }
 
 const DEFAULTS: PanelState = {
@@ -122,6 +143,26 @@ const DEFAULTS: PanelState = {
   width: "",
   height: "",
   testId: "playground-calendar",
+  cnRoot: "",
+  cnHeader: "",
+  cnTable: "",
+  cnTableHeader: "",
+  cnTableDate: "",
+  cnWeekNumber: "",
+  cnEvent: "",
+  cnSelected: "",
+  cnToday: "",
+  cnDayHeader: "",
+  cnDayName: "",
+  cnDayNumber: "",
+  cnTimeColumn: "",
+  cnTimeSlot: "",
+  cnDayColumn: "",
+  cnScheduleDateGroup: "",
+  cnScheduleDateNumber: "",
+  cnScheduleDateSubInfo: "",
+  cnScheduleTime: "",
+  cnScheduleTitle: "",
 };
 
 // ── State → CalendarProps conversion ─────────────────────────────────────────
@@ -152,6 +193,31 @@ function toCalendarProps(s: PanelState): Partial<CalendarProps> {
   if (s.msgSchedule) localeMessages.schedule = s.msgSchedule;
   if (s.msgDays) localeMessages.days = s.msgDays;
 
+  const classNames: CalendarClassNames = {};
+  if (s.cnRoot) classNames.root = s.cnRoot;
+  if (s.cnHeader) classNames.header = s.cnHeader;
+  if (s.cnTable) classNames.table = s.cnTable;
+  if (s.cnTableHeader) classNames.tableHeader = s.cnTableHeader;
+  if (s.cnTableDate) classNames.tableDate = s.cnTableDate;
+  if (s.cnWeekNumber) classNames.weekNumber = s.cnWeekNumber;
+  if (s.cnEvent) classNames.event = s.cnEvent;
+  if (s.cnSelected) classNames.selected = s.cnSelected;
+  if (s.cnToday) classNames.today = s.cnToday;
+  if (s.cnDayHeader) classNames.dayHeader = s.cnDayHeader;
+  if (s.cnDayName) classNames.dayName = s.cnDayName;
+  if (s.cnDayNumber) classNames.dayNumber = s.cnDayNumber;
+  if (s.cnTimeColumn) classNames.timeColumn = s.cnTimeColumn;
+  if (s.cnTimeSlot) classNames.timeSlot = s.cnTimeSlot;
+  if (s.cnDayColumn) classNames.dayColumn = s.cnDayColumn;
+  if (s.cnScheduleDateGroup)
+    classNames.scheduleDateGroup = s.cnScheduleDateGroup;
+  if (s.cnScheduleDateNumber)
+    classNames.scheduleDateNumber = s.cnScheduleDateNumber;
+  if (s.cnScheduleDateSubInfo)
+    classNames.scheduleDateSubInfo = s.cnScheduleDateSubInfo;
+  if (s.cnScheduleTime) classNames.scheduleTime = s.cnScheduleTime;
+  if (s.cnScheduleTitle) classNames.scheduleTitle = s.cnScheduleTitle;
+
   return {
     view: s.view,
     selectedDate: new Date(s.selectedDate),
@@ -176,6 +242,7 @@ function toCalendarProps(s: PanelState): Partial<CalendarProps> {
     maxEvents: s.maxEvents,
     colorScheme: s.colorScheme,
     theme: Object.keys(theme).length > 0 ? theme : undefined,
+    classNames: Object.keys(classNames).length > 0 ? classNames : undefined,
     locale: s.locale,
     direction: s.direction === "auto" ? undefined : s.direction,
     localeMessages:
@@ -270,6 +337,7 @@ type SectionId =
   | "yearPicker"
   | "interaction"
   | "appearance"
+  | "classNames"
   | "localization"
   | "loading"
   | "renderers"
@@ -308,6 +376,28 @@ const SECTION_KEYS: Record<SectionId, (keyof PanelState)[]> = {
     "themeSelectedBg",
     "themeTodayColor",
     "themeTodayBg",
+  ],
+  classNames: [
+    "cnRoot",
+    "cnHeader",
+    "cnTable",
+    "cnTableHeader",
+    "cnTableDate",
+    "cnWeekNumber",
+    "cnEvent",
+    "cnSelected",
+    "cnToday",
+    "cnDayHeader",
+    "cnDayName",
+    "cnDayNumber",
+    "cnTimeColumn",
+    "cnTimeSlot",
+    "cnDayColumn",
+    "cnScheduleDateGroup",
+    "cnScheduleDateNumber",
+    "cnScheduleDateSubInfo",
+    "cnScheduleTime",
+    "cnScheduleTitle",
   ],
   localization: [
     "locale",
@@ -807,6 +897,179 @@ export function ControlPanel({
             <ColorControl
               value={s.themeTodayBg}
               onChange={(v) => patch("themeTodayBg", v)}
+            />
+          </Row>
+        </Section>
+
+        {/* ── Class Names ── */}
+        <Section {...sectionProps("classNames", "Class Names")}>
+          {/* Global */}
+          <Row label="root" sub>
+            <input
+              type="text"
+              value={s.cnRoot}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnRoot", e.target.value)}
+            />
+          </Row>
+          <Row label="header" sub>
+            <input
+              type="text"
+              value={s.cnHeader}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnHeader", e.target.value)}
+            />
+          </Row>
+          <div className={styles.divider} />
+          {/* Month view */}
+          <Row label="table" sub>
+            <input
+              type="text"
+              value={s.cnTable}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnTable", e.target.value)}
+            />
+          </Row>
+          <Row label="tableHeader" sub>
+            <input
+              type="text"
+              value={s.cnTableHeader}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnTableHeader", e.target.value)}
+            />
+          </Row>
+          <Row label="tableDate" sub>
+            <input
+              type="text"
+              value={s.cnTableDate}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnTableDate", e.target.value)}
+            />
+          </Row>
+          <Row label="weekNumber" sub>
+            <input
+              type="text"
+              value={s.cnWeekNumber}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnWeekNumber", e.target.value)}
+            />
+          </Row>
+          <div className={styles.divider} />
+          {/* Shared events */}
+          <Row label="event" sub>
+            <input
+              type="text"
+              value={s.cnEvent}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnEvent", e.target.value)}
+            />
+          </Row>
+          <Row label="selected" sub>
+            <input
+              type="text"
+              value={s.cnSelected}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnSelected", e.target.value)}
+            />
+          </Row>
+          <Row label="today" sub>
+            <input
+              type="text"
+              value={s.cnToday}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnToday", e.target.value)}
+            />
+          </Row>
+          <div className={styles.divider} />
+          {/* Week & Day view */}
+          <Row label="dayHeader" sub>
+            <input
+              type="text"
+              value={s.cnDayHeader}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnDayHeader", e.target.value)}
+            />
+          </Row>
+          <Row label="dayName" sub>
+            <input
+              type="text"
+              value={s.cnDayName}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnDayName", e.target.value)}
+            />
+          </Row>
+          <Row label="dayNumber" sub>
+            <input
+              type="text"
+              value={s.cnDayNumber}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnDayNumber", e.target.value)}
+            />
+          </Row>
+          <Row label="timeColumn" sub>
+            <input
+              type="text"
+              value={s.cnTimeColumn}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnTimeColumn", e.target.value)}
+            />
+          </Row>
+          <Row label="timeSlot" sub>
+            <input
+              type="text"
+              value={s.cnTimeSlot}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnTimeSlot", e.target.value)}
+            />
+          </Row>
+          <Row label="dayColumn" sub>
+            <input
+              type="text"
+              value={s.cnDayColumn}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnDayColumn", e.target.value)}
+            />
+          </Row>
+          <div className={styles.divider} />
+          {/* Schedule view */}
+          <Row label="scheduleDateGroup" sub>
+            <input
+              type="text"
+              value={s.cnScheduleDateGroup}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnScheduleDateGroup", e.target.value)}
+            />
+          </Row>
+          <Row label="scheduleDateNumber" sub>
+            <input
+              type="text"
+              value={s.cnScheduleDateNumber}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnScheduleDateNumber", e.target.value)}
+            />
+          </Row>
+          <Row label="scheduleDateSubInfo" sub>
+            <input
+              type="text"
+              value={s.cnScheduleDateSubInfo}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnScheduleDateSubInfo", e.target.value)}
+            />
+          </Row>
+          <Row label="scheduleTime" sub>
+            <input
+              type="text"
+              value={s.cnScheduleTime}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnScheduleTime", e.target.value)}
+            />
+          </Row>
+          <Row label="scheduleTitle" sub>
+            <input
+              type="text"
+              value={s.cnScheduleTitle}
+              placeholder="CSS class name"
+              onChange={(e) => patch("cnScheduleTitle", e.target.value)}
             />
           </Row>
         </Section>
