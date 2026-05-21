@@ -555,7 +555,22 @@ function Section({
 }) {
   return (
     <div className={styles.section}>
-      <button className={styles.sectionHeader} onClick={onToggle} type="button">
+      {/* Header is a div (not a button) so the reset control can be a real
+          nested button without producing invalid <button> in <button> markup.
+          role/tabIndex/onKeyDown keep it keyboard-operable. */}
+      <div
+        className={styles.sectionHeader}
+        onClick={onToggle}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onToggle();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-expanded={open}
+      >
         <span className={styles.sectionLabel}>{title}</span>
         {badge > 0 && <span className={styles.badge}>{badge}</span>}
         {badge > 0 && (
@@ -574,7 +589,7 @@ function Section({
         <span className={`${styles.chevron} ${open ? styles.chevronOpen : ""}`}>
           ▼
         </span>
-      </button>
+      </div>
       {open && <div className={styles.sectionBody}>{children}</div>}
     </div>
   );
@@ -592,23 +607,24 @@ export function ControlPanel({
     new Set(Object.keys(SECTION_KEYS) as SectionId[]),
   );
 
+  // Notify the parent outside the setState updater. Updater functions run
+  // during React's render phase, so calling onChange (the parent's setState)
+  // inside one triggers "Cannot update a component while rendering a different
+  // component". These handlers run from DOM events, so reading the current
+  // `state` from the closure is safe — each event gets a fresh render/closure.
   const patch = <K extends keyof PanelState>(key: K, val: PanelState[K]) => {
-    setState((prev) => {
-      const next = { ...prev, [key]: val };
-      onChange(toCalendarProps(next));
-      return next;
-    });
+    const next = { ...state, [key]: val };
+    setState(next);
+    onChange(toCalendarProps(next));
   };
 
   const resetSection = (id: SectionId) => {
-    setState((prev) => {
-      const next = { ...prev };
-      for (const k of SECTION_KEYS[id]) {
-        (next as Record<string, unknown>)[k] = DEFAULTS[k];
-      }
-      onChange(toCalendarProps(next));
-      return next;
-    });
+    const next = { ...state };
+    for (const k of SECTION_KEYS[id]) {
+      (next as Record<string, unknown>)[k] = DEFAULTS[k];
+    }
+    setState(next);
+    onChange(toCalendarProps(next));
   };
 
   const resetAll = () => {
