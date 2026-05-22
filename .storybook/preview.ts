@@ -1,6 +1,9 @@
 import type { Preview } from "@storybook/react-vite";
 
 const preview: Preview = {
+  args: {
+    colorScheme: "light",
+  },
   parameters: {
     controls: {
       matchers: {
