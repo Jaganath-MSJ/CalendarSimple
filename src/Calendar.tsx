@@ -10,7 +10,7 @@ import {
   LAYOUT_CONSTANTS,
   CALENDAR_ACTIONS,
 } from "./constants";
-import { dateFn, resolveDirection } from "./utils";
+import { dateFn, resolveDirection, toCssLength } from "./utils";
 import useResizeObserver from "./hooks/useResizeObserver";
 import useEvents from "./hooks/useEvents";
 import useColorScheme from "./hooks/useColorScheme";
@@ -76,8 +76,8 @@ function CalendarContent(props: CalendarContentProps) {
       data-color-scheme={resolvedScheme}
       style={
         {
-          "--calendar-width": `${width}px`,
-          "--calendar-height": `${height}px`,
+          "--calendar-width": toCssLength(width),
+          "--calendar-height": toCssLength(height),
         } as CSSProperties
       }
       className={cx(styles.calendar, classNames?.root)}
@@ -115,12 +115,15 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
     !!allProps.width && !!allProps.height,
   );
 
-  // Use props if provided, otherwise use observed size
+  // Use props if provided, otherwise use observed size. Either may be a number
+  // (px) or any CSS string per the documented contract; string heights subtract
+  // the header via calc() so the content area stays a valid CSS length.
   const width = allProps.width ?? observedWidth ?? 0;
-  const mainHeight = allProps.height ?? observedHeight ?? 0;
+  const rawHeight = allProps.height ?? observedHeight ?? 0;
   const height =
-    (typeof mainHeight === "number" ? mainHeight : 0) -
-    LAYOUT_CONSTANTS.HEADER_HEIGHT;
+    typeof rawHeight === "number"
+      ? rawHeight - LAYOUT_CONSTANTS.HEADER_HEIGHT
+      : `calc(${rawHeight} - ${LAYOUT_CONSTANTS.HEADER_HEIGHT}px)`;
 
   const initialDate = useMemo(
     () => dateFn(props.selectedDate),
@@ -161,8 +164,8 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
           overflow: "hidden",
           ...(allProps.children
             ? ({
-                "--calendar-width": `${width}px`,
-                "--calendar-height": `${height}px`,
+                "--calendar-width": toCssLength(width),
+                "--calendar-height": toCssLength(height),
               } as CSSProperties)
             : undefined),
         }}

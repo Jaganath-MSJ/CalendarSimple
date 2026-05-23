@@ -5,6 +5,7 @@ import {
   isMultiDay,
   handleKeyboardActivation,
   resolveDirection,
+  toCssLength,
 } from "./common";
 import { LAYOUT_CONSTANTS } from "../constants";
 import { KeyboardEvent } from "react";
@@ -31,6 +32,19 @@ describe("common utils", () => {
 
     it("should not return a negative number for small heights", () => {
       expect(calculateMaxEvents(10, 6)).toBe(0);
+    });
+  });
+
+  describe("toCssLength", () => {
+    it("appends px to a numeric value", () => {
+      expect(toCssLength(800)).toBe("800px");
+      expect(toCssLength(0)).toBe("0px");
+    });
+
+    it("returns a string value verbatim without appending a unit", () => {
+      expect(toCssLength("1280px")).toBe("1280px");
+      expect(toCssLength("100%")).toBe("100%");
+      expect(toCssLength("calc(600px - 122px)")).toBe("calc(600px - 122px)");
     });
   });
 
