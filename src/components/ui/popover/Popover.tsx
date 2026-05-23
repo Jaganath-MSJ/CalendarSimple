@@ -59,7 +59,7 @@ function Popover({
   const handleClose = useCallback(() => {
     onClose();
     requestAnimationFrame(() => {
-      (anchorEl as HTMLElement | null)?.focus();
+      anchorEl?.focus();
     });
   }, [onClose, anchorEl]);
 

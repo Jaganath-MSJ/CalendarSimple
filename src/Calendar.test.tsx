@@ -168,6 +168,26 @@ describe("Calendar Component Integration", () => {
     expect(screen.getByTestId("cal-container")).toBeInTheDocument();
   });
 
+  it("does not render negative-duration events in any view (TC3 regression)", () => {
+    const today = new Date().toISOString().split("T")[0];
+    render(
+      <Calendar
+        view={ECalendarViewType.week}
+        events={[
+          {
+            id: "tc3",
+            title: "Negative Duration Event",
+            startDate: `${today}T12:00:00`,
+            endDate: `${today}T11:00:00`,
+          },
+        ]}
+      />,
+    );
+    expect(
+      screen.queryByText("Negative Duration Event"),
+    ).not.toBeInTheDocument();
+  });
+
   it("catches renderer exceptions and shows fallback instead of crashing (DI-4)", () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     render(

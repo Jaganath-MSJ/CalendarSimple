@@ -132,6 +132,7 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
     allProps.events || [],
     allProps.eventsAreSorted,
     allProps.enableEnrichedEvents,
+    allProps.enrichedEventsByDate,
   );
 
   const dir = resolveDirection(allProps.direction, allProps.locale);
@@ -143,7 +144,7 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
       initialView={allProps.view || ECalendarViewType.month}
       initialCustomDays={allProps.customDays}
       testId={allProps.testId}
-      config={{ ...allProps, width, height }}
+      config={{ ...allProps, width, height, events: validEvents }}
     >
       <div
         ref={containerRef}
