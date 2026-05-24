@@ -33,6 +33,17 @@ export function calculateMaxEvents(height: number, rowsInView: number): number {
 }
 
 /**
+ * Normalizes a calendar dimension into a valid CSS length.
+ * Numbers are treated as pixels; strings are any CSS value, used verbatim.
+ *
+ * @param value - A pixel count (number) or any CSS length string (e.g. "100%", "60vh").
+ * @returns A CSS length string safe to assign to a custom property.
+ */
+export function toCssLength(value: number | string): string {
+  return typeof value === "number" ? `${value}px` : value;
+}
+
+/**
  * Helper to determine if an event is an all-day event.
  * An event is considered "all-day" if its start and end date strings
  * contain only a date (e.g. yyyy-MM-dd) and no time component (no 'T' or space).

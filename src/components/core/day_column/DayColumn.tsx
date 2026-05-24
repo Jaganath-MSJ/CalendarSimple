@@ -61,7 +61,7 @@ function DayColumn({
         )}`;
         const handleClick = isInteractive
           ? () =>
-              onSlotClick!(
+              onSlotClick?.(
                 slotStart.toJSDate(),
                 slotStart.plus({ hours: 1 }).toJSDate(),
               )

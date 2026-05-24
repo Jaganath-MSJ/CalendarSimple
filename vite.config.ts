@@ -48,11 +48,12 @@ export default defineConfig({
         exclude: ["node_modules", "dist"],
         rollupTypes: false,
       }),
-    visualizer({
-      filename: "dist/stats.html",
-      open: true,
-      gzipSize: true,
-      brotliSize: true,
-    }),
+    process.env.ANALYZE &&
+      visualizer({
+        filename: "dist/stats.html",
+        open: true,
+        gzipSize: true,
+        brotliSize: true,
+      }),
   ],
 });

@@ -168,6 +168,26 @@ describe("Calendar Component Integration", () => {
     expect(screen.getByTestId("cal-container")).toBeInTheDocument();
   });
 
+  it("does not render negative-duration events in any view (TC3 regression)", () => {
+    const today = new Date().toISOString().split("T")[0];
+    render(
+      <Calendar
+        view={ECalendarViewType.week}
+        events={[
+          {
+            id: "tc3",
+            title: "Negative Duration Event",
+            startDate: `${today}T12:00:00`,
+            endDate: `${today}T11:00:00`,
+          },
+        ]}
+      />,
+    );
+    expect(
+      screen.queryByText("Negative Duration Event"),
+    ).not.toBeInTheDocument();
+  });
+
   it("catches renderer exceptions and shows fallback instead of crashing (DI-4)", () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     render(
@@ -179,6 +199,47 @@ describe("Calendar Component Integration", () => {
     );
     expect(screen.getByTestId("calendar-error-boundary")).toBeInTheDocument();
     errSpy.mockRestore();
+  });
+
+  describe("Layout dimensions (CSS custom properties)", () => {
+    // The inner <section> carries the --calendar-* vars (default testId "calendar").
+    const getSection = (container: HTMLElement) =>
+      container.querySelector(
+        "section[data-testid='calendar-container']",
+      ) as HTMLElement;
+
+    it("uses a string width verbatim without doubling the unit (A-11/J-12 regression)", () => {
+      const { container } = render(<Calendar width="1280px" height="600px" />);
+      const section = getSection(container);
+      expect(section.style.getPropertyValue("--calendar-width")).toBe("1280px");
+    });
+
+    it("uses a percentage width verbatim", () => {
+      const { container } = render(<Calendar width="100%" height="600px" />);
+      const section = getSection(container);
+      expect(section.style.getPropertyValue("--calendar-width")).toBe("100%");
+    });
+
+    it("appends px to a numeric width", () => {
+      const { container } = render(<Calendar width={800} height={600} />);
+      const section = getSection(container);
+      expect(section.style.getPropertyValue("--calendar-width")).toBe("800px");
+    });
+
+    it("wraps a string height in calc() that subtracts the header", () => {
+      const { container } = render(<Calendar width="1280px" height="600px" />);
+      const section = getSection(container);
+      expect(section.style.getPropertyValue("--calendar-height")).toBe(
+        "calc(600px - 122px)",
+      );
+    });
+
+    it("subtracts the header from a numeric height and appends px", () => {
+      const { container } = render(<Calendar width={800} height={600} />);
+      const section = getSection(container);
+      // 600 - HEADER_HEIGHT (122) = 478
+      expect(section.style.getPropertyValue("--calendar-height")).toBe("478px");
+    });
   });
 
   describe("RTL Direction Support", () => {
