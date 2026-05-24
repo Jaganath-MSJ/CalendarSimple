@@ -19,15 +19,13 @@ Parse the arguments above:
 4. **Execute each requested sweep** — for every sweep letter (or all A–L if no argument, or the CB subset if `--browser` was specified with no letters):
    a. Print `## Sweep <Letter>: <Name> (<N> cases) [Browser]`
    b. Run the Sweep Setup block for that sweep
-   c. For each test row: perform the steps, compare actual vs Expected, record PASS / FAIL / SKIP with a one-line note. If the ID is in the Known Issues table, prepend `[KNOWN BUG]` — a FAIL is expected.
+   c. For each test row: perform the steps, compare actual vs Expected, record PASS / FAIL / SKIP with a one-line note.
 5. **Update this file** — write results back into the Result column for every executed row. Append a new row to the Test Run Log (include Browser column). Never overwrite past log entries.
 6. **Print summary table** — PASS / FAIL / SKIP per sweep plus totals. Flag non-known FAILs as regressions.
 7. **Create/update `TEST_REPORT.md`** — write (or overwrite) `TEST_REPORT.md` in the project root with the following sections:
    - **Run metadata**: date, branch, browser, total PASS / FAIL / SKIP counts
    - **Per-sweep summary table**: sweep letter, name, pass, fail, skip
    - **Failures**: one row per FAIL with ID, sweep, description, and observed vs expected
-   - **Known Issues**: copy the current Known Issues table (OPEN rows only)
-   - **Open Follow-up Items**: copy the current Open Follow-up Items table
    - **Regressions**: list any non-known FAILs explicitly as regressions
      Use the same data written to the Test Run Log — no re-running tests.
 
@@ -47,20 +45,6 @@ This is the **canonical execution file** for every Playwright MCP test run again
 - **Total cases**: 310 (A:18 + B:14 + C:128 + D:26 + E:18 + F:18 + G:24 + H:13 + I:14 + J:14 + K:15 + L:8)
 - **Library version**: `calendar-simple` v1.2.0 — branch `version_2`
 - **Cross-browser**: Firefox + WebKit MCP servers in `.mcp.json`; run `/playwright --browser=firefox` or `/playwright --browser=webkit`. One-time setup: `npx playwright install firefox webkit`. The 27-case CB subset covers RTL CSS, matchMedia, ResizeObserver, focus/ARIA, and popover positioning.
-
----
-
-## Known Issues
-
-> Check this list at the start of each run. Rows marked **OPEN** have confirmed bugs — record FAIL in this file; do not skip them.
-
-| Status | ID       | Test                                       | Observed                                                                                                                                                                                                                                                                                                    | Expected                                                                               | Repro                                                                                     |
-| ------ | -------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| CLOSED | G-12     | `onMoreClick(date, hiddenEvents)`          | Fixed in run 2026-05-16 — second arg now correctly an array of hidden CalendarEvent objects (with enrichment fields)                                                                                                                                                                                        | Should receive `CalendarEvent[]` of hidden events                                      | Month view + `maxEvents=2` + "Month Overflow" fixture → click "+10 more" → check console  |
-| CLOSED | K-03     | `eventsAreSorted=true` with unsorted input | Fixed in commits 73d480f + 87eba25 (verified run 2026-05-19) — `useEvents` now emits `console.warn` when an unsorted array is detected; JSDoc on `eventsAreSorted` documents the warn behavior.                                                                                                             | `console.warn` logged in browser console                                               | Edge Cases fixture → toggle `eventsAreSorted=true` → check console                        |
-| CLOSED | K-05     | `enableEnrichedEvents=true` without map    | Fixed in commits 73d480f + 87eba25 (verified run 2026-05-19) — `useEvents` now emits `console.warn` when `enrichedEventsByDate` is absent; JSDoc updated on `enableEnrichedEvents` and `enrichedEventsByDate`.                                                                                              | `console.warn` logged in browser console                                               | ControlPanel → Performance → toggle `enableEnrichedEvents=true`, omit map → check console |
-| CLOSED | TC3      | Negative-duration events                   | Closed by commit 7e5714b (verified in run 2026-05-17 retest). Filter reaches all views via context; Schedule view total = 48 (without TC3); +N more popover does not include TC3. Earlier partial-fix observation was stale HMR state in long-running browser session — fresh navigation confirms full fix. | n/a — closed                                                                           | n/a — closed                                                                              |
-| CLOSED | TC3-ROOT | `useEvents` filter bypassed via context    | Closed by commit 7e5714b — `config={{ ...allProps, events: validEvents }}` correctly threads the filtered array through context for Week/Day/Month main cells.                                                                                                                                              | Schedule view and Month overflow popover still need investigation — see TC3 row above. | n/a — closed                                                                              |
 
 ---
 
@@ -146,15 +130,6 @@ When `/playwright --browser=firefox` or `/playwright --browser=webkit` is run **
 | L     | L-01, L-02, L-04, L-05, L-06, L-08 | Tab order, ARIA, popover keyboard               |
 
 When sweep letters **are** specified (e.g. `/playwright --browser=firefox A B`), run exactly those sweeps in full using the Firefox tool namespace.
-
-### Cross-Browser Known Issues
-
-| Status            | ID        | Browser                     | Test                         | Observed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Expected                           |
-| ----------------- | --------- | --------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| RESOLVED → PASS   | D-17      | Firefox + WebKit            | `autoScrollToCurrentTime`    | Verified 2026-05-21 via a `scrollTo` spy: the effect (`DayView.tsx:103-118`) calls `dayView.scrollTo({top:~970, behavior:"smooth"})` with the correct current-time target on both engines. WebKit observably scrolls (`scrollTop=882`, clamped to max); Firefox's `scrollTop` stays 0 **only because headless Firefox doesn't execute programmatic smooth scrolls** (instant `scrollTo` works). Feature is correct — earlier SKIP was a test-method error (wrong trigger order + wrong element measured). | Region scrolls toward current time |
-| INFO (playground) | A-11/J-12 | Firefox + WebKit + Chromium | Layout "1280px" width preset | `--calendar-width` resolves to invalid `"1280pxpx"` (double unit). The custom-property mechanism itself works identically in all three engines; the doubled unit is a browser-independent playground preset quirk (string width gets `px` appended).                                                                                                                                                                                                                                                      | `--calendar-width: 1280px`         |
-
-> No **browser-specific** defects found. Every CB case that ran produced identical behavior across Firefox, WebKit, and Chromium. The two rows above are a harness limitation and a pre-existing browser-independent playground quirk, respectively.
 
 ---
 
@@ -965,20 +940,3 @@ Append a row after every test session. **Never overwrite past entries.**
 - All 50 documented `CalendarProps` were exercised through the on-page control panel.
 - The compound-component pattern (`<Calendar.Header />` + `<Calendar.View />`) renders correctly but **bypasses** the `${testId}-container` wrapper because the `<section>` is only emitted in the no-children path (`Calendar.tsx:64`). This is by design but worth documenting for test authors.
 - `View.tsx:83` returns `null` for customDays when `state.customDays` is undefined — the reducer's initial state must include `customDays`, otherwise `<Calendar view="customDays">` mounts blank without a customDays prop.
-
-### Open Follow-up Items (updated 2026-05-21)
-
-| #   | Item                                                                                                                                                                                                                                                                     | Priority     | Status     |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------ | ---------- |
-| 1   | ~~Fix G-12: `onMoreClick` second arg always `undefined`~~                                                                                                                                                                                                                | ~~HIGH~~     | **CLOSED** |
-| 2   | ~~Fix TC3 filter bypass for all views (Week / Day / Month / Schedule / popover)~~ — fully closed by commit 7e5714b; verified in 2026-05-17 retest                                                                                                                        | ~~CRITICAL~~ | **CLOSED** |
-| 3   | ~~Add `console.warn` in `useEvents` for negative-duration events (TC3)~~ — TC3 is now filtered with no warning needed (silent filter is correct behavior; documented in JSDoc)                                                                                           | ~~MED~~      | **CLOSED** |
-| 4   | ~~Add `console.warn` when `enableEnrichedEvents=true` but map is missing (K-05)~~ — fixed in commit 73d480f; verified run 2026-05-19                                                                                                                                     | ~~MED~~      | **CLOSED** |
-| 5   | ~~Document `eventsAreSorted` caveat prominently in README/JSDoc (K-03)~~ — JSDoc updated in commit 87eba25; warn added in 73d480f; verified run 2026-05-19                                                                                                               | ~~MED~~      | **CLOSED** |
-| 6   | ~~Expose `classNames` in ControlPanel → re-run E-13–E-18 interactively~~ — done in commit d47c2be; Class Names section added with 20 slots; E-13–E-18 now exercisable via UI                                                                                             | ~~LOW~~      | **CLOSED** |
-| 7   | ~~Run H-13 (DI-3 overlay): events present + `isLoading=true`~~                                                                                                                                                                                                           | ~~MED~~      | **CLOSED** |
-| 8   | ~~Capture remaining ✗ screenshots (VIS-05, 07, 08, 10, 12–14, 17, 18b–18e)~~ — all 12 captured 2026-05-21 to `tests/screenshots/`                                                                                                                                        | ~~LOW~~      | **CLOSED** |
-| 9   | ~~Fix playground ControlPanel React errors: (a) setState-during-render when section badge appears; (b) `<button>` inside `<button>` on section reset~~ — fixed in commit 51e1f4c; verified 2026-05-21 (0 console errors/warnings across heavy ControlPanel use this run) | ~~MED~~      | **CLOSED** |
-| 10  | ~~Cross-browser sweeps (Firefox, WebKit)~~ — **EXECUTED 2026-05-21**: 29-case CB subset on both engines; after the D-17 focused retest, **29 PASS / 0 SKIP / 0 FAIL each**; full parity, zero browser-specific defects (D-17 verified via `scrollTo` spy)                | ~~LOW~~      | **CLOSED** |
-
----
