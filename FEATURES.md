@@ -123,19 +123,21 @@ The calendar uses Luxon internally for all date formatting.
 - **`colorScheme="light"`** — Forces the light palette.
 - **`colorScheme="dark"`** — Forces the dark palette.
 
-Palettes are implemented as CSS custom properties scoped to `[data-color-scheme="light"]` and `[data-color-scheme="dark"]` on the calendar root. Override individual variables for custom theming:
+Palettes are implemented as CSS custom properties. The light palette is the `:root` default; the dark palette re-assigns those variables under `[data-color-scheme="dark"]` (the attribute the library sets on the calendar root). Override individual variables for custom theming:
 
 ```css
+/* Customize the dark palette */
 [data-color-scheme="dark"] {
-  --primary-bg: #1a1a1a;
-  --primary-text: #ffffff;
-  --accent-color: #818cf8;
+  --bg-color: #1a1a1a;
+  --text-primary: #ffffff;
+  --primary-color: #818cf8;
 }
 
-[data-color-scheme="light"] {
-  --primary-bg: #ffffff;
-  --primary-text: #000000;
-  --accent-color: #2563eb;
+/* Customize the light palette (the :root default) */
+:root {
+  --bg-color: #ffffff;
+  --text-primary: #000000;
+  --primary-color: #2563eb;
 }
 ```
 

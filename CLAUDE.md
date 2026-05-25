@@ -16,8 +16,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Code Quality
 
-- `npm run lint` — Check for ESLint violations
-- `npm run lint:fix` — Fix ESLint violations automatically
+- `npm run lint` — Type-check (`tsc --noEmit`) **and** check for ESLint violations (there is no standalone typecheck script — `lint` covers it)
+- `npm run lint:fix` — Type-check, then fix ESLint violations automatically
 - `npm run format` — Format all code with Prettier
 - `npm run format:check` — Check if code is formatted correctly
 
@@ -64,6 +64,11 @@ Each view is a separate component receiving props via `useCalendarProps()`:
 - **ScheduleView** — Continuous scrollable list of events grouped by date
 - **View** — Wrapper component that renders the appropriate view based on context state
 
+### Loading & Error Handling
+
+- **Loading states**: The `isLoading` prop has two behaviours. With **no events**, it replaces the body with a view-specific skeleton (`src/components/ui/skeleton/` — `MonthSkeleton`, `TimeGridSkeleton`, `ScheduleSkeleton`) or `renderLoading()` if provided. With **events present**, it keeps the calendar visible behind a non-interactive overlay so stale data stays on screen during a refresh.
+- **Error boundary**: `CalendarErrorBoundary` (`src/components/ui/`) wraps the calendar; on a render error it shows an empty `data-testid="calendar-error-boundary"` element and stays silent (the host app's error reporting is expected to handle logging).
+
 ### Prop Distribution Pattern
 
 **`useCalendarProps<T>(localProps: T)`** merges context config with local overrides:
@@ -77,10 +82,11 @@ This enables prop composition: global calendar props + view-specific overrides.
 ### Layout & Styling
 
 - **CSS Modules**: All styles co-located in `Component.module.css` files
-- **Theme system**: `CalendarTheme` type provides color overrides (`default`, `selected`, `today`)
+- **Theme system**: `CalendarTheme` provides `default`/`selected`/`today` color overrides. It is **scheme-aware**: flat keys apply to both schemes, while `dark` / `light` sub-objects take precedence when the resolved scheme matches. `width` / `height` props accept a number (px) or any CSS length string.
 - **Custom classes**: `CalendarClassNames` type allows targeting specific elements
-- **CSS Variables**: Layout dimensions (`--calendar-width`, `--calendar-height`) set at root level
-- **No Tailwind/SCSS**: Vanilla CSS modules only
+- **Color scheme / dark mode**: The `colorScheme` prop (`'light'`/`'dark'`/`'auto'`, default `auto`) is resolved by `useColorScheme` (listens to `prefers-color-scheme`). The resolved value is written as `data-color-scheme="light"|"dark"` on the calendar root, which swaps the CSS custom-property palette defined in `src/styles/variables.css` (`:root` = light, `[data-color-scheme="dark"]` = dark). The `theme` prop still wins over the palette.
+- **RTL**: The `direction` prop (`'ltr'`/`'rtl'`) defaults to `rtl` when `locale` is an RTL locale (ar, he, fa, ur, ps, sd, ckb, yi), else `ltr`. An explicit `direction` overrides auto-detection.
+- **No Tailwind/SCSS**: Vanilla CSS modules + the global `variables.css` palette only
 
 ### Core Hooks (Event & Layout Logic)
 
@@ -90,6 +96,7 @@ This enables prop composition: global calendar props + view-specific overrides.
 - **`useMonthGrid`** — Builds month calendar grid with week rows; handles adjacent month visibility
 - **`useScheduleView`** — Groups events by date for schedule layout; handles sorting
 - **`useResizeObserver`** — Observes container resize; provides width/height for responsive layout
+- **`useColorScheme`** — Resolves the `colorScheme` prop to a concrete `'light'`/`'dark'` value, subscribing to the OS `prefers-color-scheme` media query when `auto`
 
 ### Event Types & Interfaces
 
@@ -167,8 +174,8 @@ Multi-day events use `startDate` and `endDate` without time components; timed ev
 ### CSS Patterns
 
 - **Selectors**: Use CSS classes defined in module; avoid element selectors for encapsulation
-- **Responsive**: Container query style — width/height props + ResizeObserver
-- **Theme colors**: Applied via inline `style` prop or `classNames` override, not CSS variables
+- **Responsive**: Container query style — width/height props + ResizeObserver; built-in breakpoints at 768px (tablet) and 480px (phone)
+- **Color palette**: Light/dark colors live as CSS custom properties in `src/styles/variables.css`, swapped via the `[data-color-scheme="dark"]` attribute selector. Per-event/per-state `theme` prop colors are applied via inline `style`, overriding the palette.
 - **Layout**: Flexbox/Grid; no absolute positioning except for current-time line
 
 ### Git & Commits
@@ -180,20 +187,23 @@ Multi-day events use `startDate` and `endDate` without time components; timed ev
 
 ## Key Files & Directory Structure
 
-| Path                              | Purpose                                                              |
-| --------------------------------- | -------------------------------------------------------------------- |
-| `src/Calendar.tsx`                | Root component; wraps in provider and dispatches to View             |
-| `src/context/CalendarContext.tsx` | State management, reducer, provider, and `useCalendar()` hook        |
-| `src/components/views/`           | View implementations (Month, Week, Day, Schedule, CustomDays)        |
-| `src/components/core/`            | Reusable core components (AllDayBanner, DayColumn, EventItems, etc.) |
-| `src/hooks/`                      | Custom hooks (useEvents, useCalendarProps, layout hooks, etc.)       |
-| `src/utils/date.ts`               | Luxon wrappers and date calculations                                 |
-| `src/utils/common.ts`             | General utilities (event filtering, sorting, etc.)                   |
-| `src/types/`                      | TypeScript interfaces and type definitions                           |
-| `src/constants/`                  | Theme defaults, action types, layout constants                       |
-| `src/styles/`                     | Global CSS variables                                                 |
-| `src/stories/`                    | Storybook stories for all features and QA scenarios                  |
-| `dist/`                           | Build output (auto-generated)                                        |
+| Path                              | Purpose                                                                    |
+| --------------------------------- | -------------------------------------------------------------------------- |
+| `src/Calendar.tsx`                | Root component; wraps in provider and dispatches to View                   |
+| `src/context/CalendarContext.tsx` | State management, reducer, provider, and `useCalendar()` hook              |
+| `src/components/views/`           | View implementations (Month, Week, Day, Schedule, CustomDays)              |
+| `src/components/core/`            | Reusable core components (AllDayBanner, DayColumn, EventItems, etc.)       |
+| `src/components/ui/`              | Popover, `CalendarErrorBoundary`, and loading skeletons (`skeleton/`)      |
+| `src/hooks/`                      | Custom hooks (useEvents, useCalendarProps, useColorScheme, layout hooks)   |
+| `src/utils/date.ts`               | Luxon wrappers and date calculations                                       |
+| `src/utils/common.ts`             | General utilities (event filtering, sorting, etc.)                         |
+| `src/utils/formatting.ts`         | UI string formatting (tooltip text, GMT offset, localized day/month names) |
+| `src/utils/contrast.ts`           | WCAG contrast helpers for accessible theme colors                          |
+| `src/types/`                      | TypeScript interfaces and type definitions                                 |
+| `src/constants/`                  | Theme defaults, action types, layout constants                             |
+| `src/styles/variables.css`        | Global CSS custom properties + light/dark palette (`data-color-scheme`)    |
+| `src/stories/`                    | Storybook stories for all features and QA scenarios                        |
+| `dist/`                           | Build output (auto-generated)                                              |
 
 ## Important Context from Memory
 
