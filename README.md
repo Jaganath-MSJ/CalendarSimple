@@ -365,13 +365,13 @@ interface CalendarClassNames {
 <Calendar colorScheme="light" />
 ```
 
-Override individual CSS custom properties for fine-grained control:
+Override individual CSS custom properties for fine-grained control. Light is the `:root` default; dark values live under `[data-color-scheme="dark"]`:
 
 ```css
 [data-color-scheme="dark"] {
-  --primary-bg: #1a1a1a;
-  --primary-text: #ffffff;
-  --accent-color: #818cf8;
+  --bg-color: #1a1a1a;
+  --text-primary: #ffffff;
+  --primary-color: #818cf8;
 }
 ```
 

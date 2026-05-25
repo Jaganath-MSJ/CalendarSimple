@@ -59,7 +59,10 @@ representative at an online or offline event.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement.
+reported to the community leaders responsible for enforcement by contacting the
+project maintainer privately — open a confidential report via GitHub's
+[private vulnerability reporting](https://github.com/Jaganath-MSJ/CalendarSimple/security/advisories/new)
+or reach out to [@Jaganath-MSJ](https://github.com/Jaganath-MSJ).
 All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the
