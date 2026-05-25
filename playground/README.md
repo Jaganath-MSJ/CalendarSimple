@@ -1,73 +1,81 @@
-# React + TypeScript + Vite
+# Calendar Simple — Playground
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A local Vite + React 19 dev harness for exercising the [`calendar-simple`](../) library
+against the **real published build** (not the source). It renders a live `<Calendar>`
+next to an interactive control panel that lets you toggle nearly every prop and swap
+between curated event fixtures.
 
-Currently, two official plugins are available:
+Use it to reproduce bugs, eyeball layout/theming changes, and sanity-check the public
+API the way a consumer would actually import it.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Relationship to the library
 
-## React Compiler
+The playground depends on the parent package via `"calendar-simple": "file:.."`, so it
+imports from the library's **`dist/` output**, exactly like an external consumer:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```ts
+import Calendar from "calendar-simple";
+import type { CalendarProps } from "calendar-simple";
+import "calendar-simple/dist/styles.css";
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Because of this, **you must build the library before running the playground.** `dist/`
+is git-ignored and not committed.
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+## Getting started
 
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+From the repository root, build the library first:
+
+```bash
+npm install
+npm run build          # produces dist/ that the playground imports
 ```
+
+Then run the playground:
+
+```bash
+cd playground
+npm install
+npm run dev            # opens the app in your browser
+```
+
+> After changing library source, re-run `npm run build` in the root (or `npm run build -- --watch`)
+> so the playground picks up your changes.
+
+## Scripts
+
+| Command           | Description                                    |
+| ----------------- | ---------------------------------------------- |
+| `npm run dev`     | Start the Vite dev server (auto-opens)         |
+| `npm run build`   | Type-check (`tsc -b`) and build the playground |
+| `npm run preview` | Preview the production build                   |
+| `npm run lint`    | Run ESLint                                     |
+
+## What's in here
+
+- **`src/App.tsx`** — Lays out the live `<Calendar>` and the control panel. Wires every
+  event callback (`onEventClick`, `onDateClick`, `onMoreClick`, `onNavigate`,
+  `onViewChange`, `onSlotClick`) to `console.log` so interactions are observable in the
+  browser console.
+- **`src/ControlPanel.tsx`** — A collapsible, sectioned panel of controls that maps UI
+  state to `Partial<CalendarProps>`. Sections cover **View, Time Grid, Year Picker,
+  Interaction, Appearance, Class Names, Localization, Loading, Renderers, Performance,
+  Layout, and Debug.** Each section shows a badge counting modified props and has its own
+  reset; "Reset All" restores defaults.
+- **`src/TestFixtures.ts`** — Curated `CalendarEvent[]` fixtures selectable from the
+  panel's **Events** dropdown: Edge Cases, Empty, Single Timed, Single All-Day, All-Day
+  Banner Stress, Month Overflow, Large Dataset (1k / 10k), DST Spring/Fall, Year/Month
+  Boundary, Unicode Titles, Custom Metadata, and HTML Injection.
+
+## Tips
+
+- The custom **Renderers** toggles (`renderEvent`, `renderHeader`, `renderHourCell`,
+  `renderDateCell`, `renderScheduleSeparator`) and **Loading** renderer swap in small demo
+  implementations so you can see custom-render hooks fire without writing code.
+- The **Large Dataset** fixtures (1k / 10k events) are useful for spot-checking rendering
+  performance and the `enableEnrichedEvents` / `eventsAreSorted` / `sortedMonthView`
+  performance props.
+- The **HTML Injection** and **Unicode Titles** fixtures are handy for verifying escaping
+  and i18n/RTL behavior alongside the **Localization** section.
+
+This is an internal dev tool — it is private (`"private": true`) and is not published.
