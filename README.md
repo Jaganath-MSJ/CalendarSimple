@@ -1,26 +1,41 @@
 # Calendar Simple
 
-![npm](https://img.shields.io/npm/v/calendar-simple)
-![npm bundle size](https://img.shields.io/bundlephobia/minzip/calendar-simple)
-![npm downloads](https://img.shields.io/npm/dm/calendar-simple)
-![license](https://img.shields.io/npm/l/calendar-simple)
+[![npm version](https://img.shields.io/npm/v/calendar-simple)](https://www.npmjs.com/package/calendar-simple)
+[![bundle size](https://img.shields.io/npm/unpacked-size/calendar-simple)](https://www.npmjs.com/package/calendar-simple)
+[![npm downloads](https://img.shields.io/npm/dm/calendar-simple)](https://www.npmjs.com/package/calendar-simple)
+[![license](https://img.shields.io/npm/l/calendar-simple)](https://github.com/Jaganath-MSJ/CalendarSimple/blob/main/LICENSE)
 
-A lightweight, customizable, and responsive calendar component for React applications. Built with TypeScript and Day.js, `calendar-simple` provides a flexible solution for date selection and event management in your React projects.
+A lightweight, customizable, and accessible calendar component for React. Built with TypeScript and Luxon.
 
-**[Live Demo](http://calendarsimple.netlify.app)**
+**[Live Demo](https://calendarsimple.netlify.app)**
 
 ## Features
 
-- **📅 Month View**: Intuitive navigation through monthly views.
-- **✨ Event Handling**: Built-in support for displaying and managing events with custom colors.
-- **📱 Responsive**: Automatically adjusts layout based on container dimensions.
-- **🎨 Theming**: Fully customizable colors for selected dates, current day, and general theme.
-- **👆 Interactive**: granular control with click handlers for dates, specific events, and "more" indicators.
-- **🛡️ TypeScript**: Written in TypeScript for robust type safety and developer experience.
+- **🗓️ Multiple Views** — Month, Week, Day, Schedule, and Custom Days views.
+- **✨ Event Handling** — Display and manage events with custom styling and arbitrary metadata.
+- **📱 Responsive** — Built-in CSS breakpoints at 768px (tablet) and 480px (phone).
+- **🎨 Theming & Customization** — Override colors via `theme` and inject CSS classes via `classNames`.
+- **🌙 Dark Mode & Color Schemes** — Built-in light/dark palettes with OS auto-detection.
+- **🌐 RTL Support** — Full right-to-left layout with auto-detection for Arabic, Hebrew, Farsi, and more.
+- **🧩 Custom Renderers** — Replace events, headers, and grid cells with your own React components.
+- **⌨️ Keyboard Navigation** — Enter/Space activation, Tab focus trap in popovers, Escape to close.
+- **♿ Accessibility** — Semantic HTML, ARIA roles, labels, and screen reader support throughout.
+- **🕒 Time Formatting** — 12-hour (AM/PM) and 24-hour formats with a live current-time indicator.
+- **👆 Interactive** — Click handlers for dates, events, "+more" indicators, and empty slot creation.
+- **🌍 Localization** — Full i18n via Luxon locale codes and custom UI message translations.
+- **🛡️ TypeScript** — Fully typed props, callbacks, and interfaces — all exported.
+
+## Requirements
+
+| Dependency | Version                   |
+| ---------- | ------------------------- |
+| React      | ≥ 19.0                    |
+| React DOM  | ≥ 19.0                    |
+| Node.js    | ≥ 18 LTS (build/dev only) |
+
+Luxon is bundled as a direct dependency — no separate install needed.
 
 ## Installation
-
-Install using your preferred package manager:
 
 ```bash
 npm install calendar-simple
@@ -34,122 +49,416 @@ pnpm add calendar-simple
 
 ### Basic Example
 
-Import the component and its styles to get started:
-
 ```tsx
 import React, { useState } from "react";
-import Calendar, { CalendarType } from "calendar-simple";
+import Calendar from "calendar-simple";
 import "calendar-simple/dist/styles.css";
 
 const App = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  // Calendar fills its container — give the parent an explicit height
   return (
     <div style={{ height: "600px", padding: "20px" }}>
       <Calendar
         selectedDate={selectedDate}
         onDateClick={setSelectedDate}
-        isSelectDate
+        selectable
       />
     </div>
   );
 };
 ```
 
-### Advanced Usage with Events & Theme
+### Advanced Usage with Events & Views
 
 ```tsx
 import React, { useState } from "react";
-import Calendar, { DataType } from "calendar-simple";
+import Calendar, { CalendarEvent, ECalendarViewType } from "calendar-simple";
 import "calendar-simple/dist/styles.css";
 
 const MyCalendar = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [view, setView] = useState<ECalendarViewType>("month");
 
-  const events: DataType[] = [
+  const events: CalendarEvent[] = [
     {
+      id: "1",
       startDate: "2024-02-14",
-      value: "Valentine's Day",
-      color: "#ffcccc",
+      title: "Valentine's Day",
+      style: { backgroundColor: "#ffcccc" },
     },
     {
+      id: "2",
       startDate: "2024-02-20",
       endDate: "2024-02-22",
-      value: "Tech Conference",
-      color: "#e6f7ff",
+      title: "Tech Conference",
+      style: { backgroundColor: "#e6f7ff" },
+    },
+    {
+      id: "3",
+      startDate: "2024-02-21T10:00:00",
+      endDate: "2024-02-21T12:00:00",
+      title: "Team Meeting",
+      style: { backgroundColor: "#cce5ff" },
     },
   ];
 
   return (
     <Calendar
+      events={events}
       selectedDate={selectedDate}
+      view={view}
       onDateClick={setSelectedDate}
-      isSelectDate
-      data={events}
-      width={800}
-      height={600}
+      onViewChange={setView}
+      selectable
+      is12Hour
+      showCurrentTime
+      autoScrollToCurrentTime
       theme={{
         selected: { color: "#fff", bgColor: "#007bff" },
         today: { color: "#007bff", bgColor: "#e6f2ff" },
       }}
-      onEventClick={(event) => alert(`Clicked: ${event.value}`)}
+      onEventClick={(event) => alert(`Clicked: ${event.title}`)}
     />
   );
 };
 ```
 
+### 🧩 Custom Renderers
+
+```tsx
+<Calendar
+  renderEvent={(event) => (
+    <div
+      style={{
+        padding: "2px",
+        backgroundColor: "#e0f2fe",
+        borderRadius: "4px",
+      }}
+    >
+      <strong>🚀 {event.title}</strong>
+    </div>
+  )}
+  renderHeader={({ currentDate, onNavigate }) => (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        padding: "10px",
+      }}
+    >
+      <button
+        onClick={() => {
+          const d = new Date(currentDate);
+          d.setMonth(d.getMonth() - 1);
+          onNavigate(d);
+        }}
+      >
+        Prev
+      </button>
+      <h2>
+        {currentDate.toLocaleDateString("default", {
+          month: "long",
+          year: "numeric",
+        })}
+      </h2>
+      <button
+        onClick={() => {
+          const d = new Date(currentDate);
+          d.setMonth(d.getMonth() + 1);
+          onNavigate(d);
+        }}
+      >
+        Next
+      </button>
+    </div>
+  )}
+/>
+```
+
+### 🌍 Localization
+
+```tsx
+<Calendar
+  locale="fr"
+  localeMessages={{
+    today: "Aujourd'hui",
+    day: "Jour",
+    week: "Semaine",
+    month: "Mois",
+    schedule: "Planning",
+    days: "Jours",
+  }}
+/>
+```
+
 ## API Reference
+
+> For full prop descriptions and usage examples, see [FEATURES.md](./FEATURES.md).
 
 ### Props
 
-| Prop               | Type                        | Description                                                | Default         |
-| ------------------ | --------------------------- | ---------------------------------------------------------- | --------------- |
-| `data`             | `DataType[]`                | Array of event data objects to display.                    | `[]`            |
-| `selectedDate`     | `Date`                      | The currently selected date object.                        | `undefined`     |
-| `onDateClick`      | `(date: Date) => void`      | Callback function fired when a date is clicked.            | `undefined`     |
-| `onEventClick`     | `(event: DataType) => void` | Callback function fired when an event is clicked.          | `undefined`     |
-| `onMoreClick`      | `(date: Date) => void`      | Callback fired when the "+X more" indicator is clicked.    | `undefined`     |
-| `onMonthChange`    | `(date: Date) => void`      | Callback fired when the visible month is changed.          | `undefined`     |
-| `width`            | `number`                    | Width of the calendar container in pixels.                 | `400`           |
-| `height`           | `number`                    | Height of the calendar container in pixels.                | `400`           |
-| `theme`            | `CalendarTheme`             | Configuration object for custom colors.                    | `Default Theme` |
-| `dayType`          | `EDayType`                  | Format for day names: `"FULL"` (Monday) or `"HALF"` (Mon). | `HALF`          |
-| `isSelectDate`     | `boolean`                   | Enables visual selection state.                            | `false`         |
-| `pastYearLength`   | `number`                    | Number of past years to show in the year dropdown.         | `5`             |
-| `futureYearLength` | `number`                    | Number of future years to show in the year dropdown.       | `5`             |
-| `maxEvents`        | `number`                    | Maximum events to show per day cell before collapsing.     | Auto-calc       |
+| Prop                      | Type                                                          | Default             |
+| ------------------------- | ------------------------------------------------------------- | ------------------- |
+| `events`                  | `CalendarEvent[]`                                             | `[]`                |
+| `selectedDate`            | `Date`                                                        | `undefined`         |
+| `view`                    | `ECalendarViewType`                                           | `"month"`           |
+| `testId`                  | `string`                                                      | `undefined`         |
+| `isLoading`               | `boolean`                                                     | `undefined`         |
+| `renderLoading`           | `() => ReactNode`                                             | `undefined`         |
+| `selectable`              | `boolean`                                                     | `false`             |
+| `creatable`               | `boolean`                                                     | `false`             |
+| `is12Hour`                | `boolean`                                                     | `false`             |
+| `colorScheme`             | `'light' \| 'dark' \| 'auto'`                                 | `'auto'`            |
+| `direction`               | `'ltr' \| 'rtl'`                                              | `` `auto-detect` `` |
+| `locale`                  | `string`                                                      | `'en'`              |
+| `localeMessages`          | `object`                                                      | `{}`                |
+| `theme`                   | `CalendarTheme`                                               | `{}`                |
+| `classNames`              | `CalendarClassNames`                                          | `{}`                |
+| `width`                   | `number \| string`                                            | `` `auto` ``        |
+| `height`                  | `number \| string`                                            | `` `auto` ``        |
+| `dayType`                 | `EDayType`                                                    | `"half"`            |
+| `weekStartsOn`            | `number`                                                      | `0`                 |
+| `weekEndsOn`              | `number`                                                      | `6`                 |
+| `customDays`              | `number`                                                      | `3`                 |
+| `showAdjacentMonths`      | `boolean`                                                     | `true`              |
+| `showWeekNumbers`         | `boolean`                                                     | `false`             |
+| `showAllDayRow`           | `boolean`                                                     | `true`              |
+| `maxEvents`               | `number`                                                      | `` `auto` ``        |
+| `minHour`                 | `number`                                                      | `0`                 |
+| `maxHour`                 | `number`                                                      | `24`                |
+| `eventOverlapOffset`      | `number`                                                      | `0`                 |
+| `showCurrentTime`         | `boolean`                                                     | `false`             |
+| `autoScrollToCurrentTime` | `boolean`                                                     | `false`             |
+| `resetDateOnViewChange`   | `boolean`                                                     | `false`             |
+| `pastYearLength`          | `number`                                                      | `5`                 |
+| `futureYearLength`        | `number`                                                      | `5`                 |
+| `onDateClick`             | `(date: Date) => void`                                        | `undefined`         |
+| `onEventClick`            | `(event: CalendarEvent) => void`                              | `undefined`         |
+| `onMoreClick`             | `(date: Date, hiddenEvents?: CalendarEvent[]) => void`        | `undefined`         |
+| `onNavigate`              | `(date: Date) => void`                                        | `undefined`         |
+| `onViewChange`            | `(view: ECalendarViewType) => void`                           | `undefined`         |
+| `onSlotClick`             | `(startDate: Date, endDate: Date) => void`                    | `undefined`         |
+| `renderEvent`             | `(event: CalendarEvent) => ReactNode`                         | `undefined`         |
+| `renderHeader`            | `(props: RenderHeaderProps) => ReactNode`                     | `undefined`         |
+| `renderHourCell`          | `(date: Date) => ReactNode`                                   | `undefined`         |
+| `renderDateCell`          | `(props: RenderDateCellProps) => ReactNode`                   | `undefined`         |
+| `renderScheduleSeparator` | `(date: Date) => ReactNode`                                   | `undefined`         |
+| `enableEnrichedEvents`    | `boolean`                                                     | `false`             |
+| `enrichedEventsByDate`    | `Record<string, CalendarEvent[]>`                             | `undefined`         |
+| `eventsAreSorted`         | `boolean`                                                     | `false`             |
+| `isEventOrderingEnabled`  | `boolean`                                                     | `true`              |
+| `sortedMonthView`         | `boolean \| ((a: CalendarEvent, b: CalendarEvent) => number)` | `true`              |
 
 ### Types
 
-#### `DataType`
+#### `CalendarEvent`
 
 ```typescript
-interface DataType {
-  startDate: string; // Format: YYYY-MM-DD
-  endDate?: string; // Format: YYYY-MM-DD
-  value: string; // Event title or description
-  color?: string; // CSS color string for event background
+interface CalendarEvent {
+  id?: string;
+  startDate: string; // YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss
+  endDate?: string;
+  title: string;
+  style?: CSSProperties;
+  [key: string]: unknown; // custom metadata fields
 }
+```
+
+#### `ECalendarViewType` & `EDayType`
+
+```typescript
+type ECalendarViewType = "month" | "week" | "day" | "schedule" | "customDays";
+type EDayType = "full" | "half";
 ```
 
 #### `CalendarTheme`
 
 ```typescript
-interface CalendarTheme {
-  selected?: {
-    color?: string; // Text color for selected date
-    bgColor?: string; // Background color for selected date
-  };
-  today?: {
-    color?: string; // Text color for today's date
-    bgColor?: string; // Background color for today's date
-  };
+interface ThemeStyle {
+  color?: string; // Text / foreground color
+  bgColor?: string; // Background color
+}
+
+interface ThemeScheme {
+  default?: ThemeStyle;
+  selected?: ThemeStyle;
+  today?: ThemeStyle;
+}
+
+interface CalendarTheme extends ThemeScheme {
+  dark?: ThemeScheme; // Overrides applied only when resolved scheme is "dark"
+  light?: ThemeScheme; // Overrides applied only when resolved scheme is "light"
 }
 ```
 
+#### `RenderHeaderProps`
+
+```typescript
+interface RenderHeaderProps {
+  currentDate: Date;
+  view: ECalendarViewType;
+  onNavigate: (date: Date) => void;
+  onViewChange: (view: ECalendarViewType) => void;
+}
+```
+
+#### `RenderDateCellProps`
+
+```typescript
+interface RenderDateCellProps {
+  date: Date;
+  isToday: boolean;
+  isSelected?: boolean;
+  isCurrentMonth?: boolean;
+}
+```
+
+#### `CalendarClassNames`
+
+```typescript
+interface CalendarClassNames {
+  root?: string;
+  header?: string;
+
+  // Month view
+  table?: string;
+  tableHeader?: string;
+  tableDate?: string;
+  weekNumber?: string;
+
+  // Shared events
+  event?: string;
+  selected?: string;
+  today?: string;
+
+  // Week & Day view
+  dayHeader?: string;
+  dayName?: string;
+  dayNumber?: string;
+  timeColumn?: string;
+  timeSlot?: string;
+  dayColumn?: string;
+
+  // Schedule view
+  scheduleDateGroup?: string;
+  scheduleDateNumber?: string;
+  scheduleDateSubInfo?: string;
+  scheduleTime?: string;
+  scheduleTitle?: string;
+}
+```
+
+## Configuration
+
+### Color Scheme
+
+```tsx
+// Follow OS preference (default)
+<Calendar colorScheme="auto" />
+
+// Force dark mode
+<Calendar colorScheme="dark" />
+
+// Force light mode
+<Calendar colorScheme="light" />
+```
+
+Override individual CSS custom properties for fine-grained control. Light is the `:root` default; dark values live under `[data-color-scheme="dark"]`:
+
+```css
+[data-color-scheme="dark"] {
+  --bg-color: #1a1a1a;
+  --text-primary: #ffffff;
+  --primary-color: #818cf8;
+}
+```
+
+### Theme Colors
+
+```tsx
+<Calendar
+  theme={{
+    today: { color: "#007bff", bgColor: "#e6f2ff" },
+    selected: { color: "#fff", bgColor: "#007bff" },
+  }}
+/>
+```
+
+### RTL Layout
+
+```tsx
+// Auto-detected for Arabic, Hebrew, Farsi, Urdu, and more
+<Calendar locale="ar" />
+
+// Manual override
+<Calendar direction="rtl" />
+```
+
+### Custom CSS Classes
+
+```tsx
+<Calendar
+  classNames={{
+    root: "my-calendar",
+    event: "my-event-chip",
+    header: "my-header",
+  }}
+/>
+```
+
+> See [FEATURES.md](./FEATURES.md) for the full `classNames` key list and Props Reference.
+
+## Responsive & Mobile
+
+Built-in CSS breakpoints adapt the layout at **768px** (tablet) and **480px** (phone) with no extra configuration. Drop the `width` prop and let the parent container control sizing for breakpoints to activate naturally.
+
+See [FEATURES.md — Responsive Layout](./FEATURES.md#responsive-layout) for the full breakpoint table.
+
+## Changelog
+
+All notable changes are tracked via [GitHub Releases](https://github.com/Jaganath-MSJ/CalendarSimple/releases).
+
+## FAQ
+
+**Why aren't my breakpoints activating?**
+CSS breakpoints fire based on _viewport_ width when an explicit `width` prop is passed. Drop the `width` prop and let the parent container control sizing for container-relative behaviour.
+
+**How do I show only work hours (e.g. 9–17)?**
+Use `minHour={9}` and `maxHour={17}` to hide hours outside that range in Day and Week views.
+
+**Do I need to install Luxon separately?**
+No — Luxon is a direct dependency bundled inside `calendar-simple`.
+
+**How do I pre-populate the selected date?**
+Pass a JavaScript `Date` object to the `selectedDate` prop and update it via `onDateClick`.
+
+**Why does RTL not activate when I set `locale="ar"`?**
+If you also pass `direction="ltr"` explicitly, that overrides auto-detection. Remove the `direction` prop to allow auto-detection to work.
+
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Here's how to get started:
+
+1. **Fork** the repository and create a branch from `dev`:
+   ```bash
+   git checkout -b feat/your-feature-name dev
+   ```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+3. **Run the dev environment:**
+   ```bash
+   npm run storybook   # Component explorer on http://localhost:6006
+   npm run test:watch  # Tests in watch mode
+   ```
+4. **Make your changes** — follow the existing TypeScript and CSS Module patterns.
+5. **Add or update tests** — new behaviour must be covered.
+6. **Submit a Pull Request** to the `dev` branch with a clear description of the change.
+
+Please follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages (`feat:`, `fix:`, `docs:`, etc.).
 
 ## License
 

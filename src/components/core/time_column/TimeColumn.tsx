@@ -1,0 +1,44 @@
+import React from "react";
+import cx from "classnames";
+import { dateFn, formatDate } from "../../../utils";
+import { DATE_FORMATS } from "../../../constants";
+import styles from "./TimeColumn.module.css";
+import { CalendarContentProps } from "../../../types";
+import { useCalendar } from "../../../context/CalendarContext";
+
+interface TimeColumnProps extends Pick<
+  CalendarContentProps,
+  "is12Hour" | "classNames" | "minHour" | "maxHour" | "locale"
+> {}
+
+function TimeColumn({
+  is12Hour,
+  classNames,
+  minHour,
+  maxHour,
+  locale,
+}: TimeColumnProps) {
+  const { testId } = useCalendar();
+  const hours = Array.from(
+    { length: maxHour - minHour },
+    (_, i) => i + minHour,
+  );
+
+  return (
+    <div
+      className={cx(styles.timeColumn, classNames?.timeColumn)}
+      data-testid={`${testId}-time-column`}
+    >
+      {hours.map((hour) => {
+        const timeFormat = is12Hour ? DATE_FORMATS.HOUR_12H : DATE_FORMATS.TIME;
+        return (
+          <div key={hour} className={cx(styles.timeSlot, classNames?.timeSlot)}>
+            {formatDate(dateFn().set({ hour, minute: 0 }), timeFormat, locale)}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export default TimeColumn;

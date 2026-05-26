@@ -1,0 +1,173 @@
+.dateData {
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.15s ease;
+  vertical-align: top;
+  height: calc(
+    var(--calendar-height) / var(--calendar-rows, 6)
+  ); /* Approx 6 rows usually */
+  min-width: calc(var(--calendar-width) / 7);
+  max-width: calc(var(--calendar-width) / 7);
+  padding: 0.25rem;
+}
+
+.dateData:hover {
+  background-color: var(--bg-hover);
+}
+
+.currentMonth {
+  color: var(--text-secondary); /* muted text */
+  background-color: var(--bg-hover);
+}
+
+.cellContent {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.25rem;
+}
+
+.dateLabel {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-block: 2px 4px;
+  margin-inline: auto 2px; /* Align to top-end (right in LTR, left in RTL) */
+  color: var(--text-primary);
+  border-radius: 50%;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+.selected .dateLabel {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.today .dateLabel {
+  background-color: var(--primary-color);
+  color: white;
+  box-shadow:
+    0 0 0 2px white,
+    0 0 0 4px var(--primary-color); /* Double ring effect for premium feel */
+}
+
+.dataContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: visible;
+  flex: 1;
+}
+
+.spacer {
+  height: 1.5rem; /* Match eventItem height */
+  margin-bottom: 2px;
+}
+
+.eventItem {
+  background-color: var(--primary-color);
+  border-radius: 4px; /* Slightly rounded */
+  z-index: 2;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  color: white;
+  font-weight: 500;
+  height: 1.5rem;
+  line-height: 1.2rem;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+  cursor: pointer;
+}
+
+.eventItem:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  filter: brightness(1.05);
+}
+
+.moreEventsContainer {
+  position: relative;
+  margin-top: 2px;
+}
+
+.moreEvents {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.15rem 0.5rem;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: start;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.moreEvents:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* ── Tablet (768px): tighter sizes, text still readable ── */
+@media (max-width: 768px) {
+  .dateLabel {
+    font-size: 0.6875rem;
+    width: 20px;
+    height: 20px;
+  }
+
+  .eventItem {
+    font-size: 0.6875rem;
+    padding: 0.1rem 0.25rem;
+    height: 1.25rem;
+    line-height: 1rem;
+  }
+
+  .moreEvents {
+    font-size: 0.6875rem;
+    padding: 0.1rem 0.25rem;
+  }
+}
+
+/* ── Phone (480px): dot-only events — colored bar, no text ── */
+@media (max-width: 480px) {
+  .dateLabel {
+    font-size: 0.625rem;
+    width: 16px;
+    height: 16px;
+    margin-block: 1px 2px;
+    margin-inline: auto 1px;
+  }
+
+  .eventItem {
+    font-size: 0;
+    padding: 0 2px;
+    height: 6px;
+    line-height: 0;
+    border-radius: 3px;
+  }
+
+  .moreEvents {
+    display: none;
+  }
+
+  .spacer {
+    height: 8px;
+  }
+}

@@ -1,0 +1,45 @@
+:root {
+  /* Theme variables */
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --bg-color: #ffffff;
+  --bg-hover: #f3f4f6;
+  --border-color: #e5e7eb;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --cal-focus-color: #005fcc;
+}
+
+/*
+ * Dark palette. Activated when the calendar root has `data-color-scheme="dark"`,
+ * which is set by `useColorScheme` based on the `colorScheme` prop or the OS
+ * `prefers-color-scheme` preference.
+ *
+ * Shadows and radii intentionally inherit from `:root` — they're already
+ * theme-agnostic (rgba black shadows read fine on dark backgrounds).
+ */
+[data-color-scheme="dark"] {
+  --primary-color: #60a5fa;
+  --primary-hover: #3b82f6;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --bg-color: #1f2937;
+  --bg-hover: #374151;
+  --border-color: #374151;
+  --cal-focus-color: #93c5fd;
+}
+
+/* Keyboard focus indicators */
+[role="button"]:focus-visible,
+button:focus-visible,
+select:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: 2px solid var(--cal-focus-color, #005fcc);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

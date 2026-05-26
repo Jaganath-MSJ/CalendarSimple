@@ -1,0 +1,121 @@
+.customView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: auto;
+  background-color: var(--bg-color);
+  position: relative;
+}
+
+.stickyTopContainer {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.customHeader {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.timeHeaderSpacer {
+  width: 60px;
+  flex-shrink: 0;
+  border-inline-end: 1px solid var(--border-color);
+}
+
+.dayHeader {
+  flex: 1;
+  padding: 10px 5px;
+  text-align: center;
+  border-inline-end: 1px solid var(--border-color);
+  min-width: 0;
+}
+
+.dayHeader:last-child {
+  border-inline-end: none;
+}
+
+.dayName {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.dayNumber {
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  margin: 0 auto;
+  border-radius: 50%;
+}
+
+.today {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+.timeGrid {
+  display: flex;
+  flex: 1;
+}
+
+.eventsGrid {
+  display: flex;
+  flex: 1;
+  position: relative;
+}
+
+.dayColumn {
+  flex: 1;
+  border-inline-end: 1px solid var(--border-color);
+  position: relative;
+  min-width: 0;
+}
+
+.dayColumn:last-child {
+  border-inline-end: none;
+}
+
+/* ── Tablet (768px): fixed column width → visible columns, rest scroll ── */
+@media (max-width: 768px) {
+  .dayHeader {
+    min-width: 100px;
+    flex: 0 0 100px;
+    padding: 8px 4px;
+  }
+
+  .dayColumn {
+    min-width: 100px;
+    flex: 0 0 100px;
+  }
+
+  .dayName {
+    font-size: 10px;
+  }
+
+  .dayNumber {
+    font-size: 15px;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+  }
+}
+
+/* ── Phone (480px): 1 column fills the viewport, scroll for others ── */
+@media (max-width: 480px) {
+  .dayHeader {
+    min-width: calc(100vw - 90px);
+    flex: 0 0 calc(100vw - 90px);
+  }
+
+  .dayColumn {
+    min-width: calc(100vw - 90px);
+    flex: 0 0 calc(100vw - 90px);
+  }
+}

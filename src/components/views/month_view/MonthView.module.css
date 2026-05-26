@@ -1,0 +1,90 @@
+.monthView {
+  height: 100%;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  /* min-width: 500px; */
+  flex: 1;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.tableHeader,
+.tableCell {
+  border-inline-end: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+.tableHeader:last-child,
+.tableCell:last-child {
+  border-inline-end: none;
+}
+
+.table tr:last-child .tableCell {
+  border-bottom: none;
+}
+
+.tableHeader {
+  height: 40px;
+  background-color: var(--bg-hover);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.tableBody {
+  /* Let flex/table handle the fill naturally instead of strict pixel height */
+}
+
+.tableCell {
+  vertical-align: top;
+  height: calc(100% / var(--calendar-rows));
+  width: calc((100% - var(--week-number-width, 0px)) / 7);
+  padding: 4px;
+}
+
+.weekNumberHeader {
+  width: var(--week-number-width, 36px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--bg-hover);
+}
+
+.weekNumberCell {
+  vertical-align: middle;
+  text-align: center;
+  color: var(--text-secondary);
+  background-color: var(--bg-hover);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-inline-end: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+  .tableHeader {
+    height: 30px;
+    font-size: 0.75rem;
+    letter-spacing: 0;
+  }
+
+  .tableCell {
+    padding: 2px;
+  }
+}

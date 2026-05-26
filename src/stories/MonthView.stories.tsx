@@ -1,0 +1,126 @@
+import React from "react";
+import type { Meta, StoryObj } from "@storybook/react";
+import { DateTime } from "luxon";
+import Calendar, { EDayType, ECalendarViewType, CalendarEvent } from "../";
+
+const meta: Meta<typeof Calendar> = {
+  title: "Month View",
+  component: Calendar,
+  parameters: {
+    layout: "centered",
+  },
+  tags: ["autodocs"],
+  args: {
+    view: ECalendarViewType.month,
+    width: 800,
+    height: 600,
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof Calendar>;
+
+const today = DateTime.now();
+
+const mockEvents: CalendarEvent[] = [
+  {
+    id: "1",
+    startDate: today.toFormat("yyyy-MM-dd"),
+    title: "Project Sync",
+    style: { backgroundColor: "#3B82F6" },
+  },
+  {
+    id: "2",
+    startDate: today.plus({ days: 1 }).toFormat("yyyy-MM-dd"),
+    endDate: today.plus({ days: 3 }).toFormat("yyyy-MM-dd"),
+    title: "Conference",
+    style: { backgroundColor: "#10B981" },
+  },
+  {
+    id: "3",
+    startDate: today.minus({ days: 2 }).toFormat("yyyy-MM-dd"),
+    title: "Design Review",
+    style: { backgroundColor: "#8B5CF6" },
+  },
+  {
+    id: "4",
+    startDate: today.toFormat("yyyy-MM-dd"),
+    title: "Lunch with Client",
+    style: { backgroundColor: "#F59E0B" },
+  },
+  {
+    id: "5",
+    startDate: today.toFormat("yyyy-MM-dd"),
+    title: "Team Building",
+    style: { backgroundColor: "#EF4444" },
+  },
+  {
+    id: "6",
+    startDate: today.toFormat("yyyy-MM-dd"),
+    title: "Monthly Update",
+    style: { backgroundColor: "#6366F1" },
+  },
+];
+
+export const Default: Story = {
+  args: {
+    events: [],
+    selectedDate: today.toJSDate(),
+  },
+};
+
+export const WithEvents: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+  },
+};
+
+export const ManyEventsOverflow: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    maxEvents: 2,
+  },
+};
+
+export const ReadOnly: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    selectable: false,
+  },
+};
+
+export const FullDayNames: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    dayType: EDayType.full,
+  },
+};
+
+export const CustomWeekStartEnd: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    weekStartsOn: 1, // Monday
+    weekEndsOn: 5, // Friday
+  },
+};
+
+export const ShowWeekNumbers: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    showWeekNumbers: true,
+  },
+};
+
+export const SortedMonthView: Story = {
+  args: {
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    sortedMonthView: true,
+  },
+};

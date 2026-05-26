@@ -27,3 +27,11 @@ yarn-error.log*
 docs
 
 storybook-static
+
+# Claude Code
+.claude/settings.local.json
+.playwright-mcp/
+tests/
+
+# Local test reports (not tracked — results live in PLAYWRIGHT_TEST_PLAN.md)
+TEST_REPORT.md

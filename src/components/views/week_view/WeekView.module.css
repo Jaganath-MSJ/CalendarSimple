@@ -1,0 +1,118 @@
+.weekView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.stickyTopContainer {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: var(--bg-color);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+.weekHeader {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-hover);
+}
+
+.timeHeaderSpacer {
+  width: 60px;
+  flex-shrink: 0;
+  border-inline-end: 1px solid var(--border-color);
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 15;
+  background-color: var(--bg-hover);
+}
+
+.dayHeader {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  border-inline-end: 1px solid var(--border-color);
+}
+
+.dayHeader:last-child {
+  border-inline-end: none;
+}
+
+.dayName {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.dayNumber {
+  font-size: 20px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.dayNumber.today {
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+.timeGrid {
+  display: flex;
+  flex: 1;
+  /* min-width: 600px; */
+}
+
+.eventsGrid {
+  display: flex;
+  flex: 1;
+}
+
+.dayColumn {
+  flex: 1;
+  position: relative;
+  border-inline-end: 1px solid var(--border-color);
+}
+
+.dayColumn:last-child {
+  border-inline-end: none;
+}
+
+/* ── Tablet (768px): ~3 day columns visible, rest accessible by scroll ── */
+@media (max-width: 768px) {
+  .dayHeader {
+    min-width: 100px;
+    flex: 0 0 100px;
+  }
+
+  .dayColumn {
+    min-width: 100px;
+    flex: 0 0 100px;
+  }
+
+  .dayName {
+    font-size: 10px;
+  }
+
+  .dayNumber {
+    font-size: 15px;
+  }
+}
+
+/* ── Phone (480px): 1 day column fills the viewport, scroll for others ── */
+@media (max-width: 480px) {
+  .dayHeader {
+    min-width: calc(100vw - 90px);
+    flex: 0 0 calc(100vw - 90px);
+  }
+
+  .dayColumn {
+    min-width: calc(100vw - 90px);
+    flex: 0 0 calc(100vw - 90px);
+  }
+}
