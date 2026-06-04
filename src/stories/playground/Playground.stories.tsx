@@ -22,7 +22,7 @@ export const KitchenSink: Story = {
     docs: {
       description: {
         story:
-          "Interactive sandbox exposing every Calendar prop, with 15 event fixtures (edge cases, DST, large datasets, RTL/Unicode, XSS). Mirrors `playground/src/App.tsx`. Callback events are logged to the browser console.",
+          "Interactive sandbox exposing every Calendar prop, with 15 event fixtures (edge cases, DST, large datasets, RTL/Unicode, XSS). Callback events are logged to the browser console.",
       },
     },
   },

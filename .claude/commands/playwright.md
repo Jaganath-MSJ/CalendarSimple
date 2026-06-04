@@ -13,7 +13,7 @@ Parse the arguments above:
 
 ## Workflow
 
-1. **Check dev server** — navigate to `http://localhost:5173`. If it does not load, stop and tell the user to run `cd playground && npm run dev` in a separate terminal.
+1. **Check dev server** — navigate to the Storybook Kitchen Sink story iframe at `http://localhost:6006/iframe.html?id=playground--kitchen-sink&viewMode=story`. If it does not load, stop and tell the user to run `npm run storybook` in a separate terminal.
 2. **Session initialization** — follow the 4-step block in the "Session Initialization" section below exactly. For cross-browser runs substitute the tool namespace as described in "Cross-Browser Sessions".
 3. If argument is `init`, stop after initialization.
 4. **Execute each requested sweep** — for every sweep letter (or all A–L if no argument, or the CB subset if `--browser` was specified with no letters):
@@ -37,9 +37,9 @@ Parse the arguments above:
 
 This is the **canonical execution file** for every Playwright MCP test run against the `calendar-simple` library. Load this file as context at the start of each test session, then execute sweeps A–L in order.
 
-- **Target app**: `http://localhost:5173` — start with `cd playground && npm run dev`
+- **Target app**: `http://localhost:6006/iframe.html?id=playground--kitchen-sink&viewMode=story` (Storybook **Playground → Kitchen Sink** story) — start with `npm run storybook`
 - **Test harness**: MCP Playwright plugin — all 23 `mcp__plugin_playwright_playwright__*` tools
-- **testId prefix**: `playground-calendar` (set in `playground/src/App.tsx:35`)
+- **testId prefix**: `playground-calendar` (set in `src/stories/playground/Playground.stories.tsx:56`)
 - **Results file**: results are tracked in this file (`.claude/commands/playwright.md`)
 - **Screenshots**: save to `tests/screenshots/` using names from the Visual Regression section
 - **Total cases**: 310 (A:18 + B:14 + C:128 + D:26 + E:18 + F:18 + G:24 + H:13 + I:14 + J:14 + K:15 + L:8)
@@ -55,13 +55,13 @@ Run these steps at the **start of every test session** before any sweep.
 ### Step 1 — Start Dev Server
 
 ```
-cd playground && npm run dev     # keep running in terminal; port 5173
+npm run storybook     # keep running in terminal; port 6006
 ```
 
 ### Step 2 — Open Browser & Baseline
 
 ```
-browser_navigate(url="http://localhost:5173")
+browser_navigate(url="http://localhost:6006/iframe.html?id=playground--kitchen-sink&viewMode=story")
 browser_wait_for(text="playground-calendar-container")
 browser_snapshot()           → verify 2-panel layout: calendar left, ControlPanel right sidebar
 browser_console_messages()   → MUST be empty (zero errors/warnings)
@@ -105,7 +105,7 @@ All sweep steps use `browser_*` commands. In cross-browser mode, substitute the 
 | Firefox            | `mcp__playwright-firefox__`           | `--browser=firefox` |
 | WebKit             | `mcp__playwright-webkit__`            | `--browser=webkit`  |
 
-For example, `browser_navigate(url="http://localhost:5173")` becomes:
+For example, `browser_navigate(url="http://localhost:6006/iframe.html?id=playground--kitchen-sink&viewMode=story")` becomes:
 
 - Chromium: `mcp__plugin_playwright_playwright__browser_navigate(url=...)`
 - Firefox: `mcp__playwright-firefox__browser_navigate(url=...)`
@@ -195,7 +195,7 @@ browser_evaluate(
 
 ```
 # Navigation
-browser_navigate(url="http://localhost:5173")
+browser_navigate(url="http://localhost:6006/iframe.html?id=playground--kitchen-sink&viewMode=story")
 browser_click(element="Today")                                  → by aria-label
 browser_click(element="Previous period")
 browser_click(element="Next period")
@@ -292,7 +292,7 @@ browser_select_option(element="<label>", values=["<value>"])    → change dropd
 
 ---
 
-## Fixtures Reference (`playground/src/TestFixtures.ts`)
+## Fixtures Reference (`src/stories/playground/TestFixtures.ts`)
 
 > To switch fixtures: `browser_select_option(element="Fixture", values=["<Name>"])` then `browser_snapshot()` to confirm re-render.
 
@@ -879,7 +879,7 @@ Save all screenshots to `tests/screenshots/`. After capturing, mark ✓ in the C
 - `Popover` keyboard + position logic: `src/components/ui/popover/Popover.tsx`
 - `KEYBOARD_SHORTCUTS` constants: `src/constants/theme.ts:38-41`
 - `LAYOUT_CONSTANTS` (HEADER_HEIGHT=122, etc.) for size assertions: `src/constants/theme.ts:22-34`
-- Fixtures: `playground/src/TestFixtures.ts` (15 named exports + `fixtureList` array at line 448)
+- Fixtures: `src/stories/playground/TestFixtures.ts` (15 named exports + `fixtureList` array)
 - Existing QA stories cross-referenced for failure interpretation: `src/stories/QA/EdgeCases.stories.tsx`, `LayoutLimits.stories.tsx`, `Performance.stories.tsx`, `Interactions.stories.tsx`, `Views.stories.tsx`, `TimeFormatting.stories.tsx`
 
 ---
@@ -898,6 +898,7 @@ Append a row after every test session. **Never overwrite past entries.**
 | 2026-05-21 | version_2 | Chromium         | —    | —    | —   | 12          | **Screenshot-capture session (no sweeps).** Captured all 12 remaining ✗ VIS shots (VIS-05/07/08/10/12/13/14/17/18b–18e) to `tests/screenshots/`; item #8 CLOSED. Console hygiene across heavy ControlPanel interaction: 0 errors / 0 warnings — playground ControlPanel React errors (item #9) confirmed FIXED by commit 51e1f4c (header `<button>`→`<div role="button">`; `onChange` moved out of the `setState` updater).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | 2026-05-21 | version_2 | Firefox          | 28   | 0    | 1   | 0           | **Cross-browser CB subset (29 cases).** All PASS except **D-17 SKIP** (autoScrollToCurrentTime fires only on the Calendar's first mount; the playground can't pre-set the prop and state doesn't survive reload — same behavior verified in Chromium & WebKit, so it's a harness limitation, not a regression). RTL (F-06/10/12/13 — `dir=rtl`, mirrored arrows, R→L columns), matchMedia (E-03), ResizeObserver reflow (J-03/07/10/11, marker survives resizes), Tab order Today→Prev→Next→View→Month→Year (L-01), Enter activation (L-02), popover focus-trap + Escape + focus-restore (L-08) all PASS. 0 console errors/warnings. New finding: Layout "1280px" preset → invalid `--calendar-width:1280pxpx` (browser-independent playground quirk; reproduced in Chromium).                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | 2026-05-21 | version_2 | WebKit           | 28   | 0    | 1   | 0           | **Cross-browser CB subset (29 cases).** Identical results to Firefox — 28 PASS, **D-17 SKIP** (same harness limitation). WebKit-specific risks confirmed working: Tab order full keyboard nav (L-01), popover focus trap + Escape restore (L-08), RTL CSS logical props (F-12/13), matchMedia auto color scheme (E-03), ResizeObserver reflow (J-11). 0 console errors/warnings.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 2026-06-02 | version_2 | Chromium         | 1    | 0    | 0   | 0           | **Smoke test after Storybook retarget** (playground folder removed; playbook now targets `http://localhost:6006/iframe.html?id=playground--kitchen-sink&viewMode=story`). Ran A-01 only to confirm the retargeted skill works: 2-panel layout renders (calendar + ControlPanel), `[data-testid="playground-calendar-container"]` resolves, defaults = month view / June 2026 / today highlighted. Only console error is a benign Storybook `favicon.ico` 404 (not a library error). Selectors unchanged (`playground-calendar` prefix preserved by the story). Retarget verified working.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | 2026-05-21 | version_2 | Firefox + WebKit | 2    | 0    | 0   | 0           | **D-17 focused retest — SUPERSEDES the D-17 SKIP in the two rows above; D-17 is now PASS on both engines.** Read the implementation: the autoscroll `useEffect` in `DayView.tsx:103-118` depends on `[autoScrollToCurrentTime, isToday]` and calls `containerRef.current.scrollTo({top, behavior:"smooth"})` on the `[data-testid="playground-calendar-day-view"]` region. Correct trigger = mount Day view (today) then flip the flag on. Spied `Element.prototype.scrollTo`: **Firefox** captured `{top:969.5, behavior:"smooth"}` on the day-view region (correct current-time target) — feature fires correctly; observable `scrollTop` stays 0 only because **headless Firefox does not execute programmatic smooth scrolls** (verified: `scrollTo({top:600,behavior:"smooth"})`→0 after 2s, instant `scrollTo({top:600})`→600). **WebKit** captured `{top:971.5, behavior:"smooth"}` AND the region observably scrolled to `scrollTop=882` (clamped to maxScroll) because WebKit headless _does_ run smooth scroll. Earlier SKIP root-caused to (a) toggling the flag before the view was mounted and (b) measuring the wrong inner element (`_body_…`) instead of the `…-day-view` region. |
 
 ### Cross-Cutting Findings (run 2026-05-21 — cross-browser Firefox + WebKit)
