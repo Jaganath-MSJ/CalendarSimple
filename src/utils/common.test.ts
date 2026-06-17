@@ -8,6 +8,7 @@ import {
   toCssLength,
 } from "./common";
 import { LAYOUT_CONSTANTS } from "../constants";
+import { CalendarEvent } from "../types";
 import { KeyboardEvent } from "react";
 
 describe("common utils", () => {
@@ -86,6 +87,28 @@ describe("common utils", () => {
           endDate: "2024-01-02T10:00:00",
         }),
       ).toBe(false);
+    });
+
+    // Regression: a non-string startDate/endDate must not crash isDateOnly
+    // (dateStr.includes is not a function). Such values carry a concrete time,
+    // so they are treated as timed events, not all-day.
+    it("does not throw and returns false for non-string dates", () => {
+      const dateObjEvent = {
+        id: "1",
+        title: "e",
+        startDate: new Date("2024-01-01T10:00:00"),
+        endDate: new Date("2024-01-01T11:00:00"),
+      } as unknown as CalendarEvent;
+      expect(() => isAllDayEvent(dateObjEvent)).not.toThrow();
+      expect(isAllDayEvent(dateObjEvent)).toBe(false);
+
+      const timestampEvent = {
+        id: "2",
+        title: "e",
+        startDate: 1704103200000,
+      } as unknown as CalendarEvent;
+      expect(() => isAllDayEvent(timestampEvent)).not.toThrow();
+      expect(isAllDayEvent(timestampEvent)).toBe(false);
     });
   });
 

@@ -143,10 +143,12 @@ function CustomView(props: CustomViewProps) {
               : undefined;
 
             return renderDateCell ? (
-              renderDateCell({
-                date: date.toJSDate(),
-                isToday,
-              })
+              <React.Fragment key={index}>
+                {renderDateCell({
+                  date: date.toJSDate(),
+                  isToday,
+                })}
+              </React.Fragment>
             ) : (
               <div
                 key={index}

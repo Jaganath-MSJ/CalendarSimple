@@ -27,18 +27,14 @@ This is a React 19 + TypeScript library bundled with Vite. You'll need **Node.js
    npm install
    ```
 
-3. **Run the local environment**. There are two ways to develop and test:
+3. **Run the local environment**. Storybook is the primary way to develop and visually test components:
 
    ```bash
-   # Storybook — the primary way to develop and visually test components (port 6006)
+   # Storybook — develop and visually test components (port 6006)
    npm run storybook
-
-   # The playground — a standalone Vite app that consumes the library locally.
-   # It lives in ./playground and links the library via "file:..".
-   cd playground
-   npm install
-   npm run dev
    ```
+
+   The **Playground → "Kitchen Sink"** story is an interactive sandbox exposing every Calendar prop with a full set of event fixtures.
 
 ## Development Workflow
 
