@@ -33,7 +33,6 @@ Please describe the tests you ran to verify your changes and provide instruction
 
 - [ ] Added/updated automated tests (`npm test`)
 - [ ] Verified via Storybook (`npm run storybook`)
-- [ ] Verified via the local playground (`cd playground && npm run dev`)
 - [ ] Verified the build bundle (`npm run build`)
 
 ## Screenshots / Recordings

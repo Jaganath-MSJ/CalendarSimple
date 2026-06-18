@@ -14,20 +14,20 @@ const sampleEvents = [
   {
     id: "a11y-1",
     title: "Team Meeting",
-    startDate: new Date(new Date(today).setHours(10, 0, 0, 0)),
-    endDate: new Date(new Date(today).setHours(11, 0, 0, 0)),
+    startDate: new Date(new Date(today).setHours(10, 0, 0, 0)).toISOString(),
+    endDate: new Date(new Date(today).setHours(11, 0, 0, 0)).toISOString(),
   },
   {
     id: "a11y-2",
     title: "Design Review",
-    startDate: new Date(new Date(today).setHours(14, 0, 0, 0)),
-    endDate: new Date(new Date(today).setHours(15, 0, 0, 0)),
+    startDate: new Date(new Date(today).setHours(14, 0, 0, 0)).toISOString(),
+    endDate: new Date(new Date(today).setHours(15, 0, 0, 0)).toISOString(),
   },
   {
     id: "a11y-3",
     title: "Planning Session",
-    startDate: new Date(new Date(today).setHours(16, 0, 0, 0)),
-    endDate: new Date(new Date(today).setHours(17, 0, 0, 0)),
+    startDate: new Date(new Date(today).setHours(16, 0, 0, 0)).toISOString(),
+    endDate: new Date(new Date(today).setHours(17, 0, 0, 0)).toISOString(),
   },
 ];
 

@@ -1,12 +1,12 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import type { ReactNode } from "react";
-import { ECalendarViewType, EDayType } from "calendar-simple";
+import { ECalendarViewType, EDayType } from "../../";
 import type {
   CalendarProps,
   ColorScheme,
   CalendarTheme,
   CalendarClassNames,
-} from "calendar-simple";
+} from "../../";
 import { fixtureList } from "./TestFixtures";
 import styles from "./ControlPanel.module.css";
 
