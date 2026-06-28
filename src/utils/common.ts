@@ -52,7 +52,11 @@ export function toCssLength(value: number | string): string {
  * @returns True if the event has no time payload.
  */
 export function isAllDayEvent(event: CalendarEvent): boolean {
-  const isDateOnly = (dateStr: string) => {
+  const isDateOnly = (dateStr: unknown): boolean => {
+    // Non-string dates (Date, number, DateTime) always carry a concrete time,
+    // so they are never date-only. Guarding here also prevents calling string
+    // methods on a non-string value (TypeError: dateStr.includes is not a function).
+    if (typeof dateStr !== "string") return false;
     return !dateStr.includes("T") && !dateStr.includes(" ");
   };
 

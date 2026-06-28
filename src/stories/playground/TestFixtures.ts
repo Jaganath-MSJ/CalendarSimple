@@ -1,4 +1,4 @@
-import type { CalendarEvent } from "calendar-simple";
+import type { CalendarEvent } from "../../";
 
 const formatDateTime = (d: Date) => d.toISOString();
 const formatDate = (d: Date) => {

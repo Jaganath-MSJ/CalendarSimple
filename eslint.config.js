@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import eslintConfigPrettier from 'eslint-config-prettier'
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'playground', 'storybook-static', 'src/stories', '.storybook', 'eslint.config.js', 'vite.config.ts'] },
+  { ignores: ['dist', 'node_modules', 'storybook-static', 'src/stories', '.storybook', 'eslint.config.js', 'vite.config.ts'] },
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   {
