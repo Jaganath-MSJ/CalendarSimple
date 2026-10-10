@@ -86,15 +86,31 @@ describe("useScheduleView Hook", () => {
     });
 
     it("appends day tracking for multi-day events", () => {
-      // Just verify it correctly adds the "Day X/" part, exact total days doesn't matter as much.
-      expect(renderEventTitle(events[1], "2024-03-01")).toMatch(
-        /Multi Day Event \(Day 1\/\d+\)/,
+      // 15:00 on 03-01 → 10:00 on 03-03 covers 3 calendar days, even though
+      // less than 48 elapsed hours separate start and end.
+      expect(renderEventTitle(events[1], "2024-03-01")).toBe(
+        "Multi Day Event (Day 1/3)",
       );
-      expect(renderEventTitle(events[1], "2024-03-02")).toMatch(
-        /Multi Day Event \(Day 2\/\d+\)/,
+      expect(renderEventTitle(events[1], "2024-03-02")).toBe(
+        "Multi Day Event (Day 2/3)",
       );
-      expect(renderEventTitle(events[1], "2024-03-03")).toMatch(
-        /Multi Day Event \(Day 3\/\d+\)/,
+      expect(renderEventTitle(events[1], "2024-03-03")).toBe(
+        "Multi Day Event (Day 3/3)",
+      );
+    });
+
+    it("counts calendar days for overnight events", () => {
+      const overnight: CalendarEvent = {
+        id: "N",
+        title: "Overnight",
+        startDate: "2024-03-01T22:00:00",
+        endDate: "2024-03-02T02:00:00",
+      };
+      expect(renderEventTitle(overnight, "2024-03-01")).toBe(
+        "Overnight (Day 1/2)",
+      );
+      expect(renderEventTitle(overnight, "2024-03-02")).toBe(
+        "Overnight (Day 2/2)",
       );
     });
   });

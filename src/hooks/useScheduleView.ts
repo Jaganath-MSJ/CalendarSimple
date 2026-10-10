@@ -16,6 +16,7 @@ import {
   dateFn,
   isSameDate,
   getDiffDays,
+  getStartOfDay,
   isAllDayEvent,
 } from "../utils";
 import { DATE_FORMATS } from "../constants";
@@ -154,7 +155,8 @@ export default function useScheduleView({
       const currentDay = dateFn(dateKey).startOf("day");
       const startDay = dateFn(event.startDate).startOf("day");
       const dayIndex = getDiffDays(currentDay, startDay) + 1;
-      const totalDays = getDiffDays(event.endDate, event.startDate) + 1;
+      // Compare day starts so partial days count as whole calendar days
+      const totalDays = getDiffDays(getStartOfDay(event.endDate), startDay) + 1;
       return `${event.title} (Day ${dayIndex}/${totalDays})`;
     }
     return event.title;

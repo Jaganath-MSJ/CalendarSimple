@@ -193,6 +193,50 @@ describe("useDayEventLayout Hook", () => {
     expect(allDayEvent!.height).toBe(1440); // 24 * 60
   });
 
+  describe("single-day timed events lasting 12h or more", () => {
+    const longShift: CalendarEvent = {
+      id: "L",
+      title: "Long shift",
+      startDate: "2024-03-01T08:00:00",
+      endDate: "2024-03-01T21:00:00",
+    };
+
+    it("keeps them in the time grid when showAllDayRow is true", () => {
+      // The all-day banner only accepts multi-day or all-day events, so
+      // dropping a long single-day event here would hide it entirely.
+      const { result } = renderHook(() =>
+        useDayEventLayout([longShift], baseDate, 0, 24, true, 0),
+      );
+      const layout = result.current as DayEventLayout[];
+      expect(layout).toHaveLength(1);
+      expect(layout[0].top).toBe(480); // 08:00
+      expect(layout[0].height).toBe(780); // 13h
+    });
+
+    it("plots them at their real times when showAllDayRow is false", () => {
+      const { result } = renderHook(() =>
+        useDayEventLayout([longShift], baseDate, 0, 24, false, 0),
+      );
+      const layout = result.current as DayEventLayout[];
+      expect(layout).toHaveLength(1);
+      expect(layout[0].top).toBe(480);
+      expect(layout[0].height).toBe(780);
+    });
+
+    it("still moves multi-day events with 12h+ overlap to the banner", () => {
+      const multiDay: CalendarEvent = {
+        id: "M",
+        title: "Overnight conference",
+        startDate: "2024-03-01T10:00:00",
+        endDate: "2024-03-02T10:00:00",
+      };
+      const { result } = renderHook(() =>
+        useDayEventLayout([multiDay], baseDate, 0, 24, true, 0),
+      );
+      expect(result.current).toEqual([]);
+    });
+  });
+
   it("handles array of dates", () => {
     const dates = [dateFn("2024-03-01"), dateFn("2024-03-02")];
     const events: CalendarEvent[] = [

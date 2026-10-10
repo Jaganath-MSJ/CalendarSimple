@@ -4,6 +4,7 @@ import { expect, describe, it, vi, afterEach } from "vitest";
 import { dateFn } from "./utils";
 import { ECalendarViewType } from "./types";
 import Calendar from "./Calendar";
+import type { RenderHeaderProps, RenderDateCellProps } from "./index";
 
 // Mock ResizeObserver as it's not available in jsdom
 class ResizeObserverMock {
@@ -199,6 +200,44 @@ describe("Calendar Component Integration", () => {
     );
     expect(screen.getByTestId("calendar-error-boundary")).toBeInTheDocument();
     errSpy.mockRestore();
+  });
+
+  it("renders single-day events of 12h or more in the day view grid", () => {
+    render(
+      <Calendar
+        view={ECalendarViewType.day}
+        selectedDate={new Date(2024, 2, 1)}
+        events={[
+          {
+            id: "long-shift",
+            title: "Long shift",
+            startDate: "2024-03-01T08:00:00",
+            endDate: "2024-03-01T21:00:00",
+          },
+        ]}
+      />,
+    );
+    expect(
+      screen.getByTestId("calendar-long-shift-day-event-item"),
+    ).toBeInTheDocument();
+  });
+
+  it("accepts render-prop types exported from the package entry", () => {
+    const renderHeader = ({ view }: RenderHeaderProps) => (
+      <div data-testid="typed-header">{view}</div>
+    );
+    const renderDateCell = ({ date }: RenderDateCellProps) => (
+      <span data-testid="typed-date-cell">{date.getDate()}</span>
+    );
+    render(
+      <Calendar
+        view={ECalendarViewType.month}
+        renderHeader={renderHeader}
+        renderDateCell={renderDateCell}
+      />,
+    );
+    expect(screen.getByTestId("typed-header")).toHaveTextContent("month");
+    expect(screen.getAllByTestId("typed-date-cell").length).toBeGreaterThan(27);
   });
 
   describe("Layout dimensions (CSS custom properties)", () => {

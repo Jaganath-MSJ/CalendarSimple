@@ -81,7 +81,7 @@ function DayColumn({
               isInteractive ? handleKeyboardActivation(handleClick!) : undefined
             }
           >
-            {renderHourCell?.(new Date(new Date().setHours(hour, 0, 0, 0)))}
+            {renderHourCell?.(slotStart.toJSDate())}
           </div>
         );
       })}
