@@ -114,4 +114,73 @@ describe("useScheduleView Hook", () => {
       );
     });
   });
+
+  describe("events ending exactly at midnight", () => {
+    // An end time of 00:00 is exclusive: the event is over before that day starts.
+    const lateShow: CalendarEvent = {
+      id: "late",
+      title: "Late show",
+      startDate: "2024-03-01T22:00:00",
+      endDate: "2024-03-02T00:00:00",
+    };
+    const conference: CalendarEvent = {
+      id: "conf",
+      title: "Conference",
+      startDate: "2024-03-01T10:00:00",
+      endDate: "2024-03-03T00:00:00",
+    };
+    const fullDay: CalendarEvent = {
+      id: "full",
+      title: "Offsite",
+      startDate: "2024-03-01T00:00:00",
+      endDate: "2024-03-02T00:00:00",
+    };
+    const midnightPoint: CalendarEvent = {
+      id: "point",
+      title: "New day marker",
+      startDate: "2024-03-01T00:00:00",
+      endDate: "2024-03-01T00:00:00",
+    };
+
+    const getHook = (events: CalendarEvent[]) =>
+      renderHook(() => useScheduleView({ events, is12Hour: true })).result
+        .current;
+
+    it("does not add an entry on the day the event ends at 00:00", () => {
+      const { groupedEvents, renderEventTime, renderEventTitle } = getHook([
+        lateShow,
+      ]);
+      expect(Object.keys(groupedEvents)).toEqual(["2024-03-01"]);
+      // formatTime leaves double spaces that the browser collapses when rendering
+      expect(renderEventTime(lateShow, "2024-03-01").replace(/\s+/g, " ")).toBe(
+        "10 PM – 12 AM",
+      );
+      expect(renderEventTitle(lateShow, "2024-03-01")).toBe("Late show");
+    });
+
+    it("treats the day before a 00:00 end as the last day of a multi-day event", () => {
+      const { groupedEvents, renderEventTime, renderEventTitle } = getHook([
+        conference,
+      ]);
+      expect(Object.keys(groupedEvents)).toEqual(["2024-03-01", "2024-03-02"]);
+      expect(renderEventTime(conference, "2024-03-02")).toBe("All day");
+      expect(renderEventTitle(conference, "2024-03-02")).toBe(
+        "Conference (Day 2/2)",
+      );
+    });
+
+    it("shows a midnight-to-midnight event as a single all-day entry", () => {
+      const { groupedEvents, renderEventTime, renderEventTitle } = getHook([
+        fullDay,
+      ]);
+      expect(Object.keys(groupedEvents)).toEqual(["2024-03-01"]);
+      expect(renderEventTime(fullDay, "2024-03-01")).toBe("All day");
+      expect(renderEventTitle(fullDay, "2024-03-01")).toBe("Offsite");
+    });
+
+    it("keeps zero-duration midnight events on their own day", () => {
+      const { groupedEvents } = getHook([midnightPoint]);
+      expect(Object.keys(groupedEvents)).toEqual(["2024-03-01"]);
+    });
+  });
 });

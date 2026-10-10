@@ -14,12 +14,27 @@ import { CalendarEvent } from "../types";
 import {
   formatDate,
   dateFn,
-  isSameDate,
+  DateType,
   getDiffDays,
   getStartOfDay,
   isAllDayEvent,
 } from "../utils";
 import { DATE_FORMATS } from "../constants";
+
+/**
+ * Returns the last calendar day an event occupies. A timed event ending at
+ * exactly 00:00 is over before that day starts, so its last day is the one
+ * before. Date-only (all-day) ranges keep their inclusive end date.
+ */
+function getLastEventDay(event: CalendarEvent): DateType {
+  const start = dateFn(event.startDate);
+  if (!event.endDate) return start.startOf("day");
+
+  const end = dateFn(event.endDate);
+  const endsAtMidnight =
+    !isAllDayEvent(event) && end > start && end.equals(end.startOf("day"));
+  return (endsAtMidnight ? end.minus({ days: 1 }) : end).startOf("day");
+}
 
 /**
  * Properties for configuring the schedule view hook.
@@ -63,9 +78,7 @@ export default function useScheduleView({
     sorted.forEach((event) => {
       // Group by every date the event spans
       let current = dateFn(event.startDate).startOf("day");
-      const end = event.endDate
-        ? dateFn(event.endDate).startOf("day")
-        : current;
+      const end = getLastEventDay(event);
 
       while (current < end || current.equals(end)) {
         const dateKey = formatDate(current, DATE_FORMATS.DATE);
@@ -104,9 +117,7 @@ export default function useScheduleView({
 
     const currentDay = dateFn(dateKey).startOf("day");
     const startDay = dateFn(event.startDate).startOf("day");
-    const endDay = event.endDate
-      ? dateFn(event.endDate).startOf("day")
-      : startDay;
+    const endDay = getLastEventDay(event);
     const isMultiDay = !startDay.equals(endDay);
 
     const timeFormat = is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME;
@@ -123,7 +134,8 @@ export default function useScheduleView({
           ? "All day"
           : `${formatTime(formatDate(event.startDate, timeFormat, locale))}`;
       } else if (currentDay.equals(endDay)) {
-        return isEndOfDay(event.endDate!)
+        // A 00:00 end means the event runs to the end of its last day
+        return isEndOfDay(event.endDate!) || isMidnight(event.endDate!)
           ? "All day"
           : `Until ${formatTime(formatDate(event.endDate!, timeFormat, locale))}`;
       } else {
@@ -134,7 +146,13 @@ export default function useScheduleView({
     // Normal single day time range
     const startStr = formatDate(event.startDate, timeFormat, locale);
     if (event.endDate) {
-      if (isMidnight(event.startDate) && isEndOfDay(event.endDate)) {
+      const endsAtNextMidnight =
+        isMidnight(event.endDate) &&
+        dateFn(event.endDate) > dateFn(event.startDate);
+      if (
+        isMidnight(event.startDate) &&
+        (isEndOfDay(event.endDate) || endsAtNextMidnight)
+      ) {
         return "All day";
       }
       const endStr = formatDate(event.endDate, timeFormat, locale);
@@ -148,15 +166,13 @@ export default function useScheduleView({
    * spans multiple days (e.g., "Event Name (Day 2/3)").
    */
   const renderEventTitle = (event: CalendarEvent, dateKey: string) => {
-    if (
-      event.endDate &&
-      !isSameDate(dateFn(event.startDate), dateFn(event.endDate))
-    ) {
-      const currentDay = dateFn(dateKey).startOf("day");
-      const startDay = dateFn(event.startDate).startOf("day");
+    const startDay = getStartOfDay(event.startDate);
+    const lastDay = getLastEventDay(event);
+    if (!startDay.equals(lastDay)) {
+      const currentDay = getStartOfDay(dateKey);
       const dayIndex = getDiffDays(currentDay, startDay) + 1;
       // Compare day starts so partial days count as whole calendar days
-      const totalDays = getDiffDays(getStartOfDay(event.endDate), startDay) + 1;
+      const totalDays = getDiffDays(lastDay, startDay) + 1;
       return `${event.title} (Day ${dayIndex}/${totalDays})`;
     }
     return event.title;

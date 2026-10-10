@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import cx from "classnames";
 import {
   getDayOfWeek,
@@ -75,6 +75,8 @@ function DayView(props: DayViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, testId, colorScheme } = useCalendar();
   const { selectedDate } = state;
+  // Stable identity: AllDayBanner collapses whenever its `days` prop changes
+  const bannerDays = useMemo(() => [selectedDate], [selectedDate]);
   const dayEvents = useDayEventLayout(
     events,
     selectedDate,
@@ -151,7 +153,7 @@ function DayView(props: DayViewProps) {
         </div>
         {showAllDayRow && (
           <AllDayBanner
-            days={[selectedDate]}
+            days={bannerDays}
             events={events || []}
             maxEvents={maxEvents}
             onEventClick={onEventClick}

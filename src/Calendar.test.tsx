@@ -222,6 +222,35 @@ describe("Calendar Component Integration", () => {
     ).toBeInTheDocument();
   });
 
+  describe("all-day banner overflow", () => {
+    const allDayEvents = ["A", "B", "C", "D", "E"].map((letter) => ({
+      id: `ad-${letter}`,
+      title: `Holiday ${letter}`,
+      startDate: "2024-03-01",
+    }));
+    const bannerEvents = () => screen.queryAllByTestId(/-all-day-event$/);
+
+    it("stays expanded in day view when the host app re-renders", () => {
+      const props = {
+        view: ECalendarViewType.day,
+        selectedDate: new Date(2024, 2, 1),
+        events: allDayEvents,
+      };
+      // Host apps commonly pass a fresh inline callback on every render
+      const { rerender } = render(
+        <Calendar {...props} onEventClick={() => {}} />,
+      );
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /more all-day events/i }),
+      );
+      expect(bannerEvents()).toHaveLength(allDayEvents.length);
+
+      rerender(<Calendar {...props} onEventClick={() => {}} />);
+      expect(bannerEvents()).toHaveLength(allDayEvents.length);
+    });
+  });
+
   it("accepts render-prop types exported from the package entry", () => {
     const renderHeader = ({ view }: RenderHeaderProps) => (
       <div data-testid="typed-header">{view}</div>
