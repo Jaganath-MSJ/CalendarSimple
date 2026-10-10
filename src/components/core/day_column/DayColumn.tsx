@@ -5,7 +5,8 @@ import { CalendarContentProps } from "../../../types";
 import { DayEventLayout } from "../../../hooks/useDayEventLayout";
 import { DayWeekEventItem } from "../day_event_item/DayWeekEventItem";
 import CurrentTimeLine from "../current_time_line/CurrentTimeLine";
-import { handleKeyboardActivation } from "../../../utils";
+import { formatDate, handleKeyboardActivation } from "../../../utils";
+import { useCalendar } from "../../../context/CalendarContext";
 import styles from "./DayColumn.module.css";
 
 interface DayColumnProps extends Pick<
@@ -41,6 +42,7 @@ function DayColumn({
   creatable,
   onSlotClick,
 }: DayColumnProps) {
+  const { config } = useCalendar();
   const hours = Array.from(
     { length: maxHour - minHour },
     (_, i) => i + minHour,
@@ -56,8 +58,10 @@ function DayColumn({
           second: 0,
           millisecond: 0,
         });
-        const slotLabel = `Create event at ${slotStart.toFormat(
+        const slotLabel = `Create event at ${formatDate(
+          slotStart,
           "h:mm a, MMMM d",
+          config.locale,
         )}`;
         const handleClick = isInteractive
           ? () =>

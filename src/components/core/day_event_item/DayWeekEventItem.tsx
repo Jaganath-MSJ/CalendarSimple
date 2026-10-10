@@ -26,8 +26,9 @@ export function DayWeekEventItem({
   classNames,
   renderEvent,
 }: DayWeekEventItemProps) {
-  const { testId } = useCalendar();
-  const tooltipText = generateTooltipText(item.event, "day", is12Hour);
+  const { testId, config } = useCalendar();
+  const locale = config.locale;
+  const tooltipText = generateTooltipText(item.event, "day", is12Hour, locale);
 
   const isSmall =
     item.height < LAYOUT_CONSTANTS.SMALL_EVENT_HEIGHT &&
@@ -75,6 +76,7 @@ export function DayWeekEventItem({
             {formatDate(
               item.event.startDate,
               is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME,
+              locale,
             )}
           </div>
         </>

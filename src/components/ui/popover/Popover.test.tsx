@@ -245,4 +245,30 @@ describe("Popover Component", () => {
     expect(screen.getAllByTestId("custom-render")).toHaveLength(2);
     expect(screen.getByText("Custom: Event 1")).toBeInTheDocument();
   });
+
+  it("formats event labels in the calendar locale", () => {
+    render(
+      <CalendarProvider
+        initialDate={dateObj}
+        initialView={ECalendarViewType.month}
+        config={{ locale: "ar-EG" }}
+      >
+        <Popover
+          dateObj={dateObj}
+          events={events as never}
+          onClose={mockOnClose}
+          anchorEl={mockAnchorEl}
+          onEventClick={mockOnEventClick}
+          is12Hour={false}
+        />
+      </CalendarProvider>,
+    );
+    // ar-EG formats digits as Arabic-Indic numerals
+    expect(screen.getByLabelText("Event 1 (٢٠٢٤-٠٣-٠١)")).toBeInTheDocument();
+    // The heading and its label use localized weekday and month names
+    expect(screen.getByText("الجمعة, ١ مارس")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Events on الجمعة, ١ مارس"),
+    ).toBeInTheDocument();
+  });
 });

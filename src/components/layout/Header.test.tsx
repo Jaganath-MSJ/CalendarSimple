@@ -5,6 +5,8 @@ import Header from "./Header";
 import { ECalendarViewType } from "../../types";
 import { dateFn, DateType } from "../../utils";
 import * as CalendarContextModule from "../../context/CalendarContext";
+import { CalendarProvider } from "../../context/CalendarContext";
+import { CalendarProps } from "../../types";
 
 // Simple wrapper for testing to provide mock context if needed, but here we'll just spy on the hook.
 describe("Header Component", () => {
@@ -212,5 +214,35 @@ describe("Header accessibility", () => {
     expect(
       screen.getByRole("combobox", { name: /select year/i }),
     ).toBeInTheDocument();
+  });
+});
+
+describe("Header with a real CalendarProvider", () => {
+  const renderHeader = (
+    view: ECalendarViewType,
+    config: Omit<CalendarProps, "children" | "selectedDate" | "view"> = {},
+    onNavigate: NonNullable<CalendarProps["onNavigate"]> = vi.fn(),
+  ) =>
+    render(
+      <CalendarProvider
+        initialDate={dateFn("2024-03-01")}
+        initialView={view}
+        config={config}
+      >
+        <Header
+          pastYearLength={10}
+          futureYearLength={10}
+          onNavigate={onNavigate}
+        />
+      </CalendarProvider>,
+    );
+
+  it("formats the custom-days range year in the calendar locale", () => {
+    renderHeader(ECalendarViewType.customDays, {
+      locale: "ar-EG",
+      customDays: 3,
+    });
+    // ar-EG formats digits as Arabic-Indic numerals, including the year
+    expect(screen.getByRole("heading")).toHaveTextContent(/, ٢٠٢٤$/);
   });
 });

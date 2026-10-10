@@ -159,4 +159,26 @@ describe("DayColumn Component", () => {
 
     expect(onSlotClick).not.toHaveBeenCalled();
   });
+
+  it("formats the create-slot label in the calendar locale", () => {
+    render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+        config={{ locale: "ko" }}
+      >
+        <DayColumn
+          {...defaultProps}
+          dayEvents={[]}
+          minHour={8}
+          maxHour={9}
+          creatable
+          onSlotClick={vi.fn()}
+        />
+      </CalendarProvider>,
+    );
+    expect(
+      screen.getByRole("button", { name: "Create event at 8:00 오전, 3월 1" }),
+    ).toBeInTheDocument();
+  });
 });
