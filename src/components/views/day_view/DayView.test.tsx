@@ -4,6 +4,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import DayView from "./DayView";
 import { dateFn } from "../../../utils";
 import * as CalendarContextModule from "../../../context/CalendarContext";
+import { CalendarProvider } from "../../../context/CalendarContext";
+import { ECalendarViewType } from "../../../types";
 
 // Provide a mock ResizeObserver since child components might need it
 globalThis.ResizeObserver = vi.fn().mockImplementation(() => ({
@@ -98,5 +100,56 @@ describe("DayView Component", () => {
     render(<DayView {...defaultProps} />);
 
     expect(screen.getByText("Test Event")).toBeInTheDocument();
+  });
+});
+
+describe("DayView all-day row (real CalendarProvider)", () => {
+  const events = [
+    { id: "holiday", title: "Holiday", startDate: "2024-03-01" },
+    {
+      id: "standup",
+      title: "Standup",
+      startDate: "2024-03-01T09:00:00",
+      endDate: "2024-03-01T09:30:00",
+    },
+  ];
+
+  const renderDayView = (showAllDayRow: boolean) =>
+    render(
+      <CalendarProvider
+        initialDate={dateFn("2024-03-01")}
+        initialView={ECalendarViewType.day}
+        testId="cal"
+        config={{ events }}
+      >
+        <DayView
+          minHour={0}
+          maxHour={24}
+          maxEvents={3}
+          eventOverlapOffset={0}
+          showAllDayRow={showAllDayRow}
+        />
+      </CalendarProvider>,
+    );
+
+  it("puts all-day events in the banner and keeps timed events in the grid", () => {
+    renderDayView(true);
+    expect(screen.getByTestId("cal-all-day-banner")).toBeInTheDocument();
+    expect(screen.getByTestId("cal-holiday-all-day-event")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("cal-holiday-day-event-item"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId("cal-standup-day-event-item"),
+    ).toBeInTheDocument();
+  });
+
+  it("stretches all-day events over the full grid when showAllDayRow is false", () => {
+    renderDayView(false);
+    expect(screen.queryByTestId("cal-all-day-banner")).not.toBeInTheDocument();
+    expect(screen.getByTestId("cal-holiday-day-event-item")).toHaveStyle({
+      top: "0px",
+      height: "1440px", // 24h × 60px
+    });
   });
 });

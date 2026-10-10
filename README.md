@@ -177,6 +177,19 @@ const MyCalendar = () => {
 />
 ```
 
+`renderHourCell` receives the start of each hour slot on that column's own date, so it can style per day:
+
+```tsx
+<Calendar
+  view="week"
+  renderHourCell={(date) =>
+    date.getDay() === 0 || date.getDay() === 6 ? (
+      <div style={{ height: "100%", background: "rgba(239, 68, 68, 0.08)" }} />
+    ) : null
+  }
+/>
+```
+
 ### 🌍 Localization
 
 ```tsx
@@ -252,6 +265,8 @@ const MyCalendar = () => {
 | `sortedMonthView`         | `boolean \| ((a: CalendarEvent, b: CalendarEvent) => number)` | `true`              |
 
 ### Types
+
+All types below can be imported from the package, e.g. `import type { RenderHeaderProps, RenderDateCellProps } from "calendar-simple";`.
 
 #### `CalendarEvent`
 

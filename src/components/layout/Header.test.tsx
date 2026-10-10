@@ -237,6 +237,47 @@ describe("Header with a real CalendarProvider", () => {
       </CalendarProvider>,
     );
 
+  it("selecting a month updates the title and calls onNavigate", () => {
+    const onNavigate = vi.fn<NonNullable<CalendarProps["onNavigate"]>>();
+    renderHeader(ECalendarViewType.month, {}, onNavigate);
+
+    fireEvent.change(screen.getByRole("combobox", { name: /select month/i }), {
+      target: { value: "5" }, // June (0-based)
+    });
+
+    expect(
+      screen.getByRole("heading", { name: "June 2024" }),
+    ).toBeInTheDocument();
+    expect(onNavigate).toHaveBeenCalledTimes(1);
+    const navigated = dateFn(onNavigate.mock.calls[0][0]);
+    expect(navigated.toISODate()).toBe("2024-06-01");
+  });
+
+  it("selecting a year updates the title and calls onNavigate", () => {
+    const onNavigate = vi.fn<NonNullable<CalendarProps["onNavigate"]>>();
+    renderHeader(ECalendarViewType.month, {}, onNavigate);
+
+    fireEvent.change(screen.getByRole("combobox", { name: /select year/i }), {
+      target: { value: "2026" },
+    });
+
+    expect(
+      screen.getByRole("heading", { name: "March 2026" }),
+    ).toBeInTheDocument();
+    expect(dateFn(onNavigate.mock.calls[0][0]).toISODate()).toBe("2026-03-01");
+  });
+
+  it("appends the ISO week number to the week view title when showWeekNumbers is true", () => {
+    renderHeader(ECalendarViewType.week, { showWeekNumbers: true });
+    // 2024-03-01 falls in ISO week 9
+    expect(screen.getByRole("heading")).toHaveTextContent(/W9$/);
+  });
+
+  it("omits the week number when showWeekNumbers is false", () => {
+    renderHeader(ECalendarViewType.week, { showWeekNumbers: false });
+    expect(screen.getByRole("heading")).not.toHaveTextContent(/W\d+/);
+  });
+
   it("formats the custom-days range year in the calendar locale", () => {
     renderHeader(ECalendarViewType.customDays, {
       locale: "ar-EG",

@@ -194,3 +194,21 @@ export const CustomMessagesFull: Story = {
     },
   },
 };
+
+export const Korean12Hour: Story = {
+  args: {
+    view: ECalendarViewType.week,
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    locale: "ko",
+    is12Hour: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Event times, tooltips and the click-to-create slot labels all follow `locale` (here 오전/오후 instead of AM/PM).",
+      },
+    },
+  },
+};
