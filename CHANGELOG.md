@@ -1,3 +1,14 @@
+# [2.1.0](https://github.com/Jaganath-MSJ/CalendarSimple/compare/v2.0.0...v2.1.0) (2026-06-28)
+
+### Bug Fixes
+
+- **common:** guard isAllDayEvent against non-string dates ([849a15e](https://github.com/Jaganath-MSJ/CalendarSimple/commit/849a15ec146eeac386273a9f3f5ce376c769e823))
+- **views:** add key to custom-rendered date cells ([c60d491](https://github.com/Jaganath-MSJ/CalendarSimple/commit/c60d491456b5c59f7f79638794a67134ab4693c3))
+
+### Features
+
+- **stories:** add Playground/Kitchen Sink story ([80ec096](https://github.com/Jaganath-MSJ/CalendarSimple/commit/80ec096fead55fd9980a40cc5ea1b6d81a391f51))
+
 # [2.0.0](https://github.com/Jaganath-MSJ/CalendarSimple/compare/v1.2.0...v2.0.0) (2026-05-26)
 
 - feat!: support compound component pattern and improve prop handling ([5635395](https://github.com/Jaganath-MSJ/CalendarSimple/commit/5635395ab21dfa2c49252cce9cfb56088396b496))
