@@ -46,7 +46,8 @@ export default defineConfig({
       dts({
         include: ["src"],
         exclude: ["node_modules", "dist"],
-        rollupTypes: false,
+        // Keep declarations under dist/src/ to match package.json "types"
+        entryRoot: ".",
       }),
     process.env.ANALYZE &&
       visualizer({

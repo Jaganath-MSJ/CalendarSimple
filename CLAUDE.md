@@ -91,10 +91,10 @@ This enables prop composition: global calendar props + view-specific overrides.
 ### Core Hooks (Event & Layout Logic)
 
 - **`useEvents`** — Filters and enriches events for the current date range; supports O(1) lookup via `enrichedEventsByDate`
-- **`useAllDayBanner`** — Extracts all-day events from event list; handles multi-day spanning
-- **`useDayEventLayout`** — Implements "Tetris" collision detection for overlapping timed events; returns positioning data
+- **`useAllDayBanner`** — Extracts all-day events from event list; handles multi-day spanning. Multi-day timed events only occupy days they cover for ≥12h; single-day timed events never go to the banner
+- **`useDayEventLayout`** — Implements "Tetris" collision detection for overlapping timed events; returns positioning data. Leaves out multi-day events with ≥12h on a day (the banner shows them) but always keeps single-day timed events, however long
 - **`useMonthGrid`** — Builds month calendar grid with week rows; handles adjacent month visibility
-- **`useScheduleView`** — Groups events by date for schedule layout; handles sorting
+- **`useScheduleView`** — Groups events by date for schedule layout; handles sorting. A timed `endDate` of exactly 00:00 is exclusive (the event ends on the previous day); date-only ranges are inclusive
 - **`useResizeObserver`** — Observes container resize; provides width/height for responsive layout
 - **`useColorScheme`** — Resolves the `colorScheme` prop to a concrete `'light'`/`'dark'` value, subscribing to the OS `prefers-color-scheme` media query when `auto`
 
@@ -120,7 +120,7 @@ Multi-day events use `startDate` and `endDate` without time components; timed ev
 - **Internal representation**: `DateTime` from Luxon library (not JS `Date`)
 - **Utilities in `src/utils/date.ts`**: `dateFn()` normalizes inputs (JS Date, ISO string, timestamp) → `DateTime`
 - **No raw `Date` in components**: Convert at boundaries (props input/output) using `toJSDate()` / `dateFn()`
-- **Localization**: Full Luxon support via `locale` prop; date formatting respects language
+- **Localization**: Full Luxon support via `locale` prop; date formatting respects language. Always pass the locale to `formatDate` (read `config.locale` from `useCalendar()` or use the merged props): it silently falls back to `"en"` when omitted
 
 ### Accessibility
 

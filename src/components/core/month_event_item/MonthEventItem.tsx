@@ -168,6 +168,7 @@ function MonthEventItem({
                     item,
                     ECalendarViewType.month,
                     is12Hour,
+                    locale,
                   );
 
                   const eventBgColor =

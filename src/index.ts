@@ -10,6 +10,8 @@ export type {
   CalendarTheme,
   ThemeScheme,
   CalendarClassNames,
+  RenderHeaderProps,
+  RenderDateCellProps,
 } from "./types";
 export type { HeaderProps } from "./components/layout/Header";
 export type { ViewProps } from "./components/views/View";
