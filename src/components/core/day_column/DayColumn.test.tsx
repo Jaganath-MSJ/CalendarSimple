@@ -165,7 +165,7 @@ describe("DayColumn Component", () => {
       <CalendarProvider
         initialDate={dateFn()}
         initialView={ECalendarViewType.week}
-        config={{ locale: "ko" }}
+        config={{ locale: "ja" }}
       >
         <DayColumn
           {...defaultProps}
@@ -178,7 +178,8 @@ describe("DayColumn Component", () => {
       </CalendarProvider>,
     );
     expect(
-      screen.getByRole("button", { name: "Create event at 8:00 오전, 3월 1" }),
+      // Japanese meridiem (午前) is stable across the Node versions CI runs on
+      screen.getByRole("button", { name: /^Create event at 8:00 午前/ }),
     ).toBeInTheDocument();
   });
 });

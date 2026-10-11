@@ -242,14 +242,15 @@ describe("DayWeekEventItem Component", () => {
       <CalendarProvider
         initialDate={dateFn()}
         initialView={ECalendarViewType.week}
-        config={{ locale: "ko" }}
+        config={{ locale: "ja" }}
       >
         <DayWeekEventItem {...defaultProps} is12Hour />
       </CalendarProvider>,
     );
     const eventEl = container.firstChild as HTMLElement;
-    // Korean renders the 12-hour meridiem as 오전/오후 instead of AM/PM
-    expect(eventEl).toHaveAttribute("title", expect.stringContaining("오전"));
-    expect(screen.getByText("10:00 오전")).toBeInTheDocument();
+    // Japanese renders the 12-hour meridiem as 午前/午後 instead of AM/PM.
+    // (Not Korean: Node 20's Intl returns "AM" for ko with hourCycle h12.)
+    expect(eventEl).toHaveAttribute("title", expect.stringContaining("午前"));
+    expect(screen.getByText("10:00 午前")).toBeInTheDocument();
   });
 });
