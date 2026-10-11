@@ -124,3 +124,40 @@ export const SortedMonthView: Story = {
     sortedMonthView: true,
   },
 };
+
+const priorityRank: Record<string, number> = { high: 0, medium: 1, low: 2 };
+
+export const SortedMonthViewCustomComparator: Story = {
+  args: {
+    events: [
+      { priority: "low", title: "Inbox zero" },
+      { priority: "high", title: "Release sign-off" },
+      { priority: "medium", title: "Design review" },
+      { priority: "high", title: "Incident follow-up" },
+    ].map((event, i) => ({
+      id: `priority-${i}`,
+      startDate: today.toFormat("yyyy-MM-dd"),
+      style: {
+        backgroundColor:
+          event.priority === "high"
+            ? "#EF4444"
+            : event.priority === "medium"
+              ? "#F59E0B"
+              : "#6B7280",
+      },
+      ...event,
+    })),
+    selectedDate: today.toJSDate(),
+    maxEvents: 4,
+    sortedMonthView: (a: CalendarEvent, b: CalendarEvent) =>
+      priorityRank[String(a.priority)] - priorityRank[String(b.priority)],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Pass a comparator to `sortedMonthView` to control order inside each day cell. Here a custom `priority` field puts high-priority events first.",
+      },
+    },
+  },
+};

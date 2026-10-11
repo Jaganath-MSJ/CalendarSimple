@@ -553,3 +553,35 @@ export const HideAllDayRow: Story = {
     },
   },
 };
+
+export const RenderHourCellPerDay: Story = {
+  args: {
+    view: ECalendarViewType.week,
+    events: customizeEvents,
+    selectedDate: today.toJSDate(),
+    renderHourCell: (date: Date) => {
+      const slot = dateFn(date);
+      const isWeekend = slot.weekday >= 6;
+      const isOffHours = slot.hour < 9 || slot.hour >= 17;
+      if (!isWeekend && !isOffHours) return null;
+      return (
+        <div
+          style={{
+            height: "100%",
+            background: isWeekend
+              ? "rgba(239, 68, 68, 0.08)"
+              : "rgba(107, 114, 128, 0.08)",
+          }}
+        />
+      );
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`renderHourCell` receives the slot's own date and hour, so it can shade per day: weekends in red, weekday hours outside 9–17 in grey.",
+      },
+    },
+  },
+};

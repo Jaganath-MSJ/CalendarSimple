@@ -125,5 +125,21 @@ describe("AllDayBanner Component", () => {
     expect(moreChip).toBeInTheDocument();
 
     fireEvent.click(moreChip);
+
+    // Expanded: chip hidden, toggle reports expanded, hook asked for all rows
+    const collapseIcon = screen.getByRole("button", {
+      name: "Collapse all-day events",
+    });
+    expect(collapseIcon).toHaveAttribute("aria-expanded", "true");
+    expect(screen.queryByText("+ 1 more")).not.toBeInTheDocument();
+    expect(mockUseAllDayBanner.mock.lastCall?.[2]).toBe(true);
+
+    // Collapse again: chip returns and the hook is asked for the capped rows
+    fireEvent.click(collapseIcon);
+    expect(
+      screen.getByRole("button", { name: "Expand all-day events" }),
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByText("+ 1 more")).toBeInTheDocument();
+    expect(mockUseAllDayBanner.mock.lastCall?.[2]).toBe(false);
   });
 });

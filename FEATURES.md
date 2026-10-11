@@ -30,13 +30,14 @@ Switch between views using the `view` prop (`ECalendarViewType`).
   - `showAdjacentMonths` — Toggle visibility of dates from adjacent months.
   - `showWeekNumbers` — Display ISO week numbers per row.
   - `weekStartsOn` / `weekEndsOn` — Configure which days begin and end the layout.
-- **Week (`"week"`)** — 7-column time grid. All-day and multi-day events appear in a top banner.
+- **Week (`"week"`)** — 7-column time grid. All-day events appear in a top banner, as do multi-day timed events on each day they cover for 12 hours or more. Single-day timed events always stay in the grid, however long they are.
   - `showAllDayRow={false}` — Pushes all-day events into the time grid as 24-hour blocks.
   - Overlapping events are tiled to prevent collision; use `eventOverlapOffset` for a layered style.
 - **Day (`"day"`)** — Single-day time grid. Maximum horizontal space for event details.
 - **Custom Days (`"customDays"`)** — Multi-day time grid starting from `selectedDate`. Set the number of days with `customDays`.
 - **Schedule (`"schedule"`)** — Chronological event list grouped by date. Optimized for mobile or sidebar use.
   - `renderScheduleSeparator` — Render a custom divider between date groups.
+  - Multi-day events repeat on each day they cover with a "(Day X/Y)" suffix, counted in calendar days. A timed event ending at exactly 00:00 finishes on the previous day, so it never adds an entry for the day it ends on.
 
 ---
 
@@ -74,7 +75,7 @@ Replace core UI elements entirely with render props.
 
 - **`renderEvent(event)`** — Replaces the default event chip across all views.
 - **`renderHeader(props)`** — Replaces the default navigation header. Receives `currentDate`, `view`, `onNavigate`, `onViewChange`.
-- **`renderHourCell(date)`** — Customizes background hour slots in Day, Week, and Custom Days views.
+- **`renderHourCell(date)`** — Customizes background hour slots in Day, Week, and Custom Days views. Receives each slot's start time on that column's own date, so you can style per day (e.g. shade weekends).
 - **`renderDateCell(props)`** — Customizes date headers (Week/Day) and date cells (Month). Receives `date`, `isToday`, `isSelected`, `isCurrentMonth`.
 - **`renderScheduleSeparator(date)`** — Renders a custom separator between date groups in Schedule view.
 
@@ -94,7 +95,7 @@ Replace core UI elements entirely with render props.
 
 The calendar uses Luxon internally for all date formatting.
 
-- **`locale`** — Any valid Luxon locale string (e.g., `"fr"`, `"es-MX"`, `"zh"`, `"ar"`). All month names, day headers, and date strings adapt automatically.
+- **`locale`** — Any valid Luxon locale string (e.g., `"fr"`, `"es-MX"`, `"zh"`, `"ar"`). All month names, day headers, and date strings adapt automatically, including event times, tooltips, popover headings and slot labels.
 - **`localeMessages`** — Translate built-in UI labels that aren't date-derived.
 
   Supported keys: `today`, `day`, `week`, `month`, `schedule`, `days`.
@@ -313,7 +314,7 @@ All accessibility features are built-in and require no extra configuration.
 | `renderLoading`           | `() => ReactNode`                           | `undefined` | Custom loading indicator renderer. Falls back to a built-in spinner when omitted. |
 | `renderEvent`             | `(event: CalendarEvent) => ReactNode`       | `undefined` | Replace the default event chip across all views.                                  |
 | `renderHeader`            | `(props: RenderHeaderProps) => ReactNode`   | `undefined` | Replace the default navigation header.                                            |
-| `renderHourCell`          | `(date: Date) => ReactNode`                 | `undefined` | Customize hour slots in Day/Week/CustomDays views.                                |
+| `renderHourCell`          | `(date: Date) => ReactNode`                 | `undefined` | Customize hour slots in Day/Week/CustomDays views; receives the slot's own date.  |
 | `renderDateCell`          | `(props: RenderDateCellProps) => ReactNode` | `undefined` | Customize date headers (Week/Day) and date cells (Month).                         |
 | `renderScheduleSeparator` | `(date: Date) => ReactNode`                 | `undefined` | Render a custom separator between date groups in Schedule view.                   |
 

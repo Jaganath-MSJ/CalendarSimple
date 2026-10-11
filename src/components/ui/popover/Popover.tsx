@@ -50,7 +50,7 @@ function Popover({
   is12Hour,
   renderEvent,
 }: PopoverProps) {
-  const { testId, colorScheme } = useCalendar();
+  const { testId, colorScheme, config } = useCalendar();
   const popoverRef = useRef<HTMLDivElement>(null);
   const [stylePosition, setStylePosition] = useState<CSSProperties>({
     visibility: "hidden",
@@ -171,7 +171,7 @@ function Popover({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`Events on ${formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH)}`}
+      aria-label={`Events on ${formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH, config.locale)}`}
       className={styles.popover}
       ref={popoverRef}
       style={stylePosition}
@@ -181,7 +181,7 @@ function Popover({
       data-color-scheme={colorScheme}
     >
       <div className={styles.popoverHeader}>
-        {formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH)}
+        {formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH, config.locale)}
       </div>
       <div className={styles.popoverContent}>
         {events.map((item, idx) => {
@@ -197,6 +197,7 @@ function Popover({
             item,
             ECalendarViewType.month,
             is12Hour,
+            config.locale,
           );
 
           const eventBgColor =

@@ -125,3 +125,40 @@ export const WithTimeLimits: Story = {
     maxHour: 18,
   },
 };
+
+export const LongSingleDayEvent: Story = {
+  args: {
+    events: [
+      {
+        id: "shift",
+        title: "On-call shift (08:00–21:00)",
+        startDate: today.set({ hour: 8, minute: 0 }).toISO()!,
+        endDate: today.set({ hour: 21, minute: 0 }).toISO()!,
+        style: { backgroundColor: "#0EA5E9" },
+      },
+      {
+        id: "handover",
+        title: "Handover",
+        startDate: today.set({ hour: 12, minute: 0 }).toISO()!,
+        endDate: today.set({ hour: 13, minute: 0 }).toISO()!,
+        style: { backgroundColor: "#8B5CF6" },
+      },
+      {
+        id: "trip",
+        title: "Trip (multi-day, moves to banner)",
+        startDate: today.minus({ days: 1 }).set({ hour: 9 }).toISO()!,
+        endDate: today.plus({ days: 1 }).set({ hour: 18 }).toISO()!,
+        style: { backgroundColor: "#10B981" },
+      },
+    ],
+    selectedDate: today.toJSDate(),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A single-day event of 12 hours or more stays in the time grid at its real times. Only multi-day events with 12h+ on a day move to the all-day banner.",
+      },
+    },
+  },
+};

@@ -236,4 +236,21 @@ describe("DayWeekEventItem Component", () => {
     fireEvent.keyDown(btn, { key: "ArrowDown" });
     expect(onEventClick).not.toHaveBeenCalled();
   });
+
+  it("formats its tooltip and start time in the calendar locale", () => {
+    const { container } = render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+        config={{ locale: "ja" }}
+      >
+        <DayWeekEventItem {...defaultProps} is12Hour />
+      </CalendarProvider>,
+    );
+    const eventEl = container.firstChild as HTMLElement;
+    // Japanese renders the 12-hour meridiem as 午前/午後 instead of AM/PM.
+    // (Not Korean: Node 20's Intl returns "AM" for ko with hourCycle h12.)
+    expect(eventEl).toHaveAttribute("title", expect.stringContaining("午前"));
+    expect(screen.getByText("10:00 午前")).toBeInTheDocument();
+  });
 });

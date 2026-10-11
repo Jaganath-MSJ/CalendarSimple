@@ -138,3 +138,54 @@ export const AutoScrollToCurrentTime: Story = {
     autoScrollToCurrentTime: true,
   },
 };
+
+const dayAt = (days: number, hour: number) =>
+  today
+    .plus({ days })
+    .set({ hour, minute: 0, second: 0 })
+    .toFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+export const MidnightAndOvernightEvents: Story = {
+  args: {
+    events: [
+      {
+        id: "late-show",
+        title: "Late show (ends 00:00)",
+        startDate: dayAt(0, 22),
+        endDate: dayAt(1, 0),
+        style: { backgroundColor: "#8B5CF6" },
+      },
+      {
+        id: "overnight",
+        title: "Overnight deploy",
+        startDate: dayAt(0, 22),
+        endDate: dayAt(1, 2),
+        style: { backgroundColor: "#EF4444" },
+      },
+      {
+        id: "offsite",
+        title: "Offsite (00:00 to 00:00)",
+        startDate: dayAt(2, 0),
+        endDate: dayAt(3, 0),
+        style: { backgroundColor: "#10B981" },
+      },
+      {
+        id: "conference",
+        title: "Conference",
+        startDate: dayAt(4, 10),
+        endDate: dayAt(6, 0),
+        style: { backgroundColor: "#3B82F6" },
+      },
+    ],
+    selectedDate: today.toJSDate(),
+    is12Hour: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'An end time of exactly 00:00 is exclusive: "Late show" appears only on its start day, "Offsite" is a single all-day entry, and "Conference" spans Day 1/2 and Day 2/2. "Overnight deploy" genuinely crosses midnight, so it shows Day 1/2 and Day 2/2.',
+      },
+    },
+  },
+};

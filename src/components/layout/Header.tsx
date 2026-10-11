@@ -162,7 +162,7 @@ function Header(props: HeaderProps) {
       if (days === 1) {
         return formatDate(selectedDate, DATE_FORMATS.MONTH_DAY_YEAR, locale);
       }
-      return `${formatDate(selectedDate, DATE_FORMATS.DAY_DATE_SHORT_MONTH, locale)} - ${formatDate(endDate, DATE_FORMATS.DAY_DATE_SHORT_MONTH, locale)}, ${formatDate(selectedDate, "yyyy")}`;
+      return `${formatDate(selectedDate, DATE_FORMATS.DAY_DATE_SHORT_MONTH, locale)} - ${formatDate(endDate, DATE_FORMATS.DAY_DATE_SHORT_MONTH, locale)}, ${formatDate(selectedDate, "yyyy", locale)}`;
     }
     if (view === ECalendarViewType.schedule) {
       if (events && events.length > 0) {

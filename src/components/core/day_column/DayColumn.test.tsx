@@ -78,6 +78,30 @@ describe("DayColumn Component", () => {
     expect(screen.getAllByTestId("custom-hour")).toHaveLength(2);
   });
 
+  it("passes the column's date and slot hour to renderHourCell", () => {
+    const renderHourCell = vi.fn<(date: Date) => React.ReactNode>(() => null);
+    render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+      >
+        <DayColumn
+          {...defaultProps}
+          dayEvents={[]}
+          minHour={8}
+          maxHour={9}
+          renderHourCell={renderHourCell}
+        />
+      </CalendarProvider>,
+    );
+
+    expect(renderHourCell).toHaveBeenCalledTimes(1);
+    const slotDate = dateFn(renderHourCell.mock.calls[0][0]);
+    expect(slotDate.toISODate()).toBe("2024-03-01");
+    expect(slotDate.hour).toBe(8);
+    expect(slotDate.minute).toBe(0);
+  });
+
   it("fires onSlotClick with correct start and end dates when creatable=true and a slot is clicked", () => {
     const onSlotClick = vi.fn();
     const date = dateFn("2024-03-01T00:00:00");
@@ -134,5 +158,28 @@ describe("DayColumn Component", () => {
     fireEvent.click(slots[0]);
 
     expect(onSlotClick).not.toHaveBeenCalled();
+  });
+
+  it("formats the create-slot label in the calendar locale", () => {
+    render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+        config={{ locale: "ja" }}
+      >
+        <DayColumn
+          {...defaultProps}
+          dayEvents={[]}
+          minHour={8}
+          maxHour={9}
+          creatable
+          onSlotClick={vi.fn()}
+        />
+      </CalendarProvider>,
+    );
+    expect(
+      // Japanese meridiem (午前) is stable across the Node versions CI runs on
+      screen.getByRole("button", { name: /^Create event at 8:00 午前/ }),
+    ).toBeInTheDocument();
   });
 });
