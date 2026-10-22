@@ -101,5 +101,9 @@
   "overrides": {
     "eslint": "$eslint",
     "esbuild": "$esbuild"
+  },
+  "allowScripts": {
+    "esbuild": false,
+    "fsevents": false
   }
 }
