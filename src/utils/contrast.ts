@@ -40,16 +40,16 @@ const colorNameMap: Record<string, string> = {
 function parseToRgb(color: string): RGB | null {
   color = color.trim().toLowerCase();
 
-  // Handle Hex (e.g., #FFF or #FFFFFF)
+  // Handle Hex (e.g., #FFF, #FFFA, #FFFFFF or #FFFFFFAA); alpha is ignored
   if (color.startsWith("#")) {
     const hex = color.slice(1);
-    if (hex.length === 3) {
+    if (hex.length === 3 || hex.length === 4) {
       return {
         r: parseInt(hex[0] + hex[0], 16),
         g: parseInt(hex[1] + hex[1], 16),
         b: parseInt(hex[2] + hex[2], 16),
       };
-    } else if (hex.length === 6) {
+    } else if (hex.length === 6 || hex.length === 8) {
       return {
         r: parseInt(hex.substring(0, 2), 16),
         g: parseInt(hex.substring(2, 4), 16),
@@ -58,10 +58,11 @@ function parseToRgb(color: string): RGB | null {
     }
   }
 
-  // Handle RGB/RGBA (e.g., rgb(255, 255, 255) or rgba(255, 255, 255, 1))
-  const rgbMatch = color.match(
-    /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)$/,
-  );
+  // Handle RGB/RGBA, comma or space separated
+  // (e.g., rgb(255, 255, 255), rgba(255, 255, 255, 1) or rgb(255 255 255 / 0.5))
+  const rgbMatch =
+    color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)$/) ??
+    color.match(/^rgba?\((\d+)\s+(\d+)\s+(\d+)(?:\s*\/\s*[\d.]+%?)?\)$/);
   if (rgbMatch) {
     return {
       r: parseInt(rgbMatch[1], 10),
