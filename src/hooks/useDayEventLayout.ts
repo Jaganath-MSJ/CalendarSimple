@@ -14,7 +14,11 @@
 import { CalendarEvent } from "../types";
 import { useMemo } from "react";
 import { dateFn, DateType, formatDate } from "../utils/date";
-import { isAllDayEvent, getEventOverlapInHours } from "../utils/common";
+import {
+  isAllDayEvent,
+  isMultiDay,
+  getEventOverlapInHours,
+} from "../utils/common";
 import { DATE_FORMATS, TIME_CONSTANTS } from "../constants";
 
 export interface UseDayEventLayoutOptions {
@@ -104,7 +108,13 @@ export default function useDayEventLayout(
 
           if (showAllDayRow) {
             if (isAllDay) return false;
-            if (getEventOverlapInHours(event, currentDay) >= 12) return false;
+            // Only multi-day events move to the all-day banner; it never
+            // shows single-day timed events, however long they are.
+            if (
+              isMultiDay(event) &&
+              getEventOverlapInHours(event, currentDay) >= 12
+            )
+              return false;
 
             // To ensure we restrict to visible operating hours
             const actStartMs = Math.max(
@@ -172,7 +182,10 @@ export default function useDayEventLayout(
 
           if (start === end) end += 1;
 
-          if (!showAllDayRow && (isAllDay || overlapHours >= 12)) {
+          if (
+            !showAllDayRow &&
+            (isAllDay || (isMultiDay(event) && overlapHours >= 12))
+          ) {
             // Force it to span the entire visible grid (minHour to maxHour)
             start = minHour * TIME_CONSTANTS.MINUTES_IN_HOUR;
             end = maxHour * TIME_CONSTANTS.MINUTES_IN_HOUR;

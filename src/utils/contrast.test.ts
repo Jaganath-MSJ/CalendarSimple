@@ -33,6 +33,18 @@ describe("contrast utility", () => {
       expect(getContrastColor("white")).toBe("#212529");
     });
 
+    it("should handle 4- and 8-digit hex with alpha", () => {
+      expect(getContrastColor("#ffff00cc")).toBe("#212529");
+      expect(getContrastColor("#ff0c")).toBe("#212529");
+      expect(getContrastColor("#000000cc")).toBe("#FFFFFF");
+    });
+
+    it("should handle space-separated rgb syntax", () => {
+      expect(getContrastColor("rgb(255 255 0)")).toBe("#212529");
+      expect(getContrastColor("rgb(255 255 0 / 0.5)")).toBe("#212529");
+      expect(getContrastColor("rgb(0 0 0)")).toBe("#FFFFFF");
+    });
+
     it("should fallback to white for unknown/invalid input", () => {
       expect(getContrastColor("invalid")).toBe("#FFFFFF");
       expect(getContrastColor(undefined)).toBe("#FFFFFF");

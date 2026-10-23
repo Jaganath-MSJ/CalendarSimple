@@ -77,8 +77,9 @@ Two distinct loading modes apply depending on whether events are present:
 ### 1.7 All-Day Banner Thresholds & Interactions
 
 - **Toggle Row Visibility (`showAllDayRow={false}`)**: Verify the all-day banner unmounts entirely and all-day events are shifted down as 24-hour blocks within the time grid.
+- **Long Single-Day Timed Events**: A single-day timed event of 12h or more (e.g. 08:00–21:00) stays in the time grid at its real times, with or without `showAllDayRow`. Only multi-day timed events move to the banner, on days they cover for 12h or more.
 - **Custom Max Events (`maxEvents={N}`)**: Provide exactly `N+2` overlapping all-day events. Verify exactly `N` renders fully, and a `+2 more` pill appears left-aligned (matching Google Calendar styling). Ensure no visual overflow occurs.
-- **Expand/Collapse Toggle**: When more all-day events exist than `maxEvents` allows, a show-more / show-less control renders. Click expand; all hidden events become visible. Click collapse; banner returns to `maxEvents` rows.
+- **Expand/Collapse Toggle**: When more all-day events exist than `maxEvents` allows, a show-more / show-less control renders. Click expand; all hidden events become visible. Click collapse; banner returns to `maxEvents` rows. In Day view, the banner must stay expanded when the host app re-renders (e.g. passes a new inline `onEventClick`).
 - **No Expand Toggle When Not Needed**: When total rows ≤ `maxEvents`, verify no expand control is rendered.
 - **Event Tooltips**: Hover over truncated or fully rendered events inside the All-Day Banner. Verify the custom formatted tooltip text correctly displays the event details to the user.
 - **Clipped Edges**: Ensure events that span beyond the currently visible week or day have appropriate styling indicating they are clipped/continue off-screen.
@@ -102,7 +103,7 @@ Two distinct loading modes apply depending on whether events are present:
 
 - **Custom CSS Classes (`classNames`)**: Inject custom classes into `root`, `header`, `event`, and `timeSlot`. Inspect DOM to ensure class string concatenation is successful without overwriting defaults.
 - **Theme Colors (`theme`)**: Pass specific hex codes into `theme={{ default: { bgColor: "black", color: "white" } }}` and verify styling.
-- **Custom Render Props (`renderEvent`, `renderHeader`, `renderHourCell`, `renderDateCell`, `renderScheduleSeparator`)**: Replace default rendering (events, header, hour grid, date cells, schedule division lines) with custom React components and verify interaction callbacks/scaling integrity are preserved.
+- **Custom Render Props (`renderEvent`, `renderHeader`, `renderHourCell`, `renderDateCell`, `renderScheduleSeparator`)**: Replace default rendering (events, header, hour grid, date cells, schedule division lines) with custom React components and verify interaction callbacks/scaling integrity are preserved. `renderHourCell` must receive each slot's own column date and hour (e.g. weekend shading only on weekend columns).
 
 ### 1.11 Performance Options
 
@@ -132,6 +133,7 @@ Two distinct loading modes apply depending on whether events are present:
 - **Auto-RTL from locale**: Pass `locale="ar"` without explicit `direction`; verify `dir="rtl"` is auto-applied on the container and the layout mirrors. Same for `he`, `fa`, `ur`.
 - **Manual `direction="rtl"` override**: With `locale="en"`, `direction="rtl"` forces RTL layout regardless of locale.
 - **Manual `direction="ltr"` beats auto**: `locale="ar"` + `direction="ltr"` stays LTR, overriding auto-detection.
+- **Localized date strings**: With `locale="ko"` and `is12Hour`, Day/Week event times and tooltips show 오전/오후 instead of AM/PM. With `locale="ar-EG"`, Month tooltips, popover headings and labels, and the Custom Days header year use Arabic-Indic digits. Default English output is unchanged.
 - **RTL layout checks**: Day columns flow right-to-left; prev/next header arrows mirror via CSS logical properties; time column moves to the right side.
 - **RTL skeleton**: Loading skeleton mirrors correctly under RTL layout.
 
@@ -173,7 +175,8 @@ These scenarios ensure that the calendar's internal math, layout engine, and dat
 
 - **Single-Day Date-Only (YYYY-MM-DD)**: An event missing a specific time. Must render in the All-Day Banner exclusively for that 1 day.
 - **Multi-Day Date-Only (YYYY-MM-DD)**: E.g., spanning 3 full days. Must stretch seamlessly across 3 columns in the All-Day Banner.
-- **Overnight Datetime Event (YYYY-MM-DDTHH:mm:ss)**: Starts 10:00 PM today, ends 2:00 AM tomorrow. Must render at the bottom of Day 1's grid and top of Day 2's grid, OR securely in the All-Day banner depending on library thresholds.
+- **Overnight Datetime Event (YYYY-MM-DDTHH:mm:ss)**: Starts 10:00 PM today, ends 2:00 AM tomorrow. Must render at the bottom of Day 1's grid and top of Day 2's grid; it covers less than 12h of each day, so it never moves to the All-Day banner. Schedule shows it as "(Day 1/2)" and "(Day 2/2)".
+- **Ends Exactly at Midnight**: 10:00 PM today → 00:00 tomorrow. Schedule lists it only on its start day (no "Until 12 AM" entry the next day). A 00:00 → 00:00 event is a single "All day" entry, and multi-day "(Day X/Y)" totals count calendar days.
 - **Cross-Midnight Precisely**: Starts 11:59 PM, ends 12:01 AM. Ensure no layout breakage from zero-height calculation errors.
 
 ### 2.2 Date String Oddities

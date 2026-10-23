@@ -98,4 +98,34 @@ describe("MonthEventItem Component", () => {
     // Now E3 should be in popover
     expect(screen.getByText("E3")).toBeInTheDocument();
   });
+
+  it("formats event tooltips in the calendar locale", () => {
+    const data = [
+      { id: "1", title: "E1", startDate: "2024-03-01", endDate: "2024-03-01" },
+    ];
+    render(
+      <CalendarProvider
+        initialDate={dateObj}
+        initialView={ECalendarViewType.month}
+        config={{ locale: "ar-EG" }}
+      >
+        <table>
+          <tbody>
+            <tr>
+              <MonthEventItem
+                {...defaultProps}
+                data={data as never}
+                maxEvents={2}
+                totalEvents={1}
+              />
+            </tr>
+          </tbody>
+        </table>
+      </CalendarProvider>,
+    );
+    // ar-EG formats digits as Arabic-Indic numerals
+    expect(
+      screen.getByTitle("E1 (٢٠٢٤-٠٣-٠١ - ٢٠٢٤-٠٣-٠١)"),
+    ).toBeInTheDocument();
+  });
 });

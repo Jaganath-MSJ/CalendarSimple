@@ -1,9 +1,11 @@
 import React from "react";
-import { render, fireEvent, screen } from "@testing-library/react";
+import { render, fireEvent, screen, within } from "@testing-library/react";
 import { expect, describe, it, vi, afterEach } from "vitest";
-import { dateFn } from "./utils";
-import { ECalendarViewType } from "./types";
+import { dateFn, formatDate } from "./utils";
+import { DATE_FORMATS } from "./constants";
+import { CalendarProps, ECalendarViewType } from "./types";
 import Calendar from "./Calendar";
+import type { RenderHeaderProps, RenderDateCellProps } from "./index";
 
 // Mock ResizeObserver as it's not available in jsdom
 class ResizeObserverMock {
@@ -199,6 +201,186 @@ describe("Calendar Component Integration", () => {
     );
     expect(screen.getByTestId("calendar-error-boundary")).toBeInTheDocument();
     errSpy.mockRestore();
+  });
+
+  it("renders single-day events of 12h or more in the day view grid", () => {
+    render(
+      <Calendar
+        view={ECalendarViewType.day}
+        selectedDate={new Date(2024, 2, 1)}
+        events={[
+          {
+            id: "long-shift",
+            title: "Long shift",
+            startDate: "2024-03-01T08:00:00",
+            endDate: "2024-03-01T21:00:00",
+          },
+        ]}
+      />,
+    );
+    expect(
+      screen.getByTestId("calendar-long-shift-day-event-item"),
+    ).toBeInTheDocument();
+  });
+
+  it("forwards onMoreClick with the cell date and hidden events", () => {
+    const onMoreClick = vi.fn<NonNullable<CalendarProps["onMoreClick"]>>();
+    render(
+      <Calendar
+        view={ECalendarViewType.month}
+        selectedDate={new Date(2024, 2, 1)}
+        maxEvents={1}
+        onMoreClick={onMoreClick}
+        events={[
+          {
+            id: "more-a",
+            title: "Alpha",
+            startDate: "2024-03-15T09:00:00",
+            endDate: "2024-03-15T10:00:00",
+          },
+          {
+            id: "more-b",
+            title: "Beta",
+            startDate: "2024-03-15T11:00:00",
+            endDate: "2024-03-15T12:00:00",
+          },
+        ]}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "1 more events on March 15, 2024" }),
+    );
+
+    expect(onMoreClick).toHaveBeenCalledTimes(1);
+    const [date, hidden] = onMoreClick.mock.calls[0];
+    expect(dateFn(date).toISODate()).toBe("2024-03-15");
+    expect(hidden).toEqual([expect.objectContaining({ id: "more-b" })]);
+  });
+
+  describe("resetDateOnViewChange", () => {
+    const changeView = (view: ECalendarViewType) =>
+      fireEvent.change(screen.getByTestId("calendar-header-view-select"), {
+        target: { value: view },
+      });
+    const headerTitle = () =>
+      within(screen.getByTestId("calendar-header")).getByRole("heading");
+
+    it("jumps to today when the view changes and the prop is true", () => {
+      const onNavigate = vi.fn<NonNullable<CalendarProps["onNavigate"]>>();
+      render(
+        <Calendar
+          view={ECalendarViewType.month}
+          selectedDate={new Date(2024, 2, 1)}
+          resetDateOnViewChange
+          onNavigate={onNavigate}
+        />,
+      );
+
+      changeView(ECalendarViewType.day);
+
+      const today = dateFn();
+      expect(headerTitle()).toHaveTextContent(
+        formatDate(today, DATE_FORMATS.MONTH_DAY_YEAR),
+      );
+      expect(dateFn(onNavigate.mock.calls[0][0]).toISODate()).toBe(
+        today.toISODate(),
+      );
+    });
+
+    it("keeps the selected date when the prop is false", () => {
+      const onNavigate = vi.fn<NonNullable<CalendarProps["onNavigate"]>>();
+      render(
+        <Calendar
+          view={ECalendarViewType.month}
+          selectedDate={new Date(2024, 2, 1)}
+          resetDateOnViewChange={false}
+          onNavigate={onNavigate}
+        />,
+      );
+
+      changeView(ECalendarViewType.day);
+
+      expect(headerTitle()).toHaveTextContent("March 1, 2024");
+      expect(onNavigate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("all-day banner overflow", () => {
+    const allDayEvents = ["A", "B", "C", "D", "E"].map((letter) => ({
+      id: `ad-${letter}`,
+      title: `Holiday ${letter}`,
+      startDate: "2024-03-01",
+    }));
+    const bannerEvents = () => screen.queryAllByTestId(/-all-day-event$/);
+
+    it("expands to show every event and collapses back to the overflow chip", () => {
+      render(
+        <Calendar
+          view={ECalendarViewType.week}
+          selectedDate={new Date(2024, 2, 1)}
+          events={allDayEvents}
+        />,
+      );
+      const collapsedCount = bannerEvents().length;
+      expect(collapsedCount).toBeLessThan(allDayEvents.length);
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /more all-day events/i }),
+      );
+      expect(bannerEvents()).toHaveLength(allDayEvents.length);
+      const collapseIcon = screen.getByRole("button", {
+        name: "Collapse all-day events",
+      });
+      expect(collapseIcon).toHaveAttribute("aria-expanded", "true");
+
+      fireEvent.click(collapseIcon);
+      expect(bannerEvents()).toHaveLength(collapsedCount);
+      expect(
+        screen.getByRole("button", { name: "Expand all-day events" }),
+      ).toHaveAttribute("aria-expanded", "false");
+      expect(
+        screen.getByRole("button", { name: /more all-day events/i }),
+      ).toBeInTheDocument();
+    });
+
+    it("stays expanded in day view when the host app re-renders", () => {
+      const props = {
+        view: ECalendarViewType.day,
+        selectedDate: new Date(2024, 2, 1),
+        events: allDayEvents,
+      };
+      // Host apps commonly pass a fresh inline callback on every render
+      const { rerender } = render(
+        <Calendar {...props} onEventClick={() => {}} />,
+      );
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /more all-day events/i }),
+      );
+      expect(bannerEvents()).toHaveLength(allDayEvents.length);
+
+      rerender(<Calendar {...props} onEventClick={() => {}} />);
+      expect(bannerEvents()).toHaveLength(allDayEvents.length);
+    });
+  });
+
+  it("accepts render-prop types exported from the package entry", () => {
+    const renderHeader = ({ view }: RenderHeaderProps) => (
+      <div data-testid="typed-header">{view}</div>
+    );
+    const renderDateCell = ({ date }: RenderDateCellProps) => (
+      <span data-testid="typed-date-cell">{date.getDate()}</span>
+    );
+    render(
+      <Calendar
+        view={ECalendarViewType.month}
+        renderHeader={renderHeader}
+        renderDateCell={renderDateCell}
+      />,
+    );
+    expect(screen.getByTestId("typed-header")).toHaveTextContent("month");
+    expect(screen.getAllByTestId("typed-date-cell").length).toBeGreaterThan(27);
   });
 
   describe("Layout dimensions (CSS custom properties)", () => {

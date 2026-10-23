@@ -41,6 +41,21 @@ describe("useAllDayBanner Hook", () => {
     expect(expanded.result.current.visibleLayoutEvents).toHaveLength(3);
   });
 
+  it("never takes single-day timed events, however long they are", () => {
+    // useDayEventLayout keeps these in the time grid; if the banner also
+    // dropped them they would vanish from Day/Week views entirely.
+    const longShift: CalendarEvent = {
+      id: "shift",
+      title: "Long shift",
+      startDate: "2024-03-01T08:00:00",
+      endDate: "2024-03-01T21:00:00",
+    };
+    const { result } = renderHook(() =>
+      useAllDayBanner(days, [longShift], false, 3),
+    );
+    expect(result.current.layoutEvents).toHaveLength(0);
+  });
+
   describe("Clipped arrow logic (step-back/forward boundary bugs)", () => {
     // Week view: Apr21 (Mon) — Apr27 (Sun) 2026
     const weekDays = [

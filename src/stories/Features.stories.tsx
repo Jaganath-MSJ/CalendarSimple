@@ -321,3 +321,37 @@ export const LoadingCustomRenderer: Story = {
     ),
   },
 };
+
+export const ResetDateOnViewChange: Story = {
+  args: {
+    view: ECalendarViewType.month,
+    events: mockEvents,
+    selectedDate: today.plus({ months: 3 }).toJSDate(),
+    resetDateOnViewChange: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Starts three months ahead. With `resetDateOnViewChange`, picking another view in the header jumps back to today and fires `onNavigate`.",
+      },
+    },
+  },
+};
+
+export const TestIdProp: Story = {
+  args: {
+    view: ECalendarViewType.week,
+    events: mockEvents,
+    selectedDate: today.toJSDate(),
+    testId: "team-calendar",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`testId` prefixes every `data-testid` in the calendar (e.g. `team-calendar-header`, `team-calendar-week-view`), so several calendars on one page can be targeted separately in tests.",
+      },
+    },
+  },
+};

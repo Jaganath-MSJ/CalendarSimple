@@ -4,6 +4,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import WeekView from "./WeekView";
 import { dateFn } from "../../../utils";
 import * as CalendarContextModule from "../../../context/CalendarContext";
+import { CalendarProvider } from "../../../context/CalendarContext";
+import { CalendarProps, ECalendarViewType } from "../../../types";
 
 // Provide a mock ResizeObserver since child components might need it
 globalThis.ResizeObserver = vi.fn().mockImplementation(() => ({
@@ -104,5 +106,68 @@ describe("WeekView Component", () => {
     render(<WeekView {...defaultProps} />);
 
     expect(screen.getByText("Test Week Event")).toBeInTheDocument();
+  });
+});
+
+describe("WeekView weekStartsOn (real CalendarProvider)", () => {
+  type WeekDay = NonNullable<CalendarProps["weekStartsOn"]>;
+
+  const renderWeek = (weekStartsOn: WeekDay, weekEndsOn: WeekDay) =>
+    render(
+      <CalendarProvider
+        initialDate={dateFn("2024-03-01")} // Friday
+        initialView={ECalendarViewType.week}
+        testId="cal"
+        config={{ events: [] }}
+      >
+        <WeekView
+          minHour={0}
+          maxHour={24}
+          eventOverlapOffset={0}
+          showAllDayRow
+          weekStartsOn={weekStartsOn}
+          weekEndsOn={weekEndsOn}
+        />
+      </CalendarProvider>,
+    );
+
+  const dayNames = () =>
+    screen
+      .getAllByText(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)$/)
+      .map((el) => el.textContent);
+
+  it("starts the week on Monday when weekStartsOn is 1", () => {
+    renderWeek(1, 0);
+    expect(dayNames()).toEqual([
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun",
+    ]);
+    // Friday 2024-03-01 belongs to the week starting Monday 2024-02-26
+    expect(screen.getByText("26")).toBeInTheDocument();
+    expect(screen.queryByText("25")).not.toBeInTheDocument();
+  });
+
+  it("wraps around when the week starts on Saturday", () => {
+    renderWeek(6, 5);
+    expect(dayNames()).toEqual([
+      "Sat",
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+    ]);
+    expect(screen.getByText("24")).toBeInTheDocument(); // Saturday 2024-02-24
+  });
+
+  it("renders a Monday–Friday work week", () => {
+    renderWeek(1, 5);
+    expect(dayNames()).toEqual(["Mon", "Tue", "Wed", "Thu", "Fri"]);
   });
 });

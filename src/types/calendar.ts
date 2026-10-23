@@ -175,7 +175,7 @@ export interface CalendarProps {
   renderEvent?: (event: CalendarEvent) => ReactNode;
   /** Replaces the entire header bar with a custom renderer. */
   renderHeader?: (props: RenderHeaderProps) => ReactNode;
-  /** Replaces the default hour label in the time grid left column. */
+  /** Renders custom content inside each hour slot of the Day, Week and Custom Days grids. Receives the slot's start time on that column's own date. */
   renderHourCell?: (date: Date) => ReactNode;
   /** Replaces the default date number in Month view cells. */
   renderDateCell?: (props: RenderDateCellProps) => ReactNode;
