@@ -1,3 +1,12 @@
+## [2.1.1](https://github.com/Jaganath-MSJ/CalendarSimple/compare/v2.1.0...v2.1.1) (2026-10-23)
+
+### Bug Fixes
+
+- **i18n:** apply locale to event times, tooltips and popover dates ([fa8919f](https://github.com/Jaganath-MSJ/CalendarSimple/commit/fa8919f8c71593f1d56cd64b8f79afb2db6f4838))
+- keep 12h+ single-day events visible and fix date edge cases ([5c022ec](https://github.com/Jaganath-MSJ/CalendarSimple/commit/5c022ec4b502371898a564d1bc56423cb70170d7))
+- **theme:** pick readable text colour for 8-digit hex and space-separated rgb ([c0edd48](https://github.com/Jaganath-MSJ/CalendarSimple/commit/c0edd4870c68730ad333e6d2d667cd39fc699e17)), closes [#ff0c](https://github.com/Jaganath-MSJ/CalendarSimple/issues/ff0c) [#ffff00cc](https://github.com/Jaganath-MSJ/CalendarSimple/issues/ffff00cc)
+- treat 00:00 schedule ends as exclusive and keep day banner open ([33122bc](https://github.com/Jaganath-MSJ/CalendarSimple/commit/33122bc008b7c12c7e28b4138eb567bdfc0bf3a1))
+
 # [2.1.0](https://github.com/Jaganath-MSJ/CalendarSimple/compare/v2.0.0...v2.1.0) (2026-06-28)
 
 ### Bug Fixes
