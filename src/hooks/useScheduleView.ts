@@ -11,6 +11,7 @@
 
 import { useMemo, useEffect, useRef } from "react";
 import { CalendarEvent, CalendarMessages } from "../types";
+import type { DateType } from "../utils";
 import {
   formatDate,
   dateFn,
@@ -26,6 +27,10 @@ import { DATE_FORMATS, resolveMessages } from "../constants";
  */
 interface UseScheduleViewProps {
   events: CalendarEvent[];
+  /** Date the list scrolls to; defaults to today. */
+  selectedDate?: DateType;
+  /** Changes on every Today / SET_DATE navigation, even to the same date. */
+  navigationId?: number;
   autoScrollToCurrentTime?: boolean;
   is12Hour?: boolean;
   locale?: string;
@@ -41,12 +46,14 @@ interface UseScheduleViewProps {
  */
 export default function useScheduleView({
   events,
+  selectedDate,
+  navigationId,
   autoScrollToCurrentTime,
   is12Hour,
   locale,
   messages = resolveMessages(),
 }: UseScheduleViewProps) {
-  const todayRef = useRef<HTMLDivElement>(null);
+  const targetRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const groupedEvents = useMemo(() => {
@@ -81,13 +88,35 @@ export default function useScheduleView({
     return groups;
   }, [events]);
 
-  useEffect(() => {
-    if (autoScrollToCurrentTime && todayRef.current && containerRef.current) {
+  const selectedKey = (selectedDate ?? dateFn()).toISODate();
+
+  // First group on or after the selected date, else the last group
+  const targetDateKey = useMemo(() => {
+    const keys = Object.keys(groupedEvents).sort();
+    if (keys.length === 0) return undefined;
+    return keys.find((key) => selectedKey && key >= selectedKey) ?? keys.at(-1);
+  }, [groupedEvents, selectedKey]);
+
+  const scrollToTarget = () => {
+    if (targetRef.current && containerRef.current) {
       const containerRect = containerRef.current.getBoundingClientRect();
-      const elementRect = todayRef.current.getBoundingClientRect();
+      const elementRect = targetRef.current.getBoundingClientRect();
       containerRef.current.scrollTop += elementRect.top - containerRect.top;
     }
+  };
+
+  // On mount (and when events change) scroll only if autoScrollToCurrentTime
+  useEffect(() => {
+    if (autoScrollToCurrentTime) scrollToTarget();
   }, [autoScrollToCurrentTime, groupedEvents]);
+
+  // Every later navigation (even to the same date) scrolls; first run skipped
+  const lastNavigationId = useRef(navigationId);
+  useEffect(() => {
+    if (lastNavigationId.current === navigationId) return;
+    lastNavigationId.current = navigationId;
+    scrollToTarget();
+  }, [navigationId]);
 
   // ---------------------------------------------------------------------------
   // 3. Presentation formatting helpers
@@ -168,7 +197,9 @@ export default function useScheduleView({
   };
 
   return {
-    todayRef,
+    targetRef,
+    todayRef: targetRef,
+    targetDateKey,
     containerRef,
     groupedEvents,
     renderEventTime,

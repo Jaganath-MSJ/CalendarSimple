@@ -13,7 +13,7 @@ Using React Native? See [calendar-simple-native](https://www.npmjs.com/package/c
 
 ## Features
 
-- **🗓️ Multiple Views** — Month, Week, Day, Schedule, and Custom Days views.
+- **🗓️ Multiple Views** — Month, Week, Day, Schedule, and Custom Days views. No Prev/Next in Schedule view; Today and the month/year pickers scroll the full list to the chosen date.
 - **✨ Event Handling** — Display and manage events with custom styling and arbitrary metadata.
 - **📱 Responsive** — Built-in CSS breakpoints at 768px (tablet) and 480px (phone).
 - **🎨 Theming & Customization** — Override colors via `theme` and inject CSS classes via `classNames`.
@@ -262,6 +262,7 @@ Keys you leave out (or set to `undefined`) use the English default; an empty str
 | `onMoreClick`             | `(date: Date, hiddenEvents?: CalendarEvent[]) => void`        | `undefined`         |
 | `onNavigate`              | `(date: Date) => void`                                        | `undefined`         |
 | `onViewChange`            | `(view: ECalendarViewType) => void`                           | `undefined`         |
+| `onDateRangeChange`       | `(start: Date, end: Date, view: ECalendarViewType) => void`   | `undefined`         |
 | `onSlotClick`             | `(startDate: Date, endDate: Date) => void`                    | `undefined`         |
 | `renderEvent`             | `(event: CalendarEvent) => ReactNode`                         | `undefined`         |
 | `renderHeader`            | `(props: RenderHeaderProps) => ReactNode`                     | `undefined`         |
@@ -273,6 +274,8 @@ Keys you leave out (or set to `undefined`) use the English default; an empty str
 | `eventsAreSorted`         | `boolean`                                                     | `false`             |
 | `isEventOrderingEnabled`  | `boolean`                                                     | `true`              |
 | `sortedMonthView`         | `boolean \| ((a: CalendarEvent, b: CalendarEvent) => number)` | `true`              |
+
+> `onDateRangeChange`: in Schedule view it also fires when `events` change (the range is the span of the loaded events, so it cannot drive lazy-loading there); with `enableEnrichedEvents` Schedule reports `selectedDate…selectedDate`.
 
 ### Types
 

@@ -9,10 +9,11 @@ import React, {
   useMemo,
   Dispatch,
 } from "react";
-import { dateFn, DateType } from "../utils";
+import { dateFn, DateType, getNavigatedDate } from "../utils";
 import { ECalendarViewType, CalendarProps, CalendarMessages } from "../types";
 import { CALENDAR_ACTIONS, resolveMessages } from "../constants";
 import useColorScheme from "../hooks/useColorScheme";
+import { useDateRangeNotifier } from "../hooks/useDateRangeNotifier";
 
 /**
  * Mutable runtime state managed by the calendar reducer.
@@ -24,6 +25,11 @@ export interface CalendarState {
   view: ECalendarViewType;
   /** Number of days shown when view is `customDays`. */
   customDays?: number;
+  /**
+   * Increments on every TODAY / SET_DATE dispatch; lets views react to repeated navigation to the same date.
+   * @internal Not part of the public API.
+   */
+  navigationId?: number;
 }
 
 /**
@@ -83,50 +89,34 @@ function calendarReducer(
       return {
         ...state,
         selectedDate: action.payload,
+        navigationId: (state.navigationId ?? 0) + 1,
       };
     case CALENDAR_ACTIONS.SET_VIEW:
       return { ...state, view: action.payload };
     case CALENDAR_ACTIONS.SET_CUSTOM_DAYS:
       return { ...state, customDays: action.payload };
-    case CALENDAR_ACTIONS.NEXT: {
-      if (state.view === ECalendarViewType.customDays) {
-        return {
-          ...state,
-          selectedDate: state.selectedDate.plus({
-            days: state.customDays || 3,
-          }),
-        };
-      }
-      const unit =
-        state.view === ECalendarViewType.schedule ? "day" : state.view;
-      return { ...state, selectedDate: state.selectedDate.plus({ [unit]: 1 }) };
-    }
+    case CALENDAR_ACTIONS.NEXT:
     case CALENDAR_ACTIONS.PREV: {
-      if (state.view === ECalendarViewType.customDays) {
-        return {
-          ...state,
-          selectedDate: state.selectedDate.minus({
-            days: state.customDays || 3,
-          }),
-        };
-      }
-      const unit =
-        state.view === ECalendarViewType.schedule ? "day" : state.view;
-      return {
-        ...state,
-        selectedDate: state.selectedDate.minus({ [unit]: 1 }),
-      };
+      const next = getNavigatedDate(
+        state,
+        action.type === CALENDAR_ACTIONS.NEXT ? 1 : -1,
+      );
+      return next === state.selectedDate
+        ? state
+        : { ...state, selectedDate: next };
     }
     case CALENDAR_ACTIONS.TODAY:
       return {
         ...state,
         selectedDate: dateFn(),
+        navigationId: (state.navigationId ?? 0) + 1,
       };
     default:
       return state;
   }
 }
 
+const EMPTY_CONFIG: NonNullable<CalendarProviderProps["config"]> = {};
 const DEFAULT_BODY_SIZE = { width: 0, height: 0 };
 
 /**
@@ -166,7 +156,10 @@ export function CalendarProvider({
     selectedDate: initialDate,
     view: initialView,
     customDays: initialCustomDays,
+    navigationId: 0,
   });
+
+  useDateRangeNotifier(state, config ?? EMPTY_CONFIG);
 
   const resolvedScheme = useColorScheme(config?.colorScheme);
 

@@ -149,9 +149,9 @@ Two distinct loading modes apply depending on whether events are present:
 
 ### 1.15 Keyboard Navigation & Accessibility
 
-- **Tab order (LTR)**: Focus cycles Today → Prev → Next → View select → Month select → Year select in order.
+- **Tab order (LTR)**: Focus cycles Today → Prev → Next → View select → Month select → Year select in order. In Schedule view Prev/Next are absent: Today → View select → Month select → Year select.
 - **Tab order (RTL)**: Tab order is reversed to match reading direction.
-- **Enter/Space activation**: Pressing Enter or Space on a focused Today, Prev, or Next button activates the handler identically to a mouse click.
+- **Enter/Space activation**: Pressing Enter or Space on a focused Today, Prev, or Next button (Prev/Next are absent in Schedule view) activates the handler identically to a mouse click.
 - **ARIA labels on header controls**: `Previous period`, `Next period`, `Select calendar view`, `Select month`, `Select year` — all present as `aria-label` values.
 - **Header landmark**: `<nav aria-label="Calendar navigation">` wraps all header controls.
 - **Month table ARIA**: `<table aria-label="Month YYYY">` with `<th scope="col">` on all day-name and week-number column headers.

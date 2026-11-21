@@ -36,6 +36,8 @@ Switch between views using the `view` prop (`ECalendarViewType`).
 - **Day (`"day"`)** — Single-day time grid. Maximum horizontal space for event details.
 - **Custom Days (`"customDays"`)** — Multi-day time grid starting from `selectedDate`. Set the number of days with `customDays`.
 - **Schedule (`"schedule"`)** — Chronological event list grouped by date. Optimized for mobile or sidebar use.
+  - No Prev/Next in Schedule view; Today and the month/year pickers scroll the full list to the chosen date.
+  - Code that dispatches `CALENDAR_ACTIONS.NEXT`/`PREV` via `useCalendar()` does nothing in Schedule view; use `SET_DATE` or `onNavigate(date)`.
   - `renderScheduleSeparator` — Render a custom divider between date groups.
   - Multi-day events repeat on each day they cover with a "(Day X/Y)" suffix, counted in calendar days. A timed event ending at exactly 00:00 finishes on the previous day, so it never adds an entry for the day it ends on.
 
@@ -156,6 +158,7 @@ The `theme` prop (inline per-element colors) takes final precedence over color s
 - **`onEventClick(event)`** — Fired when an event chip is clicked. Use to open event detail or edit screens.
 - **`onViewChange(view)`** — Fired when the user switches views via the header tabs.
   - `resetDateOnViewChange={true}` — Snaps the calendar back to today on each view switch.
+- **`onDateRangeChange(start, end, view)`** — Visible range (inclusive, start of day) for lazy-loading events. Fires on mount, navigation and view change; debounced 16 ms; Schedule reports the span of all events. In Schedule it also fires when `events` change (so it can't drive lazy-loading there); with `enableEnrichedEvents` it reports `selectedDate…selectedDate`.
 - **`onNavigate(date)`** — Fired when the user navigates forward/backward or uses the month/year dropdowns.
 - **`onMoreClick(date, hiddenEvents)`** — Fired when the "+X more" indicator is clicked in Month view. Returns the date and the array of overflowed events.
 - **`creatable` + `onSlotClick(startDate, endDate)`** — Enable slot-click creation intent.
@@ -300,17 +303,18 @@ All accessibility features are built-in and require no extra configuration.
 
 ### Interaction & Callbacks
 
-| Prop                    | Type                                                   | Default     | Description                                                        |
-| ----------------------- | ------------------------------------------------------ | ----------- | ------------------------------------------------------------------ |
-| `selectable`            | `boolean`                                              | `false`     | Enable visual selection state on date click.                       |
-| `creatable`             | `boolean`                                              | `false`     | Enable slot-click creation intent (pointer cursor on empty slots). |
-| `resetDateOnViewChange` | `boolean`                                              | `false`     | Snap calendar to today when the user switches views.               |
-| `onDateClick`           | `(date: Date) => void`                                 | `undefined` | Fired when an empty cell or day header is clicked.                 |
-| `onEventClick`          | `(event: CalendarEvent) => void`                       | `undefined` | Fired when an event is clicked.                                    |
-| `onMoreClick`           | `(date: Date, hiddenEvents?: CalendarEvent[]) => void` | `undefined` | Fired when "+X more" is clicked in Month view.                     |
-| `onNavigate`            | `(date: Date) => void`                                 | `undefined` | Fired when navigating forward/backward or via dropdowns.           |
-| `onViewChange`          | `(view: ECalendarViewType) => void`                    | `undefined` | Fired when the view is changed via the header.                     |
-| `onSlotClick`           | `(startDate: Date, endDate: Date) => void`             | `undefined` | Fired when an empty slot is clicked (requires `creatable`).        |
+| Prop                    | Type                                                        | Default     | Description                                                                                                                                                       |
+| ----------------------- | ----------------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `selectable`            | `boolean`                                                   | `false`     | Enable visual selection state on date click.                                                                                                                      |
+| `creatable`             | `boolean`                                                   | `false`     | Enable slot-click creation intent (pointer cursor on empty slots).                                                                                                |
+| `resetDateOnViewChange` | `boolean`                                                   | `false`     | Snap calendar to today when the user switches views.                                                                                                              |
+| `onDateClick`           | `(date: Date) => void`                                      | `undefined` | Fired when an empty cell or day header is clicked.                                                                                                                |
+| `onEventClick`          | `(event: CalendarEvent) => void`                            | `undefined` | Fired when an event is clicked.                                                                                                                                   |
+| `onMoreClick`           | `(date: Date, hiddenEvents?: CalendarEvent[]) => void`      | `undefined` | Fired when "+X more" is clicked in Month view.                                                                                                                    |
+| `onNavigate`            | `(date: Date) => void`                                      | `undefined` | Fired when navigating forward/backward or via dropdowns.                                                                                                          |
+| `onViewChange`          | `(view: ECalendarViewType) => void`                         | `undefined` | Fired when the view is changed via the header.                                                                                                                    |
+| `onDateRangeChange`     | `(start: Date, end: Date, view: ECalendarViewType) => void` | `undefined` | Visible range on mount, navigation and view change (debounced 16 ms). Schedule: also fires on `events` change; enriched mode reports `selectedDate…selectedDate`. |
+| `onSlotClick`           | `(startDate: Date, endDate: Date) => void`                  | `undefined` | Fired when an empty slot is clicked (requires `creatable`).                                                                                                       |
 
 ### Custom Renderers
 

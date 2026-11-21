@@ -28,7 +28,8 @@ import useCalendarProps from "./hooks/useCalendarProps";
 import CalendarErrorBoundary from "./components/ui/CalendarErrorBoundary";
 
 // Syncs controlled props into context. Rendered in both plain and compound
-// mode. Skips the first run (reducer is already initialised from props) and
+// mode. Dispatches only when a prop differs from the last synced value (the
+// reducer is already initialised from props, and StrictMode re-runs effects) and
 // compares the date by value so an equal new Date does not reset navigation.
 function PropSync({
   view,
@@ -36,29 +37,32 @@ function PropSync({
   customDays,
 }: Pick<CalendarProps, "view" | "selectedDate" | "customDays">) {
   const { dispatch } = useCalendar();
-  const mounted = useRef(false);
   const time = selectedDate ? dateFn(selectedDate).toMillis() : undefined;
+  const lastView = useRef(view);
+  const lastTime = useRef(time);
+  const lastCustomDays = useRef(customDays);
 
   useEffect(() => {
-    if (mounted.current && view) dispatch({ type: "SET_VIEW", payload: view });
+    if (view && view !== lastView.current) {
+      dispatch({ type: "SET_VIEW", payload: view });
+    }
+    lastView.current = view;
   }, [view, dispatch]);
 
   useEffect(() => {
-    if (mounted.current && selectedDate) {
+    if (selectedDate && time !== lastTime.current) {
       dispatch({ type: "SET_DATE", payload: dateFn(selectedDate) });
     }
+    lastTime.current = time;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [time, dispatch]);
 
   useEffect(() => {
-    if (mounted.current && customDays) {
+    if (customDays && customDays !== lastCustomDays.current) {
       dispatch({ type: "SET_CUSTOM_DAYS", payload: customDays });
     }
+    lastCustomDays.current = customDays;
   }, [customDays, dispatch]);
-
-  useEffect(() => {
-    mounted.current = true;
-  }, []);
 
   return null;
 }

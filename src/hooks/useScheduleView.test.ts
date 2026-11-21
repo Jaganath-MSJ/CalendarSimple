@@ -2,6 +2,7 @@ import { renderHook } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import useScheduleView from "./useScheduleView";
 import { CalendarEvent } from "../types";
+import { dateFn } from "../utils";
 
 describe("useScheduleView Hook", () => {
   const events: CalendarEvent[] = [
@@ -214,6 +215,34 @@ describe("useScheduleView Hook", () => {
     it("keeps zero-duration midnight events on their own day", () => {
       const { groupedEvents } = getHook([midnightPoint]);
       expect(Object.keys(groupedEvents)).toEqual(["2024-03-01"]);
+    });
+  });
+
+  describe("targetDateKey", () => {
+    const spread: CalendarEvent[] = [
+      { id: "a", title: "A", startDate: "2026-11-03" },
+      { id: "b", title: "B", startDate: "2026-11-10" },
+      { id: "c", title: "C", startDate: "2026-11-20" },
+    ];
+    const keyFor = (selectedDate: string) =>
+      renderHook(() =>
+        useScheduleView({ events: spread, selectedDate: dateFn(selectedDate) }),
+      ).result.current.targetDateKey;
+
+    it("is the first group on or after selectedDate", () => {
+      expect(keyFor("2026-11-09")).toBe("2026-11-10");
+      expect(keyFor("2026-11-10")).toBe("2026-11-10");
+    });
+
+    it("falls back to the last group", () => {
+      expect(keyFor("2026-11-21")).toBe("2026-11-20");
+    });
+
+    it("is undefined without groups", () => {
+      const { result } = renderHook(() =>
+        useScheduleView({ events: [], selectedDate: dateFn("2026-11-09") }),
+      );
+      expect(result.current.targetDateKey).toBeUndefined();
     });
   });
 });

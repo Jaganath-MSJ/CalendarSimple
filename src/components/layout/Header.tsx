@@ -25,6 +25,7 @@ import {
   getVisibleWeekDays,
   getRowWeekNumber,
   getLastEventDay,
+  getNavigatedDate,
 } from "../../utils";
 import styles from "./Header.module.css";
 import LeftArrow from "../../assets/LeftArrow";
@@ -86,22 +87,10 @@ function Header(props: HeaderProps) {
     const isAdd = option === EMonthOption.add;
     dispatch({ type: isAdd ? CALENDAR_ACTIONS.NEXT : CALENDAR_ACTIONS.PREV });
 
-    const unit = (view === ECalendarViewType.schedule ? "day" : view) as
-      | "day"
-      | "week"
-      | "month"
-      | "year";
-
-    let predictiveDate;
-    if (view === ECalendarViewType.customDays) {
-      predictiveDate = isAdd
-        ? selectedDate.plus({ days: customDays || 3 })
-        : selectedDate.minus({ days: customDays || 3 });
-    } else {
-      predictiveDate = isAdd
-        ? selectedDate.plus({ [unit]: 1 })
-        : selectedDate.minus({ [unit]: 1 });
-    }
+    const predictiveDate = getNavigatedDate(
+      { selectedDate, view, customDays },
+      isAdd ? 1 : -1,
+    );
 
     onNavigate?.(convertToDate(predictiveDate));
   };
@@ -218,28 +207,30 @@ function Header(props: HeaderProps) {
         >
           {messages.today}
         </button>
-        <div className={styles.arrows}>
-          <button
-            className={styles.iconButton}
-            data-testid={`${testId}-header-prev-btn`}
-            aria-label={messages.previous}
-            onClick={() => onMonthArrowClick(EMonthOption.sub)}
-          >
-            <span className={styles.iconButtonIcon}>
-              <LeftArrow />
-            </span>
-          </button>
-          <button
-            className={styles.iconButton}
-            data-testid={`${testId}-header-next-btn`}
-            aria-label={messages.next}
-            onClick={() => onMonthArrowClick(EMonthOption.add)}
-          >
-            <span className={styles.iconButtonIcon}>
-              <RightArrow />
-            </span>
-          </button>
-        </div>
+        {view !== ECalendarViewType.schedule && (
+          <div className={styles.arrows}>
+            <button
+              className={styles.iconButton}
+              data-testid={`${testId}-header-prev-btn`}
+              aria-label={messages.previous}
+              onClick={() => onMonthArrowClick(EMonthOption.sub)}
+            >
+              <span className={styles.iconButtonIcon}>
+                <LeftArrow />
+              </span>
+            </button>
+            <button
+              className={styles.iconButton}
+              data-testid={`${testId}-header-next-btn`}
+              aria-label={messages.next}
+              onClick={() => onMonthArrowClick(EMonthOption.add)}
+            >
+              <span className={styles.iconButtonIcon}>
+                <RightArrow />
+              </span>
+            </button>
+          </div>
+        )}
         <h2 className={styles.dateTitle}>{getHeaderTitle()}</h2>
       </nav>
 

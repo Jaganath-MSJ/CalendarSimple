@@ -43,10 +43,11 @@ export default function ScheduleView(props: ScheduleViewProps) {
     renderScheduleSeparator,
     locale,
   } = useCalendarProps(props);
-  const { testId, colorScheme } = useCalendar();
+  const { testId, colorScheme, state } = useCalendar();
   const messages = useMessages();
   const {
-    todayRef,
+    targetRef,
+    targetDateKey,
     containerRef,
     groupedEvents,
     renderEventTime,
@@ -54,6 +55,8 @@ export default function ScheduleView(props: ScheduleViewProps) {
   } = useScheduleView({
     messages,
     events,
+    selectedDate: state.selectedDate,
+    navigationId: state.navigationId,
     autoScrollToCurrentTime,
     is12Hour,
     locale,
@@ -89,7 +92,8 @@ export default function ScheduleView(props: ScheduleViewProps) {
             return (
               <React.Fragment key={dateKey}>
                 <div
-                  ref={isToday ? todayRef : undefined}
+                  ref={dateKey === targetDateKey ? targetRef : undefined}
+                  data-date-key={dateKey}
                   className={cx(
                     styles.dateGroup,
                     classNames?.scheduleDateGroup,

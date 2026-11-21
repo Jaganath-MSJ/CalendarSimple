@@ -77,6 +77,14 @@ const event = {
 
 - **Invalid Event Filtering**: We now automatically validate your event data arrays. Events where the `endDate` incorrectly occurs before the `startDate` are considered natively invalid and silently filtered out. This ensures the calendar no longer crashes or renders malformed UI bounds when receiving bad data.
 
+## Schedule navigation (v2.2)
+
+- Prev/Next arrows are no longer shown in Schedule view.
+- `CALENDAR_ACTIONS.NEXT`/`PREV` dispatched via `useCalendar().dispatch` do nothing in Schedule view (before: moved the date by one day). Use `SET_DATE`, `onNavigate(date)` (custom headers) or Today.
+- Schedule still lists every event; Today and the month/year pickers now scroll the list to the first day on or after the chosen date (last day if none).
+- With `autoScrollToCurrentTime`, the mount scroll now goes to the first day on/after today that has events (before: only if today itself had events).
+- New `onDateRangeChange(start, end, view)` prop.
+
 ---
 
 _Need help migrating? If you encounter an issue not covered in this guide, please open an issue on our GitHub repository._

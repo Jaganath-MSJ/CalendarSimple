@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import Header from "./Header";
 import { ECalendarViewType } from "../../types";
@@ -364,5 +365,44 @@ describe("Header with invalid event dates", () => {
       />,
     );
     expect(screen.getByRole("heading").textContent).toBe("Dec 2026");
+  });
+});
+
+describe("Header in Schedule view", () => {
+  const renderCal = (view: "schedule" | "month") =>
+    render(
+      <Calendar
+        view={view as ECalendarViewType}
+        selectedDate={new Date(2026, 10, 15)}
+        events={[]}
+        width={700}
+        height={600}
+      />,
+    );
+
+  it("does not render Prev/Next but keeps Today", () => {
+    renderCal("schedule");
+    expect(screen.queryByTestId("calendar-header-prev-btn")).toBeNull();
+    expect(screen.queryByTestId("calendar-header-next-btn")).toBeNull();
+    expect(screen.getByTestId("calendar-header-today-btn")).toBeInTheDocument();
+  });
+
+  it("renders Prev/Next in Month view", () => {
+    renderCal("month");
+    expect(screen.getByTestId("calendar-header-prev-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("calendar-header-next-btn")).toBeInTheDocument();
+  });
+
+  it("tabs Today, View, Month, Year in Schedule view", async () => {
+    const user = userEvent.setup();
+    renderCal("schedule");
+    await user.tab();
+    expect(screen.getByTestId("calendar-header-today-btn")).toHaveFocus();
+    await user.tab();
+    expect(screen.getByTestId("calendar-header-view-select")).toHaveFocus();
+    await user.tab();
+    expect(screen.getByTestId("calendar-header-month-select")).toHaveFocus();
+    await user.tab();
+    expect(screen.getByTestId("calendar-header-year-select")).toHaveFocus();
   });
 });

@@ -48,7 +48,7 @@ The Calendar is a compound component using a **Provider + Hook** pattern:
 
 ### State Management (CalendarContext)
 
-- **State shape**: `{ selectedDate: DateTime, view: ECalendarViewType, customDays?: number }`
+- **State shape**: `{ selectedDate: DateTime, view: ECalendarViewType, customDays?: number, navigationId?: number }` (`navigationId` is internal; bumps on TODAY/SET_DATE)
 - **Actions**: `SET_DATE`, `SET_VIEW`, `NEXT`, `PREV`, `TODAY` (defined in `CALENDAR_ACTIONS`)
 - **Reducer logic**: Handles navigation math (e.g., next month, previous week) based on current view
 - **Date handling**: Uses `DateType` (Luxon `DateTime`) throughout—never raw JS `Date` in internal logic

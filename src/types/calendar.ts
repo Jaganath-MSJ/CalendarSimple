@@ -162,6 +162,15 @@ export interface CalendarProps {
   onNavigate?: (date: Date) => void;
   /** Called when the user switches views. */
   onViewChange?: (view: ECalendarViewType) => void;
+  /**
+   * Called with the first and last visible day (inclusive, start of day) and
+   * the active view. Fires on mount, navigation and view change (after
+   * `onNavigate`/`onViewChange`), debounced by 16 ms. Schedule reports the
+   * span of all events, so in Schedule it also fires when `events` change and
+   * cannot drive lazy-loading; with `enableEnrichedEvents` it reports
+   * `selectedDate…selectedDate`.
+   */
+  onDateRangeChange?: (start: Date, end: Date, view: ECalendarViewType) => void;
   /** Allow clicking empty time slots to create new events. */
   creatable?: boolean;
   /** Called when an empty time slot is clicked; receives the slot's start and end date. */

@@ -93,7 +93,7 @@ describe("CalendarContext", () => {
     expect(screen.getByTestId("date").textContent).toBe("2024-01-01");
   });
 
-  it("handles NEXT and PREV actions for schedule view (treats as day)", () => {
+  it("NEXT and PREV are no-ops in schedule view", () => {
     render(
       <CalendarProvider
         initialDate={initialDate}
@@ -104,9 +104,38 @@ describe("CalendarContext", () => {
     );
 
     fireEvent.click(screen.getByTestId("next"));
-    expect(screen.getByTestId("date").textContent).toBe("2024-01-02");
+    expect(screen.getByTestId("date").textContent).toBe("2024-01-01");
     fireEvent.click(screen.getByTestId("prev"));
     expect(screen.getByTestId("date").textContent).toBe("2024-01-01");
+  });
+
+  it("NEXT and PREV in schedule view do not re-render consumers", () => {
+    let renders = 0;
+    const Counter = () => {
+      const { dispatch } = useCalendar();
+      React.useEffect(() => {
+        renders += 1;
+      });
+      return (
+        <button
+          data-testid="next-counter"
+          onClick={() => dispatch({ type: CALENDAR_ACTIONS.NEXT })}
+        >
+          n
+        </button>
+      );
+    };
+    render(
+      <CalendarProvider
+        initialDate={initialDate}
+        initialView={ECalendarViewType.schedule}
+      >
+        <Counter />
+      </CalendarProvider>,
+    );
+    const before = renders;
+    fireEvent.click(screen.getByTestId("next-counter"));
+    expect(renders).toBe(before);
   });
 
   it("handles NEXT and PREV actions for customDays view", () => {
