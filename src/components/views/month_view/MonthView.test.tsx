@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import MonthView from "./MonthView";
+import Calendar from "../../../Calendar";
 import { dateFn } from "../../../utils";
 import * as CalendarContextModule from "../../../context/CalendarContext";
 import { CalendarEvent, RenderDateCellProps } from "../../../types";
@@ -416,5 +417,56 @@ describe("MonthView Component", () => {
         expect.objectContaining({ id: "more-d", title: "Delta" }),
       ]),
     );
+  });
+});
+
+describe("MonthView week numbers follow the row", () => {
+  it("numbers Sunday-start rows by their Thursday", () => {
+    const { container } = render(
+      <Calendar
+        view="month"
+        width={700}
+        height={600}
+        selectedDate={new Date(2026, 10, 15)}
+        weekStartsOn={0}
+        showWeekNumbers
+      />,
+    );
+    const cells = Array.from(
+      container.querySelectorAll('td[class*="weekNumberCell"]'),
+    ).map((c) => c.textContent);
+    expect(cells).toEqual(["45", "46", "47", "48", "49"]);
+  });
+});
+
+describe("MonthView multi-day chip width", () => {
+  const events: CalendarEvent[] = [
+    {
+      id: "md",
+      title: "Two days",
+      startDate: "2026-11-10",
+      endDate: "2026-11-11",
+    },
+  ];
+  const chipWidth = (width: number, showWeekNumbers: boolean) => {
+    render(
+      <Calendar
+        view="month"
+        width={width}
+        height={600}
+        selectedDate={new Date(2026, 10, 10)}
+        events={events}
+        showWeekNumbers={showWeekNumbers}
+      />,
+    );
+    return screen.getByTestId("calendar-md-month-event-item").style.width;
+  };
+
+  it("multi-day chip width excludes week-number column", () => {
+    expect(chipWidth(736, true)).toBe("184px");
+  });
+
+  it("uses the full width without week numbers", () => {
+    expect(chipWidth(700, false)).toBe("184px");
   });
 });

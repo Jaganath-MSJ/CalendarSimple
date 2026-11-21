@@ -18,6 +18,8 @@ import {
   isAllDayEvent,
   isMultiDay,
   getEventOverlapInHours,
+  getLastEventDay,
+  hasValidDates,
 } from "../utils/common";
 import { DATE_FORMATS, TIME_CONSTANTS } from "../constants";
 
@@ -94,9 +96,7 @@ export default function useDayEventLayout(
 
           // Check if event overlaps this calendar day at all
           const eventStart = dateFn(event.startDate).startOf("day");
-          const eventEnd = event.endDate
-            ? dateFn(event.endDate).endOf("day")
-            : eventStart.endOf("day");
+          const eventEnd = getLastEventDay(event).endOf("day");
 
           const overlapsCurrentDay =
             currentDay >= eventStart.startOf("day") &&
@@ -146,7 +146,9 @@ export default function useDayEventLayout(
 
         if (enableEnrichedEvents && enrichedEventsByDate) {
           const dateStr = formatDate(currentDate, DATE_FORMATS.DATE);
-          return (enrichedEventsByDate[dateStr] || []).filter(filterFn);
+          return (enrichedEventsByDate[dateStr] || [])
+            .filter(hasValidDates)
+            .filter(filterFn);
         }
         return events.filter(filterFn);
       };

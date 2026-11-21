@@ -83,6 +83,7 @@ export function getDayListNames(dayType: EDayType, locale?: string): string[] {
   return [days[6], ...days.slice(0, 6)];
 }
 
+/** Month names with 0-based `value` (0 = January … 11 = December). */
 export function getMonthList(locale?: string): MonthListType[] {
   return Info.months("long", { locale: locale || "en" }).map((label, i) => ({
     label,

@@ -1,22 +1,6 @@
 /**
- * @file Default theme values and layout/keyboard constants.
+ * @file Layout/keyboard constants.
  */
-
-/** Fallback color theme applied when no `theme` prop is provided. */
-export const defaultTheme = {
-  default: {
-    color: "#000",
-    bgColor: "#fff",
-  },
-  selected: {
-    color: "#fff",
-    bgColor: "#007bff",
-  },
-  today: {
-    color: "#007bff",
-    bgColor: "#e6f2ff",
-  },
-};
 
 /** Pixel dimensions used by layout algorithms to calculate cell sizes and event positioning. */
 export const LAYOUT_CONSTANTS = {
@@ -24,7 +8,7 @@ export const LAYOUT_CONSTANTS = {
   DATE_LABEL_HEIGHT: 28,
   CELL_PADDING: 8,
   EVENT_HEIGHT: 26,
-  DEFAULT_ROWS: 6,
+  WEEK_NUMBER_WIDTH: 36,
   MIN_ROWS: 4,
   ALL_DAY_ROW_HEIGHT: 24,
   EVENT_ITEM_PADDING: 16,

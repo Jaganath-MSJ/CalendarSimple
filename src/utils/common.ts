@@ -145,3 +145,44 @@ export function handleKeyboardActivation(handler: (e: KeyboardEvent) => void) {
     }
   };
 }
+
+/**
+ * Returns the last calendar day an event occupies. A timed event ending at
+ * exactly 00:00 is over before that day starts, so its last day is the one
+ * before. Date-only (all-day) ranges keep their inclusive end date.
+ */
+export function getLastEventDay(event: CalendarEvent): DateType {
+  const start = dateFn(event.startDate);
+  if (!event.endDate) return start.startOf("day");
+
+  const end = dateFn(event.endDate);
+  const endsAtMidnight =
+    !isAllDayEvent(event) && end > start && end.equals(end.startOf("day"));
+  return (endsAtMidnight ? end.minus({ days: 1 }) : end).startOf("day");
+}
+
+/**
+ * Like an object spread, but keys whose override value is `undefined` keep
+ * their default instead of erasing it.
+ */
+export function mergeDefined<T extends object>(
+  defaults: Partial<T>,
+  overrides: Partial<T>,
+): T {
+  const merged = { ...defaults } as Record<string, unknown>;
+  for (const key in overrides) {
+    const value = overrides[key];
+    if (value !== undefined) {
+      merged[key] = value;
+    }
+  }
+  return merged as T;
+}
+
+/**
+ * True when `startDate` parses and `endDate`, if present, parses too.
+ */
+export function hasValidDates(event: CalendarEvent): boolean {
+  if (!event.startDate || !dateFn(event.startDate).isValid) return false;
+  return !event.endDate || dateFn(event.endDate).isValid;
+}

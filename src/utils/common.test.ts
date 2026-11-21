@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import {
+  mergeDefined,
   calculateMaxEvents,
+  getLastEventDay,
   isAllDayEvent,
   isMultiDay,
   handleKeyboardActivation,
@@ -221,6 +223,53 @@ describe("common utils", () => {
           endDate: "2024-01-02",
         }),
       ).toBe(true);
+    });
+  });
+
+  describe("getLastEventDay", () => {
+    const day = (e: CalendarEvent) => getLastEventDay(e).toFormat("yyyy-MM-dd");
+
+    it("treats a timed 00:00 end as exclusive", () => {
+      expect(
+        day({
+          title: "x",
+          startDate: "2026-11-10T22:00:00",
+          endDate: "2026-11-11T00:00:00",
+        }),
+      ).toBe("2026-11-10");
+    });
+
+    it("keeps date-only end inclusive", () => {
+      expect(
+        day({ title: "x", startDate: "2026-11-10", endDate: "2026-11-11" }),
+      ).toBe("2026-11-11");
+    });
+
+    it("returns the start day when there is no endDate", () => {
+      expect(day({ title: "x", startDate: "2026-11-10T09:00:00" })).toBe(
+        "2026-11-10",
+      );
+    });
+
+    it("keeps the day for a zero-length 00:00 event", () => {
+      expect(
+        day({
+          title: "x",
+          startDate: "2026-11-10T00:00:00",
+          endDate: "2026-11-10T00:00:00",
+        }),
+      ).toBe("2026-11-10");
+    });
+  });
+
+  describe("mergeDefined", () => {
+    it("skips undefined overrides and keeps defaults", () => {
+      expect(
+        mergeDefined<{ a: number; b: number }>(
+          { a: 1, b: 2 },
+          { a: undefined, b: 3 },
+        ),
+      ).toEqual({ a: 1, b: 3 });
     });
   });
 });

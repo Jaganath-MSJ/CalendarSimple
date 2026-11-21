@@ -28,6 +28,7 @@ import {
   getDate,
 } from "../utils/date";
 import { CalendarEvent, EventListType } from "../types";
+import { getLastEventDay, hasValidDates } from "../utils/common";
 import { DATE_FORMATS, TIME_CONSTANTS } from "../constants";
 
 interface InternalCalendarEvent extends CalendarEvent {
@@ -164,7 +165,9 @@ export default function useMonthGrid(
             processedWeek[i].currentDate,
             DATE_FORMATS.DATE,
           );
-          const dayEvents = enrichedEventsByDate[dateStr] || [];
+          const dayEvents = (enrichedEventsByDate[dateStr] || []).filter(
+            hasValidDates,
+          );
           dayEvents.forEach((e) => {
             const eventId = e.id || e.startDate + e.title;
             if (!addedEventIds.has(eventId)) {
@@ -176,7 +179,7 @@ export default function useMonthGrid(
       } else {
         weekEvents = dataEvents.filter((item) => {
           const start = getStartOfDay(item.startDate);
-          const end = item.endDate ? getStartOfDay(item.endDate) : start;
+          const end = getLastEventDay(item);
           // Check overlap
           return (
             isBeforeDate(start, addDays(weekEnd, 1)) &&
@@ -204,8 +207,8 @@ export default function useMonthGrid(
             if (!isSameDate(startA, startB)) return getDiffDays(startA, startB);
 
             // Secondary sort: Duration (descending)
-            const endA = a.endDate ? getStartOfDay(a.endDate) : startA;
-            const endB = b.endDate ? getStartOfDay(b.endDate) : startB;
+            const endA = getLastEventDay(a);
+            const endB = getLastEventDay(b);
             const durA = getDiffDays(endA, startA);
             const durB = getDiffDays(endB, startB);
             return durB - durA; // Longer events first
@@ -238,7 +241,7 @@ export default function useMonthGrid(
         // We clip the event's start/end to the current week's boundaries because
         // we are only rendering one week at a time in this loop.
         const start = getStartOfDay(event.startDate);
-        const end = event.endDate ? getStartOfDay(event.endDate) : start;
+        const end = getLastEventDay(event);
 
         let startIndex = getDiffDays(start, weekStart);
         let endIndex = getDiffDays(end, weekStart);
@@ -289,7 +292,7 @@ export default function useMonthGrid(
         // Find events active on this day
         const activeEvents = weekEvents.filter((event) => {
           const start = getStartOfDay(event.startDate);
-          const end = event.endDate ? getStartOfDay(event.endDate) : start;
+          const end = getLastEventDay(event);
           return (
             !isBeforeDate(currentDate, start) && !isAfterDate(currentDate, end)
           );
@@ -317,9 +320,7 @@ export default function useMonthGrid(
             if (isStart || isWeekStart) {
               // Ensure the visual end date doesn't exceed the end of the current week.
               // This is crucial for rendering the correct width for the event bar using CSS/col-span.
-              const itemEndDate = event.endDate
-                ? getStartOfDay(event.endDate)
-                : getStartOfDay(event.startDate);
+              const itemEndDate = getLastEventDay(event);
               const endOfWeekDate = addDays(currentDate, length - 1 - dayIndex);
 
               let effectiveEndDate = itemEndDate;

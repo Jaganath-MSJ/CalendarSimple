@@ -86,8 +86,7 @@ Two distinct loading modes apply depending on whether events are present:
 
 ### 1.8 Navigation Constraints
 
-- **Past Bounds (`pastYearLength={N}`)**: Verify the header controls block backward navigation beyond `N` years in the past.
-- **Future Bounds (`futureYearLength={N}`)**: Verify the header controls block forward navigation beyond `N` years into the future.
+- Arrows never stop at `pastYearLength`/`futureYearLength`; the year list grows to include the shown year.
 
 ### 1.9 Layout Limits
 
@@ -181,7 +180,7 @@ These scenarios ensure that the calendar's internal math, layout engine, and dat
 
 ### 2.2 Date String Oddities
 
-- **Missing End Date (Datetime)**: Provide only a `startDate` with a specific time. Should fallback to a default duration block (e.g., 1 hour).
+- **Missing End Date (Datetime)**: Provide only a `startDate` with a specific time. A timed event without `endDate` is a 1-minute event drawn at the 15 px minimum height.
 - **Missing End Date (Date-Only)**: Provide only a `startDate` like `2024-01-01`. Should assume it's a 1-day All-Day event.
 
 ### 2.3 Mathematical Boundaries

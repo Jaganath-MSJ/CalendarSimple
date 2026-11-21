@@ -52,7 +52,7 @@ describe("useScheduleView Hook", () => {
 
     it("renders simple single day times", () => {
       const time = renderEventTime(events[0], "2024-03-01");
-      expect(time).toContain("10  – 11 ");
+      expect(time).toBe("10 – 11");
     });
 
     it("renders all day for date-only formats", () => {
@@ -63,7 +63,7 @@ describe("useScheduleView Hook", () => {
     it("handles multi-day time formatting correctly depending on the day", () => {
       // First day
       const timeStart = renderEventTime(events[1], "2024-03-01");
-      expect(timeStart).toContain("15 "); // Shows start time only
+      expect(timeStart).toBe("15"); // Shows start time only
 
       // Middle day
       const timeMiddle = renderEventTime(events[1], "2024-03-02");
@@ -71,7 +71,40 @@ describe("useScheduleView Hook", () => {
 
       // Last day
       const timeEnd = renderEventTime(events[1], "2024-03-03");
-      expect(timeEnd).toContain("Until 10 ");
+      expect(timeEnd).toBe("Until 10");
+    });
+  });
+
+  describe("time label spacing", () => {
+    const get = (is12Hour: boolean) =>
+      renderHook(() => useScheduleView({ events: [], is12Hour, locale: "en" }))
+        .result.current.renderEventTime;
+
+    it("collapses spaces in a 12h range", () => {
+      const e = {
+        title: "A",
+        startDate: "2026-11-10T09:00:00",
+        endDate: "2026-11-10T10:30:00",
+      };
+      expect(get(true)(e, "2026-11-10")).toBe("9 AM – 10:30 AM");
+    });
+
+    it("collapses spaces in a 24h range", () => {
+      const e = {
+        title: "A",
+        startDate: "2026-11-10T14:00:00",
+        endDate: "2026-11-10T15:00:00",
+      };
+      expect(get(false)(e, "2026-11-10")).toBe("14 – 15");
+    });
+
+    it("has no double space in Until labels", () => {
+      const e = {
+        title: "A",
+        startDate: "2026-11-09T10:00:00",
+        endDate: "2026-11-10T15:00:00",
+      };
+      expect(get(true)(e, "2026-11-10")).toBe("Until 3 PM");
     });
   });
 

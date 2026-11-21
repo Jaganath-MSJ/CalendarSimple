@@ -14,27 +14,12 @@ import { CalendarEvent } from "../types";
 import {
   formatDate,
   dateFn,
-  DateType,
   getDiffDays,
   getStartOfDay,
   isAllDayEvent,
+  getLastEventDay,
 } from "../utils";
 import { DATE_FORMATS } from "../constants";
-
-/**
- * Returns the last calendar day an event occupies. A timed event ending at
- * exactly 00:00 is over before that day starts, so its last day is the one
- * before. Date-only (all-day) ranges keep their inclusive end date.
- */
-function getLastEventDay(event: CalendarEvent): DateType {
-  const start = dateFn(event.startDate);
-  if (!event.endDate) return start.startOf("day");
-
-  const end = dateFn(event.endDate);
-  const endsAtMidnight =
-    !isAllDayEvent(event) && end > start && end.equals(end.startOf("day"));
-  return (endsAtMidnight ? end.minus({ days: 1 }) : end).startOf("day");
-}
 
 /**
  * Properties for configuring the schedule view hook.
@@ -121,7 +106,8 @@ export default function useScheduleView({
     const isMultiDay = !startDay.equals(endDay);
 
     const timeFormat = is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME;
-    const formatTime = (t: string) => t.replace(/^0/, "").replace(":00", " ");
+    const formatTime = (t: string) =>
+      t.replace(/^0/, "").replace(":00", " ").replace(/\s+/g, " ").trim();
 
     const isMidnight = (d: string) =>
       dateFn(d).hour === 0 && dateFn(d).minute === 0;

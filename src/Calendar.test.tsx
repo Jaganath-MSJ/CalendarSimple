@@ -684,4 +684,21 @@ describe("Calendar Component Integration", () => {
       expect(screen.getByText(/3 DAYS_OVERRIDE/i)).toBeInTheDocument();
     });
   });
+
+  describe("explicit undefined props", () => {
+    it("keeps default minHour/maxHour when passed as undefined", () => {
+      const { container } = render(
+        <Calendar
+          view={ECalendarViewType.day}
+          width={700}
+          height={600}
+          minHour={undefined}
+          maxHour={undefined}
+        />,
+      );
+      expect(container.querySelectorAll('[class*="eventSlot"]')).toHaveLength(
+        24,
+      );
+    });
+  });
 });

@@ -10,7 +10,7 @@ import {
   LAYOUT_CONSTANTS,
   CALENDAR_ACTIONS,
 } from "./constants";
-import { dateFn, resolveDirection, toCssLength } from "./utils";
+import { dateFn, mergeDefined, resolveDirection, toCssLength } from "./utils";
 import useResizeObserver from "./hooks/useResizeObserver";
 import useEvents from "./hooks/useEvents";
 import useColorScheme from "./hooks/useColorScheme";
@@ -109,7 +109,7 @@ function CalendarContent(props: CalendarContentProps) {
 function Calendar(props: CalendarProps = defaultCalendarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const allProps: CalendarProps = { ...defaultCalendarProps, ...props };
+  const allProps = mergeDefined<CalendarProps>(defaultCalendarProps, props);
   const { width: observedWidth, height: observedHeight } = useResizeObserver(
     containerRef,
     !!allProps.width && !!allProps.height,

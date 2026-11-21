@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import cx from "classnames";
 import {
   getDayOfWeek,
@@ -11,9 +11,10 @@ import useDayEventLayout, {
   DayEventLayout,
 } from "../../../hooks/useDayEventLayout";
 import { CalendarContentProps } from "../../../types";
-import { DATE_FORMATS, TIME_CONSTANTS } from "../../../constants";
+import { DATE_FORMATS } from "../../../constants";
 import styles from "./CustomDaysView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
+import useAutoScrollToNow from "../../../hooks/useAutoScrollToNow";
 import useCalendarProps from "../../../hooks/useCalendarProps";
 import TimeColumn from "../../core/time_column/TimeColumn";
 import DayColumn from "../../core/day_column/DayColumn";
@@ -99,27 +100,12 @@ function CustomView(props: CustomViewProps) {
     },
   ) as DayEventLayout[][];
 
-  const hasToday = useMemo(() => {
-    const now = dateFn();
-    return viewDays.some((day) => now.hasSame(day, "day"));
-  }, [viewDays]);
-
-  useEffect(() => {
-    if (autoScrollToCurrentTime && containerRef.current && hasToday) {
-      const now = dateFn();
-      const hours = now.hour;
-      const minutes = now.minute;
-      const totalMinutes = hours * TIME_CONSTANTS.MINUTES_IN_HOUR + minutes;
-
-      const container = containerRef.current;
-      const targetScroll = Math.max(
-        0,
-        totalMinutes - container.clientHeight / 2,
-      );
-
-      container.scrollTo({ top: targetScroll, behavior: "smooth" });
-    }
-  }, [autoScrollToCurrentTime, hasToday]);
+  useAutoScrollToNow(containerRef, {
+    enabled: !!autoScrollToCurrentTime,
+    days: viewDays,
+    minHour,
+    maxHour,
+  });
 
   return (
     <div

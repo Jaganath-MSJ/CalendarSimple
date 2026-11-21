@@ -21,6 +21,9 @@ import {
   getMonth,
   getYear,
   getMonthList,
+  getVisibleWeekDays,
+  getRowWeekNumber,
+  getLastEventDay,
 } from "../../utils";
 import styles from "./Header.module.css";
 import LeftArrow from "../../assets/LeftArrow";
@@ -67,6 +70,8 @@ function Header(props: HeaderProps) {
     localeMessages,
     classNames,
     showWeekNumbers,
+    weekStartsOn,
+    weekEndsOn,
   } = useCalendarProps(props) as CalendarContentProps & {
     headerClassName?: string;
   };
@@ -127,17 +132,20 @@ function Header(props: HeaderProps) {
   };
 
   const getHeaderTitle = () => {
-    const weekSuffix =
-      view === ECalendarViewType.week && showWeekNumbers
-        ? `  ·  W${selectedDate.weekNumber}`
-        : "";
-
     if (view === ECalendarViewType.day) {
       return formatDate(selectedDate, DATE_FORMATS.MONTH_DAY_YEAR, locale);
     }
     if (view === ECalendarViewType.week) {
-      const startOfWeek = selectedDate.startOf("week");
-      const endOfWeek = selectedDate.endOf("week");
+      const days = getVisibleWeekDays(
+        selectedDate,
+        weekStartsOn ?? 0,
+        weekEndsOn ?? 6,
+      );
+      const startOfWeek = days[0];
+      const endOfWeek = days[days.length - 1];
+      const weekSuffix = showWeekNumbers
+        ? `  ·  W${getRowWeekNumber(startOfWeek)}`
+        : "";
       let baseString;
       if (startOfWeek.month !== endOfWeek.month) {
         if (startOfWeek.year !== endOfWeek.year) {
@@ -146,7 +154,7 @@ function Header(props: HeaderProps) {
           baseString = `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH, locale)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
         }
       } else {
-        baseString = formatDate(selectedDate, DATE_FORMATS.MONTH_YEAR, locale);
+        baseString = formatDate(startOfWeek, DATE_FORMATS.MONTH_YEAR, locale);
       }
       return `${baseString}${weekSuffix}`;
     }
@@ -171,7 +179,7 @@ function Header(props: HeaderProps) {
 
         events.forEach((event) => {
           const sd = dateFn(event.startDate);
-          const ed = event.endDate ? dateFn(event.endDate) : sd;
+          const ed = getLastEventDay(event);
           if (sd < minDate) minDate = sd;
           if (ed > maxDate) maxDate = ed;
         });

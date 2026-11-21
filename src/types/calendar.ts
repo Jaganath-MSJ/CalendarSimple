@@ -31,8 +31,7 @@ export type ECalendarViewType =
   (typeof ECalendarViewType)[keyof typeof ECalendarViewType];
 
 /**
- * Controls how much of the day is shown in the time grid.
- * `full` shows all 24 hours; `half` shows 12 hours (combined with `minHour`/`maxHour`).
+ * Weekday name length: `full` = long names (Monday), `half` = short (Mon).
  */
 export const EDayType = {
   full: "full",
@@ -105,11 +104,11 @@ export interface CalendarProps {
   // --- Configuration ---
   /** Use 12-hour clock format (AM/PM) in time grids. Defaults to `false`. */
   is12Hour?: boolean;
-  /** Allow date cells to be clicked and selected. Defaults to `true`. */
+  /** Allow date cells to be clicked and selected. Defaults to `false`. */
   selectable?: boolean;
   /** Maximum number of events shown per day cell before a "+N more" overflow link appears. */
   maxEvents?: number;
-  /** Controls time-grid range. `full` = all 24 h; `half` = respects `minHour`/`maxHour`. */
+  /** Switches weekday names between long and short. */
   dayType?: EDayType;
   /** Number of years before today available in the year picker. */
   pastYearLength?: number;
@@ -139,7 +138,7 @@ export interface CalendarProps {
   showAllDayRow?: boolean;
   /** Custom renderer for the date separator in Schedule view. */
   renderScheduleSeparator?: (date: Date) => ReactNode;
-  /** Pixel offset added between overlapping events in the time grid to keep them readable. */
+  /** Percentage of the column width each overlapping column is offset by (0 = tiled). */
   eventOverlapOffset?: number;
 
   // --- Layout ---
@@ -188,11 +187,13 @@ export interface CalendarProps {
   enrichedEventsByDate?: Record<string, CalendarEvent[]>;
   /**
    * Enable O(1) event lookup via `enrichedEventsByDate`.
+   * Skips the reversed-range filter; events with unparseable dates are still dropped.
    * Emits a `console.warn` if `enrichedEventsByDate` is not provided alongside this flag (K-05).
    */
   enableEnrichedEvents?: boolean;
   /**
-   * Skip internal validation when events are already sorted by `startDate` ascending.
+   * Skip the re-sort / reversed-range check when events are already sorted by `startDate` ascending.
+   * Events with unparseable dates are still dropped (with a one-time `console.warn`).
    *
    * **Caveat:** the library does not re-sort the array. If unsorted events are passed with this
    * flag set to `true`, they will render in the order provided. Only set this flag when the
@@ -283,6 +284,6 @@ export interface CalendarContentProps extends RequiredSome<
 export interface MonthListType {
   /** Localized month name (e.g. "January"). */
   label: string;
-  /** 1-based month number (1 = January … 12 = December). */
+  /** 0-based month index (0 = January … 11 = December). */
   value: number;
 }

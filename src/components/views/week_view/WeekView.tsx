@@ -1,7 +1,8 @@
-import React, { useMemo, useEffect, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import cx from "classnames";
 import {
   getDayOfWeek,
+  getVisibleWeekDays,
   dateFn,
   formatDate,
   getDayListNames,
@@ -11,9 +12,10 @@ import useDayEventLayout, {
   DayEventLayout,
 } from "../../../hooks/useDayEventLayout";
 import { CalendarContentProps } from "../../../types";
-import { DATE_FORMATS, TIME_CONSTANTS } from "../../../constants";
+import { DATE_FORMATS } from "../../../constants";
 import styles from "./WeekView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
+import useAutoScrollToNow from "../../../hooks/useAutoScrollToNow";
 import useCalendarProps from "../../../hooks/useCalendarProps";
 import TimeColumn from "../../core/time_column/TimeColumn";
 import DayColumn from "../../core/day_column/DayColumn";
@@ -79,20 +81,10 @@ function WeekView(props: WeekViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, testId, colorScheme } = useCalendar();
   const { selectedDate } = state;
-  const startOfWeek = useMemo(() => {
-    const currentDay = getDayOfWeek(selectedDate);
-    const diff =
-      currentDay >= weekStartsOn
-        ? weekStartsOn - currentDay
-        : weekStartsOn - currentDay - TIME_CONSTANTS.DAYS_IN_WEEK;
-    return selectedDate.plus({ days: diff }).startOf("day");
-  }, [selectedDate, weekStartsOn]);
-
-  const weekDays = useMemo(() => {
-    let length = weekEndsOn - weekStartsOn + 1;
-    if (length <= 0) length += TIME_CONSTANTS.DAYS_IN_WEEK;
-    return Array.from({ length }, (_, i) => startOfWeek.plus({ days: i }));
-  }, [startOfWeek, weekStartsOn, weekEndsOn]);
+  const weekDays = useMemo(
+    () => getVisibleWeekDays(selectedDate, weekStartsOn, weekEndsOn),
+    [selectedDate, weekStartsOn, weekEndsOn],
+  );
 
   const weekEvents = useDayEventLayout(
     events,
@@ -109,27 +101,12 @@ function WeekView(props: WeekViewProps) {
     },
   ) as DayEventLayout[][];
 
-  const isCurrentWeek = useMemo(() => {
-    const now = dateFn();
-    return weekDays.some((day) => now.hasSame(day, "day"));
-  }, [weekDays]);
-
-  useEffect(() => {
-    if (autoScrollToCurrentTime && containerRef.current && isCurrentWeek) {
-      const now = dateFn();
-      const hours = now.hour;
-      const minutes = now.minute;
-      const totalMinutes = hours * TIME_CONSTANTS.MINUTES_IN_HOUR + minutes;
-
-      const container = containerRef.current;
-      const targetScroll = Math.max(
-        0,
-        totalMinutes - container.clientHeight / 2,
-      );
-
-      container.scrollTo({ top: targetScroll, behavior: "smooth" });
-    }
-  }, [autoScrollToCurrentTime, isCurrentWeek]);
+  useAutoScrollToNow(containerRef, {
+    enabled: !!autoScrollToCurrentTime,
+    days: weekDays,
+    minHour,
+    maxHour,
+  });
 
   return (
     <div

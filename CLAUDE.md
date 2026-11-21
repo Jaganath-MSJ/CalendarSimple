@@ -91,9 +91,9 @@ This enables prop composition: global calendar props + view-specific overrides.
 ### Core Hooks (Event & Layout Logic)
 
 - **`useEvents`** — Filters and enriches events for the current date range; supports O(1) lookup via `enrichedEventsByDate`
-- **`useAllDayBanner`** — Extracts all-day events from event list; handles multi-day spanning. Multi-day timed events only occupy days they cover for ≥12h; single-day timed events never go to the banner
-- **`useDayEventLayout`** — Implements "Tetris" collision detection for overlapping timed events; returns positioning data. Leaves out multi-day events with ≥12h on a day (the banner shows them) but always keeps single-day timed events, however long
-- **`useMonthGrid`** — Builds month calendar grid with week rows; handles adjacent month visibility
+- **`useAllDayBanner`** — Extracts all-day events from event list; handles multi-day spanning. Multi-day timed events only occupy days they cover for ≥12h; single-day timed events never go to the banner. A timed `endDate` of exactly 00:00 is exclusive (`getLastEventDay`), so it shows no right "clipped" arrow
+- **`useDayEventLayout`** — Implements "Tetris" collision detection for overlapping timed events; returns positioning data. Leaves out multi-day events with ≥12h on a day (the banner shows them) but always keeps single-day timed events, however long. A timed `endDate` of exactly 00:00 is exclusive (`getLastEventDay`): nothing is drawn on the next day
+- **`useMonthGrid`** — Builds month calendar grid with week rows; handles adjacent month visibility. A timed `endDate` of exactly 00:00 is exclusive (`getLastEventDay`): the event ends on the previous day
 - **`useScheduleView`** — Groups events by date for schedule layout; handles sorting. A timed `endDate` of exactly 00:00 is exclusive (the event ends on the previous day); date-only ranges are inclusive
 - **`useResizeObserver`** — Observes container resize; provides width/height for responsive layout
 - **`useColorScheme`** — Resolves the `colorScheme` prop to a concrete `'light'`/`'dark'` value, subscribing to the OS `prefers-color-scheme` media query when `auto`
@@ -134,7 +134,7 @@ Multi-day events use `startDate` and `endDate` without time components; timed ev
 ### Setup & Mocks
 
 - **Test entry**: `src/setupTests.ts` — Configures Vitest globals, DOM assertions, and mocks
-- **ResizeObserver mock**: `useResizeObserver` is mocked as a hook returning fixed `{ width: 1200, height: 600 }`
+- **No ResizeObserver mock**: `src/setupTests.ts` only mocks `window.matchMedia`. Tests render `<Calendar>` with numeric `width`/`height` (or stub `ResizeObserver` per test)
 - **Context mocking**: Tests use `<CalendarProvider>` with initial state; no external mock library needed
 - **JSDOM environment**: `vitest.config.ts` specifies `jsdom` for DOM testing
 
@@ -212,7 +212,7 @@ This project uses specific patterns documented in prior sessions:
 - **Luxon-only dates**: All internal date handling uses `DateTime`; convert to/from JS `Date` at API boundaries
 - **CSS co-location**: Styles live alongside components in `.module.css` files
 - **Context mocks in tests**: No Vitest mock() calls; use `CalendarProvider` with test props
-- **ResizeObserver mock**: Mocked in `setupTests.ts` for consistent test sizes
+- **No global ResizeObserver mock**: `setupTests.ts` only mocks `matchMedia`; pass numeric `width`/`height` in tests (or stub `ResizeObserver` per test)
 - **Compound components + prop distribution**: Central `useCalendarProps()` hook merges context config with local overrides
 - **Event layout hooks**: Sophisticated math for collision detection (Tetris algorithm) and multi-day rendering
 
@@ -242,6 +242,6 @@ npm test -- events        # All event-related tests
 ### Extending Theme System
 
 1. Add new color key to `CalendarTheme` type
-2. Add default value to `defaultTheme` in `src/constants/theme.ts`
+2. Add the light/dark default as a CSS custom property in `src/styles/variables.css` (`:root` and `[data-color-scheme="dark"]`)
 3. Update components to use the new color
 4. Create Storybook story showing the customization

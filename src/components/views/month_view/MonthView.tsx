@@ -13,6 +13,7 @@ import {
   calculateMaxEvents,
   formatDate,
   getDayListNames,
+  getRowWeekNumber,
 } from "../../../utils";
 import useMonthGrid from "../../../hooks/useMonthGrid";
 import MonthEventItem from "../../core/month_event_item/MonthEventItem";
@@ -147,7 +148,9 @@ function MonthView(props: MonthViewProps) {
         style={
           {
             "--calendar-rows": calendarGrid.length,
-            "--week-number-width": showWeekNumbers ? "36px" : "0px",
+            "--week-number-width": showWeekNumbers
+              ? `${LAYOUT_CONSTANTS.WEEK_NUMBER_WIDTH}px`
+              : "0px",
           } as CSSProperties
         }
       >
@@ -185,7 +188,7 @@ function MonthView(props: MonthViewProps) {
                   >
                     {!showAdjacentMonths && isRowEntirelyAdjacent
                       ? null
-                      : week[0]?.currentDate.weekNumber}
+                      : getRowWeekNumber(week[0].currentDate)}
                   </td>
                 )}
                 {week.map((dayInfo, dayIndex) => (
@@ -203,7 +206,10 @@ function MonthView(props: MonthViewProps) {
                     dateObj={dayInfo.currentDate}
                     data={dayInfo.events}
                     cellWidth={
-                      (typeof width === "number" ? width : 0) /
+                      ((typeof width === "number" ? width : 0) -
+                        (showWeekNumbers
+                          ? LAYOUT_CONSTANTS.WEEK_NUMBER_WIDTH
+                          : 0)) /
                       headerDays.length
                     }
                     className={cx(styles.tableCell, classNames?.tableDate)}

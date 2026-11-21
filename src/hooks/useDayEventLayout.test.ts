@@ -340,4 +340,22 @@ describe("useDayEventLayout Hook", () => {
     expect(event.height).toBeGreaterThanOrEqual(0);
     expect(event.width).toBe(100);
   });
+
+  it("showAllDayRow=false: 22:00–00:00 not drawn on next day", () => {
+    const events: CalendarEvent[] = [
+      {
+        id: "L",
+        title: "Late",
+        startDate: "2026-11-10T22:00:00",
+        endDate: "2026-11-11T00:00:00",
+      },
+    ];
+    const days = [dateFn("2026-11-10"), dateFn("2026-11-11")];
+    const { result } = renderHook(() =>
+      useDayEventLayout(events, days, 0, 24, false, 0),
+    );
+    const layouts = result.current as DayEventLayout[][];
+    expect(layouts[0]).toHaveLength(1);
+    expect(layouts[1]).toHaveLength(0);
+  });
 });
