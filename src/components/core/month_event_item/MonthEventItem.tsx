@@ -12,6 +12,7 @@ import {
   getContrastColor,
   formatDate,
   handleKeyboardActivation,
+  stripLayoutStyle,
   resolveTheme,
 } from "../../../utils";
 import styles from "./MonthEventItem.module.css";
@@ -194,10 +195,10 @@ function MonthEventItem({
                       id={item.id}
                       data-testid={`${testId}-${id}-month-event-item`}
                       style={{
-                        width: calculatedWidth,
                         backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
                         color: textColor,
-                        ...item.style,
+                        ...stripLayoutStyle(item.style),
+                        width: calculatedWidth,
                       }}
                       title={tooltipText}
                       aria-label={`${item.title}, ${tooltipText}`}

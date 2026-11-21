@@ -281,6 +281,8 @@ interface CalendarEvent {
 }
 ```
 
+Layout keys in `style` (position, top/right/bottom/left, inset\*, width, height, zIndex) are ignored; colours and other cosmetic keys still apply.
+
 #### `ECalendarViewType` & `EDayType`
 
 ```typescript

@@ -79,6 +79,8 @@ Each view is a separate component receiving props via `useCalendarProps()`:
 
 This enables prop composition: global calendar props + view-specific overrides.
 
+- Layout maths (month max events, chip widths) reads the measured `bodySize` from `useCalendar()`; `config.width`/`config.height` stay the raw props for CSS.
+
 ### Layout & Styling
 
 - **CSS Modules**: All styles co-located in `Component.module.css` files
@@ -134,7 +136,7 @@ Multi-day events use `startDate` and `endDate` without time components; timed ev
 ### Setup & Mocks
 
 - **Test entry**: `src/setupTests.ts` — Configures Vitest globals, DOM assertions, and mocks
-- **No ResizeObserver mock**: `src/setupTests.ts` only mocks `window.matchMedia`. Tests render `<Calendar>` with numeric `width`/`height` (or stub `ResizeObserver` per test)
+- **ResizeObserver stub**: `src/setupTests.ts` installs a global no-op `ResizeObserver` stub (plus the `matchMedia` mock). Tests that need measurements override `globalThis.ResizeObserver` per test and restore it afterwards
 - **Context mocking**: Tests use `<CalendarProvider>` with initial state; no external mock library needed
 - **JSDOM environment**: `vitest.config.ts` specifies `jsdom` for DOM testing
 
@@ -212,7 +214,7 @@ This project uses specific patterns documented in prior sessions:
 - **Luxon-only dates**: All internal date handling uses `DateTime`; convert to/from JS `Date` at API boundaries
 - **CSS co-location**: Styles live alongside components in `.module.css` files
 - **Context mocks in tests**: No Vitest mock() calls; use `CalendarProvider` with test props
-- **No global ResizeObserver mock**: `setupTests.ts` only mocks `matchMedia`; pass numeric `width`/`height` in tests (or stub `ResizeObserver` per test)
+- **ResizeObserver stub**: `setupTests.ts` installs a global no-op `ResizeObserver` stub (plus the `matchMedia` mock); tests that need measurements override it per test
 - **Compound components + prop distribution**: Central `useCalendarProps()` hook merges context config with local overrides
 - **Event layout hooks**: Sophisticated math for collision detection (Tetris algorithm) and multi-day rendering
 

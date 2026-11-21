@@ -6,6 +6,7 @@ import {
   generateTooltipText,
   getContrastColor,
   handleKeyboardActivation,
+  stripLayoutStyle,
 } from "../../../utils";
 import {
   CalendarEvent,
@@ -163,12 +164,12 @@ export default function AllDayBanner({
                   [styles.clippedRight]: isClippedRight,
                 })}
                 style={{
+                  backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                  color: textColor,
+                  ...stripLayoutStyle(event.style),
                   top: `${topPx}px`,
                   left: `${leftPct}%`,
                   width: `calc(${widthPct}% - 4px)`,
-                  backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
-                  color: textColor,
-                  ...event.style,
                 }}
                 data-testid={`${testId}-${event.id}-all-day-event`}
                 aria-label={generateTooltipText(

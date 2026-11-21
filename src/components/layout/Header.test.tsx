@@ -35,6 +35,7 @@ describe("Header Component", () => {
       testId: undefined,
       config: defaultConfig,
       colorScheme: "light",
+      bodySize: { width: 0, height: 0 },
     });
   });
 
@@ -137,6 +138,7 @@ describe("Header accessibility", () => {
       dispatch: vi.fn() as never,
       testId: undefined,
       colorScheme: "light",
+      bodySize: { width: 0, height: 0 },
       config: {
         events: [],
         locale: "en",

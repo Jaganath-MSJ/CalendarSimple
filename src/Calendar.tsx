@@ -14,6 +14,7 @@ import { dateFn, mergeDefined, resolveDirection, toCssLength } from "./utils";
 import useResizeObserver from "./hooks/useResizeObserver";
 import useEvents from "./hooks/useEvents";
 import useColorScheme from "./hooks/useColorScheme";
+import useShallowStable from "./hooks/useShallowStable";
 import styles from "./Calendar.module.css";
 import Header from "./components/layout/Header";
 import DayView from "./components/views/day_view/DayView";
@@ -25,6 +26,42 @@ import { CalendarProvider, useCalendar } from "./context/CalendarContext";
 import View from "./components/views/View";
 import useCalendarProps from "./hooks/useCalendarProps";
 import CalendarErrorBoundary from "./components/ui/CalendarErrorBoundary";
+
+// Syncs controlled props into context. Rendered in both plain and compound
+// mode. Skips the first run (reducer is already initialised from props) and
+// compares the date by value so an equal new Date does not reset navigation.
+function PropSync({
+  view,
+  selectedDate,
+  customDays,
+}: Pick<CalendarProps, "view" | "selectedDate" | "customDays">) {
+  const { dispatch } = useCalendar();
+  const mounted = useRef(false);
+  const time = selectedDate ? dateFn(selectedDate).toMillis() : undefined;
+
+  useEffect(() => {
+    if (mounted.current && view) dispatch({ type: "SET_VIEW", payload: view });
+  }, [view, dispatch]);
+
+  useEffect(() => {
+    if (mounted.current && selectedDate) {
+      dispatch({ type: "SET_DATE", payload: dateFn(selectedDate) });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [time, dispatch]);
+
+  useEffect(() => {
+    if (mounted.current && customDays) {
+      dispatch({ type: "SET_CUSTOM_DAYS", payload: customDays });
+    }
+  }, [customDays, dispatch]);
+
+  useEffect(() => {
+    mounted.current = true;
+  }, []);
+
+  return null;
+}
 
 function CalendarContent(props: CalendarContentProps) {
   const {
@@ -47,27 +84,6 @@ function CalendarContent(props: CalendarContentProps) {
     state: { view, selectedDate },
     dispatch,
   } = useCalendar();
-
-  // Sync view from props to context
-  useEffect(() => {
-    if (props.view) {
-      dispatch({ type: "SET_VIEW", payload: props.view });
-    }
-  }, [props.view, dispatch]);
-
-  // Sync external date prop to context if it changes
-  useEffect(() => {
-    if (props.selectedDate) {
-      dispatch({ type: "SET_DATE", payload: dateFn(props.selectedDate) });
-    }
-  }, [props.selectedDate, dispatch]);
-
-  // Sync customDays from props to context
-  useEffect(() => {
-    if (props.customDays) {
-      dispatch({ type: "SET_CUSTOM_DAYS", payload: props.customDays });
-    }
-  }, [props.customDays, dispatch]);
 
   return (
     <section
@@ -112,7 +128,7 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
   const allProps = mergeDefined<CalendarProps>(defaultCalendarProps, props);
   const { width: observedWidth, height: observedHeight } = useResizeObserver(
     containerRef,
-    !!allProps.width && !!allProps.height,
+    typeof allProps.width === "number" && typeof allProps.height === "number",
   );
 
   // Use props if provided, otherwise use observed size. Either may be a number
@@ -124,6 +140,17 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
     typeof rawHeight === "number"
       ? rawHeight - LAYOUT_CONSTANTS.HEADER_HEIGHT
       : `calc(${rawHeight} - ${LAYOUT_CONSTANTS.HEADER_HEIGHT}px)`;
+
+  const bodySize = useMemo(() => {
+    const w =
+      typeof allProps.width === "number" ? allProps.width : observedWidth;
+    const h =
+      typeof allProps.height === "number" ? allProps.height : observedHeight;
+    return {
+      width: w,
+      height: Math.max(0, h - LAYOUT_CONSTANTS.HEADER_HEIGHT),
+    };
+  }, [allProps.width, allProps.height, observedWidth, observedHeight]);
 
   const initialDate = useMemo(
     () => dateFn(props.selectedDate),
@@ -140,6 +167,14 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
 
   const dir = resolveDirection(allProps.direction, allProps.locale);
   const resolvedScheme = useColorScheme(allProps.colorScheme);
+  const configProps = { ...allProps };
+  delete configProps.children;
+  const config = useShallowStable({
+    ...configProps,
+    width,
+    height,
+    events: validEvents,
+  });
 
   return (
     <CalendarProvider
@@ -147,8 +182,14 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
       initialView={allProps.view || ECalendarViewType.month}
       initialCustomDays={allProps.customDays}
       testId={allProps.testId}
-      config={{ ...allProps, width, height, events: validEvents }}
+      bodySize={bodySize}
+      config={config}
     >
+      <PropSync
+        view={props.view}
+        selectedDate={props.selectedDate}
+        customDays={props.customDays}
+      />
       <div
         ref={containerRef}
         data-testid={

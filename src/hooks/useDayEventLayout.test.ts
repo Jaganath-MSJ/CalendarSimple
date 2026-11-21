@@ -1,5 +1,6 @@
 import { renderHook } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { Settings } from "luxon";
 import useDayEventLayout, { DayEventLayout } from "./useDayEventLayout";
 import { dateFn } from "../utils/date";
 import { CalendarEvent } from "../types";
@@ -357,5 +358,54 @@ describe("useDayEventLayout Hook", () => {
     const layouts = result.current as DayEventLayout[][];
     expect(layouts[0]).toHaveLength(1);
     expect(layouts[1]).toHaveLength(0);
+  });
+});
+
+describe("useDayEventLayout DST days", () => {
+  afterEach(() => {
+    Settings.defaultZone = "system";
+  });
+
+  const cases: [string, string][] = [
+    ["America/New_York", "2026-03-08"],
+    ["America/New_York", "2026-11-01"],
+    ["Europe/London", "2026-03-29"],
+    ["Europe/London", "2026-10-25"],
+  ];
+
+  it.each(cases)("keeps 10:00-11:00 at top 600 in %s on %s", (zone, day) => {
+    Settings.defaultZone = zone;
+    const events: CalendarEvent[] = [
+      {
+        id: "1",
+        title: "Standup",
+        startDate: `${day}T10:00:00`,
+        endDate: `${day}T11:00:00`,
+      },
+    ];
+    const { result } = renderHook(() =>
+      useDayEventLayout(events, dateFn(day), 0, 24, true, 0),
+    );
+    const layout = result.current as DayEventLayout[];
+    expect(layout[0].top).toBe(600);
+    expect(layout[0].height).toBe(60);
+  });
+
+  it("measures an event running into the next day on the fall-back day", () => {
+    Settings.defaultZone = "America/New_York";
+    const events: CalendarEvent[] = [
+      {
+        id: "1",
+        title: "Late",
+        startDate: "2026-11-01T23:00:00",
+        endDate: "2026-11-02T01:00:00",
+      },
+    ];
+    const { result } = renderHook(() =>
+      useDayEventLayout(events, dateFn("2026-11-01"), 0, 24, true, 0),
+    );
+    const layout = result.current as DayEventLayout[];
+    expect(layout[0].top).toBe(1380);
+    expect(layout[0].height).toBe(60);
   });
 });

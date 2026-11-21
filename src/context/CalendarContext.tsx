@@ -55,6 +55,8 @@ export interface CalendarContextValue {
   config: Omit<CalendarProps, "children" | "selectedDate" | "view">;
   /** Resolved color scheme ("light" or "dark") for portaled UI such as Popover. */
   colorScheme: "light" | "dark";
+  /** Measured pixel size of the calendar body (header excluded); 0 until measured. */
+  bodySize: { width: number; height: number };
 }
 
 export const CalendarContext = createContext<CalendarContextValue | undefined>(
@@ -123,6 +125,8 @@ function calendarReducer(
   }
 }
 
+const DEFAULT_BODY_SIZE = { width: 0, height: 0 };
+
 /**
  * Props accepted by `CalendarProvider`.
  */
@@ -139,6 +143,8 @@ export interface CalendarProviderProps {
   testId?: string;
   /** Static configuration props passed through to all child components via context. */
   config?: Omit<CalendarProps, "children" | "selectedDate" | "view">;
+  /** Pixel size of the calendar body used for layout maths. */
+  bodySize?: { width: number; height: number };
 }
 
 /**
@@ -152,6 +158,7 @@ export function CalendarProvider({
   initialCustomDays,
   testId,
   config,
+  bodySize: bodySizeProp,
 }: CalendarProviderProps) {
   const [state, dispatch] = useReducer(calendarReducer, {
     selectedDate: initialDate,
@@ -161,6 +168,18 @@ export function CalendarProvider({
 
   const resolvedScheme = useColorScheme(config?.colorScheme);
 
+  // Direct provider use (no measured `bodySize`): derive from numeric config size.
+  const configWidth = typeof config?.width === "number" ? config.width : 0;
+  const configHeight = typeof config?.height === "number" ? config.height : 0;
+  const derivedBodySize = useMemo(
+    () =>
+      configWidth || configHeight
+        ? { width: configWidth, height: configHeight }
+        : DEFAULT_BODY_SIZE,
+    [configWidth, configHeight],
+  );
+  const bodySize = bodySizeProp ?? derivedBodySize;
+
   const value = useMemo(
     () => ({
       state,
@@ -168,8 +187,9 @@ export function CalendarProvider({
       testId,
       config: config || {},
       colorScheme: resolvedScheme,
+      bodySize,
     }),
-    [state, testId, config, resolvedScheme],
+    [state, testId, config, resolvedScheme, bodySize],
   );
 
   return (

@@ -8,8 +8,9 @@ import {
   handleKeyboardActivation,
   resolveDirection,
   toCssLength,
+  stripLayoutStyle,
 } from "./common";
-import { LAYOUT_CONSTANTS } from "../constants";
+import { MONTH_METRICS } from "../constants";
 import { CalendarEvent } from "../types";
 import { KeyboardEvent } from "react";
 
@@ -23,14 +24,18 @@ describe("common utils", () => {
       // Math.round((200 - DATE_LABEL_HEIGHT - CELL_PADDING) / EVENT_HEIGHT) - 1
       const availableNodeHeight =
         cellHeight -
-        LAYOUT_CONSTANTS.DATE_LABEL_HEIGHT -
-        LAYOUT_CONSTANTS.CELL_PADDING;
+        MONTH_METRICS.web.dateLabelHeight -
+        MONTH_METRICS.web.cellPadding;
 
       const expected =
-        Math.round(availableNodeHeight / LAYOUT_CONSTANTS.EVENT_HEIGHT) - 1;
+        Math.round(availableNodeHeight / MONTH_METRICS.web.eventPitch) - 1;
 
       const result = calculateMaxEvents(height, rowsInView);
       expect(result).toBe(Math.max(0, expected));
+    });
+
+    it("returns Infinity when the height is unmeasured", () => {
+      expect(calculateMaxEvents(0, 5)).toBe(Infinity);
     });
 
     it("should not return a negative number for small heights", () => {
@@ -271,5 +276,11 @@ describe("common utils", () => {
         ),
       ).toEqual({ a: 1, b: 3 });
     });
+  });
+
+  it("stripLayoutStyle removes logical inset shorthands", () => {
+    expect(
+      stripLayoutStyle({ insetInline: 1, insetBlock: 2, color: "red" }),
+    ).toEqual({ color: "red" });
   });
 });

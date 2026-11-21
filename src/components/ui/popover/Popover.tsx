@@ -18,6 +18,7 @@ import {
   generateTooltipText,
   getContrastColor,
   handleKeyboardActivation,
+  stripLayoutStyle,
 } from "../../../utils";
 import {
   CalendarContentProps,
@@ -218,7 +219,7 @@ function Popover({
               style={{
                 backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
                 color: textColor,
-                ...item.style,
+                ...stripLayoutStyle(item.style),
               }}
               aria-label={tooltipText}
               onClick={(e) => {

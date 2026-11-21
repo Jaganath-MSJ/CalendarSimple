@@ -46,7 +46,7 @@ Switch between views using the `view` prop (`ECalendarViewType`).
 Pass an array of `CalendarEvent` objects to the `events` prop.
 
 - **Required fields** — `startDate` (string) and `title` (string).
-- **Optional fields** — `id`, `endDate`, `style` (inline CSS), and any custom metadata via `[key: string]: unknown`.
+- **Optional fields** — `id`, `endDate`, `style` (inline CSS), and any custom metadata via `[key: string]: unknown`. Layout keys in `style` (position, top/right/bottom/left, inset\*, width, height, zIndex) are ignored; colours and other cosmetic keys still apply.
 - **Date-only events** — Use `YYYY-MM-DD` format for full-day events.
 - **Timed events** — Use `YYYY-MM-DDTHH:mm:ss` format for specific time blocks.
 - **Custom metadata** — Attach any extra fields (database IDs, descriptions, etc.) directly to the event object. These are returned intact in click callbacks.

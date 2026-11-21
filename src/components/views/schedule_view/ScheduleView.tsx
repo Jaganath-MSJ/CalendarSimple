@@ -7,6 +7,7 @@ import {
   checkIsToday,
   generateTooltipText,
   handleKeyboardActivation,
+  stripLayoutStyle,
   resolveTheme,
 } from "../../../utils";
 import styles from "./ScheduleView.module.css";
@@ -200,7 +201,7 @@ export default function ScheduleView(props: ScheduleViewProps) {
                                 classNames?.scheduleTitle,
                               )}
                               style={{
-                                ...event.style,
+                                ...stripLayoutStyle(event.style),
                                 backgroundColor: "transparent",
                               }}
                             >

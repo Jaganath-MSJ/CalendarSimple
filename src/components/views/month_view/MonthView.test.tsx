@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import MonthView from "./MonthView";
 import Calendar from "../../../Calendar";
@@ -27,6 +27,7 @@ describe("MonthView Component", () => {
 
   beforeEach(() => {
     vi.spyOn(CalendarContextModule, "useCalendar").mockReturnValue({
+      bodySize: { width: 800, height: 600 },
       state: {
         selectedDate: mockDate,
         view: "month",
@@ -89,6 +90,7 @@ describe("MonthView Component", () => {
       },
     ];
     vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      bodySize: { width: 800, height: 600 },
       state: {
         selectedDate: mockDate,
         view: "month",
@@ -119,6 +121,7 @@ describe("MonthView Component", () => {
     ];
 
     vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      bodySize: { width: 800, height: 600 },
       state: {
         selectedDate: mockDate,
         view: "month",
@@ -221,6 +224,7 @@ describe("MonthView Component", () => {
       },
     ];
     vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      bodySize: { width: 800, height: 600 },
       state: { selectedDate: mockDate, view: "month" },
       config: { ...defaultConfig, events },
       dispatch: vi.fn(),
@@ -243,6 +247,7 @@ describe("MonthView Component", () => {
       },
     ];
     vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      bodySize: { width: 800, height: 600 },
       state: { selectedDate: mockDate, view: "month" },
       config: { ...defaultConfig, events },
       dispatch: vi.fn(),
@@ -267,6 +272,7 @@ describe("MonthView Component", () => {
       },
     ];
     vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      bodySize: { width: 800, height: 600 },
       state: { selectedDate: mockDate, view: "month" },
       config: { ...defaultConfig, events },
       dispatch: vi.fn(),
@@ -302,6 +308,7 @@ describe("MonthView Component", () => {
       },
     ];
     vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      bodySize: { width: 800, height: 600 },
       state: { selectedDate: mockDate, view: "month" },
       config: { ...defaultConfig, events },
       dispatch: vi.fn(),
@@ -330,6 +337,7 @@ describe("MonthView Component", () => {
       },
     ];
     vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      bodySize: { width: 800, height: 600 },
       state: { selectedDate: mockDate, view: "month" },
       config: { ...defaultConfig, events },
       dispatch: vi.fn(),
@@ -366,6 +374,7 @@ describe("MonthView Component", () => {
       },
     ];
     vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      bodySize: { width: 800, height: 600 },
       state: { selectedDate: mockDate, view: "month" },
       config: { ...defaultConfig, events },
       dispatch: vi.fn(),
@@ -396,6 +405,7 @@ describe("MonthView Component", () => {
       },
     ];
     vi.mocked(CalendarContextModule.useCalendar).mockReturnValue({
+      bodySize: { width: 800, height: 600 },
       state: { selectedDate: mockDate, view: "month" },
       config: { ...defaultConfig, events },
       dispatch: vi.fn(),
@@ -468,5 +478,112 @@ describe("MonthView multi-day chip width", () => {
 
   it("uses the full width without week numbers", () => {
     expect(chipWidth(700, false)).toBe("184px");
+  });
+});
+
+describe("MonthView measures the container for string sizes", () => {
+  const original = globalThis.ResizeObserver;
+  afterEach(() => {
+    globalThis.ResizeObserver = original;
+  });
+
+  const stubObserver = (report: boolean, height = 722) => {
+    globalThis.ResizeObserver = class {
+      constructor(private cb: (e: unknown[]) => void) {}
+      observe() {
+        if (report) this.cb([{ contentRect: { width: 700, height } }]);
+      }
+      unobserve() {}
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+  };
+
+  it("caps chips from the measured height of a string-height calendar", () => {
+    stubObserver(true, 300);
+    act(() => {
+      render(
+        <Calendar
+          view="month"
+          width={700}
+          height="200px"
+          selectedDate={new Date(2026, 10, 10)}
+          events={[
+            { id: "a", title: "A", startDate: "2026-11-10" },
+            { id: "b", title: "B", startDate: "2026-11-10" },
+          ]}
+        />,
+      );
+    });
+    expect(screen.getByTestId("calendar-10-more-events")).toBeInTheDocument();
+    expect(screen.queryByTestId("calendar-a-month-event-item")).toBeNull();
+  });
+
+  it("keeps both chips for a string height", () => {
+    stubObserver(true);
+    act(() => {
+      render(
+        <Calendar
+          view="month"
+          width={700}
+          height="600px"
+          selectedDate={new Date(2026, 10, 10)}
+          events={[
+            { id: "a", title: "A", startDate: "2026-11-10" },
+            { id: "b", title: "B", startDate: "2026-11-10" },
+          ]}
+        />,
+      );
+    });
+    expect(screen.getAllByTestId("calendar-a-month-event-item")).toHaveLength(
+      1,
+    );
+    expect(screen.getAllByTestId("calendar-b-month-event-item")).toHaveLength(
+      1,
+    );
+    expect(screen.queryByText(/more/i)).toBeNull();
+  });
+
+  it("sizes a multi-day chip for a string width", () => {
+    stubObserver(true);
+    act(() => {
+      render(
+        <Calendar
+          view="month"
+          width="700px"
+          height={600}
+          selectedDate={new Date(2026, 10, 10)}
+          events={[
+            {
+              id: "md",
+              title: "Three",
+              startDate: "2026-11-10",
+              endDate: "2026-11-12",
+            },
+          ]}
+        />,
+      );
+    });
+    expect(screen.getByTestId("calendar-md-month-event-item").style.width).toBe(
+      "284px",
+    );
+  });
+
+  it("shows no more-button before a size is measured", () => {
+    stubObserver(false);
+    act(() => {
+      render(
+        <Calendar
+          view="month"
+          width={700}
+          height="600px"
+          selectedDate={new Date(2026, 10, 10)}
+          events={[
+            { id: "a", title: "A", startDate: "2026-11-10" },
+            { id: "b", title: "B", startDate: "2026-11-10" },
+          ]}
+        />,
+      );
+    });
+    expect(screen.queryByText(/more/i)).toBeNull();
   });
 });

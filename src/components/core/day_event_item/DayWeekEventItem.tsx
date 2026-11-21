@@ -5,6 +5,7 @@ import {
   generateTooltipText,
   getContrastColor,
   handleKeyboardActivation,
+  stripLayoutStyle,
 } from "../../../utils";
 import { CalendarContentProps } from "../../../types";
 import { DayEventLayout } from "../../../hooks/useDayEventLayout";
@@ -50,15 +51,15 @@ export function DayWeekEventItem({
       data-testid={`${testId}-${item.event.id}-day-event-item`}
       style={
         {
+          backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+          color: textColor,
+          ...stripLayoutStyle(item.event.style),
           top: `${item.top}px`,
           height: `${item.height}px`,
           insetInlineStart: `${item.left}%`,
           zIndex: item.zIndex,
           "--event-width": `${item.width}%`,
-          backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
-          color: textColor,
           position: "absolute",
-          ...item.event.style,
         } as CSSProperties
       }
       id={item.event.id}

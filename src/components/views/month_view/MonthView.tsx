@@ -52,8 +52,6 @@ export type MonthViewProps = Partial<
 function MonthView(props: MonthViewProps) {
   const {
     dayType,
-    width,
-    height,
     onDateClick,
     onEventClick,
     onMoreClick,
@@ -78,7 +76,7 @@ function MonthView(props: MonthViewProps) {
     onSlotClick,
     maxEvents: propsMaxEvents,
   } = useCalendarProps(props);
-  const { state, dispatch, testId } = useCalendar();
+  const { state, dispatch, testId, bodySize } = useCalendar();
   const { selectedDate } = state;
 
   const calendarGrid = useMonthGrid(
@@ -99,10 +97,10 @@ function MonthView(props: MonthViewProps) {
     () =>
       propsMaxEvents ??
       calculateMaxEvents(
-        typeof height === "number" ? height : 0,
+        bodySize.height,
         calendarGrid.length || LAYOUT_CONSTANTS.MIN_ROWS,
       ),
-    [propsMaxEvents, height, calendarGrid.length],
+    [propsMaxEvents, bodySize.height, calendarGrid.length],
   );
 
   const onClickDateHandler = useCallback(
@@ -206,7 +204,7 @@ function MonthView(props: MonthViewProps) {
                     dateObj={dayInfo.currentDate}
                     data={dayInfo.events}
                     cellWidth={
-                      ((typeof width === "number" ? width : 0) -
+                      (bodySize.width -
                         (showWeekNumbers
                           ? LAYOUT_CONSTANTS.WEEK_NUMBER_WIDTH
                           : 0)) /

@@ -60,7 +60,7 @@ function DayColumn({
         });
         const slotLabel = `Create event at ${formatDate(
           slotStart,
-          "h:mm a, MMMM d",
+          is12Hour ? "h:mm a, MMMM d" : "HH:mm, MMMM d",
           config.locale,
         )}`;
         const handleClick = isInteractive

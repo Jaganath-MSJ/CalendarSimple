@@ -17,6 +17,11 @@ export const LAYOUT_CONSTANTS = {
   DEFAULT_EVENT_COLOR: "#3b82f6",
 } as const;
 
+/** Month cell metrics consumed by `calculateMaxEvents`. */
+export const MONTH_METRICS = {
+  web: { dateLabelHeight: 28, cellPadding: 8, eventPitch: 26 },
+} as const;
+
 /** Keyboard key values that trigger interactive calendar actions. */
 export const KEYBOARD_SHORTCUTS = {
   OPEN: "Enter",
