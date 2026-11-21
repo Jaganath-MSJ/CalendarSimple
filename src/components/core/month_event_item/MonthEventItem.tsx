@@ -19,6 +19,7 @@ import styles from "./MonthEventItem.module.css";
 import Popover from "../../ui/popover/Popover";
 import { LAYOUT_CONSTANTS, DATE_FORMATS } from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
+import useMessages from "../../../hooks/useMessages";
 
 interface MonthEventItemProps extends Pick<
   CalendarContentProps,
@@ -30,6 +31,7 @@ interface MonthEventItemProps extends Pick<
   | "classNames"
   | "renderEvent"
   | "renderDateCell"
+  | "showMorePopover"
 > {
   dataClassName?: string;
   selectedClassName?: string;
@@ -41,6 +43,7 @@ interface MonthEventItemProps extends Pick<
   className?: string;
   isSelected: boolean;
   isToday: boolean;
+  isTodayAdjacent?: boolean;
   isCurrentMonth: boolean;
   onClick?: (date: DateType) => void;
   onMoreClick?: (date: DateType, hiddenEvents: EventListType[]) => void;
@@ -56,6 +59,7 @@ function MonthEventItem({
   dataClassName,
   isSelected,
   isToday,
+  isTodayAdjacent = false,
   onClick,
   selectedClassName,
   todayClassName,
@@ -70,8 +74,10 @@ function MonthEventItem({
   classNames,
   renderEvent,
   renderDateCell,
+  showMorePopover = true,
 }: MonthEventItemProps) {
   const { testId, config, colorScheme } = useCalendar();
+  const messages = useMessages();
   const locale = config.locale;
   const [showPopover, setShowPopover] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -146,9 +152,16 @@ function MonthEventItem({
                 isToday,
                 isSelected,
                 isCurrentMonth,
+                isTodayAdjacent,
               })
             ) : (
-              <p className={styles.dateLabel}>{date}</p>
+              <p
+                className={cx(styles.dateLabel, {
+                  [styles.todayAdjacent]: isTodayAdjacent,
+                })}
+              >
+                {date}
+              </p>
             )}
 
             {data && (
@@ -201,7 +214,7 @@ function MonthEventItem({
                         width: calculatedWidth,
                       }}
                       title={tooltipText}
-                      aria-label={`${item.title}, ${tooltipText}`}
+                      aria-label={`${item.title || messages.noTitle}, ${tooltipText}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         onEventClick?.(item);
@@ -219,24 +232,31 @@ function MonthEventItem({
                     <button
                       className={styles.moreEvents}
                       data-testid={`${testId}-${date}-more-events`}
-                      aria-label={`${hiddenEventsCount} more events on ${formatDate(dateObj, DATE_FORMATS.MONTH_DAY_YEAR, locale)}`}
+                      aria-label={messages.moreEventsOn(
+                        hiddenEventsCount,
+                        formatDate(
+                          dateObj,
+                          DATE_FORMATS.MONTH_DAY_YEAR,
+                          locale,
+                        ),
+                      )}
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (!showPopover) {
+                        if (showMorePopover && !showPopover) {
                           setAnchorEl(e.currentTarget);
                           setShowPopover(true);
                         }
                         onMoreClick?.(dateObj, hiddenEventsList);
                       }}
                       onKeyDown={handleKeyboardActivation((e) => {
-                        if (!showPopover) {
+                        if (showMorePopover && !showPopover) {
                           setAnchorEl(e.currentTarget as HTMLButtonElement);
                           setShowPopover(true);
                         }
                         onMoreClick?.(dateObj, hiddenEventsList);
                       })}
                     >
-                      + {hiddenEventsCount} more
+                      {messages.more(hiddenEventsCount)}
                     </button>
                     {showPopover && anchorEl && (
                       <Popover

@@ -68,6 +68,8 @@ export interface RenderDateCellProps {
   isSelected?: boolean;
   /** Whether this date belongs to the currently displayed month (false for adjacent-month cells). */
   isCurrentMonth?: boolean;
+  /** Whether this adjacent-month cell is today's date (today falls outside the displayed month). */
+  isTodayAdjacent?: boolean;
 }
 
 /**
@@ -108,6 +110,8 @@ export interface CalendarProps {
   selectable?: boolean;
   /** Maximum number of events shown per day cell before a "+N more" overflow link appears. */
   maxEvents?: number;
+  /** Open the built-in popover when "+N more" is activated in Month view. Set `false` to handle it yourself via `onMoreClick`. Defaults to `true`. */
+  showMorePopover?: boolean;
   /** Switches weekday names between long and short. */
   dayType?: EDayType;
   /** Number of years before today available in the year picker. */
@@ -229,15 +233,59 @@ export interface CalendarProps {
   colorScheme?: ColorScheme;
 
   /** Overrides for built-in UI strings (navigation buttons, view names, etc.). */
-  localeMessages?: {
-    today?: string;
-    day?: string;
-    week?: string;
-    month?: string;
-    schedule?: string;
-    /** Label suffix in the custom days dropdown (e.g. `'Days'` → "3 Days"). */
-    days?: string;
-  };
+  localeMessages?: Partial<CalendarMessages>;
+}
+
+/**
+ * Every built-in string the calendar shows or announces. Parameterised
+ * messages are functions. Pass any subset via `localeMessages`.
+ */
+export interface CalendarMessages {
+  today: string;
+  day: string;
+  week: string;
+  month: string;
+  schedule: string;
+  /** Label suffix in the custom days dropdown (e.g. `'Days'` → "3 Days"). */
+  days: string;
+  /** "All day" */
+  allDay: string;
+  /** "Until" */
+  until: string;
+  /** "No events to display" */
+  noEvents: string;
+  /** "No title" — accessibility label only; visible text stays blank. */
+  noTitle: string;
+  /** "Previous period" */
+  previous: string;
+  /** "Next period" */
+  next: string;
+  selectView: string;
+  selectMonth: string;
+  selectYear: string;
+  calendarNavigation: string;
+  allDayEvents: string;
+  expandAllDay: string;
+  collapseAllDay: string;
+  weekView: string;
+  dayView: string;
+  scheduleView: string;
+  /** Week-number suffix in the week title ("W45"). */
+  weekNumber: (n: number) => string;
+  /** "3 days view" */
+  nDaysView: (n: number) => string;
+  /** "+ 3 more" */
+  more: (n: number) => string;
+  /** "3 more all-day events, click to expand" */
+  moreAllDay: (n: number) => string;
+  /** "3 more events on March 4" (month "+N more" aria-label) */
+  moreEventsOn: (n: number, date: string) => string;
+  /** "(Day 1/3)" */
+  dayOfTotal: (i: number, n: number) => string;
+  /** "Events on March 4" */
+  eventsOn: (date: string) => string;
+  /** "Create event at 14:00, March 4" */
+  createEventAt: (time: string, date: string) => string;
 }
 
 /**

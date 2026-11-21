@@ -8,6 +8,7 @@ import * as CalendarContextModule from "../../context/CalendarContext";
 import { CalendarProvider } from "../../context/CalendarContext";
 import { CalendarProps } from "../../types";
 import Calendar from "../../Calendar";
+import { DEFAULT_MESSAGES } from "../../constants";
 
 // Simple wrapper for testing to provide mock context if needed, but here we'll just spy on the hook.
 describe("Header Component", () => {
@@ -34,6 +35,7 @@ describe("Header Component", () => {
       dispatch: mockDispatch as never,
       testId: undefined,
       config: defaultConfig,
+      messages: DEFAULT_MESSAGES,
       colorScheme: "light",
       bodySize: { width: 0, height: 0 },
     });
@@ -137,6 +139,7 @@ describe("Header accessibility", () => {
       },
       dispatch: vi.fn() as never,
       testId: undefined,
+      messages: DEFAULT_MESSAGES,
       colorScheme: "light",
       bodySize: { width: 0, height: 0 },
       config: {

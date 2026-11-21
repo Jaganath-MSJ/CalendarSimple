@@ -10,6 +10,7 @@
  */
 
 import { useMemo } from "react";
+import { DateTime } from "luxon";
 import calendarize from "calendarize";
 import {
   checkIsToday,
@@ -51,6 +52,8 @@ interface CalendarDayInfo {
   totalEvents: number;
   /** Whether this day is today */
   isToday: boolean;
+  /** Whether this is today's date shown as an adjacent-month (leading/trailing) cell */
+  isTodayAdjacent: boolean;
 }
 
 /**
@@ -352,6 +355,8 @@ export default function useMonthGrid(
           events: displayData,
           totalEvents: activeEvents.length,
           isToday: checkIsToday(selectedDate, displayDay) && isCurrentMonth,
+          isTodayAdjacent:
+            !isCurrentMonth && currentDate.hasSame(DateTime.now(), "day"),
         };
       });
     });

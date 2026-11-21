@@ -10,8 +10,8 @@ import React, {
   Dispatch,
 } from "react";
 import { dateFn, DateType } from "../utils";
-import { ECalendarViewType, CalendarProps } from "../types";
-import { CALENDAR_ACTIONS } from "../constants";
+import { ECalendarViewType, CalendarProps, CalendarMessages } from "../types";
+import { CALENDAR_ACTIONS, resolveMessages } from "../constants";
 import useColorScheme from "../hooks/useColorScheme";
 
 /**
@@ -53,6 +53,8 @@ export interface CalendarContextValue {
   testId?: string;
   /** Static calendar configuration props (everything except `children`, `selectedDate`, and `view`). */
   config: Omit<CalendarProps, "children" | "selectedDate" | "view">;
+  /** Built-in UI strings with `config.localeMessages` overrides applied over the English defaults. */
+  messages: CalendarMessages;
   /** Resolved color scheme ("light" or "dark") for portaled UI such as Popover. */
   colorScheme: "light" | "dark";
   /** Measured pixel size of the calendar body (header excluded); 0 until measured. */
@@ -180,16 +182,22 @@ export function CalendarProvider({
   );
   const bodySize = bodySizeProp ?? derivedBodySize;
 
+  const messages = useMemo(
+    () => resolveMessages(config?.localeMessages),
+    [config?.localeMessages],
+  );
+
   const value = useMemo(
     () => ({
       state,
       dispatch,
       testId,
       config: config || {},
+      messages,
       colorScheme: resolvedScheme,
       bodySize,
     }),
-    [state, testId, config, resolvedScheme, bodySize],
+    [state, testId, config, messages, resolvedScheme, bodySize],
   );
 
   return (

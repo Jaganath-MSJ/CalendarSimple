@@ -10,6 +10,7 @@ import {
   DATE_FORMATS,
   CALENDAR_ACTIONS,
   VIEW_OPTIONS,
+  resolveMessages,
 } from "../../constants";
 import {
   dateFn,
@@ -76,6 +77,7 @@ function Header(props: HeaderProps) {
     headerClassName?: string;
   };
 
+  const messages = resolveMessages(localeMessages);
   const finalHeaderClassName = props.headerClassName || classNames?.header;
   const { state, dispatch, testId } = useCalendar();
   const { selectedDate, view } = state;
@@ -144,7 +146,7 @@ function Header(props: HeaderProps) {
       const startOfWeek = days[0];
       const endOfWeek = days[days.length - 1];
       const weekSuffix = showWeekNumbers
-        ? `  ·  W${getRowWeekNumber(startOfWeek)}`
+        ? `  ·  ${messages.weekNumber(getRowWeekNumber(startOfWeek))}`
         : "";
       let baseString;
       if (startOfWeek.month !== endOfWeek.month) {
@@ -201,23 +203,26 @@ function Header(props: HeaderProps) {
       className={cx(styles.header, finalHeaderClassName)}
       data-testid={`${testId}-header`}
     >
-      <nav className={styles.navigation} aria-label="Calendar navigation">
+      <nav
+        className={styles.navigation}
+        aria-label={messages.calendarNavigation}
+      >
         <button
           className={styles.todayButton}
           data-testid={`${testId}-header-today-btn`}
-          aria-label={localeMessages?.today || "Today"}
+          aria-label={messages.today}
           onClick={() => {
             dispatch({ type: CALENDAR_ACTIONS.TODAY });
             onNavigate?.(convertToDate(dateFn()));
           }}
         >
-          {localeMessages?.today || "Today"}
+          {messages.today}
         </button>
         <div className={styles.arrows}>
           <button
             className={styles.iconButton}
             data-testid={`${testId}-header-prev-btn`}
-            aria-label="Previous period"
+            aria-label={messages.previous}
             onClick={() => onMonthArrowClick(EMonthOption.sub)}
           >
             <span className={styles.iconButtonIcon}>
@@ -227,7 +232,7 @@ function Header(props: HeaderProps) {
           <button
             className={styles.iconButton}
             data-testid={`${testId}-header-next-btn`}
-            aria-label="Next period"
+            aria-label={messages.next}
             onClick={() => onMonthArrowClick(EMonthOption.add)}
           >
             <span className={styles.iconButtonIcon}>
@@ -243,18 +248,17 @@ function Header(props: HeaderProps) {
           className={styles.select}
           value={view}
           data-testid={`${testId}-header-view-select`}
-          aria-label="Select calendar view"
+          aria-label={messages.selectView}
           onChange={onViewDropdownClick}
         >
           {VIEW_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
-              {localeMessages?.[option.value as keyof typeof localeMessages] ||
-                option.label}
+              {messages[option.value]}
             </option>
           ))}
           {customDays && customDays > 0 && customDays < 11 && (
             <option key={customDays} value={ECalendarViewType.customDays}>
-              {customDays} {localeMessages?.days || "Days"}
+              {customDays} {messages.days}
             </option>
           )}
         </select>
@@ -264,7 +268,7 @@ function Header(props: HeaderProps) {
           name={CALENDAR_STRINGS.MONTH}
           value={getMonth(selectedDate)}
           data-testid={`${testId}-header-month-select`}
-          aria-label="Select month"
+          aria-label={messages.selectMonth}
           onChange={(e) => onDropdownClick(e, EYearOption.month)}
         >
           {getMonthList(locale).map((month: MonthListType) => (
@@ -279,7 +283,7 @@ function Header(props: HeaderProps) {
           name={CALENDAR_STRINGS.YEAR}
           value={getYear(selectedDate)}
           data-testid={`${testId}-header-year-select`}
-          aria-label="Select year"
+          aria-label={messages.selectYear}
           onChange={(e) => onDropdownClick(e, EYearOption.year)}
         >
           {getYearList(

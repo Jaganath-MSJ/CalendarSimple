@@ -15,6 +15,7 @@ import { CalendarContentProps } from "../../../types";
 import { DATE_FORMATS } from "../../../constants";
 import styles from "./WeekView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
+import useMessages from "../../../hooks/useMessages";
 import useAutoScrollToNow from "../../../hooks/useAutoScrollToNow";
 import useCalendarProps from "../../../hooks/useCalendarProps";
 import TimeColumn from "../../core/time_column/TimeColumn";
@@ -80,6 +81,7 @@ function WeekView(props: WeekViewProps) {
   } = useCalendarProps(props);
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, testId, colorScheme } = useCalendar();
+  const messages = useMessages();
   const { selectedDate } = state;
   const weekDays = useMemo(
     () => getVisibleWeekDays(selectedDate, weekStartsOn, weekEndsOn),
@@ -111,7 +113,7 @@ function WeekView(props: WeekViewProps) {
   return (
     <div
       role="region"
-      aria-label="Week view"
+      aria-label={messages.weekView}
       className={styles.weekView}
       ref={containerRef}
       data-testid={`${testId}-week-view`}

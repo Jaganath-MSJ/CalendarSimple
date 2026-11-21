@@ -45,6 +45,7 @@ export const defaultCalendarProps = {
   theme: {},
   classNames: {},
   showAdjacentMonths: true,
+  showMorePopover: true,
   showWeekNumbers: false,
   resetDateOnViewChange: false,
   showAllDayRow: true,

@@ -1,0 +1,15 @@
+[
+  {
+    "name": "ESM bundle (includes bundled luxon, classnames, calendarize)",
+    "path": "dist/index.es.js",
+    "limit": "45 kB",
+    "gzip": true
+  },
+  {
+    "name": "Styles",
+    "path": "dist/calendar-simple.css",
+    "limit": "6 kB",
+    "gzip": true,
+    "rolldown": false
+  }
+]

@@ -9,6 +9,8 @@ A lightweight, customizable, and accessible calendar component for React. Built 
 
 **[Live Demo](https://calendarsimple.netlify.app)**
 
+Using React Native? See [calendar-simple-native](https://www.npmjs.com/package/calendar-simple-native).
+
 ## Features
 
 - **🗓️ Multiple Views** — Month, Week, Day, Schedule, and Custom Days views.
@@ -202,9 +204,16 @@ const MyCalendar = () => {
     month: "Mois",
     schedule: "Planning",
     days: "Jours",
+    more: (n) => `+ ${n} autres`,
   }}
 />
 ```
+
+Plain strings: `today`, `day`, `week`, `month`, `schedule`, `days`, `allDay`, `until`, `noEvents`, `noTitle` (aria-label for untitled events), `previous`, `next`, `selectView`, `selectMonth`, `selectYear`, `calendarNavigation`, `allDayEvents`, `expandAllDay`, `collapseAllDay`, `weekView`, `dayView`, `scheduleView`.
+
+Functions: `nDaysView(n)`, `more(n)`, `moreAllDay(n)`, `moreEventsOn(n, date)`, `dayOfTotal(i, n)`, `eventsOn(date)`, `createEventAt(time, date)`, `weekNumber(n)` (week-title suffix, default `W45`).
+
+Keys you leave out (or set to `undefined`) use the English default; an empty string is used as given.
 
 ## API Reference
 
@@ -226,7 +235,7 @@ const MyCalendar = () => {
 | `colorScheme`             | `'light' \| 'dark' \| 'auto'`                                 | `'auto'`            |
 | `direction`               | `'ltr' \| 'rtl'`                                              | `` `auto-detect` `` |
 | `locale`                  | `string`                                                      | `'en'`              |
-| `localeMessages`          | `object`                                                      | `{}`                |
+| `localeMessages`          | `Partial<CalendarMessages>`                                   | `{}`                |
 | `theme`                   | `CalendarTheme`                                               | `{}`                |
 | `classNames`              | `CalendarClassNames`                                          | `{}`                |
 | `width`                   | `number \| string`                                            | `` `auto` ``        |
@@ -249,6 +258,7 @@ const MyCalendar = () => {
 | `futureYearLength`        | `number`                                                      | `5`                 |
 | `onDateClick`             | `(date: Date) => void`                                        | `undefined`         |
 | `onEventClick`            | `(event: CalendarEvent) => void`                              | `undefined`         |
+| `showMorePopover`         | `boolean`                                                     | `true`              |
 | `onMoreClick`             | `(date: Date, hiddenEvents?: CalendarEvent[]) => void`        | `undefined`         |
 | `onNavigate`              | `(date: Date) => void`                                        | `undefined`         |
 | `onViewChange`            | `(view: ECalendarViewType) => void`                           | `undefined`         |
@@ -329,6 +339,7 @@ interface RenderDateCellProps {
   isToday: boolean;
   isSelected?: boolean;
   isCurrentMonth?: boolean;
+  isTodayAdjacent?: boolean; // today shown in an adjacent-month cell
 }
 ```
 

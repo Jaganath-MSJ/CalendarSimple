@@ -10,7 +10,7 @@
  */
 
 import { useMemo, useEffect, useRef } from "react";
-import { CalendarEvent } from "../types";
+import { CalendarEvent, CalendarMessages } from "../types";
 import {
   formatDate,
   dateFn,
@@ -19,7 +19,7 @@ import {
   isAllDayEvent,
   getLastEventDay,
 } from "../utils";
-import { DATE_FORMATS } from "../constants";
+import { DATE_FORMATS, resolveMessages } from "../constants";
 
 /**
  * Properties for configuring the schedule view hook.
@@ -29,6 +29,8 @@ interface UseScheduleViewProps {
   autoScrollToCurrentTime?: boolean;
   is12Hour?: boolean;
   locale?: string;
+  /** Resolved UI strings; defaults to the English messages. */
+  messages?: CalendarMessages;
 }
 
 /**
@@ -42,6 +44,7 @@ export default function useScheduleView({
   autoScrollToCurrentTime,
   is12Hour,
   locale,
+  messages = resolveMessages(),
 }: UseScheduleViewProps) {
   const todayRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -97,7 +100,7 @@ export default function useScheduleView({
    */
   const renderEventTime = (event: CalendarEvent, dateKey: string) => {
     if (isAllDayEvent(event)) {
-      return "All day";
+      return messages.allDay;
     }
 
     const currentDay = dateFn(dateKey).startOf("day");
@@ -117,15 +120,15 @@ export default function useScheduleView({
     if (isMultiDay) {
       if (currentDay.equals(startDay)) {
         return isMidnight(event.startDate)
-          ? "All day"
+          ? messages.allDay
           : `${formatTime(formatDate(event.startDate, timeFormat, locale))}`;
       } else if (currentDay.equals(endDay)) {
         // A 00:00 end means the event runs to the end of its last day
         return isEndOfDay(event.endDate!) || isMidnight(event.endDate!)
-          ? "All day"
-          : `Until ${formatTime(formatDate(event.endDate!, timeFormat, locale))}`;
+          ? messages.allDay
+          : `${messages.until} ${formatTime(formatDate(event.endDate!, timeFormat, locale))}`;
       } else {
-        return "All day";
+        return messages.allDay;
       }
     }
 
@@ -139,7 +142,7 @@ export default function useScheduleView({
         isMidnight(event.startDate) &&
         (isEndOfDay(event.endDate) || endsAtNextMidnight)
       ) {
-        return "All day";
+        return messages.allDay;
       }
       const endStr = formatDate(event.endDate, timeFormat, locale);
       return `${formatTime(startStr)} – ${formatTime(endStr)}`;
@@ -159,7 +162,7 @@ export default function useScheduleView({
       const dayIndex = getDiffDays(currentDay, startDay) + 1;
       // Compare day starts so partial days count as whole calendar days
       const totalDays = getDiffDays(lastDay, startDay) + 1;
-      return `${event.title} (Day ${dayIndex}/${totalDays})`;
+      return `${event.title} ${messages.dayOfTotal(dayIndex, totalDays)}`;
     }
     return event.title;
   };

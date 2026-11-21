@@ -76,7 +76,7 @@ Replace core UI elements entirely with render props.
 - **`renderEvent(event)`** — Replaces the default event chip across all views.
 - **`renderHeader(props)`** — Replaces the default navigation header. Receives `currentDate`, `view`, `onNavigate`, `onViewChange`.
 - **`renderHourCell(date)`** — Customizes background hour slots in Day, Week, and Custom Days views. Receives each slot's start time on that column's own date, so you can style per day (e.g. shade weekends).
-- **`renderDateCell(props)`** — Customizes date headers (Week/Day) and date cells (Month). Receives `date`, `isToday`, `isSelected`, `isCurrentMonth`.
+- **`renderDateCell(props)`** — Customizes date headers (Week/Day) and date cells (Month). Receives `date`, `isToday`, `isSelected`, `isCurrentMonth`, `isTodayAdjacent` (today shown in an adjacent-month cell).
 - **`renderScheduleSeparator(date)`** — Renders a custom separator between date groups in Schedule view.
 
 ---
@@ -98,7 +98,11 @@ The calendar uses Luxon internally for all date formatting.
 - **`locale`** — Any valid Luxon locale string (e.g., `"fr"`, `"es-MX"`, `"zh"`, `"ar"`). All month names, day headers, and date strings adapt automatically, including event times, tooltips, popover headings and slot labels.
 - **`localeMessages`** — Translate built-in UI labels that aren't date-derived.
 
-  Supported keys: `today`, `day`, `week`, `month`, `schedule`, `days`.
+  Plain strings: `today`, `day`, `week`, `month`, `schedule`, `days`, `allDay`, `until`, `noEvents`, `noTitle` (aria-label for untitled events), `previous`, `next`, `selectView`, `selectMonth`, `selectYear`, `calendarNavigation`, `allDayEvents`, `expandAllDay`, `collapseAllDay`, `weekView`, `dayView`, `scheduleView`.
+
+  Functions: `nDaysView(n)`, `more(n)`, `moreAllDay(n)`, `moreEventsOn(n, date)`, `dayOfTotal(i, n)`, `eventsOn(date)`, `createEventAt(time, date)`, `weekNumber(n)` (week-title suffix, default `W45`).
+
+  Keys you leave out (or set to `undefined`) use the English default; an empty string is used as given.
 
   ```tsx
   localeMessages={{ today: "Hoy", schedule: "Agenda" }}
@@ -256,17 +260,18 @@ All accessibility features are built-in and require no extra configuration.
 
 ### Views & Layout
 
-| Prop                 | Type               | Default | Description                                                    |
-| -------------------- | ------------------ | ------- | -------------------------------------------------------------- |
-| `showAdjacentMonths` | `boolean`          | `true`  | Show dates from adjacent months in the month grid.             |
-| `showWeekNumbers`    | `boolean`          | `false` | Display ISO week numbers in the month view.                    |
-| `showAllDayRow`      | `boolean`          | `true`  | Show the all-day event row at the top of Day/Week views.       |
-| `maxEvents`          | `number`           | auto    | Max events per day cell before collapsing to "+X more".        |
-| `minHour`            | `number`           | `0`     | Minimum hour visible in Day/Week time grids.                   |
-| `maxHour`            | `number`           | `24`    | Maximum hour visible in Day/Week time grids.                   |
-| `eventOverlapOffset` | `number`           | `0`     | Percentage offset for stacking overlapping events (0 = tiled). |
-| `width`              | `number \| string` | auto    | Width of the calendar container.                               |
-| `height`             | `number \| string` | auto    | Height of the calendar container.                              |
+| Prop                 | Type               | Default | Description                                                                 |
+| -------------------- | ------------------ | ------- | --------------------------------------------------------------------------- |
+| `showAdjacentMonths` | `boolean`          | `true`  | Show dates from adjacent months in the month grid.                          |
+| `showWeekNumbers`    | `boolean`          | `false` | Display ISO week numbers in the month view.                                 |
+| `showAllDayRow`      | `boolean`          | `true`  | Show the all-day event row at the top of Day/Week views.                    |
+| `maxEvents`          | `number`           | auto    | Max events per day cell before collapsing to "+X more".                     |
+| `showMorePopover`    | `boolean`          | `true`  | Open the built-in popover on "+X more"; `false` leaves it to `onMoreClick`. |
+| `minHour`            | `number`           | `0`     | Minimum hour visible in Day/Week time grids.                                |
+| `maxHour`            | `number`           | `24`    | Maximum hour visible in Day/Week time grids.                                |
+| `eventOverlapOffset` | `number`           | `0`     | Percentage offset for stacking overlapping events (0 = tiled).              |
+| `width`              | `number \| string` | auto    | Width of the calendar container.                                            |
+| `height`             | `number \| string` | auto    | Height of the calendar container.                                           |
 
 ### Time & Formatting
 
@@ -288,10 +293,10 @@ All accessibility features are built-in and require no extra configuration.
 
 ### Localization
 
-| Prop             | Type     | Default | Description                                                            |
-| ---------------- | -------- | ------- | ---------------------------------------------------------------------- |
-| `locale`         | `string` | `'en'`  | Luxon locale code (e.g., `'fr'`, `'ar'`, `'ja-JP'`).                   |
-| `localeMessages` | `object` | `{}`    | Translations for: `today`, `day`, `week`, `month`, `schedule`, `days`. |
+| Prop             | Type                        | Default | Description                                                      |
+| ---------------- | --------------------------- | ------- | ---------------------------------------------------------------- |
+| `locale`         | `string`                    | `'en'`  | Luxon locale code (e.g., `'fr'`, `'ar'`, `'ja-JP'`).             |
+| `localeMessages` | `Partial<CalendarMessages>` | `{}`    | Partial map of built-in UI strings (see `localeMessages` above). |
 
 ### Interaction & Callbacks
 

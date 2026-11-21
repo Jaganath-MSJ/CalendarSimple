@@ -5,7 +5,11 @@ import MonthView from "./MonthView";
 import Calendar from "../../../Calendar";
 import { dateFn } from "../../../utils";
 import * as CalendarContextModule from "../../../context/CalendarContext";
-import { CalendarEvent, RenderDateCellProps } from "../../../types";
+import {
+  CalendarEvent,
+  ECalendarViewType,
+  RenderDateCellProps,
+} from "../../../types";
 
 describe("MonthView Component", () => {
   const mockDate = dateFn("2024-03-01T12:00:00Z");
@@ -585,5 +589,49 @@ describe("MonthView measures the container for string sizes", () => {
       );
     });
     expect(screen.queryByText(/more/i)).toBeNull();
+  });
+});
+
+describe("showMorePopover", () => {
+  const events = [
+    { id: "1", startDate: "2026-11-10", title: "One" },
+    { id: "2", startDate: "2026-11-10", title: "Two" },
+    { id: "3", startDate: "2026-11-10", title: "Three" },
+  ];
+  const renderCal = (extra: Record<string, unknown> = {}) =>
+    render(
+      <Calendar
+        width={700}
+        height={600}
+        view={ECalendarViewType.month}
+        selectedDate={new Date(2026, 10, 10)}
+        maxEvents={1}
+        events={events}
+        {...extra}
+      />,
+    );
+
+  it("opens the popover by default", () => {
+    renderCal();
+    fireEvent.click(screen.getByTestId("calendar-10-more-events"));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("showMorePopover=false: click fires onMoreClick only", () => {
+    const onMoreClick = vi.fn();
+    renderCal({ showMorePopover: false, onMoreClick });
+    fireEvent.click(screen.getByTestId("calendar-10-more-events"));
+    expect(onMoreClick).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("showMorePopover=false: Enter fires onMoreClick only", () => {
+    const onMoreClick = vi.fn();
+    renderCal({ showMorePopover: false, onMoreClick });
+    fireEvent.keyDown(screen.getByTestId("calendar-10-more-events"), {
+      key: "Enter",
+    });
+    expect(onMoreClick).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });

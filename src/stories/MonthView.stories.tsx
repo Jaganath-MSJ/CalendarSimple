@@ -161,3 +161,26 @@ export const SortedMonthViewCustomComparator: Story = {
     },
   },
 };
+
+/**
+ * Today is outlined (muted, no fill) when it shows up as a leading/trailing
+ * cell of the adjacent month. The view opens on the month before today's, so
+ * today normally appears among the trailing cells.
+ */
+export const TodayOnAdjacentMonth: Story = {
+  args: {
+    showAdjacentMonths: true,
+    selectedDate: (today.day > today.daysInMonth - 7
+      ? today.endOf("month").plus({ days: 1 })
+      : today.startOf("month").minus({ days: 1 })
+    ).toJSDate(),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "With `showAdjacentMonths`, today is outlined on an adjacent-month cell. `renderDateCell` receives `isTodayAdjacent` for custom cells. The mark appears only when today falls in an adjacent cell (e.g. the first or last week of a month); otherwise the grid shows no mark.",
+      },
+    },
+  },
+};

@@ -7,6 +7,7 @@ import { DayWeekEventItem } from "../day_event_item/DayWeekEventItem";
 import CurrentTimeLine from "../current_time_line/CurrentTimeLine";
 import { formatDate, handleKeyboardActivation } from "../../../utils";
 import { useCalendar } from "../../../context/CalendarContext";
+import useMessages from "../../../hooks/useMessages";
 import styles from "./DayColumn.module.css";
 
 interface DayColumnProps extends Pick<
@@ -43,6 +44,7 @@ function DayColumn({
   onSlotClick,
 }: DayColumnProps) {
   const { config } = useCalendar();
+  const messages = useMessages();
   const hours = Array.from(
     { length: maxHour - minHour },
     (_, i) => i + minHour,
@@ -58,11 +60,10 @@ function DayColumn({
           second: 0,
           millisecond: 0,
         });
-        const slotLabel = `Create event at ${formatDate(
-          slotStart,
-          is12Hour ? "h:mm a, MMMM d" : "HH:mm, MMMM d",
-          config.locale,
-        )}`;
+        const slotLabel = messages.createEventAt(
+          formatDate(slotStart, is12Hour ? "h:mm a" : "HH:mm", config.locale),
+          formatDate(slotStart, "MMMM d", config.locale),
+        );
         const handleClick = isInteractive
           ? () =>
               onSlotClick?.(

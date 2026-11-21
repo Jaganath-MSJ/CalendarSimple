@@ -4,6 +4,7 @@ import "./styles/variables.css";
 export { EDayType, ECalendarViewType } from "./types";
 export type {
   CalendarProps,
+  CalendarMessages,
   CalendarEvent,
   CalendarContentProps,
   ColorScheme,

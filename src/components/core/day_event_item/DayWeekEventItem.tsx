@@ -12,6 +12,7 @@ import { DayEventLayout } from "../../../hooks/useDayEventLayout";
 import { LAYOUT_CONSTANTS, DATE_FORMATS } from "../../../constants";
 import styles from "./DayWeekEventItem.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
+import useMessages from "../../../hooks/useMessages";
 
 interface DayWeekEventItemProps extends Pick<
   CalendarContentProps,
@@ -28,6 +29,7 @@ export function DayWeekEventItem({
   renderEvent,
 }: DayWeekEventItemProps) {
   const { testId, config } = useCalendar();
+  const messages = useMessages();
   const locale = config.locale;
   const tooltipText = generateTooltipText(item.event, "day", is12Hour, locale);
 
@@ -63,7 +65,7 @@ export function DayWeekEventItem({
         } as CSSProperties
       }
       id={item.event.id}
-      aria-label={`${item.event.title}, ${tooltipText}`}
+      aria-label={`${item.event.title || messages.noTitle}, ${tooltipText}`}
       onClick={() => onEventClick?.(item.event)}
       onKeyDown={handleKeyboardActivation(() => onEventClick?.(item.event))}
       title={tooltipText}

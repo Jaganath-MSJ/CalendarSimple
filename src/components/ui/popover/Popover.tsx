@@ -31,6 +31,7 @@ import {
   KEYBOARD_SHORTCUTS,
 } from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
+import useMessages from "../../../hooks/useMessages";
 
 interface PopoverProps extends Pick<
   CalendarContentProps,
@@ -52,6 +53,7 @@ function Popover({
   renderEvent,
 }: PopoverProps) {
   const { testId, colorScheme, config } = useCalendar();
+  const messages = useMessages();
   const popoverRef = useRef<HTMLDivElement>(null);
   const [stylePosition, setStylePosition] = useState<CSSProperties>({
     visibility: "hidden",
@@ -172,7 +174,9 @@ function Popover({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`Events on ${formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH, config.locale)}`}
+      aria-label={messages.eventsOn(
+        formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH, config.locale),
+      )}
       className={styles.popover}
       ref={popoverRef}
       style={stylePosition}
@@ -195,7 +199,7 @@ function Popover({
           const isStartBefore = isBeforeDate(eventStart, dayStart);
           const isEndAfter = isAfterDate(eventEnd, dayStart);
           const tooltipText = generateTooltipText(
-            item,
+            { ...item, title: item.title || messages.noTitle },
             ECalendarViewType.month,
             is12Hour,
             config.locale,

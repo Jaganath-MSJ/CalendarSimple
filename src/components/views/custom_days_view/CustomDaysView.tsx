@@ -14,6 +14,7 @@ import { CalendarContentProps } from "../../../types";
 import { DATE_FORMATS } from "../../../constants";
 import styles from "./CustomDaysView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
+import useMessages from "../../../hooks/useMessages";
 import useAutoScrollToNow from "../../../hooks/useAutoScrollToNow";
 import useCalendarProps from "../../../hooks/useCalendarProps";
 import TimeColumn from "../../core/time_column/TimeColumn";
@@ -77,6 +78,7 @@ function CustomView(props: CustomViewProps) {
   } = useCalendarProps(props);
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, testId, colorScheme } = useCalendar();
+  const messages = useMessages();
   const { selectedDate } = state;
 
   const viewDays = useMemo(() => {
@@ -110,7 +112,7 @@ function CustomView(props: CustomViewProps) {
   return (
     <div
       role="region"
-      aria-label={`${customDays} days view`}
+      aria-label={messages.nDaysView(customDays)}
       className={styles.customView}
       ref={containerRef}
       data-testid={`${testId}-custom-days-view`}

@@ -31,6 +31,7 @@ export type MonthViewProps = Partial<
     | "onDateClick"
     | "onEventClick"
     | "onMoreClick"
+    | "showMorePopover"
     | "theme"
     | "classNames"
     | "weekStartsOn"
@@ -55,6 +56,7 @@ function MonthView(props: MonthViewProps) {
     onDateClick,
     onEventClick,
     onMoreClick,
+    showMorePopover,
     selectable,
     events,
     is12Hour,
@@ -198,6 +200,7 @@ function MonthView(props: MonthViewProps) {
                       dayInfo.displayDay === selectedDate.day
                     }
                     isToday={dayInfo.isToday}
+                    isTodayAdjacent={dayInfo.isTodayAdjacent}
                     isCurrentMonth={dayInfo.isCurrentMonth}
                     onClick={onClickDateHandler}
                     date={dayInfo.displayDay}
@@ -226,6 +229,7 @@ function MonthView(props: MonthViewProps) {
                     classNames={classNames}
                     renderEvent={renderEvent}
                     renderDateCell={renderDateCell}
+                    showMorePopover={showMorePopover}
                   />
                 ))}
               </tr>

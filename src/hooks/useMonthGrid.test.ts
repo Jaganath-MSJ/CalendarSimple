@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import useMonthGrid from "./useMonthGrid";
 import { dateFn } from "../utils/date";
 import { CalendarEvent } from "../types";
@@ -243,5 +243,37 @@ describe("useMonthGrid Hook", () => {
     )!;
     expect(nov10.events[0]?.endDateWeek).toBe("2026-11-10");
     expect(nov11.totalEvents).toBe(0);
+  });
+
+  describe("isTodayAdjacent", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("flags today on an adjacent-month cell without setting isToday", () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(2026, 11, 1, 10, 0));
+      const { result } = renderHook(() =>
+        useMonthGrid(dateFn("2026-11-15"), [], 0, 6),
+      );
+      const cells = result.current.flat();
+      const dec1 = cells.find(
+        (c) =>
+          !c.isCurrentMonth &&
+          c.currentDate.toFormat("yyyy-MM-dd") === "2026-12-01",
+      )!;
+      expect(dec1.isTodayAdjacent).toBe(true);
+      expect(dec1.isToday).toBe(false);
+      expect(cells.filter((c) => c.isTodayAdjacent)).toHaveLength(1);
+    });
+
+    it("does not flag current-month cells", () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(2026, 10, 15, 10, 0));
+      const { result } = renderHook(() =>
+        useMonthGrid(dateFn("2026-11-15"), [], 0, 6),
+      );
+      expect(result.current.flat().some((c) => c.isTodayAdjacent)).toBe(false);
+    });
   });
 });

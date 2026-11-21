@@ -19,6 +19,7 @@ import useAllDayBanner, {
 import styles from "./AllDayBanner.module.css";
 import { LAYOUT_CONSTANTS } from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
+import useMessages from "../../../hooks/useMessages";
 
 interface AllDayBannerProps extends Pick<
   CalendarContentProps,
@@ -44,6 +45,7 @@ export default function AllDayBanner({
   locale,
 }: AllDayBannerProps) {
   const { testId } = useCalendar();
+  const messages = useMessages();
   const [isExpanded, setIsExpanded] = useState(false);
   const MAX_VISIBLE_ROWS = maxEvents ?? 3;
 
@@ -74,7 +76,7 @@ export default function AllDayBanner({
     return (
       <div
         role="region"
-        aria-label="All-day events"
+        aria-label={messages.allDayEvents}
         className={styles.bannerWrapper}
         data-testid={`${testId}-all-day-banner`}
       >
@@ -91,7 +93,7 @@ export default function AllDayBanner({
   return (
     <div
       role="region"
-      aria-label="All-day events"
+      aria-label={messages.allDayEvents}
       className={styles.bannerWrapper}
       data-testid={`${testId}-all-day-banner`}
     >
@@ -106,7 +108,7 @@ export default function AllDayBanner({
             })}
             data-testid={`${testId}-all-day-expand-icon`}
             aria-label={
-              isExpanded ? "Collapse all-day events" : "Expand all-day events"
+              isExpanded ? messages.collapseAllDay : messages.expandAllDay
             }
             aria-expanded={isExpanded}
             onClick={() => setIsExpanded((prev) => !prev)}
@@ -173,7 +175,7 @@ export default function AllDayBanner({
                 }}
                 data-testid={`${testId}-${event.id}-all-day-event`}
                 aria-label={generateTooltipText(
-                  event,
+                  { ...event, title: event.title || messages.noTitle },
                   ECalendarViewType.week,
                   is12Hour,
                   locale,
@@ -218,11 +220,11 @@ export default function AllDayBanner({
                   width: `calc(${widthPct}% - 4px)`,
                 }}
                 data-testid={`${testId}-${idx}-all-day-more-chip`}
-                aria-label={`${count} more all-day events, click to expand`}
+                aria-label={messages.moreAllDay(count)}
                 onClick={() => setIsExpanded(true)}
                 onKeyDown={handleKeyboardActivation(() => setIsExpanded(true))}
               >
-                + {count} more
+                {messages.more(count)}
               </div>
             );
           })}

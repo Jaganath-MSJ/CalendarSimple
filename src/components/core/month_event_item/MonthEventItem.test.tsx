@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import MonthEventItem from "./MonthEventItem";
 import { dateFn } from "../../../utils";
 import { ECalendarViewType } from "../../../types";
@@ -127,5 +127,65 @@ describe("MonthEventItem Component", () => {
     expect(
       screen.getByTitle("E1 (٢٠٢٤-٠٣-٠١ - ٢٠٢٤-٠٣-٠١)"),
     ).toBeInTheDocument();
+  });
+
+  describe("isTodayAdjacent", () => {
+    const renderCell = (showAdjacentMonths: boolean) =>
+      render(
+        <CalendarProvider
+          initialDate={dateObj}
+          initialView={ECalendarViewType.month}
+        >
+          <table>
+            <tbody>
+              <tr>
+                <MonthEventItem
+                  {...defaultProps}
+                  isCurrentMonth={false}
+                  isTodayAdjacent
+                  showAdjacentMonths={showAdjacentMonths}
+                />
+              </tr>
+            </tbody>
+          </table>
+        </CalendarProvider>,
+      );
+
+    it("marks the date label when adjacent months are shown", () => {
+      renderCell(true);
+      expect(screen.getByText("1").className).toMatch(/todayAdjacent/);
+    });
+
+    it("renders no mark when adjacent months are hidden", () => {
+      renderCell(false);
+      expect(screen.queryByText("1")).not.toBeInTheDocument();
+    });
+
+    it("passes isTodayAdjacent to renderDateCell", () => {
+      const renderDateCell = vi.fn(() => <span>x</span>);
+      render(
+        <CalendarProvider
+          initialDate={dateObj}
+          initialView={ECalendarViewType.month}
+        >
+          <table>
+            <tbody>
+              <tr>
+                <MonthEventItem
+                  {...defaultProps}
+                  isCurrentMonth={false}
+                  isTodayAdjacent
+                  showAdjacentMonths
+                  renderDateCell={renderDateCell}
+                />
+              </tr>
+            </tbody>
+          </table>
+        </CalendarProvider>,
+      );
+      expect(renderDateCell).toHaveBeenCalledWith(
+        expect.objectContaining({ isTodayAdjacent: true }),
+      );
+    });
   });
 });

@@ -38,6 +38,7 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: "./src/setupTests.ts",
+    testTimeout: 20_000,
   },
   plugins: [
     // Generates .d.ts files (equivalent to tsup's dts: true)

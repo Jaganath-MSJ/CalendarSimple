@@ -14,6 +14,7 @@ import { CalendarContentProps } from "../../../types";
 import { DATE_FORMATS } from "../../../constants";
 import styles from "./DayView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
+import useMessages from "../../../hooks/useMessages";
 import useAutoScrollToNow from "../../../hooks/useAutoScrollToNow";
 import useCalendarProps from "../../../hooks/useCalendarProps";
 import TimeColumn from "../../core/time_column/TimeColumn";
@@ -75,6 +76,7 @@ function DayView(props: DayViewProps) {
   } = useCalendarProps(props);
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, testId, colorScheme } = useCalendar();
+  const messages = useMessages();
   const { selectedDate } = state;
   // Stable identity: AllDayBanner collapses whenever its `days` prop changes
   const bannerDays = useMemo(() => [selectedDate], [selectedDate]);
@@ -113,7 +115,7 @@ function DayView(props: DayViewProps) {
   return (
     <div
       role="region"
-      aria-label="Day view"
+      aria-label={messages.dayView}
       className={styles.dayView}
       ref={containerRef}
       data-testid={`${testId}-day-view`}

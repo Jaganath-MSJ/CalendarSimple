@@ -14,6 +14,7 @@ import styles from "./ScheduleView.module.css";
 import { DATE_FORMATS, LAYOUT_CONSTANTS } from "../../../constants";
 import useScheduleView from "../../../hooks/useScheduleView";
 import { useCalendar } from "../../../context/CalendarContext";
+import useMessages from "../../../hooks/useMessages";
 import useCalendarProps from "../../../hooks/useCalendarProps";
 
 export type ScheduleViewProps = Partial<
@@ -43,6 +44,7 @@ export default function ScheduleView(props: ScheduleViewProps) {
     locale,
   } = useCalendarProps(props);
   const { testId, colorScheme } = useCalendar();
+  const messages = useMessages();
   const {
     todayRef,
     containerRef,
@@ -50,6 +52,7 @@ export default function ScheduleView(props: ScheduleViewProps) {
     renderEventTime,
     renderEventTitle,
   } = useScheduleView({
+    messages,
     events,
     autoScrollToCurrentTime,
     is12Hour,
@@ -60,12 +63,12 @@ export default function ScheduleView(props: ScheduleViewProps) {
     <div
       ref={containerRef}
       role="region"
-      aria-label="Schedule view"
+      aria-label={messages.scheduleView}
       className={styles.scheduleView}
       data-testid={`${testId}-schedule-view`}
     >
       {Object.keys(groupedEvents).length === 0 ? (
-        <div className={styles.emptyState}>No events to display</div>
+        <div className={styles.emptyState}>{messages.noEvents}</div>
       ) : (
         Object.keys(groupedEvents)
           .sort()
@@ -109,7 +112,7 @@ export default function ScheduleView(props: ScheduleViewProps) {
                         )}
                         data-testid={`${testId}-${event.id}-schedule-event`}
                         aria-label={generateTooltipText(
-                          event,
+                          { ...event, title: event.title || messages.noTitle },
                           ECalendarViewType.schedule,
                           is12Hour,
                           locale,
