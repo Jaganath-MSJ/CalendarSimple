@@ -274,6 +274,7 @@ function BannerChip({
   });
   return (
     <div
+      ref={move.ref}
       role="button"
       tabIndex={0}
       className={cx(className, {

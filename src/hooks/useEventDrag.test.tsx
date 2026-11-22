@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { DateTime, Settings } from "luxon";
@@ -6,6 +6,8 @@ import Calendar from "../Calendar";
 import type { CalendarEvent, EventDropInfo, EventResizeInfo } from "../types";
 
 const COLUMN = 100;
+/** Index of the one tall Month row in the rect stub (-1 = none). */
+let ROW_TALL = -1;
 const EVENT: CalendarEvent = {
   id: "a",
   title: "Stand-up",
@@ -66,13 +68,22 @@ beforeEach(() => {
       let width = 0;
       let height = 0;
       if (id.endsWith("-day-column")) width = COLUMN;
-      if (id.endsWith("-month-cell")) [width, height] = [COLUMN, 80];
+      let top = 0;
+      if (id.endsWith("-month-cell")) {
+        const rows = Array.from(
+          this.parentElement?.parentElement?.children ?? [],
+        ).filter((r) => r.querySelector('[data-testid$="-month-cell"]'));
+        const heights = rows.map((_, i) => (i === ROW_TALL ? 200 : 80));
+        const index = rows.indexOf(this.parentElement as Element);
+        [width, height] = [COLUMN, heights[index] ?? 80];
+        top = heights.slice(0, Math.max(0, index)).reduce((a, b) => a + b, 0);
+      }
       if (String(this.className).includes("bannerContainer"))
         width = 7 * COLUMN;
       return {
         x: 0,
-        y: 0,
-        top: 0,
+        y: top,
+        top,
         left: 0,
         right: width,
         bottom: height,
@@ -85,6 +96,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  ROW_TALL = -1;
   vi.restoreAllMocks();
   Settings.defaultZone = "system";
 });
@@ -618,5 +630,159 @@ describe("review fixes", () => {
     expect(chip.style.insetInlineStart).not.toBe("");
     drag(chip, COLUMN, 0);
     expect(hm(onEventDrop.mock.calls[0][0].start)).toBe("2026-11-09 00:00");
+  });
+});
+
+describe("small fixes", () => {
+  const iso = (d: Date) =>
+    DateTime.fromJSDate(d).toFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+  function Controlled() {
+    const [events, setEvents] = useState<CalendarEvent[]>([EVENT]);
+    return (
+      <Calendar
+        view="week"
+        width={800}
+        height={600}
+        selectedDate={new Date(2026, 10, 10)}
+        events={events}
+        draggable
+        onEventDrop={(i) =>
+          setEvents([
+            { ...EVENT, startDate: iso(i.start), endDate: iso(i.end) },
+          ])
+        }
+      />
+    );
+  }
+
+  it("keeps focus on the event after a keyboard move to another day", () => {
+    render(<Controlled />);
+    item().focus();
+    fireEvent.keyDown(item(), { key: "ArrowRight", altKey: true });
+    expect(item().getAttribute("aria-label")).toContain("Stand-up");
+    expect(document.activeElement).toBe(item());
+  });
+
+  it("clears a text selection when a drag starts", () => {
+    renderWeek({ draggable: true, onEventDrop: vi.fn() });
+    const sel = window.getSelection()!;
+    sel.selectAllChildren(document.body);
+    expect(sel.rangeCount).toBe(1);
+    pointer("down", item(), 0, 0);
+    pointer("move", item(), 0, 30);
+    expect(sel.rangeCount).toBe(0);
+    fireEvent.keyDown(window, { key: "Escape" });
+  });
+
+  it("does not pull an event that starts before minHour to minHour", () => {
+    const onEventDrop = vi.fn<(i: EventDropInfo) => void>();
+    renderWeek({
+      draggable: true,
+      onEventDrop,
+      minHour: 8,
+      events: [
+        {
+          id: "a",
+          title: "Early",
+          startDate: "2026-11-10T06:00:00",
+          endDate: "2026-11-10T09:00:00",
+        },
+      ],
+    });
+    fireEvent.keyDown(item(), { key: "ArrowDown", altKey: true });
+    const info = onEventDrop.mock.calls[0][0];
+    expect(hm(info.start)).toBe("2026-11-10 06:15");
+    expect(hm(info.end)).toBe("2026-11-10 09:15");
+  });
+
+  it("keeps Escape from reaching other handlers during a drag", () => {
+    const outer = vi.fn();
+    document.addEventListener("keydown", outer);
+    try {
+      renderWeek({ draggable: true, onEventDrop: vi.fn() });
+      pointer("down", item(), 0, 0);
+      pointer("move", item(), 0, 30);
+      fireEvent.keyDown(item(), { key: "Escape" });
+      expect(outer).not.toHaveBeenCalled();
+      fireEvent.keyDown(item(), { key: "Escape" });
+      expect(outer).toHaveBeenCalledTimes(1);
+    } finally {
+      document.removeEventListener("keydown", outer);
+    }
+  });
+
+  it("cancels a drag when dragging is turned off mid-drag", () => {
+    const onEventDrop = vi.fn();
+    const ui = (draggable: boolean) => (
+      <Calendar
+        view="week"
+        width={800}
+        height={600}
+        selectedDate={new Date(2026, 10, 10)}
+        events={[EVENT]}
+        draggable={draggable}
+        onEventDrop={onEventDrop}
+      />
+    );
+    const { rerender } = render(ui(true));
+    pointer("down", item(), 0, 0);
+    pointer("move", item(), 0, 30);
+    rerender(ui(false));
+    pointer("up", item(), 0, 30);
+    expect(onEventDrop).not.toHaveBeenCalled();
+    expect(item().style.transform).toBe("");
+  });
+
+  it("does not swallow a later click after a touch drag", () => {
+    vi.useFakeTimers();
+    try {
+      const onEventDrop = vi.fn();
+      const onEventClick = vi.fn();
+      renderWeek({ draggable: true, onEventDrop, onEventClick });
+      const init = {
+        pointerId: 3,
+        pointerType: "touch",
+        button: 0,
+        clientX: 0,
+        clientY: 0,
+      };
+      fireEvent.pointerDown(item(), init);
+      act(() => {
+        vi.advanceTimersByTime(300);
+      });
+      fireEvent.pointerMove(item(), { ...init, clientY: 30 });
+      fireEvent.pointerUp(item(), { ...init, clientY: 30 });
+      expect(onEventDrop).toHaveBeenCalledTimes(1);
+      // A touch drag sends no click; a later activation must still open the event.
+      act(() => {
+        vi.advanceTimersByTime(2000);
+      });
+      fireEvent.click(item());
+      expect(onEventClick).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("moves by the real heights of Month rows", () => {
+    ROW_TALL = 2;
+    const onEventDrop = vi.fn<(i: EventDropInfo) => void>();
+    renderWeek({
+      view: "month",
+      draggable: true,
+      onEventDrop,
+      events: [
+        {
+          id: "m",
+          title: "Offsite",
+          startDate: "2026-11-10",
+          endDate: "2026-11-10",
+        },
+      ],
+    });
+    // Row 1 is 80 px, row 2 is 200 px: 210 px down is two rows, not three.
+    drag(screen.getByTestId("calendar-m-month-event-item"), 0, 210);
+    expect(hm(onEventDrop.mock.calls[0][0].start)).toBe("2026-11-24 00:00");
   });
 });

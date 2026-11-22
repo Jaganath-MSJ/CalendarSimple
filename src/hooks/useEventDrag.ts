@@ -18,6 +18,8 @@ import { cellsMoved, getAxisBounds, stepsMoved } from "../utils/drag";
 
 const MOVE_THRESHOLD_PX = 4;
 const TOUCH_HOLD_MS = 300;
+/** How long after a drag the following click is swallowed. */
+const CLICK_SUPPRESS_MS = 500;
 
 /** Sizes read from the DOM when a drag starts. */
 export interface DragMeasure {
@@ -31,6 +33,11 @@ export interface DragMeasure {
   stepPx: number;
   /** Allowed y offset, px; unbounded when omitted. */
   yBounds?: { min: number; max: number };
+  /**
+   * Offsets (px, sorted, including 0 for the start row) the y movement snaps
+   * to, for rows of different heights. One step per stop; overrides `stepPx`.
+   */
+  yStops?: number[];
 }
 
 export interface UseEventDragOptions {
@@ -77,7 +84,8 @@ export function useEventDrag(options: UseEventDragOptions): EventDragResult {
     optsRef.current = options;
   });
   const session = useRef<Session | null>(null);
-  const suppressClick = useRef(false);
+  /** Time until which a click is swallowed (the click a drag ends with). */
+  const suppressUntil = useRef(0);
   const [offset, setOffset] = useState<{ x: number; y: number } | null>(null);
 
   const end = useCallback((commit: boolean) => {
@@ -87,9 +95,9 @@ export function useEventDrag(options: UseEventDragOptions): EventDragResult {
     s.cleanup();
     if (s.timer) clearTimeout(s.timer);
     if (s.active) {
-      suppressClick.current = true;
+      suppressUntil.current = Date.now() + CLICK_SUPPRESS_MS;
       setOffset(null);
-      if (commit && (s.cells || s.steps)) {
+      if (commit && optsRef.current.enabled && (s.cells || s.steps)) {
         optsRef.current.onCommit(s.cells, s.steps);
       }
     }
@@ -97,9 +105,16 @@ export function useEventDrag(options: UseEventDragOptions): EventDragResult {
 
   useEffect(() => () => end(false), [end]);
 
+  // Dragging turned off mid-drag: cancel rather than commit on release.
+  useEffect(() => {
+    if (!options.enabled) end(false);
+  }, [options.enabled, end]);
+
   const activate = (s: Session) => {
     s.active = true;
     s.measure = optsRef.current.measure(s.el);
+    // A press-and-move would otherwise start selecting text across the grid.
+    window.getSelection?.()?.removeAllRanges();
     try {
       s.el.setPointerCapture?.(s.pointerId);
     } catch {
@@ -126,7 +141,15 @@ export function useEventDrag(options: UseEventDragOptions): EventDragResult {
     }
     let y = 0;
     let steps = 0;
-    if (axis !== "x" && m.stepPx > 0) {
+    if (axis !== "x" && m.yStops?.length) {
+      const stops = m.yStops;
+      let best = 0;
+      stops.forEach((stop, i) => {
+        if (Math.abs(stop - dy) < Math.abs(stops[best] - dy)) best = i;
+      });
+      steps = best - stops.indexOf(0);
+      y = stops[best];
+    } else if (axis !== "x" && m.stepPx > 0) {
       steps = stepsMoved(dy, m.stepPx);
       if (m.yBounds) {
         // Clamp whole steps so rounding never crosses the bound.
@@ -147,7 +170,7 @@ export function useEventDrag(options: UseEventDragOptions): EventDragResult {
   const onPointerDown = (e: React.PointerEvent<HTMLElement>) => {
     if (!optsRef.current.enabled || e.button !== 0) return;
     end(false);
-    suppressClick.current = false;
+    suppressUntil.current = 0;
     e.stopPropagation();
     const el = e.currentTarget;
     const isTouch = e.pointerType === "touch";
@@ -176,8 +199,13 @@ export function useEventDrag(options: UseEventDragOptions): EventDragResult {
         end(false);
       }
     };
+    // Capture phase on window: runs first, so the Escape that cancels a
+    // drag does not also close a popover or reach other handlers.
     const onKey = (ev: KeyboardEvent) => {
-      if (ev.key === "Escape") end(false);
+      if (ev.key !== "Escape" || !session.current) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      end(false);
     };
 
     // touch-action is fixed at touchstart, so once a touch drag is active
@@ -191,7 +219,7 @@ export function useEventDrag(options: UseEventDragOptions): EventDragResult {
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
     window.addEventListener("pointercancel", onCancel);
-    window.addEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, true);
 
     const s: Session = {
       pointerId: e.pointerId,
@@ -207,7 +235,7 @@ export function useEventDrag(options: UseEventDragOptions): EventDragResult {
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
         window.removeEventListener("pointercancel", onCancel);
-        window.removeEventListener("keydown", onKey);
+        window.removeEventListener("keydown", onKey, true);
       },
     };
     if (isTouch) {
@@ -219,8 +247,8 @@ export function useEventDrag(options: UseEventDragOptions): EventDragResult {
   };
 
   const onClickCapture = (e: React.MouseEvent<HTMLElement>) => {
-    if (!suppressClick.current) return;
-    suppressClick.current = false;
+    if (Date.now() >= suppressUntil.current) return;
+    suppressUntil.current = 0;
     e.stopPropagation();
     e.preventDefault();
   };

@@ -227,7 +227,7 @@ Use the "Drag and Resize" stories (they apply each change to `events` and print 
 - **Resize**: Hover an event in Week; drag its bottom edge down 30 min (end +30) and its top edge up 1 h (start −1 h). Dragging the bottom above the start leaves 15 min (`minEventDurationMinutes`).
 - **RTL**: In the RTL story, dragging right moves to the previous day; Alt+→ does the same.
 - **DST**: With the system zone `America/New_York`, on 8 Mar 2026 move a 10:00 event down one hour; it lands at 11:00.
-- **Keyboard**: Tab to an event; Alt+↓ moves 15 min later, Alt+→ one day later, Alt+Shift+↓ ends 15 min later. Screen readers announce the shortcuts (`aria-keyshortcuts`).
+- **Keyboard**: Tab to an event; Alt+↓ moves 15 min later, Alt+→ one day later, Alt+Shift+↓ ends 15 min later. Screen readers announce the shortcuts (`aria-keyshortcuts`). After Alt+→ the moved event (now in the next column) still has focus, so Alt+→ can be pressed again.
 - **Month**: Drag a chip one cell right (+1 day) and one row down (+7 days); a timed event keeps its time. Alt+↓ moves a week. "+N more" and popover items do not drag.
 - **All-day row**: In Week, drag an all-day chip one column right (+1 day); vertical movement does nothing.
 - **Predicate**: In "Per Event Predicate", the locked event does not drag or show resize edges; the others do.

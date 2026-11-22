@@ -297,11 +297,11 @@ const [events, setEvents] = useState(initialEvents);
 | `minEventDurationMinutes` | `number`                          | `15`        | Shortest length a resize can leave.                                                               |
 
 - **Where** — Day, Week and Custom Days: x moves days, y moves time (snapped). Month: x moves days, y moves whole weeks; times are kept. All-day row: x moves days. Schedule has no drag.
-- **Pointer** — Mouse and pen start after a 4 px move, touch after a 300 ms hold. A press without a move is still a click (`onEventClick`); the click after a drag is not sent. Escape (or a cancelled pointer) puts the event back without a callback.
+- **Pointer** — Mouse and pen start after a 4 px move, touch after a 300 ms hold. A press without a move is still a click (`onEventClick`); the click after a drag is not sent. Escape (or a cancelled pointer) puts the event back without a callback, and that Escape does not reach other handlers such as an open popover.
 - **Bounds** — An event within one day stays inside `minHour`–`maxHour` when moved or resized, and a resize never leaves less than `minEventDurationMinutes`. Events that run past midnight are moved as they are. Resize edges appear on hover/focus on the first and last day of an event, and not on items shorter than 24 px (use Alt+Shift+↑/↓ there).
 - **Wall clock** — Times move by the clock shown in the grid, so on a daylight-saving day 10:00 moved one hour lands on 11:00.
 - **RTL** — On screen directions are mirrored: dragging right (or Alt+→) moves to the previous day.
-- **Keyboard** — On a focused event: Alt+↑/↓ moves by `dragSnapMinutes` (in Month, by a week), Alt+←/→ moves a day, Alt+Shift+↑/↓ moves the end by `resizeSnapMinutes`. The keys are listed in `aria-keyshortcuts`.
+- **Keyboard** — On a focused event: Alt+↑/↓ moves by `dragSnapMinutes` (in Month, by a week), Alt+←/→ moves a day, Alt+Shift+↑/↓ moves the end by `resizeSnapMinutes`. The keys are listed in `aria-keyshortcuts`, and focus stays on the moved event once you update `events`.
 - **Recurring events** — You receive the occurrence (`recurringEventId` set). Decide in your handler whether to move the series or just that day (for example add an `exdate` and a one-off event).
 - **Not supported** — Turning a timed event into an all-day one (or back), and dragging in Schedule.
 

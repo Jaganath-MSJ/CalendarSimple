@@ -3,6 +3,7 @@
  * row. x moves by days; in Month, y moves by weeks (one row = 7 days).
  * Times of timed events are kept.
  */
+import { useRef } from "react";
 import type React from "react";
 import type { CSSProperties } from "react";
 import { useCalendar } from "../context/CalendarContext";
@@ -15,6 +16,7 @@ import {
   resolveDirection,
 } from "../utils";
 import useEventDrag, { type DragMeasure } from "./useEventDrag";
+import { markFocusAfterMove, useFocusAfterMove } from "./useFocusAfterMove";
 
 const DAYS_PER_ROW = 7;
 
@@ -25,7 +27,10 @@ export interface UseDayMoveOptions {
 }
 
 export function useDayMove(event: CalendarEvent, options: UseDayMoveOptions) {
-  const { config, state } = useCalendar();
+  const { config, state, testId } = useCalendar();
+  const ref = useRef<HTMLDivElement>(null);
+  const focusKey = event.id ? `${testId}:${event.id}` : undefined;
+  useFocusAfterMove(focusKey, ref);
   const reversed = resolveDirection(config.direction, config.locale) === "rtl";
   const canMove = canDrag(config.draggable, event, config.onEventDrop);
 
@@ -66,6 +71,7 @@ export function useDayMove(event: CalendarEvent, options: UseDayMoveOptions) {
     if (!days) return false;
     e.preventDefault();
     e.stopPropagation();
+    markFocusAfterMove(focusKey);
     moveBy(days);
     return true;
   };
@@ -75,6 +81,7 @@ export function useDayMove(event: CalendarEvent, options: UseDayMoveOptions) {
     : undefined;
 
   return {
+    ref,
     canMove,
     dragging: drag.dragging,
     handlers: drag.handlers,
@@ -102,6 +109,11 @@ export function measureMonthCell(el: HTMLElement): DragMeasure | null {
   );
   const rect = cell.getBoundingClientRect();
   const rowIndex = rows.indexOf(row);
+  // Rows can differ in height, so snap to each row's real top.
+  const rowTop = (r: Element) =>
+    (Array.from(r.children).find(isCell) as Element).getBoundingClientRect()
+      .top;
+  const yStops = rows.map((r) => rowTop(r) - rect.top);
   return {
     cellWidth: rect.width,
     columnIndex: cells.indexOf(cell),
@@ -111,6 +123,7 @@ export function measureMonthCell(el: HTMLElement): DragMeasure | null {
       min: -rowIndex * rect.height,
       max: (rows.length - 1 - rowIndex) * rect.height,
     },
+    yStops,
   };
 }
 

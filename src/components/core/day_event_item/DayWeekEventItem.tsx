@@ -1,4 +1,4 @@
-import React, { CSSProperties } from "react";
+import React, { CSSProperties, useRef } from "react";
 import type { DateTime } from "luxon";
 import cx from "classnames";
 import {
@@ -22,6 +22,10 @@ import {
   DATE_FORMATS,
   defaultCalendarProps,
 } from "../../../constants";
+import {
+  markFocusAfterMove,
+  useFocusAfterMove,
+} from "../../../hooks/useFocusAfterMove";
 import useEventDrag, { type DragMeasure } from "../../../hooks/useEventDrag";
 import type { ResizeEdge } from "../../../utils/drag";
 import styles from "./DayWeekEventItem.module.css";
@@ -71,6 +75,9 @@ export function DayWeekEventItem({
   const maxHour = config.maxHour ?? defaultCalendarProps.maxHour;
   const canMove = canDrag(config.draggable, event, config.onEventDrop);
   const eventStart = dateFn(event.startDate);
+  const ref = useRef<HTMLDivElement>(null);
+  const focusKey = event.id ? `${testId}:${event.id}` : undefined;
+  useFocusAfterMove(focusKey, ref);
   const lastDay = getLastEventDay(event);
   // Only events within one day are kept inside minHour–maxHour.
   const isOneDay = lastDay.hasSame(eventStart, "day");
@@ -81,7 +88,16 @@ export function DayWeekEventItem({
     const end = event.endDate ? dateFn(event.endDate) : undefined;
     let next = moveWallClock(start, end, days, minutes);
     if (isOneDay) {
-      next = clampWallClock(next.start, next.end, minHour, maxHour);
+      // Keep an event inside the hours, but never pull one that already
+      // starts before minHour (or ends after maxHour) to that edge.
+      const from = (start.hour * 60 + start.minute) / 60;
+      const to = from + (end ? end.diff(start, "minutes").minutes / 60 : 0);
+      next = clampWallClock(
+        next.start,
+        next.end,
+        Math.min(minHour, from),
+        Math.max(maxHour, to),
+      );
     }
     config.onEventDrop?.({
       event,
@@ -179,6 +195,7 @@ export function DayWeekEventItem({
       const delta = { ArrowUp: -resizeSnap, ArrowDown: resizeSnap }[e.key];
       if (delta) {
         e.preventDefault();
+        markFocusAfterMove(focusKey);
         resizeBy("bottom", delta);
         return;
       }
@@ -193,6 +210,7 @@ export function DayWeekEventItem({
       const delta = step[e.key];
       if (delta) {
         e.preventDefault();
+        markFocusAfterMove(focusKey);
         moveBy(delta[0], delta[1]);
         return;
       }
@@ -202,6 +220,7 @@ export function DayWeekEventItem({
 
   return (
     <div
+      ref={ref}
       role="button"
       tabIndex={0}
       className={cx(styles.eventItem, classNames?.event, {

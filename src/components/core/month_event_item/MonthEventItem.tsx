@@ -299,6 +299,7 @@ function MonthChip({
   const move = useDayMove(item, { axis: "both", measure: measureMonthCell });
   return (
     <div
+      ref={move.ref}
       role="button"
       tabIndex={0}
       className={cx(className, {
