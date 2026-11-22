@@ -5,7 +5,7 @@ import WeekView from "./WeekView";
 import { dateFn } from "../../../utils";
 import * as CalendarContextModule from "../../../context/CalendarContext";
 import { CalendarProvider } from "../../../context/CalendarContext";
-import { CalendarProps, ECalendarViewType } from "../../../types";
+import { ECalendarViewType } from "../../../types";
 
 // Provide a mock ResizeObserver since child components might need it
 globalThis.ResizeObserver = vi.fn().mockImplementation(() => ({
@@ -110,7 +110,7 @@ describe("WeekView Component", () => {
 });
 
 describe("WeekView weekStartsOn (real CalendarProvider)", () => {
-  type WeekDay = NonNullable<CalendarProps["weekStartsOn"]>;
+  type WeekDay = number;
 
   const renderWeek = (weekStartsOn: WeekDay, weekEndsOn: WeekDay) =>
     render(

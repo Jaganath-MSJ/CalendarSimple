@@ -55,6 +55,52 @@ describe("MonthEventItem Component", () => {
     expect(screen.getByText("1")).toBeInTheDocument();
   });
 
+  it("selected cell carries the selected class and no inline background by default", () => {
+    render(
+      <CalendarProvider
+        initialDate={dateObj}
+        initialView={ECalendarViewType.month}
+        testId="calendar"
+      >
+        <table>
+          <tbody>
+            <tr>
+              <MonthEventItem {...defaultProps} isSelected />
+            </tr>
+          </tbody>
+        </table>
+      </CalendarProvider>,
+    );
+    const cell = screen.getByTestId("calendar-1-month-cell");
+    expect(cell.className).toMatch(/selected/);
+    expect(cell.style.backgroundColor).toBe("");
+  });
+
+  it("theme.selected.bgColor still wins over the outlined default", () => {
+    render(
+      <CalendarProvider
+        initialDate={dateObj}
+        initialView={ECalendarViewType.month}
+        testId="calendar"
+      >
+        <table>
+          <tbody>
+            <tr>
+              <MonthEventItem
+                {...defaultProps}
+                isSelected
+                theme={{ selected: { bgColor: "#ff0000" } }}
+              />
+            </tr>
+          </tbody>
+        </table>
+      </CalendarProvider>,
+    );
+    expect(
+      screen.getByTestId("calendar-1-month-cell").style.backgroundColor,
+    ).toBe("rgb(255, 0, 0)");
+  });
+
   it("renders events and more button when excess events", () => {
     // Provide events with required tooltip props so it doesn't crash formatting
     const data = [

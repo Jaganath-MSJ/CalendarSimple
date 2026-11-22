@@ -3,7 +3,7 @@
   top: calc(100% + 4px);
   inset-inline-start: 0;
   z-index: 100;
-  background-color: var(--bg-color);
+  background-color: var(--cal-surface-raised);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   box-shadow:
@@ -52,7 +52,7 @@
 .popoverItem {
   padding: 0.25rem 0.5rem;
   background-color: var(--primary-color);
-  color: white;
+  color: var(--cal-on-primary);
   border-radius: var(--radius-md);
   font-size: 0.75rem;
   white-space: nowrap;

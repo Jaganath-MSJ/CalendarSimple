@@ -5,6 +5,8 @@ import { dateFn, formatDate } from "./utils";
 import { DATE_FORMATS } from "./constants";
 import { CalendarProps, ECalendarViewType } from "./types";
 import Calendar from "./Calendar";
+import { CalendarProvider } from "./context/CalendarContext";
+import WeekView from "./components/views/week_view/WeekView";
 import type { RenderHeaderProps, RenderDateCellProps } from "./index";
 
 describe("Calendar Component Integration", () => {
@@ -771,6 +773,104 @@ describe("Calendar Component Integration", () => {
       expect(count).toBeGreaterThan(0);
       act(() => fire?.());
       expect(spy.mock.calls.length).toBe(count);
+    });
+  });
+
+  describe("locale-resolved weekStartsOn and is12Hour", () => {
+    const firstHeader = () => screen.getAllByRole("columnheader")[0];
+
+    it("weekStartsOn=locale starts the month grid on Monday for en-GB", () => {
+      render(<Calendar weekStartsOn="locale" locale="en-GB" />);
+      expect(firstHeader().textContent).toMatch(/^mon/i);
+    });
+
+    it("weekStartsOn=locale starts the month grid on Sunday for en-US", () => {
+      render(<Calendar weekStartsOn="locale" locale="en-US" />);
+      expect(firstHeader().textContent).toMatch(/^sun/i);
+    });
+
+    describe("weekEndsOn follows weekStartsOn=locale", () => {
+      const cases: [string, RegExp, RegExp][] = [
+        ["en-GB", /^mon/i, /^sun/i],
+        ["de-DE", /^mo/i, /^so/i],
+        [
+          "ar-EG",
+          /^(sat|\u0627\u0644\u0633\u0628\u062a)/i,
+          /^(fri|\u0627\u0644\u062c\u0645\u0639\u0629)/i,
+        ],
+      ];
+
+      it.each(cases)("month view shows 7 columns for %s", (locale) => {
+        render(<Calendar weekStartsOn="locale" locale={locale} />);
+        expect(screen.getAllByRole("columnheader")).toHaveLength(7);
+      });
+
+      it.each(cases)("week view shows 7 day columns for %s", (locale) => {
+        render(
+          <Calendar
+            view={ECalendarViewType.week}
+            weekStartsOn="locale"
+            locale={locale}
+            width={700}
+            height={600}
+          />,
+        );
+        expect(screen.getAllByTestId("calendar-day-column")).toHaveLength(7);
+      });
+
+      it("en-GB runs Monday to Sunday", () => {
+        render(<Calendar weekStartsOn="locale" locale="en-GB" />);
+        const heads = screen.getAllByRole("columnheader");
+        expect(heads[0].textContent).toMatch(/^mon/i);
+        expect(heads[6].textContent).toMatch(/^sun/i);
+      });
+
+      it("an explicit weekEndsOn wins over the locale-derived end", () => {
+        render(
+          <Calendar weekStartsOn="locale" weekEndsOn={5} locale="en-GB" />,
+        );
+        expect(screen.getAllByRole("columnheader")).toHaveLength(5);
+      });
+
+      it("a direct CalendarProvider without weekEndsOn shows 7 columns", () => {
+        render(
+          <CalendarProvider
+            initialDate={dateFn("2025-01-15")}
+            initialView={ECalendarViewType.week}
+            testId="calendar"
+            config={{ weekStartsOn: "locale", locale: "en-GB", events: [] }}
+          >
+            <WeekView />
+          </CalendarProvider>,
+        );
+        expect(screen.getAllByTestId("calendar-day-column")).toHaveLength(7);
+      });
+    });
+
+    it("is12Hour=locale shows AM/PM for en-US", () => {
+      render(
+        <Calendar
+          view={ECalendarViewType.day}
+          is12Hour="locale"
+          locale="en-US"
+        />,
+      );
+      expect(screen.getByTestId("calendar-time-column").textContent).toMatch(
+        /AM|PM/,
+      );
+    });
+
+    it("is12Hour=locale uses 24-hour labels for de-DE", () => {
+      render(
+        <Calendar
+          view={ECalendarViewType.day}
+          is12Hour="locale"
+          locale="de-DE"
+        />,
+      );
+      const text = screen.getByTestId("calendar-time-column").textContent;
+      expect(text).toContain("14:00");
+      expect(text).not.toMatch(/AM|PM/);
     });
   });
 });

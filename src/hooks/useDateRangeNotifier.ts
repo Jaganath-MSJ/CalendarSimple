@@ -4,7 +4,7 @@
  */
 import { useEffect, useMemo, useRef } from "react";
 import type { CalendarState } from "../context/CalendarContext";
-import type { CalendarProps } from "../types";
+import type { CalendarConfig } from "../types";
 import { getVisibleRange } from "../utils/visibleRange";
 import { defaultCalendarProps } from "../constants";
 
@@ -18,7 +18,7 @@ const DELAY_MS = 16;
  */
 export function useDateRangeNotifier(
   state: CalendarState,
-  config: Omit<CalendarProps, "children" | "selectedDate" | "view">,
+  config: CalendarConfig,
 ): void {
   const { view, selectedDate, customDays } = state;
   const {

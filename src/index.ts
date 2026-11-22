@@ -4,6 +4,7 @@ import "./styles/variables.css";
 export { EDayType, ECalendarViewType } from "./types";
 export type {
   CalendarProps,
+  CalendarConfig,
   CalendarMessages,
   CalendarEvent,
   CalendarContentProps,
@@ -14,6 +15,7 @@ export type {
   RenderHeaderProps,
   RenderDateCellProps,
 } from "./types";
+export type { CalendarComponent } from "./Calendar";
 export type { HeaderProps } from "./components/layout/Header";
 export type { ViewProps } from "./components/views/View";
 export type { MonthViewProps } from "./components/views/month_view/MonthView";

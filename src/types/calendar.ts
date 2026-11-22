@@ -74,14 +74,18 @@ export interface RenderDateCellProps {
 
 /**
  * Top-level props for the `<Calendar>` component.
+ *
+ * @typeParam TEvent - Your event shape (must extend `CalendarEvent`). Types
+ * `events` and every callback / renderer that receives events. Set only via an
+ * explicit type argument (`NoInfer`); it is never inferred from `events`.
  */
-export interface CalendarProps {
+export interface CalendarProps<TEvent extends CalendarEvent = CalendarEvent> {
   /** Child components rendered inside the calendar layout (e.g. custom header). */
   children?: ReactNode;
 
   // --- Data & State ---
   /** Events to display. Each must have at minimum `startDate` and `title`. */
-  events?: CalendarEvent[];
+  events?: NoInfer<TEvent>[];
   /** Initially selected date. Defaults to today if omitted. */
   selectedDate?: Date;
   /** Active view mode. Defaults to `month`. */
@@ -104,8 +108,11 @@ export interface CalendarProps {
   renderLoading?: () => ReactNode;
 
   // --- Configuration ---
-  /** Use 12-hour clock format (AM/PM) in time grids. Defaults to `false`. */
-  is12Hour?: boolean;
+  /**
+   * Use 12-hour clock format (AM/PM) in time grids. Pass `"locale"` to follow
+   * the `locale`'s convention (Intl `hourCycle`). Defaults to `false`.
+   */
+  is12Hour?: boolean | "locale";
   /** Allow date cells to be clicked and selected. Defaults to `false`. */
   selectable?: boolean;
   /** Maximum number of events shown per day cell before a "+N more" overflow link appears. */
@@ -126,8 +133,12 @@ export interface CalendarProps {
   minHour?: number;
   /** Latest hour shown in the time grid (0–23). */
   maxHour?: number;
-  /** First day of the week: 0 = Sunday, 1 = Monday … 6 = Saturday. */
-  weekStartsOn?: number;
+  /**
+   * First day of the week: 0 = Sunday, 1 = Monday … 6 = Saturday. Pass
+   * `"locale"` to use the `locale`'s first day (Intl week info, then CLDR
+   * region table). Defaults to `0`.
+   */
+  weekStartsOn?: number | "locale";
   /** Last day of the week: 0–6, must be after `weekStartsOn`. */
   weekEndsOn?: number;
   /** Show dates from the previous / next month in the month grid. */
@@ -155,9 +166,9 @@ export interface CalendarProps {
   /** Called when a date cell is clicked. */
   onDateClick?: (date: Date) => void;
   /** Called when an event chip is clicked. */
-  onEventClick?: (event: CalendarEvent) => void;
+  onEventClick?: (event: NoInfer<TEvent>) => void;
   /** Called when the "+N more" overflow link is clicked. Receives the date and the hidden events. */
-  onMoreClick?: (date: Date, hiddenEvents?: CalendarEvent[]) => void;
+  onMoreClick?: (date: Date, hiddenEvents?: NoInfer<TEvent>[]) => void;
   /** Called when the calendar navigates to a different date. */
   onNavigate?: (date: Date) => void;
   /** Called when the user switches views. */
@@ -184,7 +195,7 @@ export interface CalendarProps {
 
   // --- Custom Renderers ---
   /** Replaces the default event chip with a fully custom renderer. */
-  renderEvent?: (event: CalendarEvent) => ReactNode;
+  renderEvent?: (event: NoInfer<TEvent>) => ReactNode;
   /** Replaces the entire header bar with a custom renderer. */
   renderHeader?: (props: RenderHeaderProps) => ReactNode;
   /** Renders custom content inside each hour slot of the Day, Week and Custom Days grids. Receives the slot's start time on that column's own date. */
@@ -197,7 +208,7 @@ export interface CalendarProps {
    * Pre-built O(1) lookup map of events keyed by date string. Avoids re-filtering on each render.
    * Must be provided when `enableEnrichedEvents=true` — omitting it emits a `console.warn`.
    */
-  enrichedEventsByDate?: Record<string, CalendarEvent[]>;
+  enrichedEventsByDate?: Record<string, NoInfer<TEvent>[]>;
   /**
    * Enable O(1) event lookup via `enrichedEventsByDate`.
    * Skips the reversed-range filter; events with unparseable dates are still dropped.
@@ -217,7 +228,9 @@ export interface CalendarProps {
   /** Maintain stable visual ordering of overlapping events across re-renders. */
   isEventOrderingEnabled?: boolean;
   /** Sort events within Month view cells. Pass `true` for default sort or a comparator for custom order. */
-  sortedMonthView?: boolean | ((a: CalendarEvent, b: CalendarEvent) => number);
+  sortedMonthView?:
+    | boolean
+    | ((a: NoInfer<TEvent>, b: NoInfer<TEvent>) => number);
 
   // --- Localization ---
   /** Luxon locale code (e.g. `'en'`, `'fr'`, `'es-MX'`). Controls date formatting language. */
@@ -301,11 +314,12 @@ export interface CalendarMessages {
  * Internal props type used by all view components after defaults have been applied.
  * Extends `CalendarProps` with a required subset of keys so views never need to null-check defaults.
  */
-export interface CalendarContentProps extends RequiredSome<
-  CalendarProps,
+export interface CalendarContentProps<
+  TEvent extends CalendarEvent = CalendarEvent,
+> extends RequiredSome<
+  Omit<CalendarProps<TEvent>, "weekStartsOn" | "is12Hour">,
   | "events"
   | "view"
-  | "is12Hour"
   | "selectable"
   | "creatable"
   | "dayType"
@@ -315,7 +329,6 @@ export interface CalendarContentProps extends RequiredSome<
   | "autoScrollToCurrentTime"
   | "minHour"
   | "maxHour"
-  | "weekStartsOn"
   | "weekEndsOn"
   | "showAdjacentMonths"
   | "showWeekNumbers"
@@ -333,7 +346,21 @@ export interface CalendarContentProps extends RequiredSome<
   | "testId"
   | "locale"
   | "localeMessages"
-> {}
+> {
+  /** Resolved first day of the week (0–6); never `"locale"`. */
+  weekStartsOn: number;
+  /** Resolved 12-hour clock flag; never `"locale"`. */
+  is12Hour: boolean;
+}
+
+/** Config as seen inside the context (locale-dependent values resolved). */
+export type CalendarConfig<TEvent extends CalendarEvent = CalendarEvent> = Omit<
+  CalendarProps<TEvent>,
+  "children" | "selectedDate" | "view" | "weekStartsOn" | "is12Hour"
+> & {
+  weekStartsOn?: number;
+  is12Hour?: boolean;
+};
 
 /**
  * A month entry used in the month picker dropdown.

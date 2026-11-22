@@ -272,3 +272,26 @@ describe("Popover Component", () => {
     ).toBeInTheDocument();
   });
 });
+
+describe("Popover scoped root class", () => {
+  it("adds classNames.root to the portaled popover", () => {
+    const dateObj = dateFn("2024-03-01");
+    render(
+      <CalendarProvider
+        initialDate={dateObj}
+        initialView={ECalendarViewType.month}
+        config={{ classNames: { root: "myCal" } }}
+      >
+        <Popover
+          dateObj={dateObj}
+          events={[{ id: "1", title: "E", startDate: "2024-03-01" }] as never}
+          onClose={vi.fn()}
+          anchorEl={document.createElement("div")}
+          onEventClick={vi.fn()}
+          is12Hour={false}
+        />
+      </CalendarProvider>,
+    );
+    expect(screen.getByTestId(/popover-content/)).toHaveClass("myCal");
+  });
+});

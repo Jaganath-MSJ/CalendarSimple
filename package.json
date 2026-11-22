@@ -28,14 +28,16 @@
     "build": "vite build",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "lint": "tsc --noEmit && eslint src",
-    "lint:fix": "tsc --noEmit && eslint src --fix",
+    "lint": "tsc --noEmit && tsc --noEmit -p e2e && eslint src",
+    "lint:fix": "tsc --noEmit && tsc --noEmit -p e2e && eslint src --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
     "prepare": "husky",
-    "size": "size-limit"
+    "size": "size-limit",
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots"
   },
   "lint-staged": {
     "*.{js,ts,jsx,tsx}": [
@@ -54,7 +56,6 @@
   "author": "jaganath-m-s",
   "license": "MIT",
   "dependencies": {
-    "calendarize": "^1.1.1",
     "classnames": "^2.5.1",
     "luxon": "^3.7.2"
   },
@@ -63,6 +64,7 @@
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.65.1",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@size-limit/preset-small-lib": "^14.3.0",
@@ -83,6 +85,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^17.4.0",
+    "http-server": "^14.1.1",
     "husky": "^9.1.7",
     "jsdom": "^29.0.2",
     "lint-staged": "^16.4.0",

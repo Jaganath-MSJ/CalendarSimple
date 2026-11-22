@@ -3,7 +3,7 @@
  */
 import { useCalendar } from "../context/CalendarContext";
 import { mergeDefined } from "../utils/common";
-import { CalendarProps, CalendarContentProps } from "../types";
+import { CalendarContentProps } from "../types";
 
 /**
  * Merges the global calendar config from context with view-local props.
@@ -13,9 +13,9 @@ import { CalendarProps, CalendarContentProps } from "../types";
  * @param localProps - Props specific to the calling view component.
  * @returns Merged `CalendarContentProps` with all required defaults guaranteed.
  */
-export default function useCalendarProps<T extends Partial<CalendarProps>>(
-  localProps: T,
-): CalendarContentProps {
+export default function useCalendarProps<
+  T extends Partial<CalendarContentProps>,
+>(localProps: T): CalendarContentProps {
   const { config } = useCalendar();
 
   return mergeDefined<CalendarContentProps>(config, localProps);

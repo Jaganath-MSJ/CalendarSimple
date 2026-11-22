@@ -11,7 +11,7 @@ import {
   resolveTheme,
 } from "../../../utils";
 import styles from "./ScheduleView.module.css";
-import { DATE_FORMATS, LAYOUT_CONSTANTS } from "../../../constants";
+import { DATE_FORMATS } from "../../../constants";
 import useScheduleView from "../../../hooks/useScheduleView";
 import { useCalendar } from "../../../context/CalendarContext";
 import useMessages from "../../../hooks/useMessages";
@@ -188,7 +188,7 @@ export default function ScheduleView(props: ScheduleViewProps) {
                                 style={{
                                   backgroundColor:
                                     event.style?.backgroundColor ||
-                                    LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                                    "var(--cal-event-default)",
                                 }}
                               />
                               <div

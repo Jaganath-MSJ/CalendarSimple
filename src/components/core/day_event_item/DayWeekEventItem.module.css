@@ -3,7 +3,7 @@
   inset-inline-start: 5px;
   inset-inline-end: 5px;
   padding: 4px 5px;
-  background-color: #3b82f6;
+  background-color: var(--cal-event-default);
   color: white;
   border-radius: 4px;
   font-size: 12px;

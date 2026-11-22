@@ -4,6 +4,7 @@ import { expect, describe, it, vi } from "vitest";
 import { CalendarProvider, useCalendar } from "./CalendarContext";
 import { ECalendarViewType } from "../types";
 import { dateFn } from "../utils";
+import MonthView from "../components/views/month_view/MonthView";
 import { CALENDAR_ACTIONS } from "../constants";
 
 const TestComponent = () => {
@@ -235,5 +236,27 @@ describe("CalendarContext", () => {
       "useCalendar must be used within a CalendarProvider",
     );
     consoleSpy.mockRestore();
+  });
+});
+
+describe("CalendarProvider locale-resolved config", () => {
+  it("resolves weekStartsOn=locale so the month header starts on Monday for en-GB", () => {
+    render(
+      <CalendarProvider
+        initialDate={dateFn("2024-03-01")}
+        initialView="month"
+        config={{
+          weekStartsOn: "locale",
+          locale: "en-GB",
+          weekEndsOn: 6,
+          events: [],
+          width: 700,
+          height: 600,
+        }}
+      >
+        <MonthView />
+      </CalendarProvider>,
+    );
+    expect(screen.getAllByRole("columnheader")[0].textContent).toMatch(/^mon/i);
   });
 });

@@ -177,7 +177,7 @@ function Popover({
       aria-label={messages.eventsOn(
         formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH, config.locale),
       )}
-      className={styles.popover}
+      className={cx(styles.popover, config.classNames?.root)}
       ref={popoverRef}
       style={stylePosition}
       onClick={(e) => e.stopPropagation()}
@@ -207,6 +207,8 @@ function Popover({
 
           const eventBgColor =
             item.style?.backgroundColor || LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
+          // Text contrast is computed from the hex fallback; overriding
+          // --cal-event-default does not recompute it.
           const textColor = getContrastColor(String(eventBgColor));
 
           return (
@@ -221,7 +223,7 @@ function Popover({
               id={item.id}
               data-testid={`${testId}-${item.id}-popover-item`}
               style={{
-                backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                backgroundColor: "var(--cal-event-default)",
                 color: textColor,
                 ...stripLayoutStyle(item.style),
               }}

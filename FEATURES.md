@@ -65,6 +65,37 @@ Quickly override the calendar's core accent colors without touching CSS.
 - **`selected`** — Style the user-selected date.
 - **`default`** — Base text and background colors.
 
+The selected day is drawn as an outlined circle (transparent fill, `--primary-color` ring). `theme.selected` (`bgColor` / `color`) colours the whole day cell, not the date label. When a cell is both today and selected, the date label shows the filled today style while `theme.selected` (if set) colours the cell. To get the old filled label back, set `--cal-selected-fill: var(--primary-color); --cal-selected-text: var(--cal-on-primary);` on the calendar root, per colour scheme.
+
+### Palette Tokens
+
+Defined in `src/styles/variables.css` (swapped by `data-color-scheme`) and overridable per scheme from your own CSS (see below):
+
+| Token                  | Light     | Dark      | Used for                                                                    |
+| ---------------------- | --------- | --------- | --------------------------------------------------------------------------- |
+| `--cal-on-primary`     | `#ffffff` | `#111827` | Text on `--primary-color` fills (today marker, month events, popover items) |
+| `--cal-event-default`  | `#3b82f6` | `#3b82f6` | Background of events with no color                                          |
+| `--cal-surface-raised` | `#ffffff` | `#374151` | Popover background                                                          |
+| `--cal-selected-fill`  | unset     | unset     | Optional: selected date label fill (default transparent)                    |
+| `--cal-selected-text`  | unset     | unset     | Optional: selected date label text (default `--primary-color`)              |
+
+An unscoped `[data-color-scheme="dark"]` override has the same specificity as the library's own rule, so it must load after the library CSS (or use the scoped `.myCal[data-color-scheme="dark"]` form with `classNames.root`).
+
+Overriding `--cal-event-default` does not recompute the event text color (it is derived from the default hex), so pick a color with similar contrast or set `style.color`.
+
+Override the tokens on the calendar root, once per scheme:
+
+```css
+[data-color-scheme="light"] {
+  --cal-event-default: #0ea5e9;
+}
+[data-color-scheme="dark"] {
+  --cal-event-default: #38bdf8;
+}
+```
+
+To scope this to one calendar, pass `classNames.root` and use `.myCal[data-color-scheme="dark"] { ... }`. An override on `:root`, `body` or a wrapper alone is ignored in dark mode, because the `[data-color-scheme="dark"]` block redefines the tokens on the calendar root itself, closer than any ancestor.
+
 ### The `classNames` Prop
 
 Inject your own CSS classes (Tailwind, CSS Modules, etc.) into specific DOM elements. Available keys:
@@ -85,6 +116,7 @@ Replace core UI elements entirely with render props.
 
 ## Time Formatting
 
+- **Server rendering** — Intl data may differ between server and client; pass explicit values (`weekStartsOn`, `is12Hour`) if you need identical output.
 - **`is12Hour`** — Switch all time displays to 12-hour AM/PM format (default: 24-hour).
 - **`dayType`** — Day name format: `"full"` (Monday) or `"half"` (Mon).
 - **`minHour` / `maxHour`** — Constrain the visible time range (0–24) in Day and Week views.
@@ -110,8 +142,8 @@ The calendar uses Luxon internally for all date formatting.
   localeMessages={{ today: "Hoy", schedule: "Agenda" }}
   ```
 
-- **`weekStartsOn`** — Set the first day of the week (0 = Sunday, 1 = Monday, etc.). Not inferred from `locale` — explicit control is intentional.
-- **`is12Hour`** — When combined with a locale, time designators render in the appropriate regional format.
+- **`weekStartsOn`** — Set the first day of the week (0 = Sunday, 1 = Monday, etc.). Pass `"locale"` to use the `locale`'s first day (Intl week info, then the CLDR region table); the default stays `0`. With `"locale"` the week ends on the day before it starts unless you pass `weekEndsOn`.
+- **`is12Hour`** — Pass `"locale"` to follow the `locale`'s 12/24-hour convention (default `false`); time designators render in the appropriate regional format.
 
 ---
 
@@ -140,8 +172,8 @@ Palettes are implemented as CSS custom properties. The light palette is the `:ro
   --primary-color: #818cf8;
 }
 
-/* Customize the light palette (the :root default) */
-:root {
+/* Customize the light palette */
+[data-color-scheme="light"] {
   --bg-color: #ffffff;
   --text-primary: #000000;
   --primary-color: #2563eb;
@@ -248,18 +280,18 @@ All accessibility features are built-in and require no extra configuration.
 
 ### Core & Navigation
 
-| Prop               | Type                | Default     | Description                                                              |
-| ------------------ | ------------------- | ----------- | ------------------------------------------------------------------------ |
-| `events`           | `CalendarEvent[]`   | `[]`        | Array of event objects to display.                                       |
-| `selectedDate`     | `Date`              | `undefined` | The currently selected date.                                             |
-| `view`             | `ECalendarViewType` | `"month"`   | Active view: `month`, `week`, `day`, `schedule`, or `customDays`.        |
-| `testId`           | `string`            | `undefined` | `data-testid` attribute placed on the root element for testing.          |
-| `isLoading`        | `boolean`           | `undefined` | When `true`, renders the loading indicator instead of the calendar body. |
-| `customDays`       | `number`            | `3`         | Number of days shown in the `customDays` view.                           |
-| `weekStartsOn`     | `number`            | `0`         | First day of the week (0 = Sunday, 1 = Monday, …).                       |
-| `weekEndsOn`       | `number`            | `6`         | Last day of the week.                                                    |
-| `pastYearLength`   | `number`            | `5`         | Number of past years in the year dropdown.                               |
-| `futureYearLength` | `number`            | `5`         | Number of future years in the year dropdown.                             |
+| Prop               | Type                 | Default     | Description                                                              |
+| ------------------ | -------------------- | ----------- | ------------------------------------------------------------------------ |
+| `events`           | `CalendarEvent[]`    | `[]`        | Array of event objects to display.                                       |
+| `selectedDate`     | `Date`               | `undefined` | The currently selected date.                                             |
+| `view`             | `ECalendarViewType`  | `"month"`   | Active view: `month`, `week`, `day`, `schedule`, or `customDays`.        |
+| `testId`           | `string`             | `undefined` | `data-testid` attribute placed on the root element for testing.          |
+| `isLoading`        | `boolean`            | `undefined` | When `true`, renders the loading indicator instead of the calendar body. |
+| `customDays`       | `number`             | `3`         | Number of days shown in the `customDays` view.                           |
+| `weekStartsOn`     | `number \| "locale"` | `0`         | First day of the week (0 = Sunday, 1 = Monday, …) or `"locale"`.         |
+| `weekEndsOn`       | `number`             | `6`         | Last day of the week.                                                    |
+| `pastYearLength`   | `number`             | `5`         | Number of past years in the year dropdown.                               |
+| `futureYearLength` | `number`             | `5`         | Number of future years in the year dropdown.                             |
 
 ### Views & Layout
 
@@ -278,12 +310,12 @@ All accessibility features are built-in and require no extra configuration.
 
 ### Time & Formatting
 
-| Prop                      | Type       | Default  | Description                                            |
-| ------------------------- | ---------- | -------- | ------------------------------------------------------ |
-| `is12Hour`                | `boolean`  | `false`  | Display time in 12-hour AM/PM format.                  |
-| `dayType`                 | `EDayType` | `"half"` | Day name format: `"full"` (Monday) or `"half"` (Mon).  |
-| `showCurrentTime`         | `boolean`  | `false`  | Show a line at the current time in Day and Week views. |
-| `autoScrollToCurrentTime` | `boolean`  | `false`  | Scroll to the current time line on initial load.       |
+| Prop                      | Type                  | Default  | Description                                                               |
+| ------------------------- | --------------------- | -------- | ------------------------------------------------------------------------- |
+| `is12Hour`                | `boolean \| "locale"` | `false`  | Display time in 12-hour AM/PM format, or `"locale"` to follow the locale. |
+| `dayType`                 | `EDayType`            | `"half"` | Day name format: `"full"` (Monday) or `"half"` (Mon).                     |
+| `showCurrentTime`         | `boolean`             | `false`  | Show a line at the current time in Day and Week views.                    |
+| `autoScrollToCurrentTime` | `boolean`             | `false`  | Scroll to the current time line on initial load.                          |
 
 ### Appearance
 

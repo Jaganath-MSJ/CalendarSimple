@@ -1,6 +1,7 @@
 import React, { useMemo, memo, useEffect, CSSProperties, useRef } from "react";
 import cx from "classnames";
 import {
+  CalendarEvent,
   CalendarProps,
   CalendarContentProps,
   ECalendarViewType,
@@ -173,6 +174,17 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
   const resolvedScheme = useColorScheme(allProps.colorScheme);
   const configProps = { ...allProps };
   delete configProps.children;
+  // With "locale", the week ends the day before it starts unless the caller
+  // passed weekEndsOn, so drop the injected default and let the provider resolve.
+  const deriveWeekEnd =
+    props.weekStartsOn === "locale" && props.weekEndsOn === undefined;
+  if (deriveWeekEnd) delete configProps.weekEndsOn;
+  // Raw "locale" values must not reach CalendarContent: they would override
+  // the resolved ones from context in useCalendarProps.
+  const contentProps = { ...allProps };
+  delete contentProps.weekStartsOn;
+  delete contentProps.is12Hour;
+  if (deriveWeekEnd) delete contentProps.weekEndsOn;
   const config = useShallowStable({
     ...configProps,
     width,
@@ -224,7 +236,7 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
             allProps.children
           ) : (
             <CalendarContent
-              {...(allProps as unknown as CalendarContentProps)}
+              {...(contentProps as unknown as CalendarContentProps)}
               width={width}
               height={height}
               events={validEvents}
@@ -236,9 +248,15 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
   );
 }
 
-const MemoizedCalendar = memo(
-  Calendar,
-) as unknown as React.NamedExoticComponent<CalendarProps> & {
+/**
+ * `<Calendar>` component type. Generic over the event shape so
+ * `<Calendar<MyEvent> …>` types `events` and the event callbacks; `memo`
+ * drops generics, hence the explicit call signature.
+ */
+export type CalendarComponent = (<TEvent extends CalendarEvent = CalendarEvent>(
+  props: CalendarProps<TEvent>,
+) => React.ReactElement | null) & {
+  displayName?: string;
   Header: typeof Header;
   View: typeof View;
   DayView: typeof DayView;
@@ -247,6 +265,8 @@ const MemoizedCalendar = memo(
   ScheduleView: typeof ScheduleView;
   CustomDaysView: typeof CustomDaysView;
 };
+
+const MemoizedCalendar = memo(Calendar) as unknown as CalendarComponent;
 
 MemoizedCalendar.Header = Header;
 MemoizedCalendar.View = View;

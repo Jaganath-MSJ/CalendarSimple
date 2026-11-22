@@ -188,6 +188,8 @@ function MonthEventItem({
                   const eventBgColor =
                     item.style?.backgroundColor ||
                     LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
+                  // Text contrast is computed from the hex fallback; overriding
+                  // --cal-event-default does not recompute it.
                   const textColor = getContrastColor(String(eventBgColor));
 
                   // If cellWidth is 0, we can't calculate a proper spanning width.
@@ -208,7 +210,7 @@ function MonthEventItem({
                       id={item.id}
                       data-testid={`${testId}-${id}-month-event-item`}
                       style={{
-                        backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                        backgroundColor: "var(--cal-event-default)",
                         color: textColor,
                         ...stripLayoutStyle(item.style),
                         width: calculatedWidth,

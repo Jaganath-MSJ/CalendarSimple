@@ -9,8 +9,15 @@ import React, {
   useMemo,
   Dispatch,
 } from "react";
+import { resolveIs12Hour, resolveWeekStart } from "../utils/localeDefaults";
 import { dateFn, DateType, getNavigatedDate } from "../utils";
-import { ECalendarViewType, CalendarProps, CalendarMessages } from "../types";
+import {
+  ECalendarViewType,
+  CalendarEvent,
+  CalendarConfig,
+  CalendarProps,
+  CalendarMessages,
+} from "../types";
 import { CALENDAR_ACTIONS, resolveMessages } from "../constants";
 import useColorScheme from "../hooks/useColorScheme";
 import { useDateRangeNotifier } from "../hooks/useDateRangeNotifier";
@@ -49,8 +56,12 @@ export type CalendarAction =
 
 /**
  * Shape of the value exposed by `CalendarContext`.
+ *
+ * @typeParam TEvent - Event shape of `config.events` (see `useCalendar<TEvent>()`).
  */
-export interface CalendarContextValue {
+export interface CalendarContextValue<
+  TEvent extends CalendarEvent = CalendarEvent,
+> {
   /** Current reducer state (selected date, view, customDays). */
   state: CalendarState;
   /** Dispatch function for sending actions to the reducer. */
@@ -58,7 +69,7 @@ export interface CalendarContextValue {
   /** `data-testid` forwarded from the root `<Calendar>` prop. */
   testId?: string;
   /** Static calendar configuration props (everything except `children`, `selectedDate`, and `view`). */
-  config: Omit<CalendarProps, "children" | "selectedDate" | "view">;
+  config: CalendarConfig<TEvent>;
   /** Built-in UI strings with `config.localeMessages` overrides applied over the English defaults. */
   messages: CalendarMessages;
   /** Resolved color scheme ("light" or "dark") for portaled UI such as Popover. */
@@ -149,7 +160,7 @@ export function CalendarProvider({
   initialView,
   initialCustomDays,
   testId,
-  config,
+  config: rawConfigProp,
   bodySize: bodySizeProp,
 }: CalendarProviderProps) {
   const [state, dispatch] = useReducer(calendarReducer, {
@@ -159,13 +170,37 @@ export function CalendarProvider({
     navigationId: 0,
   });
 
-  useDateRangeNotifier(state, config ?? EMPTY_CONFIG);
+  const rawConfig = rawConfigProp ?? EMPTY_CONFIG;
+  const localeTag = rawConfig.locale ?? "en";
+  const weekStartsOn = useMemo(
+    () => resolveWeekStart(rawConfig.weekStartsOn ?? 0, localeTag),
+    [rawConfig.weekStartsOn, localeTag],
+  );
+  const is12Hour = useMemo(
+    () => resolveIs12Hour(rawConfig.is12Hour ?? false, localeTag),
+    [rawConfig.is12Hour, localeTag],
+  );
+  // Resolve "locale" once here so context consumers only ever see concrete values.
+  const config = useMemo<CalendarConfig>(
+    () => ({
+      ...rawConfig,
+      weekStartsOn:
+        rawConfig.weekStartsOn === undefined ? undefined : weekStartsOn,
+      weekEndsOn:
+        rawConfig.weekEndsOn ??
+        (rawConfig.weekStartsOn === "locale" ? (weekStartsOn + 6) % 7 : 6),
+      is12Hour: rawConfig.is12Hour === undefined ? undefined : is12Hour,
+    }),
+    [rawConfig, weekStartsOn, is12Hour],
+  );
 
-  const resolvedScheme = useColorScheme(config?.colorScheme);
+  useDateRangeNotifier(state, config);
+
+  const resolvedScheme = useColorScheme(config.colorScheme);
 
   // Direct provider use (no measured `bodySize`): derive from numeric config size.
-  const configWidth = typeof config?.width === "number" ? config.width : 0;
-  const configHeight = typeof config?.height === "number" ? config.height : 0;
+  const configWidth = typeof config.width === "number" ? config.width : 0;
+  const configHeight = typeof config.height === "number" ? config.height : 0;
   const derivedBodySize = useMemo(
     () =>
       configWidth || configHeight
@@ -176,8 +211,8 @@ export function CalendarProvider({
   const bodySize = bodySizeProp ?? derivedBodySize;
 
   const messages = useMemo(
-    () => resolveMessages(config?.localeMessages),
-    [config?.localeMessages],
+    () => resolveMessages(config.localeMessages),
+    [config.localeMessages],
   );
 
   const value = useMemo(
@@ -185,7 +220,7 @@ export function CalendarProvider({
       state,
       dispatch,
       testId,
-      config: config || {},
+      config,
       messages,
       colorScheme: resolvedScheme,
       bodySize,
@@ -204,12 +239,18 @@ export function CalendarProvider({
  * Consumes `CalendarContext` and returns the current state, dispatch, and config.
  * Must be called inside a `CalendarProvider` — throws if the context is missing.
  *
+ * Pass your event type to narrow `config.events` and the event callbacks:
+ * `useCalendar<MyEvent>()`. The type argument is not checked at runtime.
+ *
  * @returns The current `CalendarContextValue`.
  */
-export function useCalendar() {
+export function useCalendar<
+  TEvent extends CalendarEvent = CalendarEvent,
+>(): CalendarContextValue<TEvent> {
   const context = useContext(CalendarContext);
   if (context === undefined) {
     throw new Error("useCalendar must be used within a CalendarProvider");
   }
-  return context;
+  // The context stores config widened to CalendarEvent; narrow it for the caller.
+  return context as unknown as CalendarContextValue<TEvent>;
 }

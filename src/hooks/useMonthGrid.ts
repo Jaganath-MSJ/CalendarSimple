@@ -11,7 +11,7 @@
 
 import { useMemo } from "react";
 import { DateTime } from "luxon";
-import calendarize from "calendarize";
+import { buildMonthMatrix } from "../utils/monthMatrix";
 import {
   checkIsToday,
   DateType,
@@ -111,7 +111,7 @@ export default function useMonthGrid(
       ((weekEndsOn - weekStartsOn + TIME_CONSTANTS.DAYS_IN_WEEK) %
         TIME_CONSTANTS.DAYS_IN_WEEK) +
       1;
-    const calendarArray = calendarize(selectedDate.toJSDate(), weekStartsOn);
+    const calendarArray = buildMonthMatrix(selectedDate, weekStartsOn);
 
     return calendarArray.map((week: number[], weekIndex: number) => {
       const slicedWeek = week.slice(0, length);

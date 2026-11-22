@@ -154,6 +154,8 @@ export default function AllDayBanner({
             const eventBgColor =
               event.style?.backgroundColor ||
               LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
+            // Text contrast is computed from the hex fallback; overriding
+            // --cal-event-default does not recompute it.
             const textColor = getContrastColor(String(eventBgColor));
 
             return (
@@ -166,7 +168,7 @@ export default function AllDayBanner({
                   [styles.clippedRight]: isClippedRight,
                 })}
                 style={{
-                  backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                  backgroundColor: "var(--cal-event-default)",
                   color: textColor,
                   ...stripLayoutStyle(event.style),
                   top: `${topPx}px`,

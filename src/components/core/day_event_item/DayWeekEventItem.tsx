@@ -40,6 +40,8 @@ export function DayWeekEventItem({
 
   const eventBgColor =
     item.event.style?.backgroundColor || LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
+  // Text contrast is computed from the hex fallback; overriding
+  // --cal-event-default does not recompute it.
   const textColor = getContrastColor(String(eventBgColor));
 
   return (
@@ -53,7 +55,7 @@ export function DayWeekEventItem({
       data-testid={`${testId}-${item.event.id}-day-event-item`}
       style={
         {
-          backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+          backgroundColor: "var(--cal-event-default)",
           color: textColor,
           ...stripLayoutStyle(item.event.style),
           top: `${item.top}px`,

@@ -16,7 +16,7 @@ Using React Native? See [calendar-simple-native](https://www.npmjs.com/package/c
 - **🗓️ Multiple Views** — Month, Week, Day, Schedule, and Custom Days views. No Prev/Next in Schedule view; Today and the month/year pickers scroll the full list to the chosen date.
 - **✨ Event Handling** — Display and manage events with custom styling and arbitrary metadata.
 - **📱 Responsive** — Built-in CSS breakpoints at 768px (tablet) and 480px (phone).
-- **🎨 Theming & Customization** — Override colors via `theme` and inject CSS classes via `classNames`.
+- **🎨 Theming & Customization** — Override colors via `theme` and inject CSS classes via `classNames`. The selected day is outlined; see the dark mode section for overridable palette tokens.
 - **🌙 Dark Mode & Color Schemes** — Built-in light/dark palettes with OS auto-detection.
 - **🌐 RTL Support** — Full right-to-left layout with auto-detection for Arabic, Hebrew, Farsi, and more.
 - **🧩 Custom Renderers** — Replace events, headers, and grid cells with your own React components.
@@ -215,6 +215,25 @@ Functions: `nDaysView(n)`, `more(n)`, `moreAllDay(n)`, `moreEventsOn(n, date)`, 
 
 Keys you leave out (or set to `undefined`) use the English default; an empty string is used as given.
 
+### TypeScript: typed events
+
+`Calendar` is generic over your event shape, so callbacks and renderers receive your type instead of `CalendarEvent`:
+
+```tsx
+import Calendar, { useCalendar, type CalendarEvent } from "calendar-simple";
+
+interface MyEvent extends CalendarEvent {
+  room: number;
+}
+
+<Calendar<MyEvent> events={events} onEventClick={(e) => e.room} />;
+
+// Inside compound children:
+const { config } = useCalendar<MyEvent>(); // config.events: MyEvent[] | undefined
+```
+
+`TEvent` is set only by an explicit type argument (`<Calendar<MyEvent>>`, `useCalendar<MyEvent>()`); without one it stays `CalendarEvent`, even when `events` has a narrower type. The type definitions need TypeScript ≥ 5.4 (they use `NoInfer`). It types `events`, `onEventClick`, `onMoreClick`, `renderEvent`, `enrichedEventsByDate` and the `sortedMonthView` comparator; it is not checked at runtime.
+
 ## API Reference
 
 > For full prop descriptions and usage examples, see [FEATURES.md](./FEATURES.md).
@@ -231,7 +250,7 @@ Keys you leave out (or set to `undefined`) use the English default; an empty str
 | `renderLoading`           | `() => ReactNode`                                             | `undefined`         |
 | `selectable`              | `boolean`                                                     | `false`             |
 | `creatable`               | `boolean`                                                     | `false`             |
-| `is12Hour`                | `boolean`                                                     | `false`             |
+| `is12Hour`                | `boolean \| "locale"`                                         | `false`             |
 | `colorScheme`             | `'light' \| 'dark' \| 'auto'`                                 | `'auto'`            |
 | `direction`               | `'ltr' \| 'rtl'`                                              | `` `auto-detect` `` |
 | `locale`                  | `string`                                                      | `'en'`              |
@@ -241,7 +260,7 @@ Keys you leave out (or set to `undefined`) use the English default; an empty str
 | `width`                   | `number \| string`                                            | `` `auto` ``        |
 | `height`                  | `number \| string`                                            | `` `auto` ``        |
 | `dayType`                 | `EDayType`                                                    | `"half"`            |
-| `weekStartsOn`            | `number`                                                      | `0`                 |
+| `weekStartsOn`            | `number \| "locale"`                                          | `0`                 |
 | `weekEndsOn`              | `number`                                                      | `6`                 |
 | `customDays`              | `number`                                                      | `3`                 |
 | `showAdjacentMonths`      | `boolean`                                                     | `true`              |
@@ -396,7 +415,7 @@ interface CalendarClassNames {
 <Calendar colorScheme="light" />
 ```
 
-Override individual CSS custom properties for fine-grained control. Light is the `:root` default; dark values live under `[data-color-scheme="dark"]`:
+Override individual CSS custom properties for fine-grained control. Override per scheme on the calendar root (`[data-color-scheme="light"]` / `[data-color-scheme="dark"]`, or scope with `classNames.root`); a `:root`-only override is ignored in dark mode. With `weekStartsOn="locale"` the week ends on the day before it unless you pass `weekEndsOn`. With server rendering, Intl data may differ between server and client; pass explicit values if you need identical output. Palette tokens `--cal-on-primary`, `--cal-event-default` and `--cal-surface-raised` follow the same pattern:
 
 ```css
 [data-color-scheme="dark"] {
