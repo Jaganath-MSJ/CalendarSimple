@@ -14,6 +14,8 @@ export type {
   CalendarClassNames,
   RenderHeaderProps,
   RenderDateCellProps,
+  EventDropInfo,
+  EventResizeInfo,
 } from "./types";
 export type { CalendarComponent } from "./Calendar";
 export type { HeaderProps } from "./components/layout/Header";

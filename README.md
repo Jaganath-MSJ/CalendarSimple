@@ -16,6 +16,7 @@ Using React Native? See [calendar-simple-native](https://www.npmjs.com/package/c
 - **🗓️ Multiple Views** — Month, Week, Day, Schedule, and Custom Days views. No Prev/Next in Schedule view; Today and the month/year pickers scroll the full list to the chosen date.
 - **✨ Event Handling** — Display and manage events with custom styling and arbitrary metadata.
 - **🔁 Recurring Events** — RFC 5545 `rrule` (daily, weekly, monthly, yearly) with `exdates`, expanded for the visible range.
+- **🖱️ Drag & Resize** — Move events by pointer or keyboard in every view but Schedule, and resize timed events in time grids.
 - **📱 Responsive** — Built-in CSS breakpoints at 768px (tablet) and 480px (phone).
 - **🎨 Theming & Customization** — Override colors via `theme` and inject CSS classes via `classNames`. The selected day is outlined; see the dark mode section for overridable palette tokens.
 - **🌙 Dark Mode & Color Schemes** — Built-in light/dark palettes with OS auto-detection.
@@ -248,6 +249,62 @@ const events = [
 
 **Upgrading:** `rrule`, `exdates`, `recurringEventId` and `occurrenceDate` on events are now interpreted by the calendar. If you already expand series yourself, either remove `rrule` from the occurrences you pass, or keep `recurringEventId` on them; the calendar leaves events with `recurringEventId` alone. A non-string `rrule` is ignored at runtime, but the TypeScript types now expect a string.
 
+### Drag & resize
+
+Turn on `draggable` (and `resizable` for time grids) and handle the callbacks. **The calendar never changes `events` itself:** apply the new times in your state and pass the updated `events` back.
+
+```tsx
+// toIso(date, allDay): your own Date → "yyyy-MM-dd" or "yyyy-MM-ddTHH:mm:ss"
+const [events, setEvents] = useState(initialEvents);
+
+<Calendar
+  events={events}
+  draggable
+  resizable
+  onEventDrop={({ event, start, end, allDay }) =>
+    setEvents((prev) =>
+      prev.map((e) =>
+        e.id === event.id
+          ? {
+              ...e,
+              startDate: toIso(start, allDay),
+              endDate: toIso(end, allDay),
+            }
+          : e,
+      ),
+    )
+  }
+  onEventResize={({ event, start, end }) =>
+    setEvents((prev) =>
+      prev.map((e) =>
+        e.id === event.id
+          ? { ...e, startDate: toIso(start, false), endDate: toIso(end, false) }
+          : e,
+      ),
+    )
+  }
+/>;
+```
+
+| Prop                      | Type                              | Default     | Description                                                                                       |
+| ------------------------- | --------------------------------- | ----------- | ------------------------------------------------------------------------------------------------- |
+| `draggable`               | `boolean \| (event) => boolean`   | `undefined` | Events that can be moved. Needs `onEventDrop`.                                                    |
+| `onEventDrop`             | `(info: EventDropInfo) => void`   | `undefined` | `{ event, start: Date, end: Date, allDay, view }` after a move.                                   |
+| `dragSnapMinutes`         | `number`                          | `15`        | Snap for moves in Day, Week and Custom Days.                                                      |
+| `resizable`               | `boolean \| (event) => boolean`   | `undefined` | Timed events that can be resized from the top or bottom edge (time grids). Needs `onEventResize`. |
+| `onEventResize`           | `(info: EventResizeInfo) => void` | `undefined` | `{ event, start: Date, end: Date, edge: "top" \| "bottom", view }` after a resize.                |
+| `resizeSnapMinutes`       | `number`                          | `15`        | Snap for resize edges.                                                                            |
+| `minEventDurationMinutes` | `number`                          | `15`        | Shortest length a resize can leave.                                                               |
+
+- **Where** — Day, Week and Custom Days: x moves days, y moves time (snapped). Month: x moves days, y moves whole weeks; times are kept. All-day row: x moves days. Schedule has no drag.
+- **Pointer** — Mouse and pen start after a 4 px move, touch after a 300 ms hold. A press without a move is still a click (`onEventClick`); the click after a drag is not sent. Escape (or a cancelled pointer) puts the event back without a callback.
+- **Bounds** — An event within one day stays inside `minHour`–`maxHour` when moved or resized, and a resize never leaves less than `minEventDurationMinutes`. Events that run past midnight are moved as they are. Resize edges appear on hover/focus on the first and last day of an event, and not on items shorter than 24 px (use Alt+Shift+↑/↓ there).
+- **Wall clock** — Times move by the clock shown in the grid, so on a daylight-saving day 10:00 moved one hour lands on 11:00.
+- **RTL** — On screen directions are mirrored: dragging right (or Alt+→) moves to the previous day.
+- **Keyboard** — On a focused event: Alt+↑/↓ moves by `dragSnapMinutes` (in Month, by a week), Alt+←/→ moves a day, Alt+Shift+↑/↓ moves the end by `resizeSnapMinutes`. The keys are listed in `aria-keyshortcuts`.
+- **Recurring events** — You receive the occurrence (`recurringEventId` set). Decide in your handler whether to move the series or just that day (for example add an `exdate` and a one-off event).
+- **Not supported** — Turning a timed event into an all-day one (or back), and dragging in Schedule.
+
 ### TypeScript: typed events
 
 `Calendar` is generic over your event shape, so callbacks and renderers receive your type instead of `CalendarEvent`:
@@ -316,6 +373,13 @@ const { config } = useCalendar<MyEvent>(); // config.events: MyEvent[] | undefin
 | `onViewChange`            | `(view: ECalendarViewType) => void`                           | `undefined`         |
 | `onDateRangeChange`       | `(start: Date, end: Date, view: ECalendarViewType) => void`   | `undefined`         |
 | `onSlotClick`             | `(startDate: Date, endDate: Date) => void`                    | `undefined`         |
+| `draggable`               | `boolean \| (event) => boolean`                               | `undefined`         |
+| `onEventDrop`             | `(info: EventDropInfo) => void`                               | `undefined`         |
+| `dragSnapMinutes`         | `number`                                                      | `15`                |
+| `resizable`               | `boolean \| (event) => boolean`                               | `undefined`         |
+| `onEventResize`           | `(info: EventResizeInfo) => void`                             | `undefined`         |
+| `resizeSnapMinutes`       | `number`                                                      | `15`                |
+| `minEventDurationMinutes` | `number`                                                      | `15`                |
 | `renderEvent`             | `(event: CalendarEvent) => ReactNode`                         | `undefined`         |
 | `renderHeader`            | `(props: RenderHeaderProps) => ReactNode`                     | `undefined`         |
 | `renderHourCell`          | `(date: Date) => ReactNode`                                   | `undefined`         |

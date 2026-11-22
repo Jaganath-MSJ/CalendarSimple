@@ -20,6 +20,7 @@ import Popover from "../../ui/popover/Popover";
 import { LAYOUT_CONSTANTS, DATE_FORMATS } from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
 import useMessages from "../../../hooks/useMessages";
+import useDayMove, { measureMonthCell } from "../../../hooks/useDayMove";
 
 interface MonthEventItemProps extends Pick<
   CalendarContentProps,
@@ -202,13 +203,11 @@ function MonthEventItem({
                   const id = item.id || `${item.startDate}-${index}`;
 
                   return (
-                    <div
+                    <MonthChip
                       key={id}
-                      role="button"
-                      tabIndex={0}
+                      item={item}
+                      testIdValue={`${testId}-${id}-month-event-item`}
                       className={cx(styles.eventItem, classNames?.event)}
-                      id={item.id}
-                      data-testid={`${testId}-${id}-month-event-item`}
                       style={{
                         backgroundColor: "var(--cal-event-default)",
                         color: textColor,
@@ -216,17 +215,11 @@ function MonthEventItem({
                         width: calculatedWidth,
                       }}
                       title={tooltipText}
-                      aria-label={`${item.title || messages.noTitle}, ${tooltipText}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEventClick?.(item);
-                      }}
-                      onKeyDown={handleKeyboardActivation(() =>
-                        onEventClick?.(item),
-                      )}
+                      ariaLabel={`${item.title || messages.noTitle}, ${tooltipText}`}
+                      onEventClick={onEventClick}
                     >
                       {renderEvent ? renderEvent(item) : item.title}
-                    </div>
+                    </MonthChip>
                   );
                 })}
                 {hiddenEventsCount > 0 && (
@@ -279,6 +272,57 @@ function MonthEventItem({
         )}
       </div>
     </td>
+  );
+}
+
+interface MonthChipProps extends Pick<CalendarContentProps, "onEventClick"> {
+  item: EventListType;
+  testIdValue: string;
+  className: string;
+  style: React.CSSProperties;
+  title: string;
+  ariaLabel: string;
+  children: React.ReactNode;
+}
+
+/** One event chip in a month cell; draggable to another day or week. */
+function MonthChip({
+  item,
+  testIdValue,
+  className,
+  style,
+  title,
+  ariaLabel,
+  onEventClick,
+  children,
+}: MonthChipProps) {
+  const move = useDayMove(item, { axis: "both", measure: measureMonthCell });
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className={cx(className, {
+        [styles.draggable]: move.canMove,
+        [styles.dragging]: move.dragging,
+      })}
+      id={item.id}
+      data-testid={testIdValue}
+      style={{ ...style, ...move.style }}
+      title={title}
+      aria-label={ariaLabel}
+      aria-keyshortcuts={move.keyShortcuts}
+      {...move.handlers}
+      onClick={(e) => {
+        e.stopPropagation();
+        onEventClick?.(item);
+      }}
+      onKeyDown={(e) => {
+        if (move.handleKey(e)) return;
+        handleKeyboardActivation(() => onEventClick?.(item))(e);
+      }}
+    >
+      {children}
+    </div>
   );
 }
 

@@ -214,6 +214,26 @@ Two distinct loading modes apply depending on whether events are present:
 - **Today re-scrolls**: Scroll the list away, then click Today while the selected date is already today; the list scrolls back to today's group (or the next group with events).
 - **Month pick**: Picking a month scrolls to the first group on or after it (the last group if none).
 
+### 1.24 Drag & Resize (`draggable`, `resizable`)
+
+Use the "Drag and Resize" stories (they apply each change to `events` and print it above the calendar).
+
+- **Move (mouse)**: In Week, drag a 09:00–09:30 event down by half an hour; it lands at 09:30–10:00 and the log shows the new times. The preview snaps to 15-minute steps while dragging.
+- **Cross-day**: Drag an event one column right; it keeps its time on the next day.
+- **Touch**: On a touch device, a quick swipe over an event scrolls the grid; press and hold ~300 ms, then drag, to move it.
+- **Click vs drag**: Click an event without moving; `onEventClick` fires and nothing moves. After a drag, releasing does not open the event.
+- **Escape**: Start a drag, press Escape before releasing; the event snaps back and nothing is logged.
+- **Bounds**: With `minHour={8}` / `maxHour={18}`, drag a 16:00–17:00 event far down; it stops at 17:00–18:00.
+- **Resize**: Hover an event in Week; drag its bottom edge down 30 min (end +30) and its top edge up 1 h (start −1 h). Dragging the bottom above the start leaves 15 min (`minEventDurationMinutes`).
+- **RTL**: In the RTL story, dragging right moves to the previous day; Alt+→ does the same.
+- **DST**: With the system zone `America/New_York`, on 8 Mar 2026 move a 10:00 event down one hour; it lands at 11:00.
+- **Keyboard**: Tab to an event; Alt+↓ moves 15 min later, Alt+→ one day later, Alt+Shift+↓ ends 15 min later. Screen readers announce the shortcuts (`aria-keyshortcuts`).
+- **Month**: Drag a chip one cell right (+1 day) and one row down (+7 days); a timed event keeps its time. Alt+↓ moves a week. "+N more" and popover items do not drag.
+- **All-day row**: In Week, drag an all-day chip one column right (+1 day); vertical movement does nothing.
+- **Predicate**: In "Per Event Predicate", the locked event does not drag or show resize edges; the others do.
+- **Recurring**: In "Recurring Occurrence", move one occurrence; the log names the series and only that day moves.
+- **Inert without callbacks**: With `draggable` but no `onEventDrop` (or `resizable` without `onEventResize`), events keep the normal pointer, do not move and show no resize edges.
+
 > Typed events (`Calendar<TEvent>`, `useCalendar<TEvent>()`) are compile-time only; they are covered by `src/types/generics.test-d.tsx` (checked by `npm run lint`).
 
 ---

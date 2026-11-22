@@ -63,6 +63,8 @@ export const KitchenSink: Story = {
             onDateRangeChange={(s, e, v) =>
               console.log("onDateRangeChange", s, e, v)
             }
+            onEventDrop={(info) => console.log("onEventDrop", info)}
+            onEventResize={(info) => console.log("onEventResize", info)}
           />
         </div>
 

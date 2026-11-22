@@ -43,6 +43,8 @@ interface PanelState {
   futureYearLength: number;
   selectable: boolean;
   creatable: boolean;
+  draggable: boolean;
+  resizable: boolean;
   maxEvents: number | undefined;
   colorScheme: ColorScheme;
   themeDefaultColor: string;
@@ -119,6 +121,8 @@ const DEFAULTS: PanelState = {
   futureYearLength: 5,
   selectable: false,
   creatable: false,
+  draggable: false,
+  resizable: false,
   maxEvents: undefined,
   colorScheme: "auto",
   themeDefaultColor: "",
@@ -246,6 +250,8 @@ function toCalendarProps(s: PanelState): Partial<CalendarProps> {
     futureYearLength: s.futureYearLength,
     selectable: s.selectable,
     creatable: s.creatable,
+    draggable: s.draggable,
+    resizable: s.resizable,
     maxEvents: s.maxEvents,
     colorScheme: s.colorScheme,
     theme: Object.keys(theme).length > 0 ? theme : undefined,
@@ -377,7 +383,13 @@ const SECTION_KEYS: Record<SectionId, (keyof PanelState)[]> = {
     "eventOverlapOffset",
   ],
   yearPicker: ["pastYearLength", "futureYearLength"],
-  interaction: ["selectable", "creatable", "maxEvents"],
+  interaction: [
+    "selectable",
+    "creatable",
+    "draggable",
+    "resizable",
+    "maxEvents",
+  ],
   appearance: [
     "colorScheme",
     "themeDefaultColor",
@@ -864,6 +876,18 @@ export function ControlPanel({
             <Toggle
               checked={s.selectable}
               onChange={(v) => patch("selectable", v)}
+            />
+          </Row>
+          <Row label="Draggable">
+            <Toggle
+              checked={s.draggable}
+              onChange={(v) => patch("draggable", v)}
+            />
+          </Row>
+          <Row label="Resizable">
+            <Toggle
+              checked={s.resizable}
+              onChange={(v) => patch("resizable", v)}
             />
           </Row>
           <Row label="Creatable">

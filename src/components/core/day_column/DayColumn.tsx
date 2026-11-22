@@ -94,6 +94,7 @@ function DayColumn({
         <DayWeekEventItem
           key={item.event.id || index}
           item={item}
+          day={date}
           onEventClick={onEventClick}
           is12Hour={is12Hour}
           classNames={classNames}

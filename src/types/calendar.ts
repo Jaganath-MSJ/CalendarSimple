@@ -169,6 +169,22 @@ export interface CalendarProps<TEvent extends CalendarEvent = CalendarEvent> {
   /** CSS height of the calendar container (number = px, string = any CSS value). */
   height?: number | string;
 
+  // --- Drag & resize ---
+  /** Let events be dragged to a new time or day (Day, Week, Custom Days, Month, all-day row). `true` for all events or a predicate per event. Needs `onEventDrop`. */
+  draggable?: boolean | ((event: NoInferCompat<TEvent>) => boolean);
+  /** Called when an event is dropped at a new time or day. The calendar does not move the event itself: update `events`. */
+  onEventDrop?: (info: EventDropInfo<NoInferCompat<TEvent>>) => void;
+  /** Minutes a timed event snaps to while dragged in a time grid. Defaults to `15`. */
+  dragSnapMinutes?: number;
+  /** Let timed events be resized from their top or bottom edge in time grids. `true` for all events or a predicate per event. Needs `onEventResize`. */
+  resizable?: boolean | ((event: NoInferCompat<TEvent>) => boolean);
+  /** Called when a timed event is resized. The calendar does not change the event itself: update `events`. */
+  onEventResize?: (info: EventResizeInfo<NoInferCompat<TEvent>>) => void;
+  /** Minutes a resize edge snaps to. Defaults to `15`. */
+  resizeSnapMinutes?: number;
+  /** Shortest length a resize can leave, in minutes. Defaults to `15`. */
+  minEventDurationMinutes?: number;
+
   // --- Event Callbacks ---
   /** Called when a date cell is clicked. */
   onDateClick?: (date: Date) => void;
@@ -352,6 +368,9 @@ export interface CalendarContentProps<
   | "sortedMonthView"
   | "testId"
   | "locale"
+  | "dragSnapMinutes"
+  | "resizeSnapMinutes"
+  | "minEventDurationMinutes"
   | "localeMessages"
 > {
   /** Resolved first day of the week (0–6); never `"locale"`. */
@@ -377,4 +396,32 @@ export interface MonthListType {
   label: string;
   /** 0-based month index (0 = January … 11 = December). */
   value: number;
+}
+
+/** What `onEventDrop` receives when an event is dropped at a new time or day. */
+export interface EventDropInfo<TEvent extends CalendarEvent = CalendarEvent> {
+  /** The event as passed in `events` (for a recurring event, the occurrence). */
+  event: TEvent;
+  /** New start. */
+  start: Date;
+  /** New end (equals `start` when the event had no end). */
+  end: Date;
+  /** Whether the event is an all-day (date-only) event. */
+  allDay: boolean;
+  /** View the drop happened in. */
+  view: ECalendarViewType;
+}
+
+/** What `onEventResize` receives when a timed event is resized. */
+export interface EventResizeInfo<TEvent extends CalendarEvent = CalendarEvent> {
+  /** The event as passed in `events` (for a recurring event, the occurrence). */
+  event: TEvent;
+  /** New start. */
+  start: Date;
+  /** New end. */
+  end: Date;
+  /** Edge that was dragged. */
+  edge: "top" | "bottom";
+  /** View the resize happened in. */
+  view: ECalendarViewType;
 }

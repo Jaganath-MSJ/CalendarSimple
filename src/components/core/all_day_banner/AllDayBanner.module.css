@@ -184,3 +184,15 @@
   background-color: var(--bg-hover);
   color: var(--text-primary);
 }
+
+.draggable {
+  cursor: grab;
+}
+
+.dragging {
+  cursor: grabbing;
+  opacity: 0.85;
+  z-index: 15;
+  user-select: none;
+  touch-action: none;
+}

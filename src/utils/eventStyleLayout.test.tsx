@@ -55,7 +55,7 @@ describe("event.style cannot override layout", () => {
     expect(el.style.backgroundColor).toBe("red");
   });
 
-  it("banner chip keeps percentage left", () => {
+  it("banner chip keeps percentage inline start", () => {
     renderView(ECalendarViewType.week, {
       id: "b",
       title: "T",
@@ -63,7 +63,8 @@ describe("event.style cannot override layout", () => {
       style: { ...hostile },
     });
     const el = screen.getByTestId("calendar-b-all-day-event");
-    expect(el.style.left).toContain("%");
+    expect(el.style.insetInlineStart).toContain("%");
+    expect(el.style.left).toBe("");
     expect(el.style.backgroundColor).toBe("red");
   });
 

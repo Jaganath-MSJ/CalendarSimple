@@ -2,7 +2,7 @@
   {
     "name": "ESM bundle (includes bundled luxon, classnames)",
     "path": "dist/index.es.js",
-    "limit": "45 kB",
+    "limit": "52 kB",
     "gzip": true
   },
   {

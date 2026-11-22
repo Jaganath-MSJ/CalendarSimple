@@ -11,3 +11,4 @@ export * from "./contrast";
 export * from "./weeks";
 export * from "./navigation";
 export * from "./localeDefaults";
+export * from "./drag";

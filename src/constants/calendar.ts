@@ -56,6 +56,9 @@ export const defaultCalendarProps = {
   sortedMonthView: true,
   testId: "calendar",
   isLoading: false,
+  dragSnapMinutes: 15,
+  resizeSnapMinutes: 15,
+  minEventDurationMinutes: 15,
 };
 
 /**

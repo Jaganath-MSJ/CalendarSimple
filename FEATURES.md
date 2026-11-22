@@ -9,6 +9,7 @@ A comprehensive reference for all features in the `calendar-simple` library.
 - [Multiple Views](#multiple-views)
 - [Event Handling](#event-handling)
 - [Recurring Events](#recurring-events)
+- [Drag & Resize](#drag--resize)
 - [Theming & Customization](#theming--customization)
 - [Time Formatting](#time-formatting)
 - [Localization](#localization)
@@ -85,6 +86,64 @@ const events = [
 - **Weekly intervals** — Weekly `INTERVAL > 1` grouping follows the rule's `WKST` (default Monday, RFC 5545), not the calendar's `weekStartsOn`.
 - **Not expanded with `enableEnrichedEvents`** — pre-enriched events are used as given.
 - Events without `rrule` are unchanged.
+
+---
+
+## Drag & Resize
+
+Turn on `draggable` (and `resizable` for time grids) and handle the callbacks. **The calendar never changes `events` itself:** apply the new times in your state and pass the updated `events` back.
+
+```tsx
+// toIso(date, allDay): your own Date → "yyyy-MM-dd" or "yyyy-MM-ddTHH:mm:ss"
+const [events, setEvents] = useState(initialEvents);
+
+<Calendar
+  events={events}
+  draggable
+  resizable
+  onEventDrop={({ event, start, end, allDay }) =>
+    setEvents((prev) =>
+      prev.map((e) =>
+        e.id === event.id
+          ? {
+              ...e,
+              startDate: toIso(start, allDay),
+              endDate: toIso(end, allDay),
+            }
+          : e,
+      ),
+    )
+  }
+  onEventResize={({ event, start, end }) =>
+    setEvents((prev) =>
+      prev.map((e) =>
+        e.id === event.id
+          ? { ...e, startDate: toIso(start, false), endDate: toIso(end, false) }
+          : e,
+      ),
+    )
+  }
+/>;
+```
+
+| Prop                      | Type                              | Default     | Description                                                                                       |
+| ------------------------- | --------------------------------- | ----------- | ------------------------------------------------------------------------------------------------- |
+| `draggable`               | `boolean \| (event) => boolean`   | `undefined` | Events that can be moved. Needs `onEventDrop`.                                                    |
+| `onEventDrop`             | `(info: EventDropInfo) => void`   | `undefined` | `{ event, start: Date, end: Date, allDay, view }` after a move.                                   |
+| `dragSnapMinutes`         | `number`                          | `15`        | Snap for moves in Day, Week and Custom Days.                                                      |
+| `resizable`               | `boolean \| (event) => boolean`   | `undefined` | Timed events that can be resized from the top or bottom edge (time grids). Needs `onEventResize`. |
+| `onEventResize`           | `(info: EventResizeInfo) => void` | `undefined` | `{ event, start: Date, end: Date, edge: "top" \| "bottom", view }` after a resize.                |
+| `resizeSnapMinutes`       | `number`                          | `15`        | Snap for resize edges.                                                                            |
+| `minEventDurationMinutes` | `number`                          | `15`        | Shortest length a resize can leave.                                                               |
+
+- **Where** — Day, Week and Custom Days: x moves days, y moves time (snapped). Month: x moves days, y moves whole weeks; times are kept. All-day row: x moves days. Schedule has no drag.
+- **Pointer** — Mouse and pen start after a 4 px move, touch after a 300 ms hold. A press without a move is still a click (`onEventClick`); the click after a drag is not sent. Escape (or a cancelled pointer) puts the event back without a callback.
+- **Bounds** — An event within one day stays inside `minHour`–`maxHour` when moved or resized, and a resize never leaves less than `minEventDurationMinutes`. Events that run past midnight are moved as they are. Resize edges appear on hover/focus on the first and last day of an event, and not on items shorter than 24 px (use Alt+Shift+↑/↓ there).
+- **Wall clock** — Times move by the clock shown in the grid, so on a daylight-saving day 10:00 moved one hour lands on 11:00.
+- **RTL** — On screen directions are mirrored: dragging right (or Alt+→) moves to the previous day.
+- **Keyboard** — On a focused event: Alt+↑/↓ moves by `dragSnapMinutes` (in Month, by a week), Alt+←/→ moves a day, Alt+Shift+↑/↓ moves the end by `resizeSnapMinutes`. The keys are listed in `aria-keyshortcuts`.
+- **Recurring events** — You receive the occurrence (`recurringEventId` set). Decide in your handler whether to move the series or just that day (for example add an `exdate` and a one-off event).
+- **Not supported** — Turning a timed event into an all-day one (or back), and dragging in Schedule.
 
 ---
 
@@ -370,18 +429,25 @@ All accessibility features are built-in and require no extra configuration.
 
 ### Interaction & Callbacks
 
-| Prop                    | Type                                                        | Default     | Description                                                                                                                                                       |
-| ----------------------- | ----------------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `selectable`            | `boolean`                                                   | `false`     | Enable visual selection state on date click.                                                                                                                      |
-| `creatable`             | `boolean`                                                   | `false`     | Enable slot-click creation intent (pointer cursor on empty slots).                                                                                                |
-| `resetDateOnViewChange` | `boolean`                                                   | `false`     | Snap calendar to today when the user switches views.                                                                                                              |
-| `onDateClick`           | `(date: Date) => void`                                      | `undefined` | Fired when an empty cell or day header is clicked.                                                                                                                |
-| `onEventClick`          | `(event: CalendarEvent) => void`                            | `undefined` | Fired when an event is clicked.                                                                                                                                   |
-| `onMoreClick`           | `(date: Date, hiddenEvents?: CalendarEvent[]) => void`      | `undefined` | Fired when "+X more" is clicked in Month view.                                                                                                                    |
-| `onNavigate`            | `(date: Date) => void`                                      | `undefined` | Fired when navigating forward/backward or via dropdowns.                                                                                                          |
-| `onViewChange`          | `(view: ECalendarViewType) => void`                         | `undefined` | Fired when the view is changed via the header.                                                                                                                    |
-| `onDateRangeChange`     | `(start: Date, end: Date, view: ECalendarViewType) => void` | `undefined` | Visible range on mount, navigation and view change (debounced 16 ms). Schedule: also fires on `events` change; enriched mode reports `selectedDate…selectedDate`. |
-| `onSlotClick`           | `(startDate: Date, endDate: Date) => void`                  | `undefined` | Fired when an empty slot is clicked (requires `creatable`).                                                                                                       |
+| Prop                      | Type                                                        | Default     | Description                                                                                                                                                       |
+| ------------------------- | ----------------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `selectable`              | `boolean`                                                   | `false`     | Enable visual selection state on date click.                                                                                                                      |
+| `creatable`               | `boolean`                                                   | `false`     | Enable slot-click creation intent (pointer cursor on empty slots).                                                                                                |
+| `resetDateOnViewChange`   | `boolean`                                                   | `false`     | Snap calendar to today when the user switches views.                                                                                                              |
+| `onDateClick`             | `(date: Date) => void`                                      | `undefined` | Fired when an empty cell or day header is clicked.                                                                                                                |
+| `onEventClick`            | `(event: CalendarEvent) => void`                            | `undefined` | Fired when an event is clicked.                                                                                                                                   |
+| `onMoreClick`             | `(date: Date, hiddenEvents?: CalendarEvent[]) => void`      | `undefined` | Fired when "+X more" is clicked in Month view.                                                                                                                    |
+| `onNavigate`              | `(date: Date) => void`                                      | `undefined` | Fired when navigating forward/backward or via dropdowns.                                                                                                          |
+| `onViewChange`            | `(view: ECalendarViewType) => void`                         | `undefined` | Fired when the view is changed via the header.                                                                                                                    |
+| `onDateRangeChange`       | `(start: Date, end: Date, view: ECalendarViewType) => void` | `undefined` | Visible range on mount, navigation and view change (debounced 16 ms). Schedule: also fires on `events` change; enriched mode reports `selectedDate…selectedDate`. |
+| `onSlotClick`             | `(startDate: Date, endDate: Date) => void`                  | `undefined` | Fired when an empty slot is clicked (requires `creatable`).                                                                                                       |
+| `draggable`               | `boolean \| (event) => boolean`                             | `undefined` | Events that can be moved by pointer or Alt+arrows. Needs `onEventDrop`.                                                                                           |
+| `onEventDrop`             | `(info: EventDropInfo) => void`                             | `undefined` | New `start`/`end` after a move; update `events` yourself.                                                                                                         |
+| `dragSnapMinutes`         | `number`                                                    | `15`        | Snap for moves in time grids.                                                                                                                                     |
+| `resizable`               | `boolean \| (event) => boolean`                             | `undefined` | Timed events resizable from their edges in time grids. Needs `onEventResize`.                                                                                     |
+| `onEventResize`           | `(info: EventResizeInfo) => void`                           | `undefined` | New `start`/`end` and `edge` after a resize.                                                                                                                      |
+| `resizeSnapMinutes`       | `number`                                                    | `15`        | Snap for resize edges.                                                                                                                                            |
+| `minEventDurationMinutes` | `number`                                                    | `15`        | Shortest length a resize can leave.                                                                                                                               |
 
 ### Custom Renderers
 

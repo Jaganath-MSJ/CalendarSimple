@@ -45,3 +45,39 @@
   text-overflow: ellipsis;
   opacity: 0.9;
 }
+
+.draggable {
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.dragging {
+  cursor: grabbing;
+  opacity: 0.85;
+  z-index: 15 !important;
+  user-select: none;
+  touch-action: none;
+}
+
+.resizeHandle {
+  position: absolute;
+  inset-inline: 0;
+  height: 6px;
+  cursor: ns-resize;
+  touch-action: none;
+  opacity: 0;
+}
+
+.resize-top {
+  top: 0;
+}
+
+.resize-bottom {
+  bottom: 0;
+}
+
+.eventItem:hover .resizeHandle,
+.eventItem:focus-within .resizeHandle {
+  opacity: 1;
+  background: rgb(255 255 255 / 0.35);
+}
