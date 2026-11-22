@@ -15,6 +15,7 @@ Using React Native? See [calendar-simple-native](https://www.npmjs.com/package/c
 
 - **🗓️ Multiple Views** — Month, Week, Day, Schedule, and Custom Days views. No Prev/Next in Schedule view; Today and the month/year pickers scroll the full list to the chosen date.
 - **✨ Event Handling** — Display and manage events with custom styling and arbitrary metadata.
+- **🔁 Recurring Events** — RFC 5545 `rrule` (daily, weekly, monthly, yearly) with `exdates`, expanded for the visible range.
 - **📱 Responsive** — Built-in CSS breakpoints at 768px (tablet) and 480px (phone).
 - **🎨 Theming & Customization** — Override colors via `theme` and inject CSS classes via `classNames`. The selected day is outlined; see the dark mode section for overridable palette tokens.
 - **🌙 Dark Mode & Color Schemes** — Built-in light/dark palettes with OS auto-detection.
@@ -215,6 +216,38 @@ Functions: `nDaysView(n)`, `more(n)`, `moreAllDay(n)`, `moreEventsOn(n, date)`, 
 
 Keys you leave out (or set to `undefined`) use the English default; an empty string is used as given.
 
+### Recurring events
+
+Give an event an RFC 5545 `rrule` and the calendar shows each occurrence as its own event. `startDate` is the first occurrence and sets the time and the length (from `endDate`).
+
+```tsx
+const events = [
+  {
+    id: "standup",
+    title: "Standup",
+    startDate: "2026-10-05T09:00:00",
+    endDate: "2026-10-05T09:15:00",
+    rrule: "FREQ=WEEKLY;BYDAY=MO,WE,FR",
+    exdates: ["2026-11-11", "2026-11-13T09:00:00"],
+  },
+];
+```
+
+- **Supported rule parts** — `FREQ` (`DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`), `INTERVAL`, `COUNT`, `UNTIL` (`YYYYMMDD`, `YYYYMMDDTHHMMSS` or `…Z`), `WKST`, `BYDAY` (with ordinals such as `1MO` or `-1FR` in `MONTHLY`, and in `YEARLY` with `BYMONTH`), `BYMONTHDAY` (1 to 31 or -1 to -31) and `BYMONTH`. An optional `RRULE:` prefix is allowed.
+- **Unsupported rules** — Any other part (for example `BYSETPOS`, `BYHOUR`, `FREQ=HOURLY`), or a malformed rule, shows the event once, unexpanded, and logs a `console.warn` (once per calendar). A series whose `startDate` or `endDate` is not a valid date is passed through unexpanded, and the usual invalid-date handling drops it.
+- **`exdates`** — Occurrences to skip, as ISO dates (`"2026-11-04"`, skips that day) or exact start times (`"2026-11-04T09:00:00"`).
+- **Occurrences** — Each occurrence copies the event with its own `startDate` / `endDate`, the id `"<id>::<occurrence start>"` (for example `"standup::2026-11-09T09:00:00"`), `recurringEventId` (the series `id`) and `occurrenceDate` (its start). `onEventClick` and `renderEvent` receive the occurrence.
+- **Expansion window** — Occurrences are generated around the visible range: two months either side, widened to whole quarters. In Schedule view, which lists every event, series are expanded from two months before `selectedDate` to 12 months after it, widened to whole quarters; every series (endless or not) is cut there, while non-recurring events are all listed as usual. `onDateRangeChange` in Schedule reports the span of what is listed, occurrences included.
+- **Limits** — At most 1000 occurrences per event per window; the rest are dropped with a warning.
+- **Ids** — Give recurring events an `id`; without one, occurrence ids fall back to the start date and two id-less series with the same start would collide.
+- **Editing** — Occurrences carry the series' `rrule`; to edit, update the series (via `recurringEventId`), not the occurrence.
+- **Time zones** — Times are held in the viewer's local zone: a series given with `Z`/offset repeats at the same local clock time.
+- **Weekly intervals** — Weekly `INTERVAL > 1` grouping follows the rule's `WKST` (default Monday, RFC 5545), not the calendar's `weekStartsOn`.
+- **Not expanded with `enableEnrichedEvents`** — pre-enriched events are used as given.
+- Events without `rrule` are unchanged.
+
+**Upgrading:** `rrule`, `exdates`, `recurringEventId` and `occurrenceDate` on events are now interpreted by the calendar. If you already expand series yourself, either remove `rrule` from the occurrences you pass, or keep `recurringEventId` on them; the calendar leaves events with `recurringEventId` alone. A non-string `rrule` is ignored at runtime, but the TypeScript types now expect a string.
+
 ### TypeScript: typed events
 
 `Calendar` is generic over your event shape, so callbacks and renderers receive your type instead of `CalendarEvent`:
@@ -309,6 +342,10 @@ interface CalendarEvent {
   endDate?: string;
   title: string;
   style?: CSSProperties;
+  rrule?: string; // RFC 5545 rule, e.g. "FREQ=WEEKLY;BYDAY=TU"
+  exdates?: string[]; // occurrences to skip (dates or exact start times)
+  recurringEventId?: string; // set on occurrences: the series id
+  occurrenceDate?: string; // set on occurrences: their start
   [key: string]: unknown; // custom metadata fields
 }
 ```

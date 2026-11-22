@@ -85,6 +85,10 @@ const event = {
 - With `autoScrollToCurrentTime`, the mount scroll now goes to the first day on/after today that has events (before: only if today itself had events).
 - New `onDateRangeChange(start, end, view)` prop.
 
+### Recurring events (v2.2)
+
+- `rrule`, `exdates`, `recurringEventId` and `occurrenceDate` on events are now interpreted by the calendar. If you already expand series yourself, either remove `rrule` from the occurrences you pass, or keep `recurringEventId` on them; the calendar leaves events with `recurringEventId` alone. A non-string `rrule` is ignored at runtime, but the TypeScript types now expect a string.
+
 ---
 
 _Need help migrating? If you encounter an issue not covered in this guide, please open an issue on our GitHub repository._

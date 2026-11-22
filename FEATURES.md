@@ -8,6 +8,7 @@ A comprehensive reference for all features in the `calendar-simple` library.
 
 - [Multiple Views](#multiple-views)
 - [Event Handling](#event-handling)
+- [Recurring Events](#recurring-events)
 - [Theming & Customization](#theming--customization)
 - [Time Formatting](#time-formatting)
 - [Localization](#localization)
@@ -52,6 +53,38 @@ Pass an array of `CalendarEvent` objects to the `events` prop.
 - **Date-only events** — Use `YYYY-MM-DD` format for full-day events.
 - **Timed events** — Use `YYYY-MM-DDTHH:mm:ss` format for specific time blocks.
 - **Custom metadata** — Attach any extra fields (database IDs, descriptions, etc.) directly to the event object. These are returned intact in click callbacks.
+
+---
+
+## Recurring Events
+
+Give an event an RFC 5545 `rrule` and the calendar shows each occurrence as its own event. `startDate` is the first occurrence and sets the time and the length (from `endDate`).
+
+```tsx
+const events = [
+  {
+    id: "standup",
+    title: "Standup",
+    startDate: "2026-10-05T09:00:00",
+    endDate: "2026-10-05T09:15:00",
+    rrule: "FREQ=WEEKLY;BYDAY=MO,WE,FR",
+    exdates: ["2026-11-11", "2026-11-13T09:00:00"],
+  },
+];
+```
+
+- **Supported rule parts** — `FREQ` (`DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`), `INTERVAL`, `COUNT`, `UNTIL` (`YYYYMMDD`, `YYYYMMDDTHHMMSS` or `…Z`), `WKST`, `BYDAY` (with ordinals such as `1MO` or `-1FR` in `MONTHLY`, and in `YEARLY` with `BYMONTH`), `BYMONTHDAY` (1 to 31 or -1 to -31) and `BYMONTH`. An optional `RRULE:` prefix is allowed.
+- **Unsupported rules** — Any other part (for example `BYSETPOS`, `BYHOUR`, `FREQ=HOURLY`), or a malformed rule, shows the event once, unexpanded, and logs a `console.warn` (once per calendar). A series whose `startDate` or `endDate` is not a valid date is passed through unexpanded, and the usual invalid-date handling drops it.
+- **`exdates`** — Occurrences to skip, as ISO dates (`"2026-11-04"`, skips that day) or exact start times (`"2026-11-04T09:00:00"`).
+- **Occurrences** — Each occurrence copies the event with its own `startDate` / `endDate`, the id `"<id>::<occurrence start>"` (for example `"standup::2026-11-09T09:00:00"`), `recurringEventId` (the series `id`) and `occurrenceDate` (its start). `onEventClick` and `renderEvent` receive the occurrence.
+- **Expansion window** — Occurrences are generated around the visible range: two months either side, widened to whole quarters. In Schedule view, which lists every event, series are expanded from two months before `selectedDate` to 12 months after it, widened to whole quarters; every series (endless or not) is cut there, while non-recurring events are all listed as usual. `onDateRangeChange` in Schedule reports the span of what is listed, occurrences included.
+- **Limits** — At most 1000 occurrences per event per window; the rest are dropped with a warning.
+- **Ids** — Give recurring events an `id`; without one, occurrence ids fall back to the start date and two id-less series with the same start would collide.
+- **Editing** — Occurrences carry the series' `rrule`; to edit, update the series (via `recurringEventId`), not the occurrence.
+- **Time zones** — Times are held in the viewer's local zone: a series given with `Z`/offset repeats at the same local clock time.
+- **Weekly intervals** — Weekly `INTERVAL > 1` grouping follows the rule's `WKST` (default Monday, RFC 5545), not the calendar's `weekStartsOn`.
+- **Not expanded with `enableEnrichedEvents`** — pre-enriched events are used as given.
+- Events without `rrule` are unchanged.
 
 ---
 
@@ -245,7 +278,7 @@ Drop the `width` prop and let the parent container control sizing for breakpoint
 
 Use these when rendering thousands of events simultaneously.
 
-- **`enableEnrichedEvents` + `enrichedEventsByDate`** — Pass a pre-mapped `Record<string, CalendarEvent[]>` for O(1) day-rendering lookups instead of filtering a flat array.
+- **`enableEnrichedEvents` + `enrichedEventsByDate`** — Pass a pre-mapped `Record<string, CalendarEvent[]>` for O(1) day-rendering lookups instead of filtering a flat array. Recurring events (`rrule`) are not expanded in this mode.
 - **`eventsAreSorted`** — Skip the initial sort when your input `events` are already ordered.
 - **`isEventOrderingEnabled={false}`** — Bypass sweep-line collision detection and Tetris overlap resolution entirely. Events render linearly — fastest path for massive payloads at the cost of visual collision spacing.
 - **`sortedMonthView`** — Enforce a custom priority / sort function for Month view Tetris slot allocation, or disable it entirely.

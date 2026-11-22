@@ -21,6 +21,7 @@ import {
 import { CALENDAR_ACTIONS, resolveMessages } from "../constants";
 import useColorScheme from "../hooks/useColorScheme";
 import { useDateRangeNotifier } from "../hooks/useDateRangeNotifier";
+import { useRecurringExpansion } from "../hooks/useRecurringExpansion";
 
 /**
  * Mutable runtime state managed by the calendar reducer.
@@ -181,7 +182,7 @@ export function CalendarProvider({
     [rawConfig.is12Hour, localeTag],
   );
   // Resolve "locale" once here so context consumers only ever see concrete values.
-  const config = useMemo<CalendarConfig>(
+  const localeConfig = useMemo<CalendarConfig>(
     () => ({
       ...rawConfig,
       weekStartsOn:
@@ -193,6 +194,9 @@ export function CalendarProvider({
     }),
     [rawConfig, weekStartsOn, is12Hour],
   );
+  // Recurring events become their occurrences, so views and the range
+  // notifier all see them.
+  const config = useRecurringExpansion(localeConfig, state);
 
   useDateRangeNotifier(state, config);
 
