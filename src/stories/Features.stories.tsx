@@ -355,3 +355,35 @@ export const TestIdProp: Story = {
     },
   },
 };
+
+function DateRangeChangeDemo(args: React.ComponentProps<typeof Calendar>) {
+  const [range, setRange] = React.useState("—");
+  return (
+    <div>
+      <Calendar
+        {...args}
+        onDateRangeChange={(start, end, view) =>
+          setRange(
+            `${DateTime.fromJSDate(start).toISODate()} → ${DateTime.fromJSDate(end).toISODate()} (${view})`,
+          )
+        }
+      />
+      <p data-testid="date-range-readout">Visible range: {range}</p>
+    </div>
+  );
+}
+
+export const DateRangeChange: Story = {
+  args: { events: mockEvents, selectedDate: today.toJSDate() },
+  render: (args: React.ComponentProps<typeof Calendar>) => (
+    <DateRangeChangeDemo {...args} />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`onDateRangeChange(start, end, view)` fires on mount, on navigation and on view change (debounced 16 ms). The line below shows the latest range; use it to fetch events for what is on screen.",
+      },
+    },
+  },
+};

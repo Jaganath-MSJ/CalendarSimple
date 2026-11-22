@@ -77,7 +77,7 @@ const events = [
 - **Unsupported rules** — Any other part (for example `BYSETPOS`, `BYHOUR`, `FREQ=HOURLY`), or a malformed rule, shows the event once, unexpanded, and logs a `console.warn` (once per calendar). A series whose `startDate` or `endDate` is not a valid date is passed through unexpanded, and the usual invalid-date handling drops it.
 - **`exdates`** — Occurrences to skip, as ISO dates (`"2026-11-04"`, skips that day) or exact start times (`"2026-11-04T09:00:00"`).
 - **Occurrences** — Each occurrence copies the event with its own `startDate` / `endDate`, the id `"<id>::<occurrence start>"` (for example `"standup::2026-11-09T09:00:00"`), `recurringEventId` (the series `id`) and `occurrenceDate` (its start). `onEventClick` and `renderEvent` receive the occurrence.
-- **Expansion window** — Occurrences are generated around the visible range: two months either side, widened to whole quarters. In Schedule view, which lists every event, series are expanded from two months before `selectedDate` to 12 months after it, widened to whole quarters; every series (endless or not) is cut there, while non-recurring events are all listed as usual. `onDateRangeChange` in Schedule reports the span of what is listed, occurrences included.
+- **Expansion window** — Occurrences are generated around the visible range: two months either side, widened to whole quarters. In Schedule view, which lists every event, series are expanded from two months before `selectedDate` to 12 months after it, widened to whole quarters; every series (endless or not) is cut there, as in calendar-simple-native, while non-recurring events are all listed as usual. `onDateRangeChange` in Schedule reports the span of what is listed, occurrences included.
 - **Limits** — At most 1000 occurrences per event per window; the rest are dropped with a warning.
 - **Ids** — Give recurring events an `id`; without one, occurrence ids fall back to the start date and two id-less series with the same start would collide.
 - **Editing** — Occurrences carry the series' `rrule`; to edit, update the series (via `recurringEventId`), not the occurrence.
@@ -209,9 +209,11 @@ Palettes are implemented as CSS custom properties. The light palette is the `:ro
 [data-color-scheme="light"] {
   --bg-color: #ffffff;
   --text-primary: #000000;
-  --primary-color: #2563eb;
+  --primary-color: #7c3aed;
 }
 ```
+
+The default light primary is `#2563eb` (hover `#1d4ed8`), matching calendar-simple-native; white text on it meets WCAG AA (5.17:1).
 
 The `theme` prop (inline per-element colors) takes final precedence over color scheme variables. No extra configuration or additional CSS imports are needed.
 

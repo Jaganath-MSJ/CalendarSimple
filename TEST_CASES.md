@@ -164,6 +164,58 @@ Two distinct loading modes apply depending on whether events are present:
 - **Children pattern**: Use `<Calendar.Header />` and `<Calendar.View />` as explicit children inside `<Calendar>{...}</Calendar>`; verify they share the same context state — navigation and view switching work identically.
 - **Named view sub-components**: `<Calendar.MonthView />`, `<Calendar.WeekView />`, `<Calendar.DayView />`, `<Calendar.ScheduleView />`, `<Calendar.CustomDaysView />` — each renders correctly when composed inside a `<Calendar>` children layout via shared context.
 
+### 1.17 Visible Range Callback (`onDateRangeChange`)
+
+- **On mount**: Render Month view for Nov 2026 with `weekStartsOn={0}`; the callback fires once with `2026-11-01 … 2026-12-05` and `"month"` (adjacent-month cells included).
+- **Navigation**: Click Next three times quickly; after 16 ms exactly one more call arrives, with the final month's range.
+- **View change**: Switch to Week; one call with the visible week's first and last day and `"week"`.
+- **Order**: `onNavigate` fires before `onDateRangeChange`.
+- **Schedule**: The range is the span of the listed events (occurrences included), from the earliest event day to the latest; with no events it is the selected date for both ends.
+
+### 1.18 Recurring Events (`rrule`, `exdates`)
+
+- **Weekly**: An event from `2026-10-06T09:00` with `FREQ=WEEKLY;BYDAY=TU` shows a chip on every November 2026 Tuesday (3, 10, 17, 24).
+- **Exdates**: Add `exdates: ["2026-11-10T09:00:00"]`; Nov 10 has no chip, the other three remain.
+- **Far navigation**: Click Next six times to May 2027; the May Tuesdays (4, 11, 18, 25) appear.
+- **Unsupported rule**: `FREQ=HOURLY` shows the event once and logs one `[calendar]` warning (not repeated on re-render).
+- **Occurrence click**: Clicking an occurrence passes an event with `recurringEventId` (the series `id`) and that occurrence's `startDate`.
+- **Schedule window**: A daily series that started years ago still lists today; every rule (finite ones too) stops at the selected date + 12 months (end of that quarter).
+
+### 1.19 "+N more" Without Popover (`showMorePopover={false}`)
+
+- **Click**: With `maxEvents={2}` and 5 events on one day, clicking "+3 more" calls `onMoreClick(date, hiddenEvents)` once and opens no dialog.
+- **Keyboard**: Focus "+3 more" and press Enter, then Space; each calls `onMoreClick` once, with no dialog.
+- **Default**: Without the prop, the popover opens as before.
+
+### 1.20 Locale-Driven Week Start and Clock (`weekStartsOn="locale"`, `is12Hour="locale"`)
+
+- **en-GB**: Month header reads Mon … Sun (7 columns); Week view has 7 day columns starting Monday.
+- **ar-EG**: The week starts on Saturday and ends on Friday (7 columns).
+- **en-US**: The week starts on Sunday; with `is12Hour="locale"` hour labels show AM/PM.
+- **de-DE**: With `is12Hour="locale"` the 14:00 slot reads "14:00".
+- **Explicit end wins**: `weekStartsOn="locale"` with `weekEndsOn={5}` in en-GB shows Mon … Fri.
+
+### 1.21 Today in Adjacent-Month Cells
+
+- **Outline**: On 1 Dec 2026, view November 2026 with `showAdjacentMonths`; the Dec 1 cell's date shows an outline in the primary colour, not a fill.
+- **Hidden**: With `showAdjacentMonths={false}`, no mark is shown.
+- **Custom cell**: A `renderDateCell` receives `isTodayAdjacent: true` for that cell.
+
+### 1.22 Palette Tokens and Selected Day
+
+- **Selected day**: With `selectable`, clicking a day shows an outlined ring (transparent fill) on its date; today's filled marker still wins when both apply.
+- **Restore the fill**: Setting `--cal-selected-fill: var(--primary-color); --cal-selected-text: var(--cal-on-primary)` on the calendar root shows the filled circle again.
+- **Contrast**: Light today marker is white on `#2563eb` (≥ 4.5:1); dark is `#111827` on `#60a5fa`.
+- **Scoped override**: With `classNames={{ root: "myCal" }}` and `.myCal[data-color-scheme="dark"] { --cal-surface-raised: … }`, the "+N more" popover uses the new surface colour.
+
+### 1.23 Schedule Navigation
+
+- **No Prev/Next**: In Schedule view the header shows Today, the view select and the month/year selects, but no Prev/Next arrows.
+- **Today re-scrolls**: Scroll the list away, then click Today while the selected date is already today; the list scrolls back to today's group (or the next group with events).
+- **Month pick**: Picking a month scrolls to the first group on or after it (the last group if none).
+
+> Typed events (`Calendar<TEvent>`, `useCalendar<TEvent>()`) are compile-time only; they are covered by `src/types/generics.test-d.tsx` (checked by `npm run lint`).
+
 ---
 
 ## 2. Event Data & Edge Cases (The "Stress Suite")

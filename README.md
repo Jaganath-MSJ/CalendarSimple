@@ -237,7 +237,7 @@ const events = [
 - **Unsupported rules** — Any other part (for example `BYSETPOS`, `BYHOUR`, `FREQ=HOURLY`), or a malformed rule, shows the event once, unexpanded, and logs a `console.warn` (once per calendar). A series whose `startDate` or `endDate` is not a valid date is passed through unexpanded, and the usual invalid-date handling drops it.
 - **`exdates`** — Occurrences to skip, as ISO dates (`"2026-11-04"`, skips that day) or exact start times (`"2026-11-04T09:00:00"`).
 - **Occurrences** — Each occurrence copies the event with its own `startDate` / `endDate`, the id `"<id>::<occurrence start>"` (for example `"standup::2026-11-09T09:00:00"`), `recurringEventId` (the series `id`) and `occurrenceDate` (its start). `onEventClick` and `renderEvent` receive the occurrence.
-- **Expansion window** — Occurrences are generated around the visible range: two months either side, widened to whole quarters. In Schedule view, which lists every event, series are expanded from two months before `selectedDate` to 12 months after it, widened to whole quarters; every series (endless or not) is cut there, while non-recurring events are all listed as usual. `onDateRangeChange` in Schedule reports the span of what is listed, occurrences included.
+- **Expansion window** — Occurrences are generated around the visible range: two months either side, widened to whole quarters. In Schedule view, which lists every event, series are expanded from two months before `selectedDate` to 12 months after it, widened to whole quarters; every series (endless or not) is cut there, as in calendar-simple-native, while non-recurring events are all listed as usual. `onDateRangeChange` in Schedule reports the span of what is listed, occurrences included.
 - **Limits** — At most 1000 occurrences per event per window; the rest are dropped with a warning.
 - **Ids** — Give recurring events an `id`; without one, occurrence ids fall back to the start date and two id-less series with the same start would collide.
 - **Editing** — Occurrences carry the series' `rrule`; to edit, update the series (via `recurringEventId`), not the occurrence.
@@ -265,7 +265,7 @@ interface MyEvent extends CalendarEvent {
 const { config } = useCalendar<MyEvent>(); // config.events: MyEvent[] | undefined
 ```
 
-`TEvent` is set only by an explicit type argument (`<Calendar<MyEvent>>`, `useCalendar<MyEvent>()`); without one it stays `CalendarEvent`, even when `events` has a narrower type. The type definitions need TypeScript ≥ 5.4 (they use `NoInfer`). It types `events`, `onEventClick`, `onMoreClick`, `renderEvent`, `enrichedEventsByDate` and the `sortedMonthView` comparator; it is not checked at runtime.
+`TEvent` is set only by an explicit type argument (`<Calendar<MyEvent>>`, `useCalendar<MyEvent>()`); without one it stays `CalendarEvent`, even when `events` has a narrower type. The type definitions do not need TypeScript 5.4 `NoInfer` (they use an equivalent that works on older compilers). It types `events`, `onEventClick`, `onMoreClick`, `renderEvent`, `enrichedEventsByDate` and the `sortedMonthView` comparator; it is not checked at runtime.
 
 ## API Reference
 

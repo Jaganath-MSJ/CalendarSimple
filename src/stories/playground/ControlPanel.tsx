@@ -20,6 +20,9 @@ interface ControlPanelProps {
 // ── Internal state shape ──────────────────────────────────────────────────────
 
 interface PanelState {
+  showMorePopover: boolean;
+  localeWeekStart: boolean;
+  localeClock: boolean;
   view: ECalendarViewType;
   selectedDate: string; // ISO date string for input[type=date]
   customDays: number;
@@ -93,6 +96,9 @@ interface PanelState {
 }
 
 const DEFAULTS: PanelState = {
+  showMorePopover: true,
+  localeWeekStart: false,
+  localeClock: false,
   view: ECalendarViewType.month,
   selectedDate: new Date().toISOString().split("T")[0],
   customDays: 3,
@@ -222,13 +228,14 @@ function toCalendarProps(s: PanelState): Partial<CalendarProps> {
     view: s.view,
     selectedDate: new Date(s.selectedDate),
     customDays: s.customDays,
-    weekStartsOn: s.weekStartsOn,
+    weekStartsOn: s.localeWeekStart ? "locale" : s.weekStartsOn,
+    showMorePopover: s.showMorePopover,
     weekEndsOn: s.weekEndsOn,
     showAdjacentMonths: s.showAdjacentMonths,
     showWeekNumbers: s.showWeekNumbers,
     showAllDayRow: s.showAllDayRow,
     resetDateOnViewChange: s.resetDateOnViewChange,
-    is12Hour: s.is12Hour,
+    is12Hour: s.localeClock ? "locale" : s.is12Hour,
     minHour: s.minHour,
     maxHour: s.maxHour,
     dayType: s.dayType,
@@ -353,6 +360,9 @@ const SECTION_KEYS: Record<SectionId, (keyof PanelState)[]> = {
     "weekEndsOn",
     "showAdjacentMonths",
     "showWeekNumbers",
+    "showMorePopover",
+    "localeWeekStart",
+    "localeClock",
     "showAllDayRow",
     "resetDateOnViewChange",
     "selectedDate",
@@ -739,6 +749,24 @@ export function ControlPanel({
             <Toggle
               checked={s.showWeekNumbers}
               onChange={(v) => patch("showWeekNumbers", v)}
+            />
+          </Row>
+          <Row label="More Popover">
+            <Toggle
+              checked={s.showMorePopover}
+              onChange={(v) => patch("showMorePopover", v)}
+            />
+          </Row>
+          <Row label="Week Start = Locale">
+            <Toggle
+              checked={s.localeWeekStart}
+              onChange={(v) => patch("localeWeekStart", v)}
+            />
+          </Row>
+          <Row label="Clock = Locale">
+            <Toggle
+              checked={s.localeClock}
+              onChange={(v) => patch("localeClock", v)}
             />
           </Row>
           <Row label="All-Day Row">

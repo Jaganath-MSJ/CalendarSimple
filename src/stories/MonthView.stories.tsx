@@ -184,3 +184,46 @@ export const TodayOnAdjacentMonth: Story = {
     },
   },
 };
+
+const busyDay = today.toISODate() ?? "";
+
+function ShowMorePopoverOffDemo(args: React.ComponentProps<typeof Calendar>) {
+  const [clicked, setClicked] = React.useState("—");
+  return (
+    <div>
+      <Calendar
+        {...args}
+        showMorePopover={false}
+        onMoreClick={(date, hidden) =>
+          setClicked(
+            `${DateTime.fromJSDate(date).toISODate()}, ${hidden?.length ?? 0} hidden`,
+          )
+        }
+      />
+      <p data-testid="more-click-readout">Clicked: {clicked}</p>
+    </div>
+  );
+}
+
+export const ShowMorePopoverOff: Story = {
+  args: {
+    maxEvents: 2,
+    selectedDate: today.toJSDate(),
+    events: Array.from({ length: 5 }, (_, i) => ({
+      id: `busy-${i}`,
+      title: `Meeting ${i + 1}`,
+      startDate: busyDay,
+    })),
+  },
+  render: (args: React.ComponentProps<typeof Calendar>) => (
+    <ShowMorePopoverOffDemo {...args} />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`showMorePopover={false}`: "+N more" opens no popover and only calls `onMoreClick(date, hiddenEvents)`, so you can show your own list.',
+      },
+    },
+  },
+};

@@ -54,10 +54,14 @@ describe("variables.css palette tokens", () => {
     expect(getContrastColor("#3b82f6")).toBeTruthy();
   });
 
-  // Light white-on-#3b82f6 is 3.68:1 (unchanged from the previous literal
-  // white); only the UI-component floor (3:1) holds there. Dark meets AA text.
+  it("uses the native light primary palette", () => {
+    expect(token(light, "--primary-color")).toBe("#2563eb");
+    expect(token(light, "--primary-hover")).toBe("#1d4ed8");
+  });
+
+  // On-primary text meets WCAG AA (4.5:1) on the primary fill in both schemes.
   it.each([
-    ["light", light, 3],
+    ["light", light, 4.5],
     ["dark", dark, 4.5],
   ])("on-primary contrast on primary (%s)", (_n, scope, min) => {
     const fg = token(scope, "--cal-on-primary") as string;

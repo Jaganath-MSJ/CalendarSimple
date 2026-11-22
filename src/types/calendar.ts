@@ -9,6 +9,13 @@ import { CalendarTheme, CalendarClassNames } from "./theme";
 export type ColorScheme = "light" | "dark" | "auto";
 
 /**
+ * Blocks inference from a position, like TypeScript 5.4+ `NoInfer`, but works on
+ * older compilers: the deferred conditional index stops `T` being inferred here.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type NoInferCompat<T> = [T][T extends any ? 0 : never];
+
+/**
  * Makes a specific subset of keys required while leaving the rest unchanged.
  * Used to enforce that `CalendarContentProps` always has defaults applied.
  */
@@ -77,7 +84,7 @@ export interface RenderDateCellProps {
  *
  * @typeParam TEvent - Your event shape (must extend `CalendarEvent`). Types
  * `events` and every callback / renderer that receives events. Set only via an
- * explicit type argument (`NoInfer`); it is never inferred from `events`.
+ * explicit type argument (`NoInferCompat`); it is never inferred from `events`.
  */
 export interface CalendarProps<TEvent extends CalendarEvent = CalendarEvent> {
   /** Child components rendered inside the calendar layout (e.g. custom header). */
@@ -85,7 +92,7 @@ export interface CalendarProps<TEvent extends CalendarEvent = CalendarEvent> {
 
   // --- Data & State ---
   /** Events to display. Each must have at minimum `startDate` and `title`. */
-  events?: NoInfer<TEvent>[];
+  events?: NoInferCompat<TEvent>[];
   /** Initially selected date. Defaults to today if omitted. */
   selectedDate?: Date;
   /** Active view mode. Defaults to `month`. */
@@ -166,9 +173,9 @@ export interface CalendarProps<TEvent extends CalendarEvent = CalendarEvent> {
   /** Called when a date cell is clicked. */
   onDateClick?: (date: Date) => void;
   /** Called when an event chip is clicked. */
-  onEventClick?: (event: NoInfer<TEvent>) => void;
+  onEventClick?: (event: NoInferCompat<TEvent>) => void;
   /** Called when the "+N more" overflow link is clicked. Receives the date and the hidden events. */
-  onMoreClick?: (date: Date, hiddenEvents?: NoInfer<TEvent>[]) => void;
+  onMoreClick?: (date: Date, hiddenEvents?: NoInferCompat<TEvent>[]) => void;
   /** Called when the calendar navigates to a different date. */
   onNavigate?: (date: Date) => void;
   /** Called when the user switches views. */
@@ -195,7 +202,7 @@ export interface CalendarProps<TEvent extends CalendarEvent = CalendarEvent> {
 
   // --- Custom Renderers ---
   /** Replaces the default event chip with a fully custom renderer. */
-  renderEvent?: (event: NoInfer<TEvent>) => ReactNode;
+  renderEvent?: (event: NoInferCompat<TEvent>) => ReactNode;
   /** Replaces the entire header bar with a custom renderer. */
   renderHeader?: (props: RenderHeaderProps) => ReactNode;
   /** Renders custom content inside each hour slot of the Day, Week and Custom Days grids. Receives the slot's start time on that column's own date. */
@@ -208,7 +215,7 @@ export interface CalendarProps<TEvent extends CalendarEvent = CalendarEvent> {
    * Pre-built O(1) lookup map of events keyed by date string. Avoids re-filtering on each render.
    * Must be provided when `enableEnrichedEvents=true` — omitting it emits a `console.warn`.
    */
-  enrichedEventsByDate?: Record<string, NoInfer<TEvent>[]>;
+  enrichedEventsByDate?: Record<string, NoInferCompat<TEvent>[]>;
   /**
    * Enable O(1) event lookup via `enrichedEventsByDate`.
    * Skips the reversed-range filter; events with unparseable dates are still dropped.
@@ -230,7 +237,7 @@ export interface CalendarProps<TEvent extends CalendarEvent = CalendarEvent> {
   /** Sort events within Month view cells. Pass `true` for default sort or a comparator for custom order. */
   sortedMonthView?:
     | boolean
-    | ((a: NoInfer<TEvent>, b: NoInfer<TEvent>) => number);
+    | ((a: NoInferCompat<TEvent>, b: NoInferCompat<TEvent>) => number);
 
   // --- Localization ---
   /** Luxon locale code (e.g. `'en'`, `'fr'`, `'es-MX'`). Controls date formatting language. */
