@@ -58,10 +58,35 @@ jobs:
           node-version: 22.x
           cache: "npm"
 
-      - name: Check bundle size
+      # The action also builds the base branch to compare sizes. A base
+      # without size-limit (before the setup reached it) cannot be measured,
+      # so then only the PR's own limits are checked.
+      - name: Check the base branch has size-limit
+        id: base
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --depth=1 origin "$BASE_REF"
+          if git cat-file -e FETCH_HEAD:.size-limit.json 2>/dev/null; then
+            echo "has_size_limit=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_size_limit=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::$BASE_REF has no .size-limit.json; checking this PR's limits without a comparison."
+          fi
+
+      - name: Check bundle size (compare with base)
+        if: steps.base.outputs.has_size_limit == 'true'
         uses: andresz1/size-limit-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies
+        if: steps.base.outputs.has_size_limit != 'true'
+        run: npm ci
+
+      - name: Check bundle size (limits only)
+        if: steps.base.outputs.has_size_limit != 'true'
+        run: npm run build && npx size-limit
 
   # NOTE: `--update-snapshots=missing` writes missing baselines and PASSES, so
   # until e2e/__screenshots__/ is committed this job is always green and guards
