@@ -24,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Documentation & Stories
 
 - `npm run storybook` — Start Storybook dev server on port 6006
-- Live demo: http://calendarsimple.netlify.app
+- Live demo: https://jaganath-msj.github.io/CalendarSimple/ (Storybook, deployed from `main` by `.github/workflows/pages.yml`)
 
 ### Single Test Execution
 

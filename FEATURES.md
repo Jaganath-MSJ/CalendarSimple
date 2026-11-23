@@ -1,6 +1,6 @@
 # Calendar Simple — Detailed Feature Guide
 
-> **Quick links:** [README](./README.md) · [npm](https://www.npmjs.com/package/calendar-simple) · [Live Demo](https://calendarsimple.netlify.app)
+> **Quick links:** [README](./README.md) · [npm](https://www.npmjs.com/package/calendar-simple) · [Live Demo](https://jaganath-msj.github.io/CalendarSimple/)
 
 A comprehensive reference for all features in the `calendar-simple` library.
 

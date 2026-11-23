@@ -7,7 +7,7 @@
 
 A lightweight, customizable, and accessible calendar component for React. Built with TypeScript and Luxon.
 
-**[Live Demo](https://calendarsimple.netlify.app)**
+**[Live Demo](https://jaganath-msj.github.io/CalendarSimple/)**
 
 Using React Native? See [calendar-simple-native](https://www.npmjs.com/package/calendar-simple-native).
 

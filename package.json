@@ -26,6 +26,10 @@
     "type": "git",
     "url": "git+https://github.com/Jaganath-MSJ/CalendarSimple.git"
   },
+  "homepage": "https://jaganath-msj.github.io/CalendarSimple/",
+  "bugs": {
+    "url": "https://github.com/Jaganath-MSJ/CalendarSimple/issues"
+  },
   "publishConfig": {
     "access": "public"
   },
