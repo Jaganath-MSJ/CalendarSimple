@@ -32,9 +32,7 @@ import { CalendarEvent, EventListType } from "../types";
 import { getLastEventDay, hasValidDates } from "../utils/common";
 import { DATE_FORMATS, TIME_CONSTANTS } from "../constants";
 
-interface InternalCalendarEvent extends CalendarEvent {
-  _tempId?: string;
-}
+type InternalCalendarEvent = CalendarEvent;
 
 /**
  * Represents the information for a single day in the calendar grid.
@@ -160,6 +158,10 @@ export default function useMonthGrid(
       );
 
       let weekEvents: InternalCalendarEvent[] = [];
+      // Slot ids and the app's own objects, kept beside the events: the
+      // events passed in are never mutated, and drops report the original.
+      const tempIds = new Map<CalendarEvent, string>();
+      const sourceOf = new Map<CalendarEvent, CalendarEvent>();
 
       if (enableEnrichedEvents && enrichedEventsByDate) {
         const addedEventIds = new Set<string>();
@@ -174,7 +176,9 @@ export default function useMonthGrid(
           dayEvents.forEach((e) => {
             const eventId = e.id || e.startDate + e.title;
             if (!addedEventIds.has(eventId)) {
-              weekEvents.push({ ...e });
+              const copy = { ...e };
+              sourceOf.set(copy, e);
+              weekEvents.push(copy);
               addedEventIds.add(eventId);
             }
           });
@@ -282,7 +286,7 @@ export default function useMonthGrid(
         }
 
         // Store the ID on the event object temporarily for step 5
-        event._tempId = eventId;
+        tempIds.set(event, eventId);
       });
 
       // -------------------------------------------------------------------------
@@ -305,13 +309,13 @@ export default function useMonthGrid(
 
         let maxDaySlot = -1;
         activeEvents.forEach((e) => {
-          const s = eventSlots.get(e._tempId!);
+          const s = eventSlots.get(tempIds.get(e)!);
           if (s !== undefined && s > maxDaySlot) maxDaySlot = s;
         });
 
         for (let s = 0; s <= maxDaySlot; s++) {
           const event = activeEvents.find(
-            (e) => eventSlots.get(e._tempId!) === s,
+            (e) => eventSlots.get(tempIds.get(e)!) === s,
           );
           if (event) {
             const itemStartDate = getStartOfDay(event.startDate);
@@ -336,6 +340,7 @@ export default function useMonthGrid(
                 startDateWeek: formatDate(currentDate, DATE_FORMATS.DATE),
                 endDateWeek: formatDate(effectiveEndDate, DATE_FORMATS.DATE),
                 isSpacer: false,
+                sourceEvent: sourceOf.get(event) ?? event,
               });
             } else {
               // Spacer: The event exists on this day but was started in a previous cell in this row.

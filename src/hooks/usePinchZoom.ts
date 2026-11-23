@@ -63,14 +63,14 @@ export default function usePinchZoom(ref: RefObject<HTMLElement | null>) {
       e.preventDefault();
       const l = latest.current;
       const from = pinchHeight.current ?? l.height;
-      const next = Math.min(
+      // Keep the exact height through the gesture (small trackpad steps
+      // would round back to where they started); round when drawing.
+      const exact = Math.min(
         l.max,
-        Math.max(
-          l.min,
-          Math.round(from * Math.exp(-e.deltaY * ZOOM_PER_DELTA)),
-        ),
+        Math.max(l.min, from * Math.exp(-e.deltaY * ZOOM_PER_DELTA)),
       );
-      pinchHeight.current = next;
+      pinchHeight.current = exact;
+      const next = Math.round(exact);
       if (gestureEnded.current) {
         // The previous gesture's redraw never came (height unchanged).
         gestureEnded.current = false;
@@ -85,7 +85,9 @@ export default function usePinchZoom(ref: RefObject<HTMLElement | null>) {
         const end = pinchHeight.current;
         pinchHeight.current = null;
         gestureEnded.current = true;
-        if (end !== null) latest.current.onHourHeightChange?.(end);
+        if (end !== null) {
+          latest.current.onHourHeightChange?.(Math.round(end));
+        }
       }, PINCH_END_MS);
     };
     el.addEventListener("wheel", onWheel, { passive: false });

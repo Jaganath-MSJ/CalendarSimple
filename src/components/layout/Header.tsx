@@ -26,6 +26,7 @@ import {
   getRowWeekNumber,
   getLastEventDay,
   getNavigatedDate,
+  clampCustomDays,
 } from "../../utils";
 import styles from "./Header.module.css";
 import LeftArrow from "../../assets/LeftArrow";
@@ -247,9 +248,9 @@ function Header(props: HeaderProps) {
               {messages[option.value]}
             </option>
           ))}
-          {customDays && customDays > 0 && customDays < 11 && (
-            <option key={customDays} value={ECalendarViewType.customDays}>
-              {customDays} {messages.days}
+          {customDays !== undefined && (
+            <option key="customDays" value={ECalendarViewType.customDays}>
+              {clampCustomDays(customDays)} {messages.days}
             </option>
           )}
         </select>

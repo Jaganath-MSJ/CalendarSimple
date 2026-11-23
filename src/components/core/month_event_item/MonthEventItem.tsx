@@ -316,7 +316,9 @@ function MonthChip({
   onEventClick,
   children,
 }: MonthChipProps) {
-  const { ref: chipRef, ...move } = useDayMove(item, {
+  // Drops report the app's own object, not the layout copy.
+  const source = (!item.isSpacer && item.sourceEvent) || item;
+  const { ref: chipRef, ...move } = useDayMove(source, {
     axis: "both",
     measure: measureMonthCell,
   });

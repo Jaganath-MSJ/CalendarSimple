@@ -238,7 +238,9 @@ function expandOne<E extends CalendarEvent>(
       out.push({
         ...event,
         id: `${event.id ?? event.startDate}::${startText}`,
-        recurringEventId: event.id,
+        // Always defined, so an occurrence fed back is never a series again;
+        // an id-less series is named by its start.
+        recurringEventId: event.id ?? String(event.startDate),
         occurrenceDate: startText,
         startDate: startText,
         ...(end ? { endDate: format(occEnd, allDay, withOffset) } : {}),

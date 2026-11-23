@@ -48,5 +48,7 @@ export type EventListType =
       startDateWeek: string;
       endDateWeek?: string;
       isSpacer?: false;
+      /** The event object as passed in `events` (reported by `onEventDrop`). */
+      sourceEvent?: CalendarEvent;
     })
   | (CalendarEvent & { isSpacer: true });

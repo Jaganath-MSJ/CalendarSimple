@@ -151,6 +151,7 @@ const [events, setEvents] = useState(initialEvents);
 - **RTL** — On screen directions are mirrored: dragging right (or Alt+→) moves to the previous day.
 - **Keyboard** — On a focused event: Alt+↑/↓ moves by `dragSnapMinutes` (in Month, by a week), Alt+←/→ moves a day, Alt+Shift+↑/↓ moves the end by `resizeSnapMinutes`. The keys are listed in `aria-keyshortcuts`, and focus stays on the moved event once you update `events`.
 - **Recurring events** — You receive the occurrence (`recurringEventId` set). Decide in your handler whether to move the series or just that day (for example add an `exdate` and a one-off event).
+- **All-day events in the time grid** — With `showAllDayRow={false}`, all-day events drawn in the grid move by whole days only (`allDay: true`) and cannot be resized.
 - **Not supported** — Turning a timed event into an all-day one (or back), and dragging in Schedule.
 
 ---

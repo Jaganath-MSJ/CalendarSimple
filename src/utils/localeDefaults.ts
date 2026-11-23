@@ -1,6 +1,7 @@
 /**
  * @file Resolves `"locale"` values for `weekStartsOn` and `is12Hour`.
  */
+import { DateTime } from "luxon";
 import { WEEK_START_FALLBACK } from "./weekStartTable";
 
 /** The subset of `Intl` these resolvers use; injectable for tests. */
@@ -77,7 +78,7 @@ export function resolveIs12Hour(
     if (hourCycle === "h11" || hourCycle === "h12") return true;
     if (hourCycle === "h23" || hourCycle === "h24") return false;
     return format
-      .formatToParts(new Date(2000, 0, 1, 13, 0, 0))
+      .formatToParts(DateTime.local(2000, 1, 1, 13).toMillis())
       .some((part) => part.type === "dayPeriod");
   } catch {
     return false;

@@ -10,6 +10,7 @@ import {
   generateTooltipText,
   getContrastColor,
   handleKeyboardActivation,
+  isAllDayEvent,
   moveWallClock,
   resizeWallClock,
   resolveDirection,
@@ -78,6 +79,9 @@ export function DayWeekEventItem({
   const minHour = config.minHour ?? defaultCalendarProps.minHour;
   const maxHour = config.maxHour ?? defaultCalendarProps.maxHour;
   const canMove = canDrag(config.draggable, event, config.onEventDrop);
+  // All-day events drawn in the grid (showAllDayRow={false}) move by whole
+  // days only and are never resized, so they stay all-day.
+  const allDay = isAllDayEvent(event);
   const eventStart = dateFn(event.startDate);
   const ref = useRef<HTMLDivElement>(null);
   const focusKey = event.id ? `${testId}:${event.id}` : undefined;
@@ -90,8 +94,8 @@ export function DayWeekEventItem({
   const moveBy = (days: number, minutes: number) => {
     const start = dateFn(event.startDate);
     const end = event.endDate ? dateFn(event.endDate) : undefined;
-    let next = moveWallClock(start, end, days, minutes);
-    if (isOneDay) {
+    let next = moveWallClock(start, end, days, allDay ? 0 : minutes);
+    if (isOneDay && !allDay) {
       // Keep an event inside the hours, but never pull one that already
       // starts before minHour (or ends after maxHour) to that edge.
       const from = (start.hour * 60 + start.minute) / 60;
@@ -107,14 +111,14 @@ export function DayWeekEventItem({
       event,
       start: next.start.toJSDate(),
       end: next.end.toJSDate(),
-      allDay: false,
+      allDay,
       view: state.view,
     });
   };
 
   const move = useEventDrag({
     enabled: canMove,
-    axis: "both",
+    axis: allDay ? "x" : "both",
     reversed,
     measure: (el) => {
       const column = el.closest<HTMLElement>('[data-testid$="-day-column"]');
@@ -142,7 +146,8 @@ export function DayWeekEventItem({
   const minLength =
     config.minEventDurationMinutes ??
     defaultCalendarProps.minEventDurationMinutes;
-  const canResize = canDrag(config.resizable, event, config.onEventResize);
+  const canResize =
+    !allDay && canDrag(config.resizable, event, config.onEventResize);
   const gridHeight = (maxHour - minHour) * 60 * scale;
 
   /** Reports the event with its `edge` moved by wall-clock `minutes`. */
@@ -178,7 +183,9 @@ export function DayWeekEventItem({
     enabled: canResize,
     axis: "y",
     reversed,
-    measure: resizeMeasure(-topPx, heightPx - minLength * scale),
+    // Never let the limits cross zero: an event already shorter than the
+    // minimum must not resize on a tiny jiggle.
+    measure: resizeMeasure(-topPx, Math.max(0, heightPx - minLength * scale)),
     onCommit: (_c, steps) => resizeBy("top", steps * resizeSnap),
   });
   const bottom = useEventDrag({
@@ -186,7 +193,7 @@ export function DayWeekEventItem({
     axis: "y",
     reversed,
     measure: resizeMeasure(
-      minLength * scale - heightPx,
+      Math.min(0, minLength * scale - heightPx),
       gridHeight - topPx - heightPx,
     ),
     onCommit: (_c, steps) => resizeBy("bottom", steps * resizeSnap),
@@ -206,8 +213,7 @@ export function DayWeekEventItem({
     }
     if (canMove && e.altKey && !e.shiftKey) {
       const step: Record<string, [number, number]> = {
-        ArrowUp: [0, -snap],
-        ArrowDown: [0, snap],
+        ...(!allDay && { ArrowUp: [0, -snap], ArrowDown: [0, snap] }),
         ArrowLeft: [reversed ? 1 : -1, 0],
         ArrowRight: [reversed ? -1 : 1, 0],
       };
@@ -254,7 +260,10 @@ export function DayWeekEventItem({
       aria-label={`${item.event.title || messages.noTitle}, ${tooltipText}`}
       aria-keyshortcuts={
         [
-          canMove && "Alt+ArrowUp Alt+ArrowDown Alt+ArrowLeft Alt+ArrowRight",
+          canMove &&
+            (allDay
+              ? "Alt+ArrowLeft Alt+ArrowRight"
+              : "Alt+ArrowUp Alt+ArrowDown Alt+ArrowLeft Alt+ArrowRight"),
           canResize && "Alt+Shift+ArrowUp Alt+Shift+ArrowDown",
         ]
           .filter(Boolean)
@@ -262,14 +271,10 @@ export function DayWeekEventItem({
       }
       aria-description={
         [
-          ...(canMove
-            ? [
-                messages.moveEarlier(snap),
-                messages.moveLater(snap),
-                messages.movePreviousDay,
-                messages.moveNextDay,
-              ]
+          ...(canMove && !allDay
+            ? [messages.moveEarlier(snap), messages.moveLater(snap)]
             : []),
+          ...(canMove ? [messages.movePreviousDay, messages.moveNextDay] : []),
           ...(canResize
             ? [
                 messages.makeLonger(resizeSnap),

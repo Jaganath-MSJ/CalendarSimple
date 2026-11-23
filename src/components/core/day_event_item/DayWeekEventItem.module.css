@@ -21,6 +21,7 @@
   align-items: center;
   gap: 4px;
   padding: 2px 5px;
+  --event-pad-y: 2px;
 }
 
 .eventItemTiny {
@@ -28,6 +29,7 @@
   align-items: center;
   gap: 4px;
   padding: 1px 4px;
+  --event-pad-y: 1px;
   font-size: 10px;
   line-height: 1;
 }
@@ -61,21 +63,26 @@
   touch-action: none;
 }
 
+/* Grips are flex items of the event (no absolute positioning): negative
+   margins pull them over the event's padding, to its top and bottom edges. */
 .resizeHandle {
-  position: absolute;
-  inset-inline: 0;
+  flex: none;
   height: 6px;
+  margin-inline: -5px;
   cursor: ns-resize;
   touch-action: none;
   opacity: 0;
 }
 
 .resize-top {
-  top: 0;
+  order: -1;
+  margin-top: calc(-1 * var(--event-pad-y, 4px));
+  margin-bottom: -2px;
 }
 
 .resize-bottom {
-  bottom: 0;
+  margin-top: auto;
+  margin-bottom: calc(-1 * var(--event-pad-y, 4px));
 }
 
 .eventItem:hover .resizeHandle,

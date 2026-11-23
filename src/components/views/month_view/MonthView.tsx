@@ -137,7 +137,11 @@ function MonthView(props: MonthViewProps) {
     // Grid keys belong to the day cells; chips and "+N more" keep theirs.
     const target0 = e.target as HTMLElement;
     if (!target0.matches?.("td[data-date]")) return;
-    const target = getMonthKeyTarget(e, rovingDay, {
+    // Start from the focused cell (it may be an adjacent-month day).
+    const focused = target0.dataset.date
+      ? dateFn(target0.dataset.date)
+      : rovingDay;
+    const target = getMonthKeyTarget(e, focused, {
       weekStartsOn,
       weekEndsOn,
       flip: resolveDirection(direction, locale) === "rtl",
