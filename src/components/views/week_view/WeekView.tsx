@@ -17,6 +17,7 @@ import styles from "./WeekView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
 import useMessages from "../../../hooks/useMessages";
 import useAutoScrollToNow from "../../../hooks/useAutoScrollToNow";
+import usePinchZoom from "../../../hooks/usePinchZoom";
 import useCalendarProps from "../../../hooks/useCalendarProps";
 import TimeColumn from "../../core/time_column/TimeColumn";
 import DayColumn from "../../core/day_column/DayColumn";
@@ -103,7 +104,10 @@ function WeekView(props: WeekViewProps) {
     },
   ) as DayEventLayout[][];
 
+  usePinchZoom(containerRef);
+  const { hourHeight } = useCalendar();
   useAutoScrollToNow(containerRef, {
+    scale: hourHeight / 60,
     enabled: !!autoScrollToCurrentTime,
     days: weekDays,
     minHour,
@@ -116,6 +120,7 @@ function WeekView(props: WeekViewProps) {
       aria-label={messages.weekView}
       className={styles.weekView}
       ref={containerRef}
+      data-calendar-scroll=""
       data-testid={`${testId}-week-view`}
     >
       <div className={styles.stickyTopContainer}>

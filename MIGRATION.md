@@ -85,6 +85,16 @@ const event = {
 - With `autoScrollToCurrentTime`, the mount scroll now goes to the first day on/after today that has events (before: only if today itself had events).
 - New `onDateRangeChange(start, end, view)` prop.
 
+### Parity with calendar-simple-native (v2.2)
+
+- `customDays` is now typed `1 | 2 | … | 7` (`CustomDaysCount`). A wider `number` is a TypeScript error; at runtime values are rounded and clamped to 1–7. Before, 8–10 drew 8–10 days (now 7) and values outside 1–10 drew nothing (now 1 or 7).
+- With the new `keyboardNavigation` (default `true`) the month grid has **one** tab stop (the selected day) and arrow keys move between days; before, every cell was a tab stop. Pass `keyboardNavigation={false}` for the old tab order.
+- Month cell labels now end with the event count ("Nov 10, 2026, 3 events"; `localeMessages.eventCount`).
+- The "+N more" popover has a close button (it takes the initial focus), and "+ New event" when `creatable` and `onSlotClick` are set.
+- The exported `CalendarContentProps` gains required keys `keyboardNavigation`, `swipeNavigation`, `pinchToZoom`, `minHourHeight` and `maxHourHeight` (filled from the defaults); code that builds it by hand must add them.
+- `onMoreClick`'s `hiddenEvents` is typed as always present (it always was passed).
+- New: `palette`, `hourHeight` / `minHourHeight` / `maxHourHeight` / `onHourHeightChange` / `pinchToZoom`, `swipeNavigation`, `testID`, `DEFAULT_MESSAGES`, and the messages `close`, `newEvent`, `loading`, `eventCount`, `moveEarlier`, `moveLater`, `movePreviousDay`, `moveNextDay`, `makeLonger`, `makeShorter`.
+
 ### Recurring events (v2.2)
 
 - `rrule`, `exdates`, `recurringEventId` and `occurrenceDate` on events are now interpreted by the calendar. If you already expand series yourself, either remove `rrule` from the occurrences you pass, or keep `recurringEventId` on them; the calendar leaves events with `recurringEventId` alone. A non-string `rrule` is ignored at runtime, but the TypeScript types now expect a string.

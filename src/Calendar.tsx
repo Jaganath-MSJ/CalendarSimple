@@ -11,7 +11,13 @@ import {
   LAYOUT_CONSTANTS,
   CALENDAR_ACTIONS,
 } from "./constants";
-import { dateFn, mergeDefined, resolveDirection, toCssLength } from "./utils";
+import {
+  dateFn,
+  mergeDefined,
+  paletteStyle,
+  resolveDirection,
+  toCssLength,
+} from "./utils";
 import useResizeObserver from "./hooks/useResizeObserver";
 import useEvents from "./hooks/useEvents";
 import useColorScheme from "./hooks/useColorScheme";
@@ -80,6 +86,7 @@ function CalendarContent(props: CalendarContentProps) {
     direction,
     locale,
     colorScheme,
+    palette,
   } = useCalendarProps(props);
 
   const dir = resolveDirection(direction, locale);
@@ -88,6 +95,7 @@ function CalendarContent(props: CalendarContentProps) {
   const {
     state: { view, selectedDate },
     dispatch,
+    hourHeight,
   } = useCalendar();
 
   return (
@@ -99,6 +107,8 @@ function CalendarContent(props: CalendarContentProps) {
         {
           "--calendar-width": toCssLength(width),
           "--calendar-height": toCssLength(height),
+          "--cal-hour-height": `${hourHeight}px`,
+          ...paletteStyle(palette, resolvedScheme),
         } as CSSProperties
       }
       className={cx(styles.calendar, classNames?.root)}
@@ -127,10 +137,36 @@ function CalendarContent(props: CalendarContentProps) {
   );
 }
 
+/**
+ * The outer container. It renders inside the provider so it can write
+ * `--cal-hour-height`: compound children (`Calendar.WeekView`…) and the
+ * loading overlay then size their hour slots like the events.
+ */
+function CalendarContainer(
+  props: React.HTMLAttributes<HTMLDivElement> & {
+    divRef: React.RefObject<HTMLDivElement | null>;
+    "data-color-scheme"?: string;
+  },
+) {
+  const { divRef, ...rest } = props;
+  const { hourHeight } = useCalendar();
+  const style = {
+    ...rest.style,
+    "--cal-hour-height": `${hourHeight}px`,
+  } as CSSProperties;
+  return <div ref={divRef} {...rest} style={style} />;
+}
+
 function Calendar(props: CalendarProps = defaultCalendarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const allProps = mergeDefined<CalendarProps>(defaultCalendarProps, props);
+  // `testID` is calendar-simple-native's name; `testId` wins when both are set.
+  const allProps = mergeDefined<CalendarProps>(
+    defaultCalendarProps,
+    props.testId === undefined && props.testID !== undefined
+      ? { ...props, testId: props.testID }
+      : props,
+  );
   const { width: observedWidth, height: observedHeight } = useResizeObserver(
     containerRef,
     typeof allProps.width === "number" && typeof allProps.height === "number",
@@ -206,8 +242,8 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
         selectedDate={props.selectedDate}
         customDays={props.customDays}
       />
-      <div
-        ref={containerRef}
+      <CalendarContainer
+        divRef={containerRef}
         data-testid={
           allProps.children ? `${allProps.testId}-container` : undefined
         }
@@ -219,6 +255,7 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
+          ...paletteStyle(allProps.palette, resolvedScheme),
           ...(allProps.children
             ? ({
                 "--calendar-width": toCssLength(width),
@@ -243,7 +280,7 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
             />
           )}
         </CalendarErrorBoundary>
-      </div>
+      </CalendarContainer>
     </CalendarProvider>
   );
 }

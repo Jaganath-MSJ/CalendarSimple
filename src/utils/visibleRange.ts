@@ -5,6 +5,7 @@
 import { TIME_CONSTANTS } from "../constants";
 import { CalendarEvent, ECalendarViewType } from "../types";
 import { getLastEventDay } from "./common";
+import { clampCustomDays } from "./customDays";
 import { dateFn, DateType, getDayOfWeek } from "./date";
 import { getVisibleWeekDays } from "./weeks";
 
@@ -52,7 +53,7 @@ export function getVisibleRange(
     case ECalendarViewType.customDays:
       return {
         start: day,
-        end: day.plus({ days: Math.max(opts.customDays ?? 3, 1) - 1 }),
+        end: day.plus({ days: clampCustomDays(opts.customDays) - 1 }),
       };
     case ECalendarViewType.schedule: {
       const events = opts.events ?? [];

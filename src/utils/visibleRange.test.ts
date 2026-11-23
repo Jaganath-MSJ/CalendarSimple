@@ -48,6 +48,16 @@ describe("getVisibleRange", () => {
       ),
     ).toEqual(["2026-11-10", "2026-11-12"]);
   });
+  it("customDays is limited to 7", () => {
+    expect(
+      iso(
+        getVisibleRange(ECalendarViewType.customDays, nov10, {
+          ...base,
+          customDays: 12,
+        }),
+      ),
+    ).toEqual(["2026-11-10", "2026-11-16"]);
+  });
   it("schedule spans all events", () => {
     const events = [
       { startDate: "2026-10-03", title: "a" },

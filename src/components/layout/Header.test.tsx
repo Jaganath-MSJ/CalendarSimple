@@ -39,6 +39,8 @@ describe("Header Component", () => {
       messages: DEFAULT_MESSAGES,
       colorScheme: "light",
       bodySize: { width: 0, height: 0 },
+      hourHeight: 60,
+      setHourHeight: () => {},
     });
   });
 
@@ -143,6 +145,8 @@ describe("Header accessibility", () => {
       messages: DEFAULT_MESSAGES,
       colorScheme: "light",
       bodySize: { width: 0, height: 0 },
+      hourHeight: 60,
+      setHourHeight: () => {},
       config: {
         events: [],
         locale: "en",

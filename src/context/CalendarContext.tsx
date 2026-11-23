@@ -5,12 +5,13 @@ import React, {
   createContext,
   useContext,
   useReducer,
+  useState,
   ReactNode,
   useMemo,
   Dispatch,
 } from "react";
 import { resolveIs12Hour, resolveWeekStart } from "../utils/localeDefaults";
-import { dateFn, DateType, getNavigatedDate } from "../utils";
+import { clampCustomDays, dateFn, DateType, getNavigatedDate } from "../utils";
 import {
   ECalendarViewType,
   CalendarEvent,
@@ -18,7 +19,11 @@ import {
   CalendarProps,
   CalendarMessages,
 } from "../types";
-import { CALENDAR_ACTIONS, resolveMessages } from "../constants";
+import {
+  CALENDAR_ACTIONS,
+  resolveMessages,
+  TIME_CONSTANTS,
+} from "../constants";
 import useColorScheme from "../hooks/useColorScheme";
 import { useDateRangeNotifier } from "../hooks/useDateRangeNotifier";
 import { useRecurringExpansion } from "../hooks/useRecurringExpansion";
@@ -77,6 +82,10 @@ export interface CalendarContextValue<
   colorScheme: "light" | "dark";
   /** Measured pixel size of the calendar body (header excluded); 0 until measured. */
   bodySize: { width: number; height: number };
+  /** Pixels per hour in the time grids: `config.hourHeight`, else the zoom level (default 60). */
+  hourHeight: number;
+  /** Sets the uncontrolled zoom level (pinch); ignored while `hourHeight` is set. */
+  setHourHeight: (height: number) => void;
 }
 
 export const CalendarContext = createContext<CalendarContextValue | undefined>(
@@ -106,7 +115,7 @@ function calendarReducer(
     case CALENDAR_ACTIONS.SET_VIEW:
       return { ...state, view: action.payload };
     case CALENDAR_ACTIONS.SET_CUSTOM_DAYS:
-      return { ...state, customDays: action.payload };
+      return { ...state, customDays: clampCustomDays(action.payload) };
     case CALENDAR_ACTIONS.NEXT:
     case CALENDAR_ACTIONS.PREV: {
       const next = getNavigatedDate(
@@ -167,7 +176,10 @@ export function CalendarProvider({
   const [state, dispatch] = useReducer(calendarReducer, {
     selectedDate: initialDate,
     view: initialView,
-    customDays: initialCustomDays,
+    customDays:
+      initialCustomDays === undefined
+        ? undefined
+        : clampCustomDays(initialCustomDays),
     navigationId: 0,
   });
 
@@ -219,6 +231,17 @@ export function CalendarProvider({
     [config.localeMessages],
   );
 
+  const [zoomHourHeight, setHourHeight] = useState<number>(
+    TIME_CONSTANTS.DEFAULT_HOUR_HEIGHT,
+  );
+  // An invalid hourHeight (0, negative, NaN) falls back to the zoom level.
+  const hourHeight =
+    typeof config.hourHeight === "number" &&
+    Number.isFinite(config.hourHeight) &&
+    config.hourHeight > 0
+      ? config.hourHeight
+      : zoomHourHeight;
+
   const value = useMemo(
     () => ({
       state,
@@ -228,8 +251,10 @@ export function CalendarProvider({
       messages,
       colorScheme: resolvedScheme,
       bodySize,
+      hourHeight,
+      setHourHeight,
     }),
-    [state, testId, config, messages, resolvedScheme, bodySize],
+    [state, testId, config, messages, resolvedScheme, bodySize, hourHeight],
   );
 
   return (

@@ -4,6 +4,7 @@
 import type { CalendarState } from "../context/CalendarContext";
 import { ECalendarViewType } from "../types";
 import type { DateType } from "./date";
+import { clampCustomDays } from "./customDays";
 
 /**
  * Returns the date `NEXT` (`direction = 1`) or `PREV` (`-1`) moves to.
@@ -17,7 +18,7 @@ export function getNavigatedDate(
   const { selectedDate, view, customDays } = state;
   if (view === ECalendarViewType.schedule) return selectedDate;
   if (view === ECalendarViewType.customDays) {
-    return selectedDate.plus({ days: direction * (customDays || 3) });
+    return selectedDate.plus({ days: direction * clampCustomDays(customDays) });
   }
   return selectedDate.plus({ [view]: direction });
 }

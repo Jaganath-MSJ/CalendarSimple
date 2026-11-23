@@ -33,4 +33,16 @@ describe("getNavigatedDate", () => {
     expect(iso(getNavigatedDate(state, 1))).toBe("2026-02-03");
     expect(iso(getNavigatedDate(state, -1))).toBe("2026-01-28");
   });
+
+  it("moves customDays by at most 7", () => {
+    const next = getNavigatedDate(
+      {
+        selectedDate: dateFn("2026-11-10"),
+        view: ECalendarViewType.customDays,
+        customDays: 9,
+      },
+      1,
+    );
+    expect(next.toISODate()).toBe("2026-11-17");
+  });
 });

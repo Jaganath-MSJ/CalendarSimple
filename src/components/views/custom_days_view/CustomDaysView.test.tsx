@@ -56,7 +56,7 @@ describe("CustomDaysView Component", () => {
     maxHour: 24,
     showAllDayRow: true,
     eventOverlapOffset: 0,
-    customDays: 3,
+    customDays: 3 as const,
     enableEnrichedEvents: false,
     eventsAreSorted: false,
     isEventOrderingEnabled: false,

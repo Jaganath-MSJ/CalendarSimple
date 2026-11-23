@@ -105,8 +105,7 @@
     "react-dom": "^19.2.5"
   },
   "overrides": {
-    "eslint": "$eslint",
-    "esbuild": "$esbuild"
+    "eslint": "$eslint"
   },
   "allowScripts": {
     "esbuild": false,

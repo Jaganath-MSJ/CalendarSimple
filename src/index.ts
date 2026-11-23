@@ -11,9 +11,12 @@ export type {
   ColorScheme,
   CalendarTheme,
   ThemeScheme,
+  CalendarPalette,
+  CalendarPaletteOverrides,
   CalendarClassNames,
   RenderHeaderProps,
   RenderDateCellProps,
+  CustomDaysCount,
   EventDropInfo,
   EventResizeInfo,
 } from "./types";
@@ -27,6 +30,6 @@ export type { ScheduleViewProps } from "./components/views/schedule_view/Schedul
 export type { CustomViewProps } from "./components/views/custom_days_view/CustomDaysView";
 
 export { CalendarProvider, useCalendar } from "./context/CalendarContext";
-export { CALENDAR_ACTIONS } from "./constants";
+export { CALENDAR_ACTIONS, DEFAULT_MESSAGES } from "./constants";
 
 export default Calendar;

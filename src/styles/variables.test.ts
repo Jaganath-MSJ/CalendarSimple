@@ -69,3 +69,30 @@ describe("variables.css palette tokens", () => {
     expect(ratio(fg, bg)).toBeGreaterThanOrEqual(min);
   });
 });
+
+describe("now line and scrim tokens", () => {
+  it("defines --cal-now-line and --cal-scrim in both schemes", () => {
+    const light = css.slice(
+      css.indexOf(":root {"),
+      css.indexOf("}", css.indexOf(":root {")),
+    );
+    const darkStart = css.indexOf('[data-color-scheme="dark"] {');
+    const dark = css.slice(darkStart, css.indexOf("}", darkStart));
+    for (const scope of [light, dark]) {
+      expect(scope).toMatch(/--cal-now-line:\s*#ea4335;/);
+      expect(scope).toMatch(/--cal-scrim:\s*rgba\(/);
+    }
+  });
+
+  it("draws the current-time line with --cal-now-line", () => {
+    const line = readFileSync(
+      resolve(
+        process.cwd(),
+        "src/components/core/current_time_line/CurrentTimeLine.module.css",
+      ),
+      "utf8",
+    );
+    expect(line).not.toContain("#ea4335");
+    expect(line).toContain("var(--cal-now-line)");
+  });
+});

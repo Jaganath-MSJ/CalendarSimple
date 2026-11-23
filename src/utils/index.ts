@@ -12,3 +12,6 @@ export * from "./weeks";
 export * from "./navigation";
 export * from "./localeDefaults";
 export * from "./drag";
+export * from "./customDays";
+export * from "./palette";
+export * from "./keyboard";

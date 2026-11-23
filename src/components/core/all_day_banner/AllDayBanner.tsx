@@ -259,7 +259,7 @@ function BannerChip({
   onEventClick,
   children,
 }: BannerChipProps) {
-  const move = useDayMove(event, {
+  const { ref: chipRef, ...move } = useDayMove(event, {
     axis: "x",
     measure: (el) => {
       const row = el.parentElement;
@@ -274,7 +274,7 @@ function BannerChip({
   });
   return (
     <div
-      ref={move.ref}
+      ref={chipRef}
       role="button"
       tabIndex={0}
       className={cx(className, {
@@ -285,6 +285,7 @@ function BannerChip({
       data-testid={testIdValue}
       aria-label={ariaLabel}
       aria-keyshortcuts={move.keyShortcuts}
+      aria-description={move.description}
       {...move.handlers}
       onClick={() => onEventClick?.(event)}
       onKeyDown={(e) => {

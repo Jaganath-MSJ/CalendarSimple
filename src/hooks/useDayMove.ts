@@ -17,6 +17,7 @@ import {
 } from "../utils";
 import useEventDrag, { type DragMeasure } from "./useEventDrag";
 import { markFocusAfterMove, useFocusAfterMove } from "./useFocusAfterMove";
+import useMessages from "./useMessages";
 
 const DAYS_PER_ROW = 7;
 
@@ -28,6 +29,7 @@ export interface UseDayMoveOptions {
 
 export function useDayMove(event: CalendarEvent, options: UseDayMoveOptions) {
   const { config, state, testId } = useCalendar();
+  const messages = useMessages();
   const ref = useRef<HTMLDivElement>(null);
   const focusKey = event.id ? `${testId}:${event.id}` : undefined;
   useFocusAfterMove(focusKey, ref);
@@ -87,6 +89,9 @@ export function useDayMove(event: CalendarEvent, options: UseDayMoveOptions) {
     handlers: drag.handlers,
     handleKey,
     style,
+    description: canMove
+      ? [messages.movePreviousDay, messages.moveNextDay].join(". ")
+      : undefined,
     keyShortcuts: canMove
       ? options.axis === "both"
         ? "Alt+ArrowUp Alt+ArrowDown Alt+ArrowLeft Alt+ArrowRight"

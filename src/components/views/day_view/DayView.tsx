@@ -16,6 +16,7 @@ import styles from "./DayView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
 import useMessages from "../../../hooks/useMessages";
 import useAutoScrollToNow from "../../../hooks/useAutoScrollToNow";
+import usePinchZoom from "../../../hooks/usePinchZoom";
 import useCalendarProps from "../../../hooks/useCalendarProps";
 import TimeColumn from "../../core/time_column/TimeColumn";
 import DayColumn from "../../core/day_column/DayColumn";
@@ -105,7 +106,10 @@ function DayView(props: DayViewProps) {
       }
     : undefined;
 
+  usePinchZoom(containerRef);
+  const { hourHeight } = useCalendar();
   useAutoScrollToNow(containerRef, {
+    scale: hourHeight / 60,
     enabled: !!autoScrollToCurrentTime,
     days: [selectedDate],
     minHour,
@@ -118,6 +122,7 @@ function DayView(props: DayViewProps) {
       aria-label={messages.dayView}
       className={styles.dayView}
       ref={containerRef}
+      data-calendar-scroll=""
       data-testid={`${testId}-day-view`}
     >
       <div className={styles.stickyTopContainer}>

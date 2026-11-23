@@ -17,6 +17,7 @@ Using React Native? See [calendar-simple-native](https://www.npmjs.com/package/c
 - **✨ Event Handling** — Display and manage events with custom styling and arbitrary metadata.
 - **🔁 Recurring Events** — RFC 5545 `rrule` (daily, weekly, monthly, yearly) with `exdates`, expanded for the visible range.
 - **🖱️ Drag & Resize** — Move events by pointer or keyboard in every view but Schedule, and resize timed events in time grids.
+- **⌨️ Keyboard & Gestures** — Arrow-key day and period navigation, optional touch swipe between periods, and hour zoom (Ctrl/⌘ + wheel); same API as calendar-simple-native.
 - **📱 Responsive** — Built-in CSS breakpoints at 768px (tablet) and 480px (phone).
 - **🎨 Theming & Customization** — Override colors via `theme` and inject CSS classes via `classNames`. The selected day is outlined; see the dark mode section for overridable palette tokens.
 - **🌙 Dark Mode & Color Schemes** — Built-in light/dark palettes with OS auto-detection.
@@ -330,66 +331,74 @@ const { config } = useCalendar<MyEvent>(); // config.events: MyEvent[] | undefin
 
 ### Props
 
-| Prop                      | Type                                                          | Default             |
-| ------------------------- | ------------------------------------------------------------- | ------------------- |
-| `events`                  | `CalendarEvent[]`                                             | `[]`                |
-| `selectedDate`            | `Date`                                                        | `undefined`         |
-| `view`                    | `ECalendarViewType`                                           | `"month"`           |
-| `testId`                  | `string`                                                      | `undefined`         |
-| `isLoading`               | `boolean`                                                     | `undefined`         |
-| `renderLoading`           | `() => ReactNode`                                             | `undefined`         |
-| `selectable`              | `boolean`                                                     | `false`             |
-| `creatable`               | `boolean`                                                     | `false`             |
-| `is12Hour`                | `boolean \| "locale"`                                         | `false`             |
-| `colorScheme`             | `'light' \| 'dark' \| 'auto'`                                 | `'auto'`            |
-| `direction`               | `'ltr' \| 'rtl'`                                              | `` `auto-detect` `` |
-| `locale`                  | `string`                                                      | `'en'`              |
-| `localeMessages`          | `Partial<CalendarMessages>`                                   | `{}`                |
-| `theme`                   | `CalendarTheme`                                               | `{}`                |
-| `classNames`              | `CalendarClassNames`                                          | `{}`                |
-| `width`                   | `number \| string`                                            | `` `auto` ``        |
-| `height`                  | `number \| string`                                            | `` `auto` ``        |
-| `dayType`                 | `EDayType`                                                    | `"half"`            |
-| `weekStartsOn`            | `number \| "locale"`                                          | `0`                 |
-| `weekEndsOn`              | `number`                                                      | `6`                 |
-| `customDays`              | `number`                                                      | `3`                 |
-| `showAdjacentMonths`      | `boolean`                                                     | `true`              |
-| `showWeekNumbers`         | `boolean`                                                     | `false`             |
-| `showAllDayRow`           | `boolean`                                                     | `true`              |
-| `maxEvents`               | `number`                                                      | `` `auto` ``        |
-| `minHour`                 | `number`                                                      | `0`                 |
-| `maxHour`                 | `number`                                                      | `24`                |
-| `eventOverlapOffset`      | `number`                                                      | `0`                 |
-| `showCurrentTime`         | `boolean`                                                     | `false`             |
-| `autoScrollToCurrentTime` | `boolean`                                                     | `false`             |
-| `resetDateOnViewChange`   | `boolean`                                                     | `false`             |
-| `pastYearLength`          | `number`                                                      | `5`                 |
-| `futureYearLength`        | `number`                                                      | `5`                 |
-| `onDateClick`             | `(date: Date) => void`                                        | `undefined`         |
-| `onEventClick`            | `(event: CalendarEvent) => void`                              | `undefined`         |
-| `showMorePopover`         | `boolean`                                                     | `true`              |
-| `onMoreClick`             | `(date: Date, hiddenEvents?: CalendarEvent[]) => void`        | `undefined`         |
-| `onNavigate`              | `(date: Date) => void`                                        | `undefined`         |
-| `onViewChange`            | `(view: ECalendarViewType) => void`                           | `undefined`         |
-| `onDateRangeChange`       | `(start: Date, end: Date, view: ECalendarViewType) => void`   | `undefined`         |
-| `onSlotClick`             | `(startDate: Date, endDate: Date) => void`                    | `undefined`         |
-| `draggable`               | `boolean \| (event) => boolean`                               | `undefined`         |
-| `onEventDrop`             | `(info: EventDropInfo) => void`                               | `undefined`         |
-| `dragSnapMinutes`         | `number`                                                      | `15`                |
-| `resizable`               | `boolean \| (event) => boolean`                               | `undefined`         |
-| `onEventResize`           | `(info: EventResizeInfo) => void`                             | `undefined`         |
-| `resizeSnapMinutes`       | `number`                                                      | `15`                |
-| `minEventDurationMinutes` | `number`                                                      | `15`                |
-| `renderEvent`             | `(event: CalendarEvent) => ReactNode`                         | `undefined`         |
-| `renderHeader`            | `(props: RenderHeaderProps) => ReactNode`                     | `undefined`         |
-| `renderHourCell`          | `(date: Date) => ReactNode`                                   | `undefined`         |
-| `renderDateCell`          | `(props: RenderDateCellProps) => ReactNode`                   | `undefined`         |
-| `renderScheduleSeparator` | `(date: Date) => ReactNode`                                   | `undefined`         |
-| `enableEnrichedEvents`    | `boolean`                                                     | `false`             |
-| `enrichedEventsByDate`    | `Record<string, CalendarEvent[]>`                             | `undefined`         |
-| `eventsAreSorted`         | `boolean`                                                     | `false`             |
-| `isEventOrderingEnabled`  | `boolean`                                                     | `true`              |
-| `sortedMonthView`         | `boolean \| ((a: CalendarEvent, b: CalendarEvent) => number)` | `true`              |
+| Prop                              | Type                                                                    | Default             |
+| --------------------------------- | ----------------------------------------------------------------------- | ------------------- |
+| `events`                          | `CalendarEvent[]`                                                       | `[]`                |
+| `selectedDate`                    | `Date`                                                                  | `undefined`         |
+| `view`                            | `ECalendarViewType`                                                     | `"month"`           |
+| `testId`                          | `string`                                                                | `undefined`         |
+| `testID`                          | `string` (alias of `testId`, which wins)                                | `undefined`         |
+| `keyboardNavigation`              | `boolean`                                                               | `true`              |
+| `swipeNavigation`                 | `boolean`                                                               | `false`             |
+| `hourHeight`                      | `number`                                                                | `60`                |
+| `minHourHeight` / `maxHourHeight` | `number`                                                                | `30` / `180`        |
+| `pinchToZoom`                     | `boolean`                                                               | `false`             |
+| `onHourHeightChange`              | `(hourHeight: number) => void`                                          | `undefined`         |
+| `palette`                         | `{ light?: Partial<CalendarPalette>; dark?: Partial<CalendarPalette> }` | `undefined`         |
+| `isLoading`                       | `boolean`                                                               | `undefined`         |
+| `renderLoading`                   | `() => ReactNode`                                                       | `undefined`         |
+| `selectable`                      | `boolean`                                                               | `false`             |
+| `creatable`                       | `boolean`                                                               | `false`             |
+| `is12Hour`                        | `boolean \| "locale"`                                                   | `false`             |
+| `colorScheme`                     | `'light' \| 'dark' \| 'auto'`                                           | `'auto'`            |
+| `direction`                       | `'ltr' \| 'rtl'`                                                        | `` `auto-detect` `` |
+| `locale`                          | `string`                                                                | `'en'`              |
+| `localeMessages`                  | `Partial<CalendarMessages>`                                             | `{}`                |
+| `theme`                           | `CalendarTheme`                                                         | `{}`                |
+| `classNames`                      | `CalendarClassNames`                                                    | `{}`                |
+| `width`                           | `number \| string`                                                      | `` `auto` ``        |
+| `height`                          | `number \| string`                                                      | `` `auto` ``        |
+| `dayType`                         | `EDayType`                                                              | `"half"`            |
+| `weekStartsOn`                    | `number \| "locale"`                                                    | `0`                 |
+| `weekEndsOn`                      | `number`                                                                | `6`                 |
+| `customDays`                      | `1 \| 2 \| 3 \| 4 \| 5 \| 6 \| 7` (`CustomDaysCount`)                   | `3`                 |
+| `showAdjacentMonths`              | `boolean`                                                               | `true`              |
+| `showWeekNumbers`                 | `boolean`                                                               | `false`             |
+| `showAllDayRow`                   | `boolean`                                                               | `true`              |
+| `maxEvents`                       | `number`                                                                | `` `auto` ``        |
+| `minHour`                         | `number`                                                                | `0`                 |
+| `maxHour`                         | `number`                                                                | `24`                |
+| `eventOverlapOffset`              | `number`                                                                | `0`                 |
+| `showCurrentTime`                 | `boolean`                                                               | `false`             |
+| `autoScrollToCurrentTime`         | `boolean`                                                               | `false`             |
+| `resetDateOnViewChange`           | `boolean`                                                               | `false`             |
+| `pastYearLength`                  | `number`                                                                | `5`                 |
+| `futureYearLength`                | `number`                                                                | `5`                 |
+| `onDateClick`                     | `(date: Date) => void`                                                  | `undefined`         |
+| `onEventClick`                    | `(event: CalendarEvent) => void`                                        | `undefined`         |
+| `showMorePopover`                 | `boolean`                                                               | `true`              |
+| `onMoreClick`                     | `(date: Date, hiddenEvents: CalendarEvent[]) => void`                   | `undefined`         |
+| `onNavigate`                      | `(date: Date) => void`                                                  | `undefined`         |
+| `onViewChange`                    | `(view: ECalendarViewType) => void`                                     | `undefined`         |
+| `onDateRangeChange`               | `(start: Date, end: Date, view: ECalendarViewType) => void`             | `undefined`         |
+| `onSlotClick`                     | `(startDate: Date, endDate: Date) => void`                              | `undefined`         |
+| `draggable`                       | `boolean \| (event) => boolean`                                         | `undefined`         |
+| `onEventDrop`                     | `(info: EventDropInfo) => void`                                         | `undefined`         |
+| `dragSnapMinutes`                 | `number`                                                                | `15`                |
+| `resizable`                       | `boolean \| (event) => boolean`                                         | `undefined`         |
+| `onEventResize`                   | `(info: EventResizeInfo) => void`                                       | `undefined`         |
+| `resizeSnapMinutes`               | `number`                                                                | `15`                |
+| `minEventDurationMinutes`         | `number`                                                                | `15`                |
+| `renderEvent`                     | `(event: CalendarEvent) => ReactNode`                                   | `undefined`         |
+| `renderHeader`                    | `(props: RenderHeaderProps) => ReactNode`                               | `undefined`         |
+| `renderHourCell`                  | `(date: Date) => ReactNode`                                             | `undefined`         |
+| `renderDateCell`                  | `(props: RenderDateCellProps) => ReactNode`                             | `undefined`         |
+| `renderScheduleSeparator`         | `(date: Date) => ReactNode`                                             | `undefined`         |
+| `enableEnrichedEvents`            | `boolean`                                                               | `false`             |
+| `enrichedEventsByDate`            | `Record<string, CalendarEvent[]>`                                       | `undefined`         |
+| `eventsAreSorted`                 | `boolean`                                                               | `false`             |
+| `isEventOrderingEnabled`          | `boolean`                                                               | `true`              |
+| `sortedMonthView`                 | `boolean \| ((a: CalendarEvent, b: CalendarEvent) => number)`           | `true`              |
 
 > `onDateRangeChange`: in Schedule view it also fires when `events` change (the range is the span of the loaded events, so it cannot drive lazy-loading there); with `enableEnrichedEvents` Schedule reports `selectedDate…selectedDate`.
 
@@ -536,6 +545,63 @@ Override individual CSS custom properties for fine-grained control. Override per
   }}
 />
 ```
+
+### Keyboard navigation
+
+On by default (`keyboardNavigation={false}` turns it off), with the same keys as calendar-simple-native:
+
+| View                   | Keys                                                                                                                                                                                                                                                                                                                                                            |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Month                  | One tab stop (the selected day). ← → (mirrored in RTL), ↑ ↓ a week, Home / End the week row, PageUp / PageDown a month (Shift: a year), T today. Leaving the month navigates (like Next / Previous, this moves the selected date) and keeps focus on the day. Enter / Space activates the day. Keys on event chips and in the "+N more" popover stay with them. |
+| Day, Week, Custom Days | PageUp / PageDown and ← / → (mirrored in RTL) turn the period; T goes to today.                                                                                                                                                                                                                                                                                 |
+| Schedule               | ↑ / ↓ move between rows; T goes to today (Schedule has no periods).                                                                                                                                                                                                                                                                                             |
+
+Keys pressed with Ctrl, ⌘ or Alt, and keys typed in an input, are left alone (Alt+arrows move a draggable event).
+
+### Palette
+
+`palette` takes calendar-simple-native's palette keys per scheme and sets the matching CSS custom properties on the calendar (and the "+N more" popover). `theme` still wins.
+
+```tsx
+<Calendar
+  palette={{
+    light: { primary: "#7c3aed", nowLine: "#16a34a" },
+    dark: { primary: "#a78bfa" },
+  }}
+/>
+```
+
+| Key             | CSS property       | Key             | CSS property                               |
+| --------------- | ------------------ | --------------- | ------------------------------------------ |
+| `primary`       | `--primary-color`  | `bgMuted`       | `--bg-hover`                               |
+| `primaryStrong` | `--primary-hover`  | `border`        | `--border-color`                           |
+| `onPrimary`     | `--cal-on-primary` | `surfaceRaised` | `--cal-surface-raised`                     |
+| `textPrimary`   | `--text-primary`   | `focus`         | `--cal-focus-color`                        |
+| `textSecondary` | `--text-secondary` | `eventDefault`  | `--cal-event-default`                      |
+| `bg`            | `--bg-color`       | `nowLine`       | `--cal-now-line`                           |
+|                 |                    | `scrim`         | `--cal-scrim` (no web element uses it yet) |
+
+### Hour height and zoom
+
+`hourHeight` sets the pixels per hour in Day, Week and Custom Days (default 60). With `pinchToZoom`, Ctrl/⌘ + wheel zooms (browsers that report a trackpad pinch as Ctrl + wheel, such as Chrome, Edge and Firefox, zoom on a pinch too) between `minHourHeight` (30) and `maxHourHeight` (180); `onHourHeightChange(height)` fires when the gesture stops. Leave `hourHeight` out to let the zoom change it, or control it:
+
+```tsx
+const [hourHeight, setHourHeight] = useState(60);
+<Calendar
+  view="week"
+  pinchToZoom
+  hourHeight={hourHeight}
+  onHourHeightChange={setHourHeight}
+/>;
+```
+
+### Swipe navigation
+
+`swipeNavigation` (default `false`, as calendar-simple-native on web): a horizontal touch swipe of at least 50 px on Month or a time grid turns the period; swipe left for next (mirrored in RTL). Not in Schedule. While it is on, the view leaves only vertical panning to the browser, so horizontal scrolling and the browser's own pinch-zoom do not start on the calendar; a swipe that starts on a draggable event drags it instead.
+
+### Custom Days
+
+`customDays` is `1`–`7` (`CustomDaysCount`, default 3). Values from JavaScript are rounded and clamped to that range, so the view always draws.
 
 ### RTL Layout
 

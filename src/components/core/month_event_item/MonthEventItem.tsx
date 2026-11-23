@@ -49,6 +49,14 @@ interface MonthEventItemProps extends Pick<
   onClick?: (date: DateType) => void;
   onMoreClick?: (date: DateType, hiddenEvents: EventListType[]) => void;
   totalEvents?: number;
+  /**
+   * Roving focus (`keyboardNavigation`): `true` = the grid's one tab stop,
+   * `false` = focusable by the arrow keys only, `undefined` = every
+   * clickable cell is a tab stop.
+   */
+  tabStop?: boolean;
+  /** Called when the cell takes focus (roving focus follows it). */
+  onCellFocus?: (date: DateType) => void;
 }
 
 function MonthEventItem({
@@ -76,6 +84,8 @@ function MonthEventItem({
   renderEvent,
   renderDateCell,
   showMorePopover = true,
+  tabStop,
+  onCellFocus,
 }: MonthEventItemProps) {
   const { testId, config, colorScheme } = useCalendar();
   const messages = useMessages();
@@ -128,11 +138,21 @@ function MonthEventItem({
     <td
       style={style}
       data-testid={`${testId}-${date}-month-cell`}
+      data-date={dateObj.toISODate() ?? undefined}
       onClick={() => onClick?.(dateObj)}
-      tabIndex={onClick ? 0 : undefined}
+      onFocus={
+        onCellFocus
+          ? (e) => {
+              if (e.target === e.currentTarget) onCellFocus(dateObj);
+            }
+          : undefined
+      }
+      tabIndex={
+        tabStop === undefined ? (onClick ? 0 : undefined) : tabStop ? 0 : -1
+      }
       aria-label={
         onClick
-          ? formatDate(dateObj, DATE_FORMATS.MONTH_DAY_YEAR, locale)
+          ? `${formatDate(dateObj, DATE_FORMATS.MONTH_DAY_YEAR, locale)}, ${messages.eventCount(totalEvents)}`
           : undefined
       }
       onKeyDown={
@@ -296,10 +316,13 @@ function MonthChip({
   onEventClick,
   children,
 }: MonthChipProps) {
-  const move = useDayMove(item, { axis: "both", measure: measureMonthCell });
+  const { ref: chipRef, ...move } = useDayMove(item, {
+    axis: "both",
+    measure: measureMonthCell,
+  });
   return (
     <div
-      ref={move.ref}
+      ref={chipRef}
       role="button"
       tabIndex={0}
       className={cx(className, {
@@ -312,6 +335,7 @@ function MonthChip({
       title={title}
       aria-label={ariaLabel}
       aria-keyshortcuts={move.keyShortcuts}
+      aria-description={move.description}
       {...move.handlers}
       onClick={(e) => {
         e.stopPropagation();

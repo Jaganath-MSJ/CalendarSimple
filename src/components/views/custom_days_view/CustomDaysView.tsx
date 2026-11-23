@@ -16,6 +16,7 @@ import styles from "./CustomDaysView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
 import useMessages from "../../../hooks/useMessages";
 import useAutoScrollToNow from "../../../hooks/useAutoScrollToNow";
+import usePinchZoom from "../../../hooks/usePinchZoom";
 import useCalendarProps from "../../../hooks/useCalendarProps";
 import TimeColumn from "../../core/time_column/TimeColumn";
 import DayColumn from "../../core/day_column/DayColumn";
@@ -102,7 +103,10 @@ function CustomView(props: CustomViewProps) {
     },
   ) as DayEventLayout[][];
 
+  usePinchZoom(containerRef);
+  const { hourHeight } = useCalendar();
   useAutoScrollToNow(containerRef, {
+    scale: hourHeight / 60,
     enabled: !!autoScrollToCurrentTime,
     days: viewDays,
     minHour,
@@ -115,6 +119,7 @@ function CustomView(props: CustomViewProps) {
       aria-label={messages.nDaysView(customDays)}
       className={styles.customView}
       ref={containerRef}
+      data-calendar-scroll=""
       data-testid={`${testId}-custom-days-view`}
     >
       <div className={styles.stickyTopContainer}>

@@ -9,6 +9,7 @@ import Calendar, {
   type CalendarProps,
   type CalendarContentProps,
   CalendarProvider,
+  type CustomDaysCount,
 } from "../index";
 import { dateFn } from "../utils";
 
@@ -30,7 +31,7 @@ expectTypeOf<
   Parameters<NonNullable<P["renderEvent"]>>[0]
 >().toEqualTypeOf<MyEvent>();
 expectTypeOf<Parameters<NonNullable<P["onMoreClick"]>>[1]>().toEqualTypeOf<
-  MyEvent[] | undefined
+  MyEvent[]
 >();
 expectTypeOf<NonNullable<P["enrichedEventsByDate"]>>().toEqualTypeOf<
   Record<string, MyEvent[]>
@@ -71,7 +72,7 @@ export function JsxCases(myEvents: MyEvent[], plain: CalendarEvent[]) {
         }}
         renderEvent={(e) => e.room}
         onMoreClick={(_date, hidden) => {
-          expectTypeOf(hidden).toEqualTypeOf<MyEvent[] | undefined>();
+          expectTypeOf(hidden).toEqualTypeOf<MyEvent[]>();
         }}
         sortedMonthView={(a, b) => a.room - b.room}
       />
@@ -98,7 +99,7 @@ export function JsxCases(myEvents: MyEvent[], plain: CalendarEvent[]) {
         }}
         renderEvent={(e) => String(e.color)}
         onMoreClick={(_date, hidden) =>
-          expectTypeOf(hidden).toEqualTypeOf<CalendarEvent[] | undefined>()
+          expectTypeOf(hidden).toEqualTypeOf<CalendarEvent[]>()
         }
         sortedMonthView={(a, b) => {
           expectTypeOf(a).toEqualTypeOf<CalendarEvent>();
@@ -127,5 +128,25 @@ export function providerConfigTypes() {
     >
       {null}
     </CalendarProvider>
+  );
+}
+
+// Native parity: hiddenEvents is always passed to onMoreClick.
+expectTypeOf<
+  Parameters<NonNullable<CalendarProps["onMoreClick"]>>[1]
+>().toEqualTypeOf<CalendarEvent[]>();
+
+// customDays is 1–7 only.
+expectTypeOf<
+  NonNullable<CalendarProps["customDays"]>
+>().toEqualTypeOf<CustomDaysCount>();
+export function customDaysTypes() {
+  return (
+    <>
+      <Calendar view="customDays" customDays={7} />
+      {/* @ts-expect-error 8 days is outside 1–7 */}
+      <Calendar view="customDays" customDays={8} />
+      <Calendar testID="cal" />
+    </>
   );
 }

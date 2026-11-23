@@ -19,6 +19,7 @@ import {
   getContrastColor,
   handleKeyboardActivation,
   stripLayoutStyle,
+  paletteStyle,
 } from "../../../utils";
 import {
   CalendarContentProps,
@@ -146,8 +147,11 @@ function Popover({
   }, []);
 
   const handlePopoverKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // The popover is portaled, but React still bubbles its keys to the month
+    // cell (Enter/Space would click the day) and the grid (arrows would move
+    // the roving focus): keys inside the dialog stay inside it.
+    e.stopPropagation();
     if (e.key === KEYBOARD_SHORTCUTS.CLOSE) {
-      e.stopPropagation();
       handleClose();
       return;
     }
@@ -179,14 +183,32 @@ function Popover({
       )}
       className={cx(styles.popover, config.classNames?.root)}
       ref={popoverRef}
-      style={stylePosition}
+      style={{
+        ...paletteStyle(config.palette, colorScheme),
+        ...stylePosition,
+      }}
       onClick={(e) => e.stopPropagation()}
       onKeyDown={handlePopoverKeyDown}
       data-testid={`${testId}-popover-content`}
       data-color-scheme={colorScheme}
     >
       <div className={styles.popoverHeader}>
-        {formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH, config.locale)}
+        <span>
+          {formatDate(
+            dateObj,
+            DATE_FORMATS.DAY_DATE_SHORT_MONTH,
+            config.locale,
+          )}
+        </span>
+        <button
+          type="button"
+          className={styles.closeButton}
+          aria-label={messages.close}
+          data-testid={`${testId}-popover-close`}
+          onClick={handleClose}
+        >
+          ×
+        </button>
       </div>
       <div className={styles.popoverContent}>
         {events.map((item, idx) => {
@@ -243,6 +265,23 @@ function Popover({
             </div>
           );
         })}
+        {config.creatable && config.onSlotClick && (
+          <button
+            type="button"
+            className={styles.newEventButton}
+            aria-label={messages.newEvent}
+            data-testid={`${testId}-popover-new-event`}
+            onClick={() => {
+              handleClose();
+              config.onSlotClick?.(
+                getStartOfDay(dateObj).toJSDate(),
+                getStartOfDay(dateObj).endOf("day").toJSDate(),
+              );
+            }}
+          >
+            {`+ ${messages.newEvent}`}
+          </button>
+        )}
       </div>
     </div>
   );

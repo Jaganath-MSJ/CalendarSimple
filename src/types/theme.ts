@@ -91,3 +91,42 @@ export interface CalendarTheme extends ThemeScheme {
   /** Overrides applied only when the resolved scheme is "light". */
   light?: ThemeScheme;
 }
+
+/**
+ * Palette colours, with the same keys as calendar-simple-native. On web each
+ * key sets a CSS custom property on the calendar root (see `palette`).
+ */
+export interface CalendarPalette {
+  /** `--primary-color`: today marker, selection, primary actions. */
+  primary: string;
+  /** `--primary-hover`: hover / pressed primary. */
+  primaryStrong: string;
+  /** `--cal-on-primary`: text on `primary`. */
+  onPrimary: string;
+  /** `--text-primary`. */
+  textPrimary: string;
+  /** `--text-secondary`. */
+  textSecondary: string;
+  /** `--bg-color`: calendar background. */
+  bg: string;
+  /** `--bg-hover`: muted background (hover, headers). */
+  bgMuted: string;
+  /** `--border-color`. */
+  border: string;
+  /** `--cal-surface-raised`: popovers. */
+  surfaceRaised: string;
+  /** `--cal-focus-color`: focus ring. */
+  focus: string;
+  /** `--cal-event-default`: events without their own colour. */
+  eventDefault: string;
+  /** `--cal-now-line`: current-time line. */
+  nowLine: string;
+  /** `--cal-scrim`: dimmed backdrop (native sheets; no web element uses it yet). */
+  scrim: string;
+}
+
+/** Per-scheme palette overrides (`palette` prop). */
+export interface CalendarPaletteOverrides {
+  light?: Partial<CalendarPalette>;
+  dark?: Partial<CalendarPalette>;
+}

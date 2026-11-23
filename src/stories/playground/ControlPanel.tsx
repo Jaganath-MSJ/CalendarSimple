@@ -8,6 +8,7 @@ import type {
   CalendarClassNames,
 } from "../../";
 import { fixtureList } from "./TestFixtures";
+import { clampCustomDays } from "../../utils/customDays";
 import styles from "./ControlPanel.module.css";
 
 interface ControlPanelProps {
@@ -44,6 +45,10 @@ interface PanelState {
   selectable: boolean;
   creatable: boolean;
   draggable: boolean;
+  keyboardNavigation: boolean;
+  swipeNavigation: boolean;
+  pinchToZoom: boolean;
+  hourHeight: number;
   resizable: boolean;
   maxEvents: number | undefined;
   colorScheme: ColorScheme;
@@ -122,6 +127,10 @@ const DEFAULTS: PanelState = {
   selectable: false,
   creatable: false,
   draggable: false,
+  keyboardNavigation: true,
+  swipeNavigation: false,
+  pinchToZoom: false,
+  hourHeight: 60,
   resizable: false,
   maxEvents: undefined,
   colorScheme: "auto",
@@ -231,7 +240,7 @@ function toCalendarProps(s: PanelState): Partial<CalendarProps> {
   return {
     view: s.view,
     selectedDate: new Date(s.selectedDate),
-    customDays: s.customDays,
+    customDays: clampCustomDays(s.customDays),
     weekStartsOn: s.localeWeekStart ? "locale" : s.weekStartsOn,
     showMorePopover: s.showMorePopover,
     weekEndsOn: s.weekEndsOn,
@@ -251,6 +260,11 @@ function toCalendarProps(s: PanelState): Partial<CalendarProps> {
     selectable: s.selectable,
     creatable: s.creatable,
     draggable: s.draggable,
+    keyboardNavigation: s.keyboardNavigation,
+    swipeNavigation: s.swipeNavigation,
+    pinchToZoom: s.pinchToZoom,
+    // With pinch on, leave the height uncontrolled so the zoom shows.
+    hourHeight: s.pinchToZoom ? undefined : s.hourHeight,
     resizable: s.resizable,
     maxEvents: s.maxEvents,
     colorScheme: s.colorScheme,
@@ -387,6 +401,10 @@ const SECTION_KEYS: Record<SectionId, (keyof PanelState)[]> = {
     "selectable",
     "creatable",
     "draggable",
+    "keyboardNavigation",
+    "swipeNavigation",
+    "pinchToZoom",
+    "hourHeight",
     "resizable",
     "maxEvents",
   ],
@@ -733,7 +751,7 @@ export function ControlPanel({
           <RangeRow
             label="Custom Days"
             min={1}
-            max={10}
+            max={7}
             value={s.customDays}
             onChange={(v) => patch("customDays", v)}
           />
@@ -878,6 +896,31 @@ export function ControlPanel({
               onChange={(v) => patch("selectable", v)}
             />
           </Row>
+          <Row label="Keyboard Navigation">
+            <Toggle
+              checked={s.keyboardNavigation}
+              onChange={(v) => patch("keyboardNavigation", v)}
+            />
+          </Row>
+          <Row label="Swipe Navigation">
+            <Toggle
+              checked={s.swipeNavigation}
+              onChange={(v) => patch("swipeNavigation", v)}
+            />
+          </Row>
+          <Row label="Pinch To Zoom">
+            <Toggle
+              checked={s.pinchToZoom}
+              onChange={(v) => patch("pinchToZoom", v)}
+            />
+          </Row>
+          <RangeRow
+            label="Hour Height"
+            min={30}
+            max={180}
+            value={s.hourHeight}
+            onChange={(v) => patch("hourHeight", v)}
+          />
           <Row label="Draggable">
             <Toggle
               checked={s.draggable}

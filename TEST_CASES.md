@@ -234,6 +234,20 @@ Use the "Drag and Resize" stories (they apply each change to `events` and print 
 - **Recurring**: In "Recurring Occurrence", move one occurrence; the log names the series and only that day moves.
 - **Inert without callbacks**: With `draggable` but no `onEventDrop` (or `resizable` without `onEventResize`), events keep the normal pointer, do not move and show no resize edges.
 
+### 1.25 Parity with calendar-simple-native
+
+- **Month keys**: Tab into the month: only the selected day takes focus. ← → move a day, ↑ ↓ a week, Home / End the row, PageDown the next month (focus stays on the same day), T today. RTL: ← moves to the next day.
+- **Time-grid keys**: In Week, click an empty area of the grid, then PageDown / → (next week), PageUp / ← (previous), T (today). Ctrl+PageDown and typing in a custom input do nothing.
+- **Schedule keys**: ↑ / ↓ move between rows; PageDown does nothing; T scrolls to today.
+- **keyboardNavigation={false}**: every month cell is a tab stop again and the keys do nothing.
+- **Popover**: "+N more" popover shows × (closes it); with `creatable` + `onSlotClick`, "+ New event" calls `onSlotClick(day 00:00, day 23:59:59)` and closes.
+- **Labels**: A month cell reads "Nov 10, 2026, 3 events"; the loading skeleton is announced as "Loading events"; a draggable event describes "Move 15 minutes earlier…".
+- **Palette**: `palette={{ light: { primary: "#7c3aed", nowLine: "#16a34a" } }}`: today marker purple, current-time line green; in dark mode only the `dark` entry applies.
+- **Hour height**: `hourHeight={120}`: hours twice as tall; drag 60 px = 30 minutes; the current-time line and auto-scroll follow.
+- **Zoom**: `pinchToZoom`: Ctrl/⌘ + wheel (and a trackpad pinch in Chrome / Edge / Firefox) zooms between 30 and 180 px per hour, keeping the time at the top of the view; check Safari separately; `onHourHeightChange` fires once when you stop.
+- **Swipe**: On a touch device with `swipeNavigation`, swipe left = next period, right = previous (mirrored in RTL); vertical scrolling still works; nothing in Schedule.
+- **customDays**: `customDays={7}` shows 7 days; a JavaScript value of 12 shows 7 and 0 shows 1.
+
 > Typed events (`Calendar<TEvent>`, `useCalendar<TEvent>()`) are compile-time only; they are covered by `src/types/generics.test-d.tsx` (checked by `npm run lint`).
 
 ---

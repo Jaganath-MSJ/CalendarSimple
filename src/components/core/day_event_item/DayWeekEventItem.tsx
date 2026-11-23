@@ -52,15 +52,19 @@ export function DayWeekEventItem({
   renderEvent,
   day,
 }: DayWeekEventItemProps) {
-  const { testId, config, state } = useCalendar();
+  const { testId, config, state, hourHeight } = useCalendar();
+  // Layout is in minutes; the grid draws hourHeight px per hour.
+  const scale = hourHeight / 60;
+  const topPx = item.top * scale;
+  const heightPx = item.height * scale;
   const messages = useMessages();
   const locale = config.locale;
   const tooltipText = generateTooltipText(item.event, "day", is12Hour, locale);
 
   const isSmall =
-    item.height < LAYOUT_CONSTANTS.SMALL_EVENT_HEIGHT &&
-    item.height >= LAYOUT_CONSTANTS.TINY_EVENT_HEIGHT;
-  const isTiny = item.height < LAYOUT_CONSTANTS.TINY_EVENT_HEIGHT;
+    heightPx < LAYOUT_CONSTANTS.SMALL_EVENT_HEIGHT &&
+    heightPx >= LAYOUT_CONSTANTS.TINY_EVENT_HEIGHT;
+  const isTiny = heightPx < LAYOUT_CONSTANTS.TINY_EVENT_HEIGHT;
 
   const eventBgColor =
     item.event.style?.backgroundColor || LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
@@ -119,14 +123,14 @@ export function DayWeekEventItem({
       const columns = Array.from(row.children).filter(
         (c) => c.getAttribute("data-testid") === column.dataset.testid,
       );
-      const gridHeight = (maxHour - minHour) * 60;
+      const gridHeight = (maxHour - minHour) * 60 * scale;
       return {
         cellWidth: column.getBoundingClientRect().width,
         columnIndex: columns.indexOf(column),
         columnCount: columns.length,
-        stepPx: snap,
+        stepPx: snap * scale,
         yBounds: isOneDay
-          ? { min: -item.top, max: gridHeight - item.top - item.height }
+          ? { min: -topPx, max: gridHeight - topPx - heightPx }
           : undefined,
       };
     },
@@ -139,7 +143,7 @@ export function DayWeekEventItem({
     config.minEventDurationMinutes ??
     defaultCalendarProps.minEventDurationMinutes;
   const canResize = canDrag(config.resizable, event, config.onEventResize);
-  const gridHeight = (maxHour - minHour) * 60;
+  const gridHeight = (maxHour - minHour) * 60 * scale;
 
   /** Reports the event with its `edge` moved by wall-clock `minutes`. */
   const resizeBy = (edge: ResizeEdge, minutes: number) => {
@@ -167,14 +171,14 @@ export function DayWeekEventItem({
     cellWidth: 0,
     columnIndex: 0,
     columnCount: 1,
-    stepPx: resizeSnap,
+    stepPx: resizeSnap * scale,
     yBounds: { min, max },
   });
   const top = useEventDrag({
     enabled: canResize,
     axis: "y",
     reversed,
-    measure: resizeMeasure(-item.top, item.height - minLength),
+    measure: resizeMeasure(-topPx, heightPx - minLength * scale),
     onCommit: (_c, steps) => resizeBy("top", steps * resizeSnap),
   });
   const bottom = useEventDrag({
@@ -182,8 +186,8 @@ export function DayWeekEventItem({
     axis: "y",
     reversed,
     measure: resizeMeasure(
-      minLength - item.height,
-      gridHeight - item.top - item.height,
+      minLength * scale - heightPx,
+      gridHeight - topPx - heightPx,
     ),
     onCommit: (_c, steps) => resizeBy("bottom", steps * resizeSnap),
   });
@@ -235,8 +239,8 @@ export function DayWeekEventItem({
           backgroundColor: "var(--cal-event-default)",
           color: textColor,
           ...stripLayoutStyle(item.event.style),
-          top: `${item.top + topShift}px`,
-          height: `${item.height + heightShift}px`,
+          top: `${topPx + topShift}px`,
+          height: `${heightPx + heightShift}px`,
           insetInlineStart: `${item.left}%`,
           zIndex: item.zIndex,
           "--event-width": `${item.width}%`,
@@ -255,6 +259,24 @@ export function DayWeekEventItem({
         ]
           .filter(Boolean)
           .join(" ") || undefined
+      }
+      aria-description={
+        [
+          ...(canMove
+            ? [
+                messages.moveEarlier(snap),
+                messages.moveLater(snap),
+                messages.movePreviousDay,
+                messages.moveNextDay,
+              ]
+            : []),
+          ...(canResize
+            ? [
+                messages.makeLonger(resizeSnap),
+                messages.makeShorter(resizeSnap),
+              ]
+            : []),
+        ].join(". ") || undefined
       }
       onPointerDown={move.handlers.onPointerDown}
       onClickCapture={(e) => {
@@ -281,7 +303,7 @@ export function DayWeekEventItem({
         </>
       )}
       {canResize &&
-        item.height >= MIN_RESIZE_HEIGHT &&
+        heightPx >= MIN_RESIZE_HEIGHT &&
         (["top", "bottom"] as const)
           .filter(
             (edge) =>

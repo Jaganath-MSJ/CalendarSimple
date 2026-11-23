@@ -35,6 +35,17 @@ export const DEFAULT_MESSAGES: CalendarMessages = {
   dayOfTotal: (i, n) => `(Day ${i}/${n})`,
   eventsOn: (d) => `Events on ${d}`,
   createEventAt: (t, d) => `Create event at ${t}, ${d}`,
+  close: "Close",
+  newEvent: "New event",
+  loading: "Loading events",
+  eventCount: (n) =>
+    n === 0 ? "no events" : n === 1 ? "1 event" : `${n} events`,
+  moveEarlier: (m) => `Move ${m} minutes earlier`,
+  moveLater: (m) => `Move ${m} minutes later`,
+  movePreviousDay: "Move to the previous day",
+  moveNextDay: "Move to the next day",
+  makeLonger: (m) => `Make ${m} minutes longer`,
+  makeShorter: (m) => `Make ${m} minutes shorter`,
 };
 
 /**

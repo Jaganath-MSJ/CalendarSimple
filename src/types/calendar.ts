@@ -3,7 +3,14 @@
  */
 import { ReactNode } from "react";
 import { CalendarEvent } from "./events";
-import { CalendarTheme, CalendarClassNames } from "./theme";
+import {
+  CalendarTheme,
+  CalendarClassNames,
+  CalendarPaletteOverrides,
+} from "./theme";
+
+/** Days the Custom Days view can show. */
+export type CustomDaysCount = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 /** Color palette modes accepted by `CalendarProps.colorScheme`. */
 export type ColorScheme = "light" | "dark" | "auto";
@@ -99,6 +106,8 @@ export interface CalendarProps<TEvent extends CalendarEvent = CalendarEvent> {
   view?: ECalendarViewType;
   /** `data-testid` attribute placed on the root element for testing. */
   testId?: string;
+  /** Alias of `testId` (the calendar-simple-native name); `testId` wins when both are set. */
+  testID?: string;
 
   // --- Loading State ---
   /**
@@ -124,6 +133,30 @@ export interface CalendarProps<TEvent extends CalendarEvent = CalendarEvent> {
   selectable?: boolean;
   /** Maximum number of events shown per day cell before a "+N more" overflow link appears. */
   maxEvents?: number;
+  /**
+   * Keyboard navigation (as calendar-simple-native): Month has one tab stop
+   * and ← → ↑ ↓, Home / End, PageUp / PageDown (Shift: a year) and T move
+   * between days; the time grids turn the period with PageUp / PageDown and
+   * ← / →; Schedule moves between rows with ↑ / ↓. T goes to today.
+   * Defaults to `true`.
+   */
+  keyboardNavigation?: boolean;
+  /**
+   * Pixels per hour in the Day / Week / Custom Days grids (default 60). Set
+   * it to control the zoom (update it from `onHourHeightChange`); leave it
+   * out to let `pinchToZoom` change it.
+   */
+  hourHeight?: number;
+  /** Smallest hour height a pinch reaches (default 30). */
+  minHourHeight?: number;
+  /** Largest hour height a pinch reaches (default 180). */
+  maxHourHeight?: number;
+  /** A zoom gesture (Ctrl/⌘ + wheel) ended at a new hour height. */
+  onHourHeightChange?: (hourHeight: number) => void;
+  /** Swipe left / right on touch screens to turn the period in Month and the time grids (mirrored in RTL; not in Schedule). Default `false`, as calendar-simple-native on web. */
+  swipeNavigation?: boolean;
+  /** Zoom the time grids with Ctrl/⌘ + wheel (a trackpad pinch where the browser reports it that way). Default `false`. */
+  pinchToZoom?: boolean;
   /** Open the built-in popover when "+N more" is activated in Month view. Set `false` to handle it yourself via `onMoreClick`. Defaults to `true`. */
   showMorePopover?: boolean;
   /** Switches weekday names between long and short. */
@@ -152,8 +185,8 @@ export interface CalendarProps<TEvent extends CalendarEvent = CalendarEvent> {
   showAdjacentMonths?: boolean;
   /** Show ISO week numbers in the leftmost column of the month grid. */
   showWeekNumbers?: boolean;
-  /** Number of days shown in the CustomDays view. */
-  customDays?: number;
+  /** Number of days shown in the Custom Days view: 1–7 (default 3). Other values from JavaScript are rounded and clamped. */
+  customDays?: CustomDaysCount;
   /** Reset the selected date to today when switching views. */
   resetDateOnViewChange?: boolean;
   /** Show the all-day event banner row in Week / Day views. */
@@ -191,7 +224,7 @@ export interface CalendarProps<TEvent extends CalendarEvent = CalendarEvent> {
   /** Called when an event chip is clicked. */
   onEventClick?: (event: NoInferCompat<TEvent>) => void;
   /** Called when the "+N more" overflow link is clicked. Receives the date and the hidden events. */
-  onMoreClick?: (date: Date, hiddenEvents?: NoInferCompat<TEvent>[]) => void;
+  onMoreClick?: (date: Date, hiddenEvents: NoInferCompat<TEvent>[]) => void;
   /** Called when the calendar navigates to a different date. */
   onNavigate?: (date: Date) => void;
   /** Called when the user switches views. */
@@ -213,6 +246,12 @@ export interface CalendarProps<TEvent extends CalendarEvent = CalendarEvent> {
   // --- Appearance ---
   /** Color theme overrides for selected, today, and default states. */
   theme?: CalendarTheme;
+  /**
+   * Palette overrides per scheme, with calendar-simple-native's keys
+   * (`primary`, `bg`, `nowLine`…). Each key sets a CSS custom property on the
+   * calendar root (and the "+N more" popover). `theme` still wins.
+   */
+  palette?: CalendarPaletteOverrides;
   /** CSS class name overrides for individual calendar elements. */
   classNames?: CalendarClassNames;
 
@@ -252,8 +291,7 @@ export interface CalendarProps<TEvent extends CalendarEvent = CalendarEvent> {
   isEventOrderingEnabled?: boolean;
   /** Sort events within Month view cells. Pass `true` for default sort or a comparator for custom order. */
   sortedMonthView?:
-    | boolean
-    | ((a: NoInferCompat<TEvent>, b: NoInferCompat<TEvent>) => number);
+    boolean | ((a: NoInferCompat<TEvent>, b: NoInferCompat<TEvent>) => number);
 
   // --- Localization ---
   /** Luxon locale code (e.g. `'en'`, `'fr'`, `'es-MX'`). Controls date formatting language. */
@@ -331,6 +369,27 @@ export interface CalendarMessages {
   eventsOn: (date: string) => string;
   /** "Create event at 14:00, March 4" */
   createEventAt: (time: string, date: string) => string;
+  // --- Shared with calendar-simple-native (same keys and English wording) ---
+  /** Label of a close button ("Close"). */
+  close: string;
+  /** "+ New event" action in the day's "+N more" popover (`creatable`). */
+  newEvent: string;
+  /** Label of the loading skeleton ("Loading events"). */
+  loading: string;
+  /** "no events", "1 event", "3 events": the month cell label. */
+  eventCount: (n: number) => string;
+  /** "Move 15 minutes earlier" (draggable event). */
+  moveEarlier: (minutes: number) => string;
+  /** "Move 15 minutes later" (draggable event). */
+  moveLater: (minutes: number) => string;
+  /** "Move to the previous day" (draggable event). */
+  movePreviousDay: string;
+  /** "Move to the next day" (draggable event). */
+  moveNextDay: string;
+  /** "Make 15 minutes longer" (resizable event). */
+  makeLonger: (minutes: number) => string;
+  /** "Make 15 minutes shorter" (resizable event). */
+  makeShorter: (minutes: number) => string;
 }
 
 /**
@@ -368,6 +427,11 @@ export interface CalendarContentProps<
   | "sortedMonthView"
   | "testId"
   | "locale"
+  | "keyboardNavigation"
+  | "pinchToZoom"
+  | "swipeNavigation"
+  | "minHourHeight"
+  | "maxHourHeight"
   | "dragSnapMinutes"
   | "resizeSnapMinutes"
   | "minEventDurationMinutes"

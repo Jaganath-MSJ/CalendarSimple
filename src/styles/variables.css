@@ -16,6 +16,8 @@
   --cal-on-primary: #ffffff;
   --cal-event-default: #3b82f6;
   --cal-surface-raised: #ffffff;
+  --cal-now-line: #ea4335;
+  --cal-scrim: rgba(17, 24, 39, 0.45);
 }
 
 /*
@@ -38,6 +40,8 @@
   --cal-on-primary: #111827;
   --cal-event-default: #3b82f6;
   --cal-surface-raised: #374151;
+  --cal-now-line: #ea4335;
+  --cal-scrim: rgba(0, 0, 0, 0.55);
 }
 
 /* Keyboard focus indicators */

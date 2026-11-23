@@ -65,6 +65,7 @@ export const KitchenSink: Story = {
             }
             onEventDrop={(info) => console.log("onEventDrop", info)}
             onEventResize={(info) => console.log("onEventResize", info)}
+            onHourHeightChange={(h) => console.log("onHourHeightChange", h)}
           />
         </div>
 

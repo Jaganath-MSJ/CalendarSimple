@@ -1,4 +1,11 @@
-import React, { CSSProperties, useCallback, useMemo } from "react";
+import React, {
+  CSSProperties,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import cx from "classnames";
 import { CalendarContentProps } from "../../../types";
 import {
@@ -14,7 +21,14 @@ import {
   formatDate,
   getDayListNames,
   getRowWeekNumber,
+  getMonthKeyTarget,
+  isVisibleWeekday,
+  resolveDirection,
 } from "../../../utils";
+import {
+  isTypingTarget,
+  useNavigate,
+} from "../../../hooks/usePeriodNavigation";
 import useMonthGrid from "../../../hooks/useMonthGrid";
 import MonthEventItem from "../../core/month_event_item/MonthEventItem";
 import styles from "./MonthView.module.css";
@@ -81,6 +95,67 @@ function MonthView(props: MonthViewProps) {
   const { state, dispatch, testId, bodySize } = useCalendar();
   const { selectedDate } = state;
 
+  // Roving focus (keyboardNavigation): one tab stop, arrows move it.
+  const { keyboardNavigation, direction } = useCalendarProps({});
+  const navigate = useNavigate();
+  const [roving, setRoving] = useState<DateType | null>(null);
+  // As calendar-simple-native: the focused day, else the selected day, else
+  // today, else the 1st, moved past weekdays the grid hides (work weeks).
+  const rovingDay = useMemo(() => {
+    const inMonth = (d: DateType | null): d is DateType =>
+      d !== null && d.hasSame(selectedDate, "month");
+    const today = dateFn();
+    const firstOfMonth = selectedDate.startOf("month");
+    let day = inMonth(roving)
+      ? roving
+      : inMonth(selectedDate)
+        ? selectedDate
+        : inMonth(today)
+          ? today
+          : firstOfMonth;
+    for (
+      let i = 0;
+      i < 7 && !isVisibleWeekday(day, weekStartsOn, weekEndsOn);
+      i++
+    ) {
+      day = day.plus({ days: 1 });
+    }
+    return day.startOf("day");
+  }, [roving, selectedDate, weekStartsOn, weekEndsOn]);
+  const tableRef = useRef<HTMLTableElement>(null);
+  const pendingFocus = useRef<string | null>(null);
+  useEffect(() => {
+    const iso = pendingFocus.current;
+    if (!iso) return;
+    pendingFocus.current = null;
+    tableRef.current
+      ?.querySelector<HTMLElement>(`[data-date="${iso}"]`)
+      ?.focus();
+  });
+  const onGridKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.defaultPrevented || isTypingTarget(e.target)) return;
+    // Grid keys belong to the day cells; chips and "+N more" keep theirs.
+    const target0 = e.target as HTMLElement;
+    if (!target0.matches?.("td[data-date]")) return;
+    const target = getMonthKeyTarget(e, rovingDay, {
+      weekStartsOn,
+      weekEndsOn,
+      flip: resolveDirection(direction, locale) === "rtl",
+      today: dateFn(),
+    });
+    if (!target) return;
+    e.preventDefault();
+    setRoving(target);
+    pendingFocus.current = target.toISODate();
+    if (!target.hasSame(selectedDate, "month")) navigate(target);
+    else {
+      tableRef.current
+        ?.querySelector<HTMLElement>(`[data-date="${pendingFocus.current}"]`)
+        ?.focus();
+      pendingFocus.current = null;
+    }
+  };
+
   const calendarGrid = useMonthGrid(
     selectedDate,
     events,
@@ -143,6 +218,7 @@ function MonthView(props: MonthViewProps) {
   return (
     <div className={styles.monthView} data-testid={`${testId}-month-view`}>
       <table
+        ref={tableRef}
         className={cx(styles.table, classNames?.table)}
         aria-label={tableAriaLabel}
         style={
@@ -173,7 +249,10 @@ function MonthView(props: MonthViewProps) {
             ))}
           </tr>
         </thead>
-        <tbody className={styles.tableBody}>
+        <tbody
+          className={styles.tableBody}
+          onKeyDown={keyboardNavigation ? onGridKeyDown : undefined}
+        >
           {calendarGrid.map((week, weekIndex) => {
             const isRowEntirelyAdjacent = week.every((d) => !d.isCurrentMonth);
 
@@ -230,6 +309,12 @@ function MonthView(props: MonthViewProps) {
                     renderEvent={renderEvent}
                     renderDateCell={renderDateCell}
                     showMorePopover={showMorePopover}
+                    tabStop={
+                      keyboardNavigation
+                        ? dayInfo.currentDate.hasSame(rovingDay, "day")
+                        : undefined
+                    }
+                    onCellFocus={keyboardNavigation ? setRoving : undefined}
                   />
                 ))}
               </tr>
