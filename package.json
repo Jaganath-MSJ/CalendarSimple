@@ -3,7 +3,7 @@
   "version": "2.1.0",
   "type": "module",
   "description": "A user-friendly calendar app for viewing, selecting, and managing dates with data management capabilities.",
-  "main": "./dist/index.cjs.js",
+  "main": "./dist/index.cjs",
   "module": "./dist/index.es.js",
   "types": "./dist/src/index.d.ts",
   "files": [
@@ -11,9 +11,14 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
-      "import": "./dist/index.es.js",
-      "require": "./dist/index.cjs.js"
+      "import": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/index.es.js"
+      },
+      "require": {
+        "types": "./dist/cjs-types/index.d.ts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./dist/styles.css": "./dist/calendar-simple.css"
   },
@@ -25,7 +30,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && node scripts/cjs-types.mjs",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "lint": "tsc --noEmit && tsc --noEmit -p e2e && eslint src",

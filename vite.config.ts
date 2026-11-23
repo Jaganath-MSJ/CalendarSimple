@@ -4,6 +4,7 @@ import { configDefaults } from "vitest/config";
 import dts from "vite-plugin-dts";
 import { visualizer } from "rollup-plugin-visualizer";
 import { resolve } from "path";
+import { libFileName } from "./scripts/lib-file-name.mjs";
 
 export default defineConfig({
   build: {
@@ -11,10 +12,7 @@ export default defineConfig({
       entry: resolve(import.meta.dirname, "src/index.ts"),
       name: "calendar-simple", // Replace with your library name
       formats: ["cjs", "es", "iife"],
-      fileName: (format) => {
-        const ext = format === "iife" ? "iife.js" : `${format}.js`;
-        return `index.${ext}`;
-      },
+      fileName: libFileName,
     },
     rollupOptions: {
       // Externalize dependencies that shouldn't be bundled

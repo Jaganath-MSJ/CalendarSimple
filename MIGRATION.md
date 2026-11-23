@@ -85,6 +85,11 @@ const event = {
 - With `autoScrollToCurrentTime`, the mount scroll now goes to the first day on/after today that has events (before: only if today itself had events).
 - New `onDateRangeChange(start, end, view)` prop.
 
+### CommonJS build (v2.2)
+
+- The CommonJS bundle is now `dist/index.cjs` (was `dist/index.cjs.js`). Because the package is `"type": "module"`, Node read the old `.js` file as an ES module, so `require("calendar-simple")` returned no exports. `require()` now works, and `main` / `exports` point to the new file; only code that imported `dist/index.cjs.js` by path needs updating.
+- `require()` users also get CommonJS type declarations (`dist/cjs-types`), so TypeScript with `module: node16`/`nodenext` accepts the import from a CommonJS file.
+
 ### Parity with calendar-simple-native (v2.2)
 
 - `customDays` is now typed `1 | 2 | … | 7` (`CustomDaysCount`). A wider `number` is a TypeScript error; at runtime values are rounded and clamped to 1–7. Before, 8–10 drew 8–10 days (now 7) and values outside 1–10 drew nothing (now 1 or 7).
