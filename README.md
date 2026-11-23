@@ -9,6 +9,21 @@ A lightweight, customizable, and accessible calendar component for React. Built 
 
 **[Live Demo](https://jaganath-msj.github.io/CalendarSimple/)**
 
+<p align="center">
+  <img src=".github/assets/demo/views.gif" alt="Switching between the Month, Week, Day and Schedule views" width="720" />
+</p>
+
+<p align="center">
+  <img src=".github/assets/demo/drag-and-resize.gif" alt="Dragging an event to another day and time, then resizing another event from its bottom edge" width="720" />
+</p>
+
+<table>
+  <tr>
+    <td align="center"><img src=".github/assets/demo/dark-mode.gif" alt="The month view switching between light and dark mode" width="400" /><br /><sub>Light and dark mode</sub></td>
+    <td align="center"><img src=".github/assets/demo/localization.gif" alt="The month view in English, German and Arabic (right-to-left)" width="400" /><br /><sub>Localization and right-to-left</sub></td>
+  </tr>
+</table>
+
 Using React Native? See [calendar-simple-native](https://www.npmjs.com/package/calendar-simple-native).
 
 ## Features
@@ -251,6 +266,8 @@ const events = [
 **Upgrading:** `rrule`, `exdates`, `recurringEventId` and `occurrenceDate` on events are now interpreted by the calendar. If you already expand series yourself, either remove `rrule` from the occurrences you pass, or keep `recurringEventId` on them; the calendar leaves events with `recurringEventId` alone. A non-string `rrule` is ignored at runtime, but the TypeScript types now expect a string.
 
 ### Drag & resize
+
+<img src=".github/assets/demo/drag-and-resize.gif" alt="Dragging an event to another day and time, then resizing another event from its bottom edge" width="560" />
 
 Turn on `draggable` (and `resizable` for time grids) and handle the callbacks. **The calendar never changes `events` itself:** apply the new times in your state and pass the updated `events` back.
 
