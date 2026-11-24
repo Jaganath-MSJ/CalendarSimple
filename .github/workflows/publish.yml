@@ -17,7 +17,7 @@ jobs:
       id-token: write # to enable use of OIDC for npm trusted publishing and provenance
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false # we'll use a PAT or GITHUB_TOKEN for pushing
