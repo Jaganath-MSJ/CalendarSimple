@@ -10,6 +10,7 @@ import {
   DATE_FORMATS,
   CALENDAR_ACTIONS,
   VIEW_OPTIONS,
+  resolveMessages,
 } from "../../constants";
 import {
   dateFn,
@@ -21,6 +22,11 @@ import {
   getMonth,
   getYear,
   getMonthList,
+  getVisibleWeekDays,
+  getRowWeekNumber,
+  getLastEventDay,
+  getNavigatedDate,
+  clampCustomDays,
 } from "../../utils";
 import styles from "./Header.module.css";
 import LeftArrow from "../../assets/LeftArrow";
@@ -67,10 +73,13 @@ function Header(props: HeaderProps) {
     localeMessages,
     classNames,
     showWeekNumbers,
+    weekStartsOn,
+    weekEndsOn,
   } = useCalendarProps(props) as CalendarContentProps & {
     headerClassName?: string;
   };
 
+  const messages = resolveMessages(localeMessages);
   const finalHeaderClassName = props.headerClassName || classNames?.header;
   const { state, dispatch, testId } = useCalendar();
   const { selectedDate, view } = state;
@@ -79,22 +88,10 @@ function Header(props: HeaderProps) {
     const isAdd = option === EMonthOption.add;
     dispatch({ type: isAdd ? CALENDAR_ACTIONS.NEXT : CALENDAR_ACTIONS.PREV });
 
-    const unit = (view === ECalendarViewType.schedule ? "day" : view) as
-      | "day"
-      | "week"
-      | "month"
-      | "year";
-
-    let predictiveDate;
-    if (view === ECalendarViewType.customDays) {
-      predictiveDate = isAdd
-        ? selectedDate.plus({ days: customDays || 3 })
-        : selectedDate.minus({ days: customDays || 3 });
-    } else {
-      predictiveDate = isAdd
-        ? selectedDate.plus({ [unit]: 1 })
-        : selectedDate.minus({ [unit]: 1 });
-    }
+    const predictiveDate = getNavigatedDate(
+      { selectedDate, view, customDays },
+      isAdd ? 1 : -1,
+    );
 
     onNavigate?.(convertToDate(predictiveDate));
   };
@@ -127,17 +124,20 @@ function Header(props: HeaderProps) {
   };
 
   const getHeaderTitle = () => {
-    const weekSuffix =
-      view === ECalendarViewType.week && showWeekNumbers
-        ? `  ·  W${selectedDate.weekNumber}`
-        : "";
-
     if (view === ECalendarViewType.day) {
       return formatDate(selectedDate, DATE_FORMATS.MONTH_DAY_YEAR, locale);
     }
     if (view === ECalendarViewType.week) {
-      const startOfWeek = selectedDate.startOf("week");
-      const endOfWeek = selectedDate.endOf("week");
+      const days = getVisibleWeekDays(
+        selectedDate,
+        weekStartsOn ?? 0,
+        weekEndsOn ?? 6,
+      );
+      const startOfWeek = days[0];
+      const endOfWeek = days[days.length - 1];
+      const weekSuffix = showWeekNumbers
+        ? `  ·  ${messages.weekNumber(getRowWeekNumber(startOfWeek))}`
+        : "";
       let baseString;
       if (startOfWeek.month !== endOfWeek.month) {
         if (startOfWeek.year !== endOfWeek.year) {
@@ -146,7 +146,7 @@ function Header(props: HeaderProps) {
           baseString = `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH, locale)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
         }
       } else {
-        baseString = formatDate(selectedDate, DATE_FORMATS.MONTH_YEAR, locale);
+        baseString = formatDate(startOfWeek, DATE_FORMATS.MONTH_YEAR, locale);
       }
       return `${baseString}${weekSuffix}`;
     }
@@ -171,7 +171,7 @@ function Header(props: HeaderProps) {
 
         events.forEach((event) => {
           const sd = dateFn(event.startDate);
-          const ed = event.endDate ? dateFn(event.endDate) : sd;
+          const ed = getLastEventDay(event);
           if (sd < minDate) minDate = sd;
           if (ed > maxDate) maxDate = ed;
         });
@@ -193,40 +193,45 @@ function Header(props: HeaderProps) {
       className={cx(styles.header, finalHeaderClassName)}
       data-testid={`${testId}-header`}
     >
-      <nav className={styles.navigation} aria-label="Calendar navigation">
+      <nav
+        className={styles.navigation}
+        aria-label={messages.calendarNavigation}
+      >
         <button
           className={styles.todayButton}
           data-testid={`${testId}-header-today-btn`}
-          aria-label={localeMessages?.today || "Today"}
+          aria-label={messages.today}
           onClick={() => {
             dispatch({ type: CALENDAR_ACTIONS.TODAY });
             onNavigate?.(convertToDate(dateFn()));
           }}
         >
-          {localeMessages?.today || "Today"}
+          {messages.today}
         </button>
-        <div className={styles.arrows}>
-          <button
-            className={styles.iconButton}
-            data-testid={`${testId}-header-prev-btn`}
-            aria-label="Previous period"
-            onClick={() => onMonthArrowClick(EMonthOption.sub)}
-          >
-            <span className={styles.iconButtonIcon}>
-              <LeftArrow />
-            </span>
-          </button>
-          <button
-            className={styles.iconButton}
-            data-testid={`${testId}-header-next-btn`}
-            aria-label="Next period"
-            onClick={() => onMonthArrowClick(EMonthOption.add)}
-          >
-            <span className={styles.iconButtonIcon}>
-              <RightArrow />
-            </span>
-          </button>
-        </div>
+        {view !== ECalendarViewType.schedule && (
+          <div className={styles.arrows}>
+            <button
+              className={styles.iconButton}
+              data-testid={`${testId}-header-prev-btn`}
+              aria-label={messages.previous}
+              onClick={() => onMonthArrowClick(EMonthOption.sub)}
+            >
+              <span className={styles.iconButtonIcon}>
+                <LeftArrow />
+              </span>
+            </button>
+            <button
+              className={styles.iconButton}
+              data-testid={`${testId}-header-next-btn`}
+              aria-label={messages.next}
+              onClick={() => onMonthArrowClick(EMonthOption.add)}
+            >
+              <span className={styles.iconButtonIcon}>
+                <RightArrow />
+              </span>
+            </button>
+          </div>
+        )}
         <h2 className={styles.dateTitle}>{getHeaderTitle()}</h2>
       </nav>
 
@@ -235,18 +240,17 @@ function Header(props: HeaderProps) {
           className={styles.select}
           value={view}
           data-testid={`${testId}-header-view-select`}
-          aria-label="Select calendar view"
+          aria-label={messages.selectView}
           onChange={onViewDropdownClick}
         >
           {VIEW_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
-              {localeMessages?.[option.value as keyof typeof localeMessages] ||
-                option.label}
+              {messages[option.value]}
             </option>
           ))}
-          {customDays && customDays > 0 && customDays < 11 && (
-            <option key={customDays} value={ECalendarViewType.customDays}>
-              {customDays} {localeMessages?.days || "Days"}
+          {customDays !== undefined && (
+            <option key="customDays" value={ECalendarViewType.customDays}>
+              {clampCustomDays(customDays)} {messages.days}
             </option>
           )}
         </select>
@@ -256,7 +260,7 @@ function Header(props: HeaderProps) {
           name={CALENDAR_STRINGS.MONTH}
           value={getMonth(selectedDate)}
           data-testid={`${testId}-header-month-select`}
-          aria-label="Select month"
+          aria-label={messages.selectMonth}
           onChange={(e) => onDropdownClick(e, EYearOption.month)}
         >
           {getMonthList(locale).map((month: MonthListType) => (
@@ -271,7 +275,7 @@ function Header(props: HeaderProps) {
           name={CALENDAR_STRINGS.YEAR}
           value={getYear(selectedDate)}
           data-testid={`${testId}-header-year-select`}
-          aria-label="Select year"
+          aria-label={messages.selectYear}
           onChange={(e) => onDropdownClick(e, EYearOption.year)}
         >
           {getYearList(

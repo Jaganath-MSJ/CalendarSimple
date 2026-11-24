@@ -102,6 +102,31 @@ describe("DayColumn Component", () => {
     expect(slotDate.minute).toBe(0);
   });
 
+  it.each([
+    [false, "14:00"],
+    [true, "2:00 PM"],
+  ])("slot aria-label honours is12Hour=%s", (is12Hour, expected) => {
+    render(
+      <CalendarProvider
+        initialDate={dateFn()}
+        initialView={ECalendarViewType.week}
+      >
+        <DayColumn
+          {...defaultProps}
+          dayEvents={[]}
+          is12Hour={is12Hour}
+          minHour={14}
+          maxHour={15}
+          creatable
+          onSlotClick={vi.fn()}
+        />
+      </CalendarProvider>,
+    );
+    expect(screen.getByRole("button").getAttribute("aria-label")).toContain(
+      expected,
+    );
+  });
+
   it("fires onSlotClick with correct start and end dates when creatable=true and a slot is clicked", () => {
     const onSlotClick = vi.fn();
     const date = dateFn("2024-03-01T00:00:00");
@@ -169,6 +194,7 @@ describe("DayColumn Component", () => {
       >
         <DayColumn
           {...defaultProps}
+          is12Hour
           dayEvents={[]}
           minHour={8}
           maxHour={9}

@@ -77,10 +77,10 @@ describe("View Component", () => {
     expect(screen.getByTestId("custom-days-view")).toBeInTheDocument();
   });
 
-  it("returns null for CustomDaysView when customDays is invalid", () => {
+  it("still renders CustomDaysView when customDays is out of range (clamped to 1–7)", () => {
     mockCalendar(ECalendarViewType.customDays, {}, 0);
-    const { container } = render(<View />);
-    expect(container).toBeEmptyDOMElement();
+    render(<View />);
+    expect(screen.getByTestId("custom-days-view")).toBeInTheDocument();
   });
 
   // ── loading: empty events → show skeleton ─────────────

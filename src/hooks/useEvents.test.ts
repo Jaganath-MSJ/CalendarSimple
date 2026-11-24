@@ -151,4 +151,81 @@ describe("useEvents Hook", () => {
     expect(warnSpy).not.toHaveBeenCalled();
     warnSpy.mockRestore();
   });
+
+  describe("invalid dates", () => {
+    const MSG =
+      "[calendar] dropped 2 event(s) with an invalid startDate or endDate.";
+    const valid = {
+      id: "ok",
+      title: "Ok",
+      startDate: "2026-11-10T09:00:00",
+      endDate: "2026-11-10T10:00:00",
+    };
+    const mixed: CalendarEvent[] = [
+      { id: "a", title: "Bad start", startDate: "not-a-date" },
+      {
+        id: "b",
+        title: "Bad end",
+        startDate: "2026-11-10T09:00:00",
+        endDate: "garbage",
+      },
+      valid,
+    ];
+    const dropWarnings = (spy: { mock: { calls: unknown[][] } }) =>
+      spy.mock.calls.filter((c: unknown[]) => c[0] === MSG);
+
+    it("drops them and warns once", () => {
+      const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { result } = renderHook(() => useEvents(mixed));
+      expect(result.current).toEqual([valid]);
+      expect(dropWarnings(spy)).toHaveLength(1);
+      spy.mockRestore();
+    });
+
+    it("drops them with eventsAreSorted", () => {
+      const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { result } = renderHook(() => useEvents(mixed, true));
+      expect(result.current).toEqual([valid]);
+      spy.mockRestore();
+    });
+
+    it("drops them with enableEnrichedEvents", () => {
+      const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { result } = renderHook(() => useEvents(mixed, false, true, {}));
+      expect(result.current).toEqual([valid]);
+      spy.mockRestore();
+    });
+
+    it("does not warn again on rerender with the same array", () => {
+      const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { rerender } = renderHook(() => useEvents(mixed));
+      rerender();
+      expect(dropWarnings(spy)).toHaveLength(1);
+      spy.mockRestore();
+    });
+  });
+
+  describe("invalid-date warning stability", () => {
+    const bad = { id: "bad", title: "Bad", startDate: "not-a-date" };
+    const good = { id: "g", title: "Good", startDate: "2024-01-01" };
+
+    it("warns once when the same invalid set arrives in a new array", () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { rerender } = renderHook(({ ev }) => useEvents(ev), {
+        initialProps: { ev: [bad, good] as CalendarEvent[] },
+      });
+      rerender({ ev: [bad, good] });
+      rerender({ ev: [{ ...bad }, { ...good }] });
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+      rerender({ ev: [{ ...bad, id: "bad2" }, good] });
+      expect(warnSpy).toHaveBeenCalledTimes(2);
+      warnSpy.mockRestore();
+    });
+
+    it("returns the caller's array by identity when sorted and valid", () => {
+      const input: CalendarEvent[] = [good];
+      const { result } = renderHook(() => useEvents(input, true));
+      expect(result.current).toBe(input);
+    });
+  });
 });

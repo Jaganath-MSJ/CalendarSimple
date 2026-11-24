@@ -1,6 +1,7 @@
 import React, { useMemo, memo, useEffect, CSSProperties, useRef } from "react";
 import cx from "classnames";
 import {
+  CalendarEvent,
   CalendarProps,
   CalendarContentProps,
   ECalendarViewType,
@@ -10,10 +11,17 @@ import {
   LAYOUT_CONSTANTS,
   CALENDAR_ACTIONS,
 } from "./constants";
-import { dateFn, resolveDirection, toCssLength } from "./utils";
+import {
+  dateFn,
+  mergeDefined,
+  paletteStyle,
+  resolveDirection,
+  toCssLength,
+} from "./utils";
 import useResizeObserver from "./hooks/useResizeObserver";
 import useEvents from "./hooks/useEvents";
 import useColorScheme from "./hooks/useColorScheme";
+import useShallowStable from "./hooks/useShallowStable";
 import styles from "./Calendar.module.css";
 import Header from "./components/layout/Header";
 import DayView from "./components/views/day_view/DayView";
@@ -25,6 +33,46 @@ import { CalendarProvider, useCalendar } from "./context/CalendarContext";
 import View from "./components/views/View";
 import useCalendarProps from "./hooks/useCalendarProps";
 import CalendarErrorBoundary from "./components/ui/CalendarErrorBoundary";
+
+// Syncs controlled props into context. Rendered in both plain and compound
+// mode. Dispatches only when a prop differs from the last synced value (the
+// reducer is already initialised from props, and StrictMode re-runs effects) and
+// compares the date by value so an equal new Date does not reset navigation.
+function PropSync({
+  view,
+  selectedDate,
+  customDays,
+}: Pick<CalendarProps, "view" | "selectedDate" | "customDays">) {
+  const { dispatch } = useCalendar();
+  const time = selectedDate ? dateFn(selectedDate).toMillis() : undefined;
+  const lastView = useRef(view);
+  const lastTime = useRef(time);
+  const lastCustomDays = useRef(customDays);
+
+  useEffect(() => {
+    if (view && view !== lastView.current) {
+      dispatch({ type: "SET_VIEW", payload: view });
+    }
+    lastView.current = view;
+  }, [view, dispatch]);
+
+  useEffect(() => {
+    if (selectedDate && time !== lastTime.current) {
+      dispatch({ type: "SET_DATE", payload: dateFn(selectedDate) });
+    }
+    lastTime.current = time;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [time, dispatch]);
+
+  useEffect(() => {
+    if (customDays && customDays !== lastCustomDays.current) {
+      dispatch({ type: "SET_CUSTOM_DAYS", payload: customDays });
+    }
+    lastCustomDays.current = customDays;
+  }, [customDays, dispatch]);
+
+  return null;
+}
 
 function CalendarContent(props: CalendarContentProps) {
   const {
@@ -38,6 +86,7 @@ function CalendarContent(props: CalendarContentProps) {
     direction,
     locale,
     colorScheme,
+    palette,
   } = useCalendarProps(props);
 
   const dir = resolveDirection(direction, locale);
@@ -46,28 +95,8 @@ function CalendarContent(props: CalendarContentProps) {
   const {
     state: { view, selectedDate },
     dispatch,
+    hourHeight,
   } = useCalendar();
-
-  // Sync view from props to context
-  useEffect(() => {
-    if (props.view) {
-      dispatch({ type: "SET_VIEW", payload: props.view });
-    }
-  }, [props.view, dispatch]);
-
-  // Sync external date prop to context if it changes
-  useEffect(() => {
-    if (props.selectedDate) {
-      dispatch({ type: "SET_DATE", payload: dateFn(props.selectedDate) });
-    }
-  }, [props.selectedDate, dispatch]);
-
-  // Sync customDays from props to context
-  useEffect(() => {
-    if (props.customDays) {
-      dispatch({ type: "SET_CUSTOM_DAYS", payload: props.customDays });
-    }
-  }, [props.customDays, dispatch]);
 
   return (
     <section
@@ -78,6 +107,8 @@ function CalendarContent(props: CalendarContentProps) {
         {
           "--calendar-width": toCssLength(width),
           "--calendar-height": toCssLength(height),
+          "--cal-hour-height": `${hourHeight}px`,
+          ...paletteStyle(palette, resolvedScheme),
         } as CSSProperties
       }
       className={cx(styles.calendar, classNames?.root)}
@@ -106,13 +137,39 @@ function CalendarContent(props: CalendarContentProps) {
   );
 }
 
+/**
+ * The outer container. It renders inside the provider so it can write
+ * `--cal-hour-height`: compound children (`Calendar.WeekView`…) and the
+ * loading overlay then size their hour slots like the events.
+ */
+function CalendarContainer(
+  props: React.HTMLAttributes<HTMLDivElement> & {
+    divRef: React.RefObject<HTMLDivElement | null>;
+    "data-color-scheme"?: string;
+  },
+) {
+  const { divRef, ...rest } = props;
+  const { hourHeight } = useCalendar();
+  const style = {
+    ...rest.style,
+    "--cal-hour-height": `${hourHeight}px`,
+  } as CSSProperties;
+  return <div ref={divRef} {...rest} style={style} />;
+}
+
 function Calendar(props: CalendarProps = defaultCalendarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const allProps: CalendarProps = { ...defaultCalendarProps, ...props };
+  // `testID` is calendar-simple-native's name; `testId` wins when both are set.
+  const allProps = mergeDefined<CalendarProps>(
+    defaultCalendarProps,
+    props.testId === undefined && props.testID !== undefined
+      ? { ...props, testId: props.testID }
+      : props,
+  );
   const { width: observedWidth, height: observedHeight } = useResizeObserver(
     containerRef,
-    !!allProps.width && !!allProps.height,
+    typeof allProps.width === "number" && typeof allProps.height === "number",
   );
 
   // Use props if provided, otherwise use observed size. Either may be a number
@@ -124,6 +181,17 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
     typeof rawHeight === "number"
       ? rawHeight - LAYOUT_CONSTANTS.HEADER_HEIGHT
       : `calc(${rawHeight} - ${LAYOUT_CONSTANTS.HEADER_HEIGHT}px)`;
+
+  const bodySize = useMemo(() => {
+    const w =
+      typeof allProps.width === "number" ? allProps.width : observedWidth;
+    const h =
+      typeof allProps.height === "number" ? allProps.height : observedHeight;
+    return {
+      width: w,
+      height: Math.max(0, h - LAYOUT_CONSTANTS.HEADER_HEIGHT),
+    };
+  }, [allProps.width, allProps.height, observedWidth, observedHeight]);
 
   const initialDate = useMemo(
     () => dateFn(props.selectedDate),
@@ -140,6 +208,25 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
 
   const dir = resolveDirection(allProps.direction, allProps.locale);
   const resolvedScheme = useColorScheme(allProps.colorScheme);
+  const configProps = { ...allProps };
+  delete configProps.children;
+  // With "locale", the week ends the day before it starts unless the caller
+  // passed weekEndsOn, so drop the injected default and let the provider resolve.
+  const deriveWeekEnd =
+    props.weekStartsOn === "locale" && props.weekEndsOn === undefined;
+  if (deriveWeekEnd) delete configProps.weekEndsOn;
+  // Raw "locale" values must not reach CalendarContent: they would override
+  // the resolved ones from context in useCalendarProps.
+  const contentProps = { ...allProps };
+  delete contentProps.weekStartsOn;
+  delete contentProps.is12Hour;
+  if (deriveWeekEnd) delete contentProps.weekEndsOn;
+  const config = useShallowStable({
+    ...configProps,
+    width,
+    height,
+    events: validEvents,
+  });
 
   return (
     <CalendarProvider
@@ -147,10 +234,16 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
       initialView={allProps.view || ECalendarViewType.month}
       initialCustomDays={allProps.customDays}
       testId={allProps.testId}
-      config={{ ...allProps, width, height, events: validEvents }}
+      bodySize={bodySize}
+      config={config}
     >
-      <div
-        ref={containerRef}
+      <PropSync
+        view={props.view}
+        selectedDate={props.selectedDate}
+        customDays={props.customDays}
+      />
+      <CalendarContainer
+        divRef={containerRef}
         data-testid={
           allProps.children ? `${allProps.testId}-container` : undefined
         }
@@ -162,6 +255,7 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
+          ...paletteStyle(allProps.palette, resolvedScheme),
           ...(allProps.children
             ? ({
                 "--calendar-width": toCssLength(width),
@@ -179,21 +273,27 @@ function Calendar(props: CalendarProps = defaultCalendarProps) {
             allProps.children
           ) : (
             <CalendarContent
-              {...(allProps as unknown as CalendarContentProps)}
+              {...(contentProps as unknown as CalendarContentProps)}
               width={width}
               height={height}
               events={validEvents}
             />
           )}
         </CalendarErrorBoundary>
-      </div>
+      </CalendarContainer>
     </CalendarProvider>
   );
 }
 
-const MemoizedCalendar = memo(
-  Calendar,
-) as unknown as React.NamedExoticComponent<CalendarProps> & {
+/**
+ * `<Calendar>` component type. Generic over the event shape so
+ * `<Calendar<MyEvent> …>` types `events` and the event callbacks; `memo`
+ * drops generics, hence the explicit call signature.
+ */
+export type CalendarComponent = (<TEvent extends CalendarEvent = CalendarEvent>(
+  props: CalendarProps<TEvent>,
+) => React.ReactElement | null) & {
+  displayName?: string;
   Header: typeof Header;
   View: typeof View;
   DayView: typeof DayView;
@@ -202,6 +302,8 @@ const MemoizedCalendar = memo(
   ScheduleView: typeof ScheduleView;
   CustomDaysView: typeof CustomDaysView;
 };
+
+const MemoizedCalendar = memo(Calendar) as unknown as CalendarComponent;
 
 MemoizedCalendar.Header = Header;
 MemoizedCalendar.View = View;

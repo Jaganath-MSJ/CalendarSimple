@@ -68,7 +68,7 @@ describe("useAllDayBanner Hook", () => {
       dateFn("2026-04-27"),
     ];
 
-    it("shows right arrow when event ends just past viewEnd with step-back (Case 3: ends Apr28T00:00)", () => {
+    it("hides right arrow when event ends at exactly 00:00 after viewEnd (Case 3)", () => {
       // Event ends on day after viewEnd with 0h overlap → step-back to viewEnd boundary
       const event: CalendarEvent = {
         id: "test1",
@@ -80,7 +80,7 @@ describe("useAllDayBanner Hook", () => {
         useAllDayBanner(weekDays, [event], false),
       );
       expect(result.current.layoutEvents).toHaveLength(1);
-      expect(result.current.layoutEvents[0].isClippedRight).toBe(true);
+      expect(result.current.layoutEvents[0].isClippedRight).toBe(false);
     });
 
     it("shows right arrow when event ends within 12h past viewEnd with step-back (Case 4: ends Apr28T05:00)", () => {

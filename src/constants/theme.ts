@@ -1,22 +1,6 @@
 /**
- * @file Default theme values and layout/keyboard constants.
+ * @file Layout/keyboard constants.
  */
-
-/** Fallback color theme applied when no `theme` prop is provided. */
-export const defaultTheme = {
-  default: {
-    color: "#000",
-    bgColor: "#fff",
-  },
-  selected: {
-    color: "#fff",
-    bgColor: "#007bff",
-  },
-  today: {
-    color: "#007bff",
-    bgColor: "#e6f2ff",
-  },
-};
 
 /** Pixel dimensions used by layout algorithms to calculate cell sizes and event positioning. */
 export const LAYOUT_CONSTANTS = {
@@ -24,13 +8,18 @@ export const LAYOUT_CONSTANTS = {
   DATE_LABEL_HEIGHT: 28,
   CELL_PADDING: 8,
   EVENT_HEIGHT: 26,
-  DEFAULT_ROWS: 6,
+  WEEK_NUMBER_WIDTH: 36,
   MIN_ROWS: 4,
   ALL_DAY_ROW_HEIGHT: 24,
   EVENT_ITEM_PADDING: 16,
   SMALL_EVENT_HEIGHT: 40,
   TINY_EVENT_HEIGHT: 20,
   DEFAULT_EVENT_COLOR: "#3b82f6",
+} as const;
+
+/** Month cell metrics consumed by `calculateMaxEvents`. */
+export const MONTH_METRICS = {
+  web: { dateLabelHeight: 28, cellPadding: 8, eventPitch: 26 },
 } as const;
 
 /** Keyboard key values that trigger interactive calendar actions. */

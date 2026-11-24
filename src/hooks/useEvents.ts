@@ -2,14 +2,16 @@
  * @file useEvents.ts
  * @description Hook to sanitize and prepare a list of calendar events.
  *
- * This utility currently acts as a basic validation layer, filtering out
- * completely invalid events (e.g., events where the end date chronologically
- * precedes the start date).
+ * This utility acts as a basic validation layer. Events with unparseable dates
+ * are dropped on every path (with a one-time warning per distinct invalid set);
+ * events whose end date precedes the start date are also silently dropped,
+ * except when `eventsAreSorted` / `enableEnrichedEvents` skip that check.
  */
 
 import { useEffect, useMemo } from "react";
 import { dateFn } from "../utils/date";
 import { CalendarEvent } from "../types/events";
+import { hasValidDates } from "../utils/common";
 
 /**
  * Hook to filter and return only valid calendar events.
@@ -19,10 +21,10 @@ import { CalendarEvent } from "../types/events";
  *
  * @param events - The raw array of calendar events to process. Events with
  *   `endDate < startDate` are filtered out (negative-duration guard).
- * @param eventsAreSorted - When `true`, skips validation and returns events as-is (caller guarantees
+ * @param eventsAreSorted - When `true`, skips the reversed-range filter (invalid-date events are still dropped; caller guarantees
  *   events are pre-sorted by `startDate` ascending). **Caveat:** unsorted input will render in the
  *   provided order — the library never re-sorts the array.
- * @param enableEnrichedEvents - When `true`, skips validation (caller supplies pre-enriched events via `enrichedEventsByDate`).
+ * @param enableEnrichedEvents - When `true`, skips the reversed-range filter (invalid-date events are still dropped; caller supplies pre-enriched events via `enrichedEventsByDate`).
  * @param enrichedEventsByDate - Required companion map when `enableEnrichedEvents=true`.
  * @returns A memoized array containing only logically valid events.
  */
@@ -59,19 +61,41 @@ export default function useEvents(
     }
   }, [enableEnrichedEvents, enrichedEventsByDate]);
 
-  const validEvents = useMemo(() => {
-    // -------------------------------------------------------------------------
-    // 1. Basic Validation: Filter invalid date ranges
-    // -------------------------------------------------------------------------
+  const { validEvents, droppedKey } = useMemo(() => {
+    // Events with unparseable dates are dropped on every path (single pass).
+    const parseable: CalendarEvent[] = [];
+    const dropped: string[] = [];
+    for (const event of events) {
+      if (hasValidDates(event)) parseable.push(event);
+      else dropped.push(String(event.id ?? event.startDate));
+    }
+    const droppedKey =
+      dropped.length > 0 ? `${dropped.length}:${dropped.join("|")}` : "";
+
     if (eventsAreSorted || enableEnrichedEvents) {
-      return events;
+      return {
+        validEvents: dropped.length === 0 ? events : parseable,
+        droppedKey,
+      };
     }
 
-    return events.filter((event) => {
-      if (!event.endDate) return true;
-      return dateFn(event.endDate) >= dateFn(event.startDate);
-    });
+    return {
+      validEvents: parseable.filter((event) => {
+        if (!event.endDate) return true;
+        return dateFn(event.endDate) >= dateFn(event.startDate);
+      }),
+      droppedKey,
+    };
   }, [events, eventsAreSorted, enableEnrichedEvents]);
+
+  useEffect(() => {
+    if (droppedKey) {
+      const count = droppedKey.slice(0, droppedKey.indexOf(":"));
+      console.warn(
+        `[calendar] dropped ${count} event(s) with an invalid startDate or endDate.`,
+      );
+    }
+  }, [droppedKey]);
 
   return validEvents;
 }

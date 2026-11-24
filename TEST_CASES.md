@@ -86,8 +86,7 @@ Two distinct loading modes apply depending on whether events are present:
 
 ### 1.8 Navigation Constraints
 
-- **Past Bounds (`pastYearLength={N}`)**: Verify the header controls block backward navigation beyond `N` years in the past.
-- **Future Bounds (`futureYearLength={N}`)**: Verify the header controls block forward navigation beyond `N` years into the future.
+- Arrows never stop at `pastYearLength`/`futureYearLength`; the year list grows to include the shown year.
 
 ### 1.9 Layout Limits
 
@@ -150,9 +149,9 @@ Two distinct loading modes apply depending on whether events are present:
 
 ### 1.15 Keyboard Navigation & Accessibility
 
-- **Tab order (LTR)**: Focus cycles Today → Prev → Next → View select → Month select → Year select in order.
+- **Tab order (LTR)**: Focus cycles Today → Prev → Next → View select → Month select → Year select in order. In Schedule view Prev/Next are absent: Today → View select → Month select → Year select.
 - **Tab order (RTL)**: Tab order is reversed to match reading direction.
-- **Enter/Space activation**: Pressing Enter or Space on a focused Today, Prev, or Next button activates the handler identically to a mouse click.
+- **Enter/Space activation**: Pressing Enter or Space on a focused Today, Prev, or Next button (Prev/Next are absent in Schedule view) activates the handler identically to a mouse click.
 - **ARIA labels on header controls**: `Previous period`, `Next period`, `Select calendar view`, `Select month`, `Select year` — all present as `aria-label` values.
 - **Header landmark**: `<nav aria-label="Calendar navigation">` wraps all header controls.
 - **Month table ARIA**: `<table aria-label="Month YYYY">` with `<th scope="col">` on all day-name and week-number column headers.
@@ -164,6 +163,92 @@ Two distinct loading modes apply depending on whether events are present:
 - **Default render (no children)**: `<Calendar>` without children renders the built-in layout (header bar + active view body).
 - **Children pattern**: Use `<Calendar.Header />` and `<Calendar.View />` as explicit children inside `<Calendar>{...}</Calendar>`; verify they share the same context state — navigation and view switching work identically.
 - **Named view sub-components**: `<Calendar.MonthView />`, `<Calendar.WeekView />`, `<Calendar.DayView />`, `<Calendar.ScheduleView />`, `<Calendar.CustomDaysView />` — each renders correctly when composed inside a `<Calendar>` children layout via shared context.
+
+### 1.17 Visible Range Callback (`onDateRangeChange`)
+
+- **On mount**: Render Month view for Nov 2026 with `weekStartsOn={0}`; the callback fires once with `2026-11-01 … 2026-12-05` and `"month"` (adjacent-month cells included).
+- **Navigation**: Click Next three times quickly; after 16 ms exactly one more call arrives, with the final month's range.
+- **View change**: Switch to Week; one call with the visible week's first and last day and `"week"`.
+- **Order**: `onNavigate` fires before `onDateRangeChange`.
+- **Schedule**: The range is the span of the listed events (occurrences included), from the earliest event day to the latest; with no events it is the selected date for both ends.
+
+### 1.18 Recurring Events (`rrule`, `exdates`)
+
+- **Weekly**: An event from `2026-10-06T09:00` with `FREQ=WEEKLY;BYDAY=TU` shows a chip on every November 2026 Tuesday (3, 10, 17, 24).
+- **Exdates**: Add `exdates: ["2026-11-10T09:00:00"]`; Nov 10 has no chip, the other three remain.
+- **Far navigation**: Click Next six times to May 2027; the May Tuesdays (4, 11, 18, 25) appear.
+- **Unsupported rule**: `FREQ=HOURLY` shows the event once and logs one `[calendar]` warning (not repeated on re-render).
+- **Occurrence click**: Clicking an occurrence passes an event with `recurringEventId` (the series `id`) and that occurrence's `startDate`.
+- **Schedule window**: A daily series that started years ago still lists today; every rule (finite ones too) stops at the selected date + 12 months (end of that quarter).
+
+### 1.19 "+N more" Without Popover (`showMorePopover={false}`)
+
+- **Click**: With `maxEvents={2}` and 5 events on one day, clicking "+3 more" calls `onMoreClick(date, hiddenEvents)` once and opens no dialog.
+- **Keyboard**: Focus "+3 more" and press Enter, then Space; each calls `onMoreClick` once, with no dialog.
+- **Default**: Without the prop, the popover opens as before.
+
+### 1.20 Locale-Driven Week Start and Clock (`weekStartsOn="locale"`, `is12Hour="locale"`)
+
+- **en-GB**: Month header reads Mon … Sun (7 columns); Week view has 7 day columns starting Monday.
+- **ar-EG**: The week starts on Saturday and ends on Friday (7 columns).
+- **en-US**: The week starts on Sunday; with `is12Hour="locale"` hour labels show AM/PM.
+- **de-DE**: With `is12Hour="locale"` the 14:00 slot reads "14:00".
+- **Explicit end wins**: `weekStartsOn="locale"` with `weekEndsOn={5}` in en-GB shows Mon … Fri.
+
+### 1.21 Today in Adjacent-Month Cells
+
+- **Outline**: On 1 Dec 2026, view November 2026 with `showAdjacentMonths`; the Dec 1 cell's date shows an outline in the primary colour, not a fill.
+- **Hidden**: With `showAdjacentMonths={false}`, no mark is shown.
+- **Custom cell**: A `renderDateCell` receives `isTodayAdjacent: true` for that cell.
+
+### 1.22 Palette Tokens and Selected Day
+
+- **Selected day**: With `selectable`, clicking a day shows an outlined ring (transparent fill) on its date; today's filled marker still wins when both apply.
+- **Restore the fill**: Setting `--cal-selected-fill: var(--primary-color); --cal-selected-text: var(--cal-on-primary)` on the calendar root shows the filled circle again.
+- **Contrast**: Light today marker is white on `#2563eb` (≥ 4.5:1); dark is `#111827` on `#60a5fa`.
+- **Scoped override**: With `classNames={{ root: "myCal" }}` and `.myCal[data-color-scheme="dark"] { --cal-surface-raised: … }`, the "+N more" popover uses the new surface colour.
+
+### 1.23 Schedule Navigation
+
+- **No Prev/Next**: In Schedule view the header shows Today, the view select and the month/year selects, but no Prev/Next arrows.
+- **Today re-scrolls**: Scroll the list away, then click Today while the selected date is already today; the list scrolls back to today's group (or the next group with events).
+- **Month pick**: Picking a month scrolls to the first group on or after it (the last group if none).
+
+### 1.24 Drag & Resize (`draggable`, `resizable`)
+
+Use the "Drag and Resize" stories (they apply each change to `events` and print it above the calendar).
+
+- **Move (mouse)**: In Week, drag a 09:00–09:30 event down by half an hour; it lands at 09:30–10:00 and the log shows the new times. The preview snaps to 15-minute steps while dragging.
+- **Cross-day**: Drag an event one column right; it keeps its time on the next day.
+- **Touch**: On a touch device, a quick swipe over an event scrolls the grid; press and hold ~300 ms, then drag, to move it.
+- **Click vs drag**: Click an event without moving; `onEventClick` fires and nothing moves. After a drag, releasing does not open the event.
+- **Escape**: Start a drag, press Escape before releasing; the event snaps back and nothing is logged.
+- **Bounds**: With `minHour={8}` / `maxHour={18}`, drag a 16:00–17:00 event far down; it stops at 17:00–18:00.
+- **Resize**: Hover an event in Week; drag its bottom edge down 30 min (end +30) and its top edge up 1 h (start −1 h). Dragging the bottom above the start leaves 15 min (`minEventDurationMinutes`).
+- **RTL**: In the RTL story, dragging right moves to the previous day; Alt+→ does the same.
+- **DST**: With the system zone `America/New_York`, on 8 Mar 2026 move a 10:00 event down one hour; it lands at 11:00.
+- **Keyboard**: Tab to an event; Alt+↓ moves 15 min later, Alt+→ one day later, Alt+Shift+↓ ends 15 min later. Screen readers announce the shortcuts (`aria-keyshortcuts`). After Alt+→ the moved event (now in the next column) still has focus, so Alt+→ can be pressed again.
+- **Month**: Drag a chip one cell right (+1 day) and one row down (+7 days); a timed event keeps its time. Alt+↓ moves a week. "+N more" and popover items do not drag.
+- **All-day row**: In Week, drag an all-day chip one column right (+1 day); vertical movement does nothing.
+- **Predicate**: In "Per Event Predicate", the locked event does not drag or show resize edges; the others do.
+- **Recurring**: In "Recurring Occurrence", move one occurrence; the log names the series and only that day moves.
+- **Inert without callbacks**: With `draggable` but no `onEventDrop` (or `resizable` without `onEventResize`), events keep the normal pointer, do not move and show no resize edges.
+
+### 1.25 Parity with calendar-simple-native
+
+- **Month keys**: Tab into the month: only the selected day takes focus. ← → move a day, ↑ ↓ a week, Home / End the row, PageDown the next month (focus stays on the same day), T today. RTL: ← moves to the next day.
+- **Time-grid keys**: In Week, click an empty area of the grid, then PageDown / → (next week), PageUp / ← (previous), T (today). Ctrl+PageDown and typing in a custom input do nothing.
+- **Schedule keys**: ↑ / ↓ move between rows; PageDown does nothing; T scrolls to today.
+- **keyboardNavigation={false}**: every month cell is a tab stop again and the keys do nothing.
+- **Popover**: "+N more" popover shows × (closes it); with `creatable` + `onSlotClick`, "+ New event" calls `onSlotClick(day 00:00, day 23:59:59)` and closes.
+- **Labels**: A month cell reads "Nov 10, 2026, 3 events"; the loading skeleton is announced as "Loading events"; a draggable event describes "Move 15 minutes earlier…".
+- **Palette**: `palette={{ light: { primary: "#7c3aed", nowLine: "#16a34a" } }}`: today marker purple, current-time line green; in dark mode only the `dark` entry applies.
+- **Hour height**: `hourHeight={120}`: hours twice as tall; drag 60 px = 30 minutes; the current-time line and auto-scroll follow.
+- **Zoom**: `pinchToZoom`: Ctrl/⌘ + wheel (and a trackpad pinch in Chrome / Edge / Firefox) zooms between 30 and 180 px per hour, keeping the time at the top of the view; check Safari separately; `onHourHeightChange` fires once when you stop.
+- **Swipe**: On a touch device with `swipeNavigation`, swipe left = next period, right = previous (mirrored in RTL); vertical scrolling still works; nothing in Schedule.
+- **customDays**: `customDays={7}` shows 7 days; a JavaScript value of 12 shows 7 and 0 shows 1.
+
+> Typed events (`Calendar<TEvent>`, `useCalendar<TEvent>()`) are compile-time only; they are covered by `src/types/generics.test-d.tsx` (checked by `npm run lint`).
 
 ---
 
@@ -181,7 +266,7 @@ These scenarios ensure that the calendar's internal math, layout engine, and dat
 
 ### 2.2 Date String Oddities
 
-- **Missing End Date (Datetime)**: Provide only a `startDate` with a specific time. Should fallback to a default duration block (e.g., 1 hour).
+- **Missing End Date (Datetime)**: Provide only a `startDate` with a specific time. A timed event without `endDate` is a 1-minute event drawn at the 15 px minimum height.
 - **Missing End Date (Date-Only)**: Provide only a `startDate` like `2024-01-01`. Should assume it's a 1-day All-Day event.
 
 ### 2.3 Mathematical Boundaries

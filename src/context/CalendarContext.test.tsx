@@ -4,6 +4,7 @@ import { expect, describe, it, vi } from "vitest";
 import { CalendarProvider, useCalendar } from "./CalendarContext";
 import { ECalendarViewType } from "../types";
 import { dateFn } from "../utils";
+import MonthView from "../components/views/month_view/MonthView";
 import { CALENDAR_ACTIONS } from "../constants";
 
 const TestComponent = () => {
@@ -93,7 +94,7 @@ describe("CalendarContext", () => {
     expect(screen.getByTestId("date").textContent).toBe("2024-01-01");
   });
 
-  it("handles NEXT and PREV actions for schedule view (treats as day)", () => {
+  it("NEXT and PREV are no-ops in schedule view", () => {
     render(
       <CalendarProvider
         initialDate={initialDate}
@@ -104,9 +105,38 @@ describe("CalendarContext", () => {
     );
 
     fireEvent.click(screen.getByTestId("next"));
-    expect(screen.getByTestId("date").textContent).toBe("2024-01-02");
+    expect(screen.getByTestId("date").textContent).toBe("2024-01-01");
     fireEvent.click(screen.getByTestId("prev"));
     expect(screen.getByTestId("date").textContent).toBe("2024-01-01");
+  });
+
+  it("NEXT and PREV in schedule view do not re-render consumers", () => {
+    let renders = 0;
+    const Counter = () => {
+      const { dispatch } = useCalendar();
+      React.useEffect(() => {
+        renders += 1;
+      });
+      return (
+        <button
+          data-testid="next-counter"
+          onClick={() => dispatch({ type: CALENDAR_ACTIONS.NEXT })}
+        >
+          n
+        </button>
+      );
+    };
+    render(
+      <CalendarProvider
+        initialDate={initialDate}
+        initialView={ECalendarViewType.schedule}
+      >
+        <Counter />
+      </CalendarProvider>,
+    );
+    const before = renders;
+    fireEvent.click(screen.getByTestId("next-counter"));
+    expect(renders).toBe(before);
   });
 
   it("handles NEXT and PREV actions for customDays view", () => {
@@ -206,5 +236,27 @@ describe("CalendarContext", () => {
       "useCalendar must be used within a CalendarProvider",
     );
     consoleSpy.mockRestore();
+  });
+});
+
+describe("CalendarProvider locale-resolved config", () => {
+  it("resolves weekStartsOn=locale so the month header starts on Monday for en-GB", () => {
+    render(
+      <CalendarProvider
+        initialDate={dateFn("2024-03-01")}
+        initialView="month"
+        config={{
+          weekStartsOn: "locale",
+          locale: "en-GB",
+          weekEndsOn: 6,
+          events: [],
+          width: 700,
+          height: 600,
+        }}
+      >
+        <MonthView />
+      </CalendarProvider>,
+    );
+    expect(screen.getAllByRole("columnheader")[0].textContent).toMatch(/^mon/i);
   });
 });

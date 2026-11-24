@@ -1,13 +1,16 @@
 import { describe, it, expect, vi } from "vitest";
 import {
+  mergeDefined,
   calculateMaxEvents,
+  getLastEventDay,
   isAllDayEvent,
   isMultiDay,
   handleKeyboardActivation,
   resolveDirection,
   toCssLength,
+  stripLayoutStyle,
 } from "./common";
-import { LAYOUT_CONSTANTS } from "../constants";
+import { MONTH_METRICS } from "../constants";
 import { CalendarEvent } from "../types";
 import { KeyboardEvent } from "react";
 
@@ -21,14 +24,18 @@ describe("common utils", () => {
       // Math.round((200 - DATE_LABEL_HEIGHT - CELL_PADDING) / EVENT_HEIGHT) - 1
       const availableNodeHeight =
         cellHeight -
-        LAYOUT_CONSTANTS.DATE_LABEL_HEIGHT -
-        LAYOUT_CONSTANTS.CELL_PADDING;
+        MONTH_METRICS.web.dateLabelHeight -
+        MONTH_METRICS.web.cellPadding;
 
       const expected =
-        Math.round(availableNodeHeight / LAYOUT_CONSTANTS.EVENT_HEIGHT) - 1;
+        Math.round(availableNodeHeight / MONTH_METRICS.web.eventPitch) - 1;
 
       const result = calculateMaxEvents(height, rowsInView);
       expect(result).toBe(Math.max(0, expected));
+    });
+
+    it("returns Infinity when the height is unmeasured", () => {
+      expect(calculateMaxEvents(0, 5)).toBe(Infinity);
     });
 
     it("should not return a negative number for small heights", () => {
@@ -222,5 +229,58 @@ describe("common utils", () => {
         }),
       ).toBe(true);
     });
+  });
+
+  describe("getLastEventDay", () => {
+    const day = (e: CalendarEvent) => getLastEventDay(e).toFormat("yyyy-MM-dd");
+
+    it("treats a timed 00:00 end as exclusive", () => {
+      expect(
+        day({
+          title: "x",
+          startDate: "2026-11-10T22:00:00",
+          endDate: "2026-11-11T00:00:00",
+        }),
+      ).toBe("2026-11-10");
+    });
+
+    it("keeps date-only end inclusive", () => {
+      expect(
+        day({ title: "x", startDate: "2026-11-10", endDate: "2026-11-11" }),
+      ).toBe("2026-11-11");
+    });
+
+    it("returns the start day when there is no endDate", () => {
+      expect(day({ title: "x", startDate: "2026-11-10T09:00:00" })).toBe(
+        "2026-11-10",
+      );
+    });
+
+    it("keeps the day for a zero-length 00:00 event", () => {
+      expect(
+        day({
+          title: "x",
+          startDate: "2026-11-10T00:00:00",
+          endDate: "2026-11-10T00:00:00",
+        }),
+      ).toBe("2026-11-10");
+    });
+  });
+
+  describe("mergeDefined", () => {
+    it("skips undefined overrides and keeps defaults", () => {
+      expect(
+        mergeDefined<{ a: number; b: number }>(
+          { a: 1, b: 2 },
+          { a: undefined, b: 3 },
+        ),
+      ).toEqual({ a: 1, b: 3 });
+    });
+  });
+
+  it("stripLayoutStyle removes logical inset shorthands", () => {
+    expect(
+      stripLayoutStyle({ insetInline: 1, insetBlock: 2, color: "red" }),
+    ).toEqual({ color: "red" });
   });
 });

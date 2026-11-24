@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import Header from "./Header";
 import { ECalendarViewType } from "../../types";
@@ -7,6 +8,8 @@ import { dateFn, DateType } from "../../utils";
 import * as CalendarContextModule from "../../context/CalendarContext";
 import { CalendarProvider } from "../../context/CalendarContext";
 import { CalendarProps } from "../../types";
+import Calendar from "../../Calendar";
+import { DEFAULT_MESSAGES } from "../../constants";
 
 // Simple wrapper for testing to provide mock context if needed, but here we'll just spy on the hook.
 describe("Header Component", () => {
@@ -33,7 +36,11 @@ describe("Header Component", () => {
       dispatch: mockDispatch as never,
       testId: undefined,
       config: defaultConfig,
+      messages: DEFAULT_MESSAGES,
       colorScheme: "light",
+      bodySize: { width: 0, height: 0 },
+      hourHeight: 60,
+      setHourHeight: () => {},
     });
   });
 
@@ -135,7 +142,11 @@ describe("Header accessibility", () => {
       },
       dispatch: vi.fn() as never,
       testId: undefined,
+      messages: DEFAULT_MESSAGES,
       colorScheme: "light",
+      bodySize: { width: 0, height: 0 },
+      hourHeight: 60,
+      setHourHeight: () => {},
       config: {
         events: [],
         locale: "en",
@@ -285,5 +296,117 @@ describe("Header with a real CalendarProvider", () => {
     });
     // ar-EG formats digits as Arabic-Indic numerals, including the year
     expect(screen.getByRole("heading")).toHaveTextContent(/, ٢٠٢٤$/);
+  });
+});
+
+describe("Header week title follows visible days", () => {
+  const renderWeek = (props: Partial<CalendarProps>) =>
+    render(<Calendar view="week" width={700} height={600} {...props} />);
+  const title = () => screen.getByRole("heading").textContent ?? "";
+
+  it("shows a single month for a Sunday-start week", () => {
+    renderWeek({ selectedDate: new Date(2026, 10, 1), weekStartsOn: 0 });
+    expect(title()).toBe("November 2026");
+  });
+
+  it("spans months for a Monday-start week", () => {
+    renderWeek({ selectedDate: new Date(2026, 10, 30), weekStartsOn: 1 });
+    expect(title()).toBe("Nov - Dec 2026");
+  });
+
+  it("uses only visible days when weekEndsOn trims the week", () => {
+    renderWeek({
+      selectedDate: new Date(2026, 11, 29),
+      weekStartsOn: 0,
+      weekEndsOn: 3,
+    });
+    expect(title()).toBe("December 2026");
+  });
+
+  it("uses the week number of the visible week", () => {
+    renderWeek({
+      selectedDate: new Date(2026, 10, 1),
+      weekStartsOn: 0,
+      showWeekNumbers: true,
+    });
+    expect(title().endsWith("W45")).toBe(true);
+  });
+});
+
+describe("Header with invalid event dates", () => {
+  it("schedule title never shows Invalid DateTime", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    render(
+      <Calendar
+        view="schedule"
+        width={700}
+        height={600}
+        events={[
+          { title: "Bad", startDate: "not-a-date" },
+          { title: "Good", startDate: "2026-11-10T09:00:00" },
+        ]}
+      />,
+    );
+    expect(screen.getByRole("heading").textContent).not.toContain(
+      "Invalid DateTime",
+    );
+    warn.mockRestore();
+  });
+
+  it("schedule title ignores the exclusive 00:00 end of the last event", () => {
+    render(
+      <Calendar
+        view="schedule"
+        width={700}
+        height={600}
+        events={[
+          {
+            title: "NYE",
+            startDate: "2026-12-31T22:00:00",
+            endDate: "2027-01-01T00:00:00",
+          },
+        ]}
+      />,
+    );
+    expect(screen.getByRole("heading").textContent).toBe("Dec 2026");
+  });
+});
+
+describe("Header in Schedule view", () => {
+  const renderCal = (view: "schedule" | "month") =>
+    render(
+      <Calendar
+        view={view as ECalendarViewType}
+        selectedDate={new Date(2026, 10, 15)}
+        events={[]}
+        width={700}
+        height={600}
+      />,
+    );
+
+  it("does not render Prev/Next but keeps Today", () => {
+    renderCal("schedule");
+    expect(screen.queryByTestId("calendar-header-prev-btn")).toBeNull();
+    expect(screen.queryByTestId("calendar-header-next-btn")).toBeNull();
+    expect(screen.getByTestId("calendar-header-today-btn")).toBeInTheDocument();
+  });
+
+  it("renders Prev/Next in Month view", () => {
+    renderCal("month");
+    expect(screen.getByTestId("calendar-header-prev-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("calendar-header-next-btn")).toBeInTheDocument();
+  });
+
+  it("tabs Today, View, Month, Year in Schedule view", async () => {
+    const user = userEvent.setup();
+    renderCal("schedule");
+    await user.tab();
+    expect(screen.getByTestId("calendar-header-today-btn")).toHaveFocus();
+    await user.tab();
+    expect(screen.getByTestId("calendar-header-view-select")).toHaveFocus();
+    await user.tab();
+    expect(screen.getByTestId("calendar-header-month-select")).toHaveFocus();
+    await user.tab();
+    expect(screen.getByTestId("calendar-header-year-select")).toHaveFocus();
   });
 });

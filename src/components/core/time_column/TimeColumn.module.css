@@ -9,7 +9,7 @@
 }
 
 .timeSlot {
-  height: 60px; /* 1 hour height */
+  height: var(--cal-hour-height, 60px); /* 1 hour height */
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;

@@ -8,6 +8,7 @@ import type {
   CalendarClassNames,
 } from "../../";
 import { fixtureList } from "./TestFixtures";
+import { clampCustomDays } from "../../utils/customDays";
 import styles from "./ControlPanel.module.css";
 
 interface ControlPanelProps {
@@ -20,6 +21,9 @@ interface ControlPanelProps {
 // ── Internal state shape ──────────────────────────────────────────────────────
 
 interface PanelState {
+  showMorePopover: boolean;
+  localeWeekStart: boolean;
+  localeClock: boolean;
   view: ECalendarViewType;
   selectedDate: string; // ISO date string for input[type=date]
   customDays: number;
@@ -40,6 +44,12 @@ interface PanelState {
   futureYearLength: number;
   selectable: boolean;
   creatable: boolean;
+  draggable: boolean;
+  keyboardNavigation: boolean;
+  swipeNavigation: boolean;
+  pinchToZoom: boolean;
+  hourHeight: number;
+  resizable: boolean;
   maxEvents: number | undefined;
   colorScheme: ColorScheme;
   themeDefaultColor: string;
@@ -93,6 +103,9 @@ interface PanelState {
 }
 
 const DEFAULTS: PanelState = {
+  showMorePopover: true,
+  localeWeekStart: false,
+  localeClock: false,
   view: ECalendarViewType.month,
   selectedDate: new Date().toISOString().split("T")[0],
   customDays: 3,
@@ -113,6 +126,12 @@ const DEFAULTS: PanelState = {
   futureYearLength: 5,
   selectable: false,
   creatable: false,
+  draggable: false,
+  keyboardNavigation: true,
+  swipeNavigation: false,
+  pinchToZoom: false,
+  hourHeight: 60,
+  resizable: false,
   maxEvents: undefined,
   colorScheme: "auto",
   themeDefaultColor: "",
@@ -221,14 +240,15 @@ function toCalendarProps(s: PanelState): Partial<CalendarProps> {
   return {
     view: s.view,
     selectedDate: new Date(s.selectedDate),
-    customDays: s.customDays,
-    weekStartsOn: s.weekStartsOn,
+    customDays: clampCustomDays(s.customDays),
+    weekStartsOn: s.localeWeekStart ? "locale" : s.weekStartsOn,
+    showMorePopover: s.showMorePopover,
     weekEndsOn: s.weekEndsOn,
     showAdjacentMonths: s.showAdjacentMonths,
     showWeekNumbers: s.showWeekNumbers,
     showAllDayRow: s.showAllDayRow,
     resetDateOnViewChange: s.resetDateOnViewChange,
-    is12Hour: s.is12Hour,
+    is12Hour: s.localeClock ? "locale" : s.is12Hour,
     minHour: s.minHour,
     maxHour: s.maxHour,
     dayType: s.dayType,
@@ -239,6 +259,13 @@ function toCalendarProps(s: PanelState): Partial<CalendarProps> {
     futureYearLength: s.futureYearLength,
     selectable: s.selectable,
     creatable: s.creatable,
+    draggable: s.draggable,
+    keyboardNavigation: s.keyboardNavigation,
+    swipeNavigation: s.swipeNavigation,
+    pinchToZoom: s.pinchToZoom,
+    // With pinch on, leave the height uncontrolled so the zoom shows.
+    hourHeight: s.pinchToZoom ? undefined : s.hourHeight,
+    resizable: s.resizable,
     maxEvents: s.maxEvents,
     colorScheme: s.colorScheme,
     theme: Object.keys(theme).length > 0 ? theme : undefined,
@@ -353,6 +380,9 @@ const SECTION_KEYS: Record<SectionId, (keyof PanelState)[]> = {
     "weekEndsOn",
     "showAdjacentMonths",
     "showWeekNumbers",
+    "showMorePopover",
+    "localeWeekStart",
+    "localeClock",
     "showAllDayRow",
     "resetDateOnViewChange",
     "selectedDate",
@@ -367,7 +397,17 @@ const SECTION_KEYS: Record<SectionId, (keyof PanelState)[]> = {
     "eventOverlapOffset",
   ],
   yearPicker: ["pastYearLength", "futureYearLength"],
-  interaction: ["selectable", "creatable", "maxEvents"],
+  interaction: [
+    "selectable",
+    "creatable",
+    "draggable",
+    "keyboardNavigation",
+    "swipeNavigation",
+    "pinchToZoom",
+    "hourHeight",
+    "resizable",
+    "maxEvents",
+  ],
   appearance: [
     "colorScheme",
     "themeDefaultColor",
@@ -711,7 +751,7 @@ export function ControlPanel({
           <RangeRow
             label="Custom Days"
             min={1}
-            max={10}
+            max={7}
             value={s.customDays}
             onChange={(v) => patch("customDays", v)}
           />
@@ -739,6 +779,24 @@ export function ControlPanel({
             <Toggle
               checked={s.showWeekNumbers}
               onChange={(v) => patch("showWeekNumbers", v)}
+            />
+          </Row>
+          <Row label="More Popover">
+            <Toggle
+              checked={s.showMorePopover}
+              onChange={(v) => patch("showMorePopover", v)}
+            />
+          </Row>
+          <Row label="Week Start = Locale">
+            <Toggle
+              checked={s.localeWeekStart}
+              onChange={(v) => patch("localeWeekStart", v)}
+            />
+          </Row>
+          <Row label="Clock = Locale">
+            <Toggle
+              checked={s.localeClock}
+              onChange={(v) => patch("localeClock", v)}
             />
           </Row>
           <Row label="All-Day Row">
@@ -836,6 +894,43 @@ export function ControlPanel({
             <Toggle
               checked={s.selectable}
               onChange={(v) => patch("selectable", v)}
+            />
+          </Row>
+          <Row label="Keyboard Navigation">
+            <Toggle
+              checked={s.keyboardNavigation}
+              onChange={(v) => patch("keyboardNavigation", v)}
+            />
+          </Row>
+          <Row label="Swipe Navigation">
+            <Toggle
+              checked={s.swipeNavigation}
+              onChange={(v) => patch("swipeNavigation", v)}
+            />
+          </Row>
+          <Row label="Pinch To Zoom">
+            <Toggle
+              checked={s.pinchToZoom}
+              onChange={(v) => patch("pinchToZoom", v)}
+            />
+          </Row>
+          <RangeRow
+            label="Hour Height"
+            min={30}
+            max={180}
+            value={s.hourHeight}
+            onChange={(v) => patch("hourHeight", v)}
+          />
+          <Row label="Draggable">
+            <Toggle
+              checked={s.draggable}
+              onChange={(v) => patch("draggable", v)}
+            />
+          </Row>
+          <Row label="Resizable">
+            <Toggle
+              checked={s.resizable}
+              onChange={(v) => patch("resizable", v)}
             />
           </Row>
           <Row label="Creatable">

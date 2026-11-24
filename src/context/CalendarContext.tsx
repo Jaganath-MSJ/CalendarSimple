@@ -5,14 +5,28 @@ import React, {
   createContext,
   useContext,
   useReducer,
+  useState,
   ReactNode,
   useMemo,
   Dispatch,
 } from "react";
-import { dateFn, DateType } from "../utils";
-import { ECalendarViewType, CalendarProps } from "../types";
-import { CALENDAR_ACTIONS } from "../constants";
+import { resolveIs12Hour, resolveWeekStart } from "../utils/localeDefaults";
+import { clampCustomDays, dateFn, DateType, getNavigatedDate } from "../utils";
+import {
+  ECalendarViewType,
+  CalendarEvent,
+  CalendarConfig,
+  CalendarProps,
+  CalendarMessages,
+} from "../types";
+import {
+  CALENDAR_ACTIONS,
+  resolveMessages,
+  TIME_CONSTANTS,
+} from "../constants";
 import useColorScheme from "../hooks/useColorScheme";
+import { useDateRangeNotifier } from "../hooks/useDateRangeNotifier";
+import { useRecurringExpansion } from "../hooks/useRecurringExpansion";
 
 /**
  * Mutable runtime state managed by the calendar reducer.
@@ -24,6 +38,11 @@ export interface CalendarState {
   view: ECalendarViewType;
   /** Number of days shown when view is `customDays`. */
   customDays?: number;
+  /**
+   * Increments on every TODAY / SET_DATE dispatch; lets views react to repeated navigation to the same date.
+   * @internal Not part of the public API.
+   */
+  navigationId?: number;
 }
 
 /**
@@ -43,8 +62,12 @@ export type CalendarAction =
 
 /**
  * Shape of the value exposed by `CalendarContext`.
+ *
+ * @typeParam TEvent - Event shape of `config.events` (see `useCalendar<TEvent>()`).
  */
-export interface CalendarContextValue {
+export interface CalendarContextValue<
+  TEvent extends CalendarEvent = CalendarEvent,
+> {
   /** Current reducer state (selected date, view, customDays). */
   state: CalendarState;
   /** Dispatch function for sending actions to the reducer. */
@@ -52,9 +75,17 @@ export interface CalendarContextValue {
   /** `data-testid` forwarded from the root `<Calendar>` prop. */
   testId?: string;
   /** Static calendar configuration props (everything except `children`, `selectedDate`, and `view`). */
-  config: Omit<CalendarProps, "children" | "selectedDate" | "view">;
+  config: CalendarConfig<TEvent>;
+  /** Built-in UI strings with `config.localeMessages` overrides applied over the English defaults. */
+  messages: CalendarMessages;
   /** Resolved color scheme ("light" or "dark") for portaled UI such as Popover. */
   colorScheme: "light" | "dark";
+  /** Measured pixel size of the calendar body (header excluded); 0 until measured. */
+  bodySize: { width: number; height: number };
+  /** Pixels per hour in the time grids: `config.hourHeight`, else the zoom level (default 60). */
+  hourHeight: number;
+  /** Sets the uncontrolled zoom level (pinch); ignored while `hourHeight` is set. */
+  setHourHeight: (height: number) => void;
 }
 
 export const CalendarContext = createContext<CalendarContextValue | undefined>(
@@ -79,49 +110,35 @@ function calendarReducer(
       return {
         ...state,
         selectedDate: action.payload,
+        navigationId: (state.navigationId ?? 0) + 1,
       };
     case CALENDAR_ACTIONS.SET_VIEW:
       return { ...state, view: action.payload };
     case CALENDAR_ACTIONS.SET_CUSTOM_DAYS:
-      return { ...state, customDays: action.payload };
-    case CALENDAR_ACTIONS.NEXT: {
-      if (state.view === ECalendarViewType.customDays) {
-        return {
-          ...state,
-          selectedDate: state.selectedDate.plus({
-            days: state.customDays || 3,
-          }),
-        };
-      }
-      const unit =
-        state.view === ECalendarViewType.schedule ? "day" : state.view;
-      return { ...state, selectedDate: state.selectedDate.plus({ [unit]: 1 }) };
-    }
+      return { ...state, customDays: clampCustomDays(action.payload) };
+    case CALENDAR_ACTIONS.NEXT:
     case CALENDAR_ACTIONS.PREV: {
-      if (state.view === ECalendarViewType.customDays) {
-        return {
-          ...state,
-          selectedDate: state.selectedDate.minus({
-            days: state.customDays || 3,
-          }),
-        };
-      }
-      const unit =
-        state.view === ECalendarViewType.schedule ? "day" : state.view;
-      return {
-        ...state,
-        selectedDate: state.selectedDate.minus({ [unit]: 1 }),
-      };
+      const next = getNavigatedDate(
+        state,
+        action.type === CALENDAR_ACTIONS.NEXT ? 1 : -1,
+      );
+      return next === state.selectedDate
+        ? state
+        : { ...state, selectedDate: next };
     }
     case CALENDAR_ACTIONS.TODAY:
       return {
         ...state,
         selectedDate: dateFn(),
+        navigationId: (state.navigationId ?? 0) + 1,
       };
     default:
       return state;
   }
 }
+
+const EMPTY_CONFIG: NonNullable<CalendarProviderProps["config"]> = {};
+const DEFAULT_BODY_SIZE = { width: 0, height: 0 };
 
 /**
  * Props accepted by `CalendarProvider`.
@@ -139,6 +156,8 @@ export interface CalendarProviderProps {
   testId?: string;
   /** Static configuration props passed through to all child components via context. */
   config?: Omit<CalendarProps, "children" | "selectedDate" | "view">;
+  /** Pixel size of the calendar body used for layout maths. */
+  bodySize?: { width: number; height: number };
 }
 
 /**
@@ -151,25 +170,91 @@ export function CalendarProvider({
   initialView,
   initialCustomDays,
   testId,
-  config,
+  config: rawConfigProp,
+  bodySize: bodySizeProp,
 }: CalendarProviderProps) {
   const [state, dispatch] = useReducer(calendarReducer, {
     selectedDate: initialDate,
     view: initialView,
-    customDays: initialCustomDays,
+    customDays:
+      initialCustomDays === undefined
+        ? undefined
+        : clampCustomDays(initialCustomDays),
+    navigationId: 0,
   });
 
-  const resolvedScheme = useColorScheme(config?.colorScheme);
+  const rawConfig = rawConfigProp ?? EMPTY_CONFIG;
+  const localeTag = rawConfig.locale ?? "en";
+  const weekStartsOn = useMemo(
+    () => resolveWeekStart(rawConfig.weekStartsOn ?? 0, localeTag),
+    [rawConfig.weekStartsOn, localeTag],
+  );
+  const is12Hour = useMemo(
+    () => resolveIs12Hour(rawConfig.is12Hour ?? false, localeTag),
+    [rawConfig.is12Hour, localeTag],
+  );
+  // Resolve "locale" once here so context consumers only ever see concrete values.
+  const localeConfig = useMemo<CalendarConfig>(
+    () => ({
+      ...rawConfig,
+      weekStartsOn:
+        rawConfig.weekStartsOn === undefined ? undefined : weekStartsOn,
+      weekEndsOn:
+        rawConfig.weekEndsOn ??
+        (rawConfig.weekStartsOn === "locale" ? (weekStartsOn + 6) % 7 : 6),
+      is12Hour: rawConfig.is12Hour === undefined ? undefined : is12Hour,
+    }),
+    [rawConfig, weekStartsOn, is12Hour],
+  );
+  // Recurring events become their occurrences, so views and the range
+  // notifier all see them.
+  const config = useRecurringExpansion(localeConfig, state);
+
+  useDateRangeNotifier(state, config);
+
+  const resolvedScheme = useColorScheme(config.colorScheme);
+
+  // Direct provider use (no measured `bodySize`): derive from numeric config size.
+  const configWidth = typeof config.width === "number" ? config.width : 0;
+  const configHeight = typeof config.height === "number" ? config.height : 0;
+  const derivedBodySize = useMemo(
+    () =>
+      configWidth || configHeight
+        ? { width: configWidth, height: configHeight }
+        : DEFAULT_BODY_SIZE,
+    [configWidth, configHeight],
+  );
+  const bodySize = bodySizeProp ?? derivedBodySize;
+
+  const messages = useMemo(
+    () => resolveMessages(config.localeMessages),
+    [config.localeMessages],
+  );
+
+  const [zoomHourHeight, setHourHeight] = useState<number>(
+    TIME_CONSTANTS.DEFAULT_HOUR_HEIGHT,
+  );
+  // An invalid hourHeight (0, negative, NaN) falls back to the zoom level.
+  const hourHeight =
+    typeof config.hourHeight === "number" &&
+    Number.isFinite(config.hourHeight) &&
+    config.hourHeight > 0
+      ? config.hourHeight
+      : zoomHourHeight;
 
   const value = useMemo(
     () => ({
       state,
       dispatch,
       testId,
-      config: config || {},
+      config,
+      messages,
       colorScheme: resolvedScheme,
+      bodySize,
+      hourHeight,
+      setHourHeight,
     }),
-    [state, testId, config, resolvedScheme],
+    [state, testId, config, messages, resolvedScheme, bodySize, hourHeight],
   );
 
   return (
@@ -183,12 +268,18 @@ export function CalendarProvider({
  * Consumes `CalendarContext` and returns the current state, dispatch, and config.
  * Must be called inside a `CalendarProvider` — throws if the context is missing.
  *
+ * Pass your event type to narrow `config.events` and the event callbacks:
+ * `useCalendar<MyEvent>()`. The type argument is not checked at runtime.
+ *
  * @returns The current `CalendarContextValue`.
  */
-export function useCalendar() {
+export function useCalendar<
+  TEvent extends CalendarEvent = CalendarEvent,
+>(): CalendarContextValue<TEvent> {
   const context = useContext(CalendarContext);
   if (context === undefined) {
     throw new Error("useCalendar must be used within a CalendarProvider");
   }
-  return context;
+  // The context stores config widened to CalendarEvent; narrow it for the caller.
+  return context as unknown as CalendarContextValue<TEvent>;
 }

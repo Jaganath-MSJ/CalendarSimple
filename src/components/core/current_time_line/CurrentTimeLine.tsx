@@ -18,7 +18,8 @@ const CurrentTimeLine = ({
   minHour,
   maxHour,
 }: CurrentTimeLineProps) => {
-  const { testId } = useCalendar();
+  const { testId, hourHeight } = useCalendar();
+  const scale = hourHeight / TIME_CONSTANTS.MINUTES_IN_HOUR;
   const [position, setPosition] = useState(() => {
     const now = dateFn();
     return (now.hour - minHour) * TIME_CONSTANTS.MINUTES_IN_HOUR + now.minute;
@@ -29,7 +30,6 @@ const CurrentTimeLine = ({
       const now = dateFn();
       const hours = now.hour;
       const minutes = now.minute;
-      // eventSlot height is 60px per hour
       const totalMinutes =
         (hours - minHour) * TIME_CONSTANTS.MINUTES_IN_HOUR + minutes;
       setPosition(totalMinutes);
@@ -51,7 +51,7 @@ const CurrentTimeLine = ({
   return (
     <div
       className={cx(styles.currentTimeLine, className)}
-      style={{ top: `${position}px` }}
+      style={{ top: `${position * scale}px` }}
       data-testid={`${testId}-current-time-line`}
     >
       <div className={styles.circle} />

@@ -37,7 +37,9 @@ export default function useResizeObserver(
       const entry = entries[0];
       const { width, height } = entry.contentRect;
 
-      setSize({ width, height });
+      setSize((p) =>
+        p.width === width && p.height === height ? p : { width, height },
+      );
     });
 
     resizeObserver.observe(element);

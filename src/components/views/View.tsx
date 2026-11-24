@@ -12,6 +12,12 @@ import MonthSkeleton from "../ui/skeleton/MonthSkeleton";
 import TimeGridSkeleton from "../ui/skeleton/TimeGridSkeleton";
 import ScheduleSkeleton from "../ui/skeleton/ScheduleSkeleton";
 import styles from "./View.module.css";
+import useMessages from "../../hooks/useMessages";
+import {
+  usePeriodKeys,
+  useSwipeNavigation,
+} from "../../hooks/usePeriodNavigation";
+import { clampCustomDays } from "../../utils/customDays";
 
 export type ViewProps = Partial<
   Omit<
@@ -29,8 +35,12 @@ export type ViewProps = Partial<
 
 export default function View(props: ViewProps) {
   const { isLoading, events, renderLoading } = useCalendarProps({});
+  const messages = useMessages();
+  const onPeriodKey = usePeriodKeys();
+  const swipe = useSwipeNavigation();
   const {
     state: { view, customDays },
+    hourHeight,
   } = useCalendar();
 
   // Track loading→loaded transition to trigger fadeIn animation
@@ -52,21 +62,29 @@ export default function View(props: ViewProps) {
 
   // Show skeleton (or custom loading UI) when loading with no events
   if (showLoadingUi) {
-    if (renderLoading) {
-      return <div className={styles.viewBody}>{renderLoading()}</div>;
-    }
-    switch (view) {
-      case ECalendarViewType.month:
-        return <MonthSkeleton />;
-      case ECalendarViewType.day:
-      case ECalendarViewType.week:
-      case ECalendarViewType.customDays:
-        return <TimeGridSkeleton />;
-      case ECalendarViewType.schedule:
-        return <ScheduleSkeleton />;
-      default:
-        return <MonthSkeleton />;
-    }
+    const timeGrid =
+      view === ECalendarViewType.day ||
+      view === ECalendarViewType.week ||
+      view === ECalendarViewType.customDays;
+    const skeleton = renderLoading ? (
+      renderLoading()
+    ) : view === ECalendarViewType.schedule ? (
+      <ScheduleSkeleton />
+    ) : timeGrid ? (
+      <TimeGridSkeleton />
+    ) : (
+      <MonthSkeleton />
+    );
+    return (
+      <div
+        className={styles.viewBody}
+        role="status"
+        aria-busy="true"
+        aria-label={messages.loading}
+      >
+        {skeleton}
+      </div>
+    );
   }
 
   const renderActiveView = () => {
@@ -80,8 +98,9 @@ export default function View(props: ViewProps) {
       case ECalendarViewType.schedule:
         return <ScheduleView {...props} />;
       case ECalendarViewType.customDays:
-        if (!customDays || customDays < 1 || customDays > 10) return null;
-        return <CustomDaysView {...props} customDays={customDays} />;
+        return (
+          <CustomDaysView {...props} customDays={clampCustomDays(customDays)} />
+        );
       default:
         return null;
     }
@@ -93,6 +112,7 @@ export default function View(props: ViewProps) {
       <div
         className={styles.loadingOverlay}
         data-testid="calendar-loading-overlay"
+        aria-busy="true"
       >
         {renderActiveView()}
       </div>
@@ -103,7 +123,20 @@ export default function View(props: ViewProps) {
   const activeView = renderActiveView();
   if (!activeView) return null;
   return (
-    <div className={cx(styles.views, { [styles.fadeIn]: showFadeIn })}>
+    <div
+      className={cx(styles.views, { [styles.fadeIn]: showFadeIn })}
+      data-calendar-views=""
+      style={
+        {
+          "--cal-hour-height": `${hourHeight}px`,
+          // Swipes turn the period; keep vertical scrolling to the browser.
+          ...(swipe && { touchAction: "pan-y" }),
+        } as React.CSSProperties
+      }
+      {...swipe}
+      tabIndex={onPeriodKey ? -1 : undefined}
+      onKeyDown={onPeriodKey}
+    >
       {activeView}
     </div>
   );

@@ -17,6 +17,7 @@ import {
   isAllDayEvent,
   isMultiDay,
   getEventOverlapInHours,
+  getLastEventDay,
 } from "../utils/common";
 import { LAYOUT_CONSTANTS } from "../constants";
 
@@ -156,7 +157,7 @@ export default function useAllDayBanner(
     // and assign a vertical "row" index so no overlapping events share a row.
     // -------------------------------------------------------------------------
     intersectingEvents.forEach(
-      ({ event, bannerStartDay, bannerEndDay, exactStart, exactEnd }) => {
+      ({ event, bannerStartDay, bannerEndDay, exactStart }) => {
         // Calculate bound indices for the current visible view
         let startIndex = days.findIndex((d) =>
           dateFn(d).startOf("day").equals(bannerStartDay),
@@ -180,7 +181,7 @@ export default function useAllDayBanner(
           bannerStartDay < viewStart ||
           exactStart.startOf("day") < bannerStartDay;
         const isClippedRight =
-          bannerEndDay > viewEnd || exactEnd.startOf("day") > bannerEndDay;
+          bannerEndDay > viewEnd || getLastEventDay(event) > bannerEndDay;
 
         // Row stacking: Find the lowest row index where the event fits without overlap
         let rowIndex = 0;

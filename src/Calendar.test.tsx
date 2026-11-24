@@ -1,19 +1,13 @@
 import React from "react";
-import { render, fireEvent, screen, within } from "@testing-library/react";
+import { render, fireEvent, screen, within, act } from "@testing-library/react";
 import { expect, describe, it, vi, afterEach } from "vitest";
 import { dateFn, formatDate } from "./utils";
 import { DATE_FORMATS } from "./constants";
 import { CalendarProps, ECalendarViewType } from "./types";
 import Calendar from "./Calendar";
+import { CalendarProvider } from "./context/CalendarContext";
+import WeekView from "./components/views/week_view/WeekView";
 import type { RenderHeaderProps, RenderDateCellProps } from "./index";
-
-// Mock ResizeObserver as it's not available in jsdom
-class ResizeObserverMock {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-}
-globalThis.ResizeObserver = ResizeObserverMock;
 
 describe("Calendar Component Integration", () => {
   it("renders the Calendar without crashing", () => {
@@ -682,6 +676,201 @@ describe("Calendar Component Integration", () => {
       });
       // The option text for customDays is "${customDays} ${localeMessages.days}"
       expect(screen.getByText(/3 DAYS_OVERRIDE/i)).toBeInTheDocument();
+    });
+  });
+
+  describe("explicit undefined props", () => {
+    it("keeps default minHour/maxHour when passed as undefined", () => {
+      const { container } = render(
+        <Calendar
+          view={ECalendarViewType.day}
+          width={700}
+          height={600}
+          minHour={undefined}
+          maxHour={undefined}
+        />,
+      );
+      expect(container.querySelectorAll('[class*="eventSlot"]')).toHaveLength(
+        24,
+      );
+    });
+  });
+
+  describe("prop sync", () => {
+    const jan = () => new Date(2026, 0, 15);
+    const compound = (
+      date: Date,
+      view: ECalendarViewType = ECalendarViewType.month,
+    ) => (
+      <Calendar selectedDate={date} view={view} width={700} height={600}>
+        <Calendar.Header />
+        <Calendar.View />
+      </Calendar>
+    );
+
+    it("syncs selectedDate in compound mode", () => {
+      const { rerender } = render(compound(jan()));
+      expect(screen.getByRole("heading")).toHaveTextContent("January 2026");
+      rerender(compound(new Date(2026, 5, 15)));
+      expect(screen.getByRole("heading")).toHaveTextContent("June 2026");
+    });
+
+    it("syncs view in compound mode", () => {
+      const { rerender } = render(compound(jan()));
+      expect(screen.queryByTestId("calendar-week-view")).toBeNull();
+      rerender(compound(jan(), ECalendarViewType.week));
+      expect(screen.getByTestId("calendar-week-view")).toBeInTheDocument();
+    });
+
+    it("does not reset navigation for an equal new Date (compound)", () => {
+      const { rerender } = render(compound(jan()));
+      fireEvent.click(screen.getByTestId("calendar-header-next-btn"));
+      expect(screen.getByRole("heading")).toHaveTextContent("February 2026");
+      rerender(compound(jan()));
+      expect(screen.getByRole("heading")).toHaveTextContent("February 2026");
+    });
+
+    it("does not reset navigation for an equal new Date (plain)", () => {
+      const el = (d: Date) => (
+        <Calendar selectedDate={d} width={700} height={600} />
+      );
+      const { rerender } = render(el(jan()));
+      fireEvent.click(screen.getByTestId("calendar-header-next-btn"));
+      expect(screen.getByRole("heading")).toHaveTextContent("February 2026");
+      rerender(el(jan()));
+      expect(screen.getByRole("heading")).toHaveTextContent("February 2026");
+    });
+  });
+  describe("config identity", () => {
+    const originalRO = globalThis.ResizeObserver;
+    afterEach(() => {
+      globalThis.ResizeObserver = originalRO;
+    });
+
+    it("does not re-render context consumers when the observed size is unchanged", () => {
+      let fire: (() => void) | undefined;
+      globalThis.ResizeObserver = class {
+        constructor(cb: (e: unknown[]) => void) {
+          fire = () => cb([{ contentRect: { width: 700, height: 722 } }]);
+        }
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      } as unknown as typeof ResizeObserver;
+      const spy = vi.fn(() => null);
+      render(
+        <Calendar
+          width="700px"
+          height={600}
+          selectedDate={new Date(2026, 10, 10)}
+          renderDateCell={spy}
+        >
+          <Calendar.View />
+        </Calendar>,
+      );
+      act(() => fire?.());
+      const count = spy.mock.calls.length;
+      expect(count).toBeGreaterThan(0);
+      act(() => fire?.());
+      expect(spy.mock.calls.length).toBe(count);
+    });
+  });
+
+  describe("locale-resolved weekStartsOn and is12Hour", () => {
+    const firstHeader = () => screen.getAllByRole("columnheader")[0];
+
+    it("weekStartsOn=locale starts the month grid on Monday for en-GB", () => {
+      render(<Calendar weekStartsOn="locale" locale="en-GB" />);
+      expect(firstHeader().textContent).toMatch(/^mon/i);
+    });
+
+    it("weekStartsOn=locale starts the month grid on Sunday for en-US", () => {
+      render(<Calendar weekStartsOn="locale" locale="en-US" />);
+      expect(firstHeader().textContent).toMatch(/^sun/i);
+    });
+
+    describe("weekEndsOn follows weekStartsOn=locale", () => {
+      const cases: [string, RegExp, RegExp][] = [
+        ["en-GB", /^mon/i, /^sun/i],
+        ["de-DE", /^mo/i, /^so/i],
+        [
+          "ar-EG",
+          /^(sat|\u0627\u0644\u0633\u0628\u062a)/i,
+          /^(fri|\u0627\u0644\u062c\u0645\u0639\u0629)/i,
+        ],
+      ];
+
+      it.each(cases)("month view shows 7 columns for %s", (locale) => {
+        render(<Calendar weekStartsOn="locale" locale={locale} />);
+        expect(screen.getAllByRole("columnheader")).toHaveLength(7);
+      });
+
+      it.each(cases)("week view shows 7 day columns for %s", (locale) => {
+        render(
+          <Calendar
+            view={ECalendarViewType.week}
+            weekStartsOn="locale"
+            locale={locale}
+            width={700}
+            height={600}
+          />,
+        );
+        expect(screen.getAllByTestId("calendar-day-column")).toHaveLength(7);
+      });
+
+      it("en-GB runs Monday to Sunday", () => {
+        render(<Calendar weekStartsOn="locale" locale="en-GB" />);
+        const heads = screen.getAllByRole("columnheader");
+        expect(heads[0].textContent).toMatch(/^mon/i);
+        expect(heads[6].textContent).toMatch(/^sun/i);
+      });
+
+      it("an explicit weekEndsOn wins over the locale-derived end", () => {
+        render(
+          <Calendar weekStartsOn="locale" weekEndsOn={5} locale="en-GB" />,
+        );
+        expect(screen.getAllByRole("columnheader")).toHaveLength(5);
+      });
+
+      it("a direct CalendarProvider without weekEndsOn shows 7 columns", () => {
+        render(
+          <CalendarProvider
+            initialDate={dateFn("2025-01-15")}
+            initialView={ECalendarViewType.week}
+            testId="calendar"
+            config={{ weekStartsOn: "locale", locale: "en-GB", events: [] }}
+          >
+            <WeekView />
+          </CalendarProvider>,
+        );
+        expect(screen.getAllByTestId("calendar-day-column")).toHaveLength(7);
+      });
+    });
+
+    it("is12Hour=locale shows AM/PM for en-US", () => {
+      render(
+        <Calendar
+          view={ECalendarViewType.day}
+          is12Hour="locale"
+          locale="en-US"
+        />,
+      );
+      expect(screen.getByTestId("calendar-time-column").textContent).toMatch(
+        /AM|PM/,
+      );
+    });
+
+    it("is12Hour=locale uses 24-hour labels for de-DE", () => {
+      render(
+        <Calendar
+          view={ECalendarViewType.day}
+          is12Hour="locale"
+          locale="de-DE"
+        />,
+      );
+      const text = screen.getByTestId("calendar-time-column").textContent;
+      expect(text).toContain("14:00");
+      expect(text).not.toMatch(/AM|PM/);
     });
   });
 });

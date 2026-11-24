@@ -18,6 +18,8 @@ import {
   isAllDayEvent,
   isMultiDay,
   getEventOverlapInHours,
+  getLastEventDay,
+  hasValidDates,
 } from "../utils/common";
 import { DATE_FORMATS, TIME_CONSTANTS } from "../constants";
 
@@ -54,6 +56,18 @@ interface ProcessedEvent {
   left?: number;
   width?: number;
   expandCols?: number;
+}
+
+/**
+ * Wall-clock minute of `dt` within `day`, clipped to [0, 1440]. Measured from
+ * hour/minute (not millisecond differences) so DST days stay aligned.
+ */
+function minuteOfDay(dt: DateType, day: DateType): number {
+  const local = dt.setZone(day.zone);
+  const dayStart = day.startOf("day");
+  if (local < dayStart) return 0;
+  if (local >= dayStart.plus({ days: 1 })) return 1440;
+  return local.hour * TIME_CONSTANTS.MINUTES_IN_HOUR + local.minute;
 }
 
 /**
@@ -94,9 +108,7 @@ export default function useDayEventLayout(
 
           // Check if event overlaps this calendar day at all
           const eventStart = dateFn(event.startDate).startOf("day");
-          const eventEnd = event.endDate
-            ? dateFn(event.endDate).endOf("day")
-            : eventStart.endOf("day");
+          const eventEnd = getLastEventDay(event).endOf("day");
 
           const overlapsCurrentDay =
             currentDay >= eventStart.startOf("day") &&
@@ -117,21 +129,10 @@ export default function useDayEventLayout(
               return false;
 
             // To ensure we restrict to visible operating hours
-            const actStartMs = Math.max(
-              dateFn(event.startDate).valueOf(),
-              currentDay.valueOf(),
-            );
-            const actEndMs = Math.min(
-              event.endDate ? dateFn(event.endDate).valueOf() : actStartMs,
-              currentDay.endOf("day").valueOf() + 1,
-            );
-
-            const startMins = Math.floor(
-              (actStartMs - currentDay.valueOf()) /
-                TIME_CONSTANTS.MS_PER_MINUTE,
-            );
-            const endMins = Math.floor(
-              (actEndMs - currentDay.valueOf()) / TIME_CONSTANTS.MS_PER_MINUTE,
+            const startMins = minuteOfDay(dateFn(event.startDate), currentDay);
+            const endMins = minuteOfDay(
+              event.endDate ? dateFn(event.endDate) : dateFn(event.startDate),
+              currentDay,
             );
 
             const isWithinBounds =
@@ -146,7 +147,9 @@ export default function useDayEventLayout(
 
         if (enableEnrichedEvents && enrichedEventsByDate) {
           const dateStr = formatDate(currentDate, DATE_FORMATS.DATE);
-          return (enrichedEventsByDate[dateStr] || []).filter(filterFn);
+          return (enrichedEventsByDate[dateStr] || [])
+            .filter(hasValidDates)
+            .filter(filterFn);
         }
         return events.filter(filterFn);
       };
@@ -160,25 +163,18 @@ export default function useDayEventLayout(
       // -------------------------------------------------------------------------
       const processedEvents: ProcessedEvent[] = eventsForDay.map(
         (event, index) => {
-          const currentDayStartMs = dateFn(currentDate)
-            .startOf("day")
-            .valueOf();
-          const currentDayEndMs = dateFn(currentDate).endOf("day").valueOf();
+          const currentDay = dateFn(currentDate).startOf("day");
 
           const isAllDay = isAllDayEvent(event);
           const overlapHours = getEventOverlapInHours(event, currentDate);
 
-          const actStartMs = Math.max(
-            dateFn(event.startDate).valueOf(),
-            currentDayStartMs,
+          // Wall-clock minutes of the clipped start and end (end of day = 1440)
+          const startDt = dateFn(event.startDate);
+          let start = minuteOfDay(startDt, currentDay);
+          let end = minuteOfDay(
+            event.endDate ? dateFn(event.endDate) : startDt,
+            currentDay,
           );
-          const actEndMs = Math.min(
-            event.endDate ? dateFn(event.endDate).valueOf() : actStartMs,
-            currentDayEndMs + 1, // Add 1ms to include exact midnight
-          );
-
-          let start = Math.floor((actStartMs - currentDayStartMs) / 60000);
-          let end = Math.floor((actEndMs - currentDayStartMs) / 60000);
 
           if (start === end) end += 1;
 

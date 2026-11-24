@@ -6,28 +6,42 @@
  * and spatial calculations like the maximum number of viewable events per cell.
  */
 
-import { KeyboardEvent } from "react";
+import { CSSProperties, KeyboardEvent } from "react";
 import {
   KEYBOARD_SHORTCUTS,
-  LAYOUT_CONSTANTS,
+  MONTH_METRICS,
   RTL_LOCALES,
   TIME_CONSTANTS,
 } from "../constants";
 import { CalendarEvent } from "../types";
 import { dateFn, DateType } from "./date";
 
+/** Month cell metrics consumed by `calculateMaxEvents` (see `MONTH_METRICS`). */
+export interface MonthCellMetrics {
+  dateLabelHeight: number;
+  cellPadding: number;
+  eventPitch: number;
+}
+
 /**
  * Calculates the maximum number of events that can be displayed in a cell based on the calendar height.
  *
- * @param height - The total height of the calendar
- * @returns The maximum number of events to display
+ * @param height - The total height of the calendar body; `<= 0` means unmeasured (no cap)
+ * @param rowsInView - Number of week rows sharing that height
+ * @param metrics - Cell metrics; defaults to the web values
+ * @returns The maximum number of events to display (`Infinity` when unmeasured)
  */
-export function calculateMaxEvents(height: number, rowsInView: number): number {
-  const { DATE_LABEL_HEIGHT, CELL_PADDING, EVENT_HEIGHT } = LAYOUT_CONSTANTS;
+export function calculateMaxEvents(
+  height: number,
+  rowsInView: number,
+  metrics: MonthCellMetrics = MONTH_METRICS.web,
+): number {
+  if (height <= 0) return Infinity;
+  const { dateLabelHeight, cellPadding, eventPitch } = metrics;
 
   const cellHeight = height / rowsInView;
-  const availableHeight = cellHeight - DATE_LABEL_HEIGHT - CELL_PADDING;
-  const calculatedMax = Math.round(availableHeight / EVENT_HEIGHT) - 1; // -1 for "more" button
+  const availableHeight = cellHeight - dateLabelHeight - cellPadding;
+  const calculatedMax = Math.round(availableHeight / eventPitch) - 1; // -1 for "more" button
 
   return Math.max(0, calculatedMax);
 }
@@ -144,4 +158,72 @@ export function handleKeyboardActivation(handler: (e: KeyboardEvent) => void) {
       handler(e);
     }
   };
+}
+
+/**
+ * Returns the last calendar day an event occupies. A timed event ending at
+ * exactly 00:00 is over before that day starts, so its last day is the one
+ * before. Date-only (all-day) ranges keep their inclusive end date.
+ */
+export function getLastEventDay(event: CalendarEvent): DateType {
+  const start = dateFn(event.startDate);
+  if (!event.endDate) return start.startOf("day");
+
+  const end = dateFn(event.endDate);
+  const endsAtMidnight =
+    !isAllDayEvent(event) && end > start && end.equals(end.startOf("day"));
+  return (endsAtMidnight ? end.minus({ days: 1 }) : end).startOf("day");
+}
+
+/**
+ * Like an object spread, but keys whose override value is `undefined` keep
+ * their default instead of erasing it.
+ */
+export function mergeDefined<T extends object>(
+  defaults: Partial<T>,
+  overrides: Partial<T>,
+): T {
+  const merged = { ...defaults } as Record<string, unknown>;
+  for (const key in overrides) {
+    const value = overrides[key];
+    if (value !== undefined) {
+      merged[key] = value;
+    }
+  }
+  return merged as T;
+}
+
+/**
+ * True when `startDate` parses and `endDate`, if present, parses too.
+ */
+export function hasValidDates(event: CalendarEvent): boolean {
+  if (!event.startDate || !dateFn(event.startDate).isValid) return false;
+  return !event.endDate || dateFn(event.endDate).isValid;
+}
+
+/** Style keys an event's `style` may not set: they would break the layout. */
+export const LAYOUT_STYLE_KEYS = [
+  "position",
+  "top",
+  "right",
+  "bottom",
+  "left",
+  "inset",
+  "insetInlineStart",
+  "insetInlineEnd",
+  "insetBlockStart",
+  "insetBlockEnd",
+  "insetInline",
+  "insetBlock",
+  "width",
+  "height",
+  "zIndex",
+] as const;
+
+/** Returns a copy of `style` without layout-affecting keys. */
+export function stripLayoutStyle(style?: CSSProperties): CSSProperties {
+  if (!style) return {};
+  const copy: CSSProperties = { ...style };
+  for (const key of LAYOUT_STYLE_KEYS) delete copy[key];
+  return copy;
 }

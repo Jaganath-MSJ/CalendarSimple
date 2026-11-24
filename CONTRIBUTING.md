@@ -89,6 +89,27 @@ Guidelines:
 - **Render with `<CalendarProvider>`** and React Testing Library queries; we don't use external mocking libraries for context.
 - **Add a Storybook story** demonstrating any new feature or edge case — stories double as integration tests and QA scenarios.
 
+## Visual tests
+
+Playwright screenshot tests run against the Storybook build (`e2e/stories.spec.ts`).
+
+```bash
+npx playwright install chromium     # once
+npm run build-storybook && npm run test:visual
+```
+
+Baselines live in `e2e/__screenshots__/` and must come from the Playwright Docker image
+(`mcr.microsoft.com/playwright:v1.65.1-noble`) or the CI `visual-baselines` artifact, never from macOS,
+because font rendering differs and every screenshot would mismatch.
+
+Until `e2e/__screenshots__/` is committed, the CI `visual` job writes missing baselines
+(`--update-snapshots=missing`) and passes, so it guards nothing. After the first CI run, download the
+`visual-baselines` artifact and commit it.
+
+To update baselines after an intentional visual change, run `npm run test:visual:update` inside the
+Playwright Docker image (or download the `visual-baselines` artifact from the CI run) and commit the
+changed files in `e2e/__screenshots__/`.
+
 ## Coding Guidelines
 
 - **TypeScript**: Strictly typed throughout. No implicit `any`; export new public types from `src/index.ts`.
