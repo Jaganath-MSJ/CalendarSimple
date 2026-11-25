@@ -1,7 +1,7 @@
 :root {
   /* Theme variables */
-  --primary-color: #3b82f6;
-  --primary-hover: #2563eb;
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
   --text-primary: #1f2937;
   --text-secondary: #6b7280;
   --bg-color: #ffffff;
@@ -13,6 +13,11 @@
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
   --cal-focus-color: #005fcc;
+  --cal-on-primary: #ffffff;
+  --cal-event-default: #3b82f6;
+  --cal-surface-raised: #ffffff;
+  --cal-now-line: #ea4335;
+  --cal-scrim: rgba(17, 24, 39, 0.45);
 }
 
 /*
@@ -32,6 +37,11 @@
   --bg-hover: #374151;
   --border-color: #374151;
   --cal-focus-color: #93c5fd;
+  --cal-on-primary: #111827;
+  --cal-event-default: #3b82f6;
+  --cal-surface-raised: #374151;
+  --cal-now-line: #ea4335;
+  --cal-scrim: rgba(0, 0, 0, 0.55);
 }
 
 /* Keyboard focus indicators */

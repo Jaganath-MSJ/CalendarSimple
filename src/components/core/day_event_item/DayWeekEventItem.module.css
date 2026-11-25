@@ -3,7 +3,7 @@
   inset-inline-start: 5px;
   inset-inline-end: 5px;
   padding: 4px 5px;
-  background-color: #3b82f6;
+  background-color: var(--cal-event-default);
   color: white;
   border-radius: 4px;
   font-size: 12px;
@@ -21,6 +21,7 @@
   align-items: center;
   gap: 4px;
   padding: 2px 5px;
+  --event-pad-y: 2px;
 }
 
 .eventItemTiny {
@@ -28,6 +29,7 @@
   align-items: center;
   gap: 4px;
   padding: 1px 4px;
+  --event-pad-y: 1px;
   font-size: 10px;
   line-height: 1;
 }
@@ -44,4 +46,47 @@
   overflow: hidden;
   text-overflow: ellipsis;
   opacity: 0.9;
+}
+
+.draggable {
+  cursor: grab;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: pan-y;
+}
+
+.dragging {
+  cursor: grabbing;
+  opacity: 0.85;
+  z-index: 15 !important;
+  user-select: none;
+  touch-action: none;
+}
+
+/* Grips are flex items of the event (no absolute positioning): negative
+   margins pull them over the event's padding, to its top and bottom edges. */
+.resizeHandle {
+  flex: none;
+  height: 6px;
+  margin-inline: -5px;
+  cursor: ns-resize;
+  touch-action: none;
+  opacity: 0;
+}
+
+.resize-top {
+  order: -1;
+  margin-top: calc(-1 * var(--event-pad-y, 4px));
+  margin-bottom: -2px;
+}
+
+.resize-bottom {
+  margin-top: auto;
+  margin-bottom: calc(-1 * var(--event-pad-y, 4px));
+}
+
+.eventItem:hover .resizeHandle,
+.eventItem:focus-within .resizeHandle {
+  opacity: 1;
+  background: rgb(255 255 255 / 0.35);
 }

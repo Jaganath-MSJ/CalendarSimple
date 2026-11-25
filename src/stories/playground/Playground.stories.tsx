@@ -60,6 +60,12 @@ export const KitchenSink: Story = {
             onNavigate={(d) => console.log("onNavigate", d)}
             onViewChange={(v) => console.log("onViewChange", v)}
             onSlotClick={(s, e) => console.log("onSlotClick", s, e)}
+            onDateRangeChange={(s, e, v) =>
+              console.log("onDateRangeChange", s, e, v)
+            }
+            onEventDrop={(info) => console.log("onEventDrop", info)}
+            onEventResize={(info) => console.log("onEventResize", info)}
+            onHourHeightChange={(h) => console.log("onHourHeightChange", h)}
           />
         </div>
 

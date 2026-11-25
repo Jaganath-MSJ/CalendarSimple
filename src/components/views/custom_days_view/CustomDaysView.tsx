@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import cx from "classnames";
 import {
   getDayOfWeek,
@@ -11,9 +11,12 @@ import useDayEventLayout, {
   DayEventLayout,
 } from "../../../hooks/useDayEventLayout";
 import { CalendarContentProps } from "../../../types";
-import { DATE_FORMATS, TIME_CONSTANTS } from "../../../constants";
+import { DATE_FORMATS } from "../../../constants";
 import styles from "./CustomDaysView.module.css";
 import { useCalendar } from "../../../context/CalendarContext";
+import useMessages from "../../../hooks/useMessages";
+import useAutoScrollToNow from "../../../hooks/useAutoScrollToNow";
+import usePinchZoom from "../../../hooks/usePinchZoom";
 import useCalendarProps from "../../../hooks/useCalendarProps";
 import TimeColumn from "../../core/time_column/TimeColumn";
 import DayColumn from "../../core/day_column/DayColumn";
@@ -76,6 +79,7 @@ function CustomView(props: CustomViewProps) {
   } = useCalendarProps(props);
   const containerRef = useRef<HTMLDivElement>(null);
   const { state, testId, colorScheme } = useCalendar();
+  const messages = useMessages();
   const { selectedDate } = state;
 
   const viewDays = useMemo(() => {
@@ -99,34 +103,23 @@ function CustomView(props: CustomViewProps) {
     },
   ) as DayEventLayout[][];
 
-  const hasToday = useMemo(() => {
-    const now = dateFn();
-    return viewDays.some((day) => now.hasSame(day, "day"));
-  }, [viewDays]);
-
-  useEffect(() => {
-    if (autoScrollToCurrentTime && containerRef.current && hasToday) {
-      const now = dateFn();
-      const hours = now.hour;
-      const minutes = now.minute;
-      const totalMinutes = hours * TIME_CONSTANTS.MINUTES_IN_HOUR + minutes;
-
-      const container = containerRef.current;
-      const targetScroll = Math.max(
-        0,
-        totalMinutes - container.clientHeight / 2,
-      );
-
-      container.scrollTo({ top: targetScroll, behavior: "smooth" });
-    }
-  }, [autoScrollToCurrentTime, hasToday]);
+  usePinchZoom(containerRef);
+  const { hourHeight } = useCalendar();
+  useAutoScrollToNow(containerRef, {
+    scale: hourHeight / 60,
+    enabled: !!autoScrollToCurrentTime,
+    days: viewDays,
+    minHour,
+    maxHour,
+  });
 
   return (
     <div
       role="region"
-      aria-label={`${customDays} days view`}
+      aria-label={messages.nDaysView(customDays)}
       className={styles.customView}
       ref={containerRef}
+      data-calendar-scroll=""
       data-testid={`${testId}-custom-days-view`}
     >
       <div className={styles.stickyTopContainer}>

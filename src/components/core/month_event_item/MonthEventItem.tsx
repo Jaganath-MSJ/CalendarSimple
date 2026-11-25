@@ -12,12 +12,15 @@ import {
   getContrastColor,
   formatDate,
   handleKeyboardActivation,
+  stripLayoutStyle,
   resolveTheme,
 } from "../../../utils";
 import styles from "./MonthEventItem.module.css";
 import Popover from "../../ui/popover/Popover";
 import { LAYOUT_CONSTANTS, DATE_FORMATS } from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
+import useMessages from "../../../hooks/useMessages";
+import useDayMove, { measureMonthCell } from "../../../hooks/useDayMove";
 
 interface MonthEventItemProps extends Pick<
   CalendarContentProps,
@@ -29,6 +32,7 @@ interface MonthEventItemProps extends Pick<
   | "classNames"
   | "renderEvent"
   | "renderDateCell"
+  | "showMorePopover"
 > {
   dataClassName?: string;
   selectedClassName?: string;
@@ -40,10 +44,19 @@ interface MonthEventItemProps extends Pick<
   className?: string;
   isSelected: boolean;
   isToday: boolean;
+  isTodayAdjacent?: boolean;
   isCurrentMonth: boolean;
   onClick?: (date: DateType) => void;
   onMoreClick?: (date: DateType, hiddenEvents: EventListType[]) => void;
   totalEvents?: number;
+  /**
+   * Roving focus (`keyboardNavigation`): `true` = the grid's one tab stop,
+   * `false` = focusable by the arrow keys only, `undefined` = every
+   * clickable cell is a tab stop.
+   */
+  tabStop?: boolean;
+  /** Called when the cell takes focus (roving focus follows it). */
+  onCellFocus?: (date: DateType) => void;
 }
 
 function MonthEventItem({
@@ -55,6 +68,7 @@ function MonthEventItem({
   dataClassName,
   isSelected,
   isToday,
+  isTodayAdjacent = false,
   onClick,
   selectedClassName,
   todayClassName,
@@ -69,8 +83,12 @@ function MonthEventItem({
   classNames,
   renderEvent,
   renderDateCell,
+  showMorePopover = true,
+  tabStop,
+  onCellFocus,
 }: MonthEventItemProps) {
   const { testId, config, colorScheme } = useCalendar();
+  const messages = useMessages();
   const locale = config.locale;
   const [showPopover, setShowPopover] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -120,11 +138,21 @@ function MonthEventItem({
     <td
       style={style}
       data-testid={`${testId}-${date}-month-cell`}
+      data-date={dateObj.toISODate() ?? undefined}
       onClick={() => onClick?.(dateObj)}
-      tabIndex={onClick ? 0 : undefined}
+      onFocus={
+        onCellFocus
+          ? (e) => {
+              if (e.target === e.currentTarget) onCellFocus(dateObj);
+            }
+          : undefined
+      }
+      tabIndex={
+        tabStop === undefined ? (onClick ? 0 : undefined) : tabStop ? 0 : -1
+      }
       aria-label={
         onClick
-          ? formatDate(dateObj, DATE_FORMATS.MONTH_DAY_YEAR, locale)
+          ? `${formatDate(dateObj, DATE_FORMATS.MONTH_DAY_YEAR, locale)}, ${messages.eventCount(totalEvents)}`
           : undefined
       }
       onKeyDown={
@@ -145,9 +173,16 @@ function MonthEventItem({
                 isToday,
                 isSelected,
                 isCurrentMonth,
+                isTodayAdjacent,
               })
             ) : (
-              <p className={styles.dateLabel}>{date}</p>
+              <p
+                className={cx(styles.dateLabel, {
+                  [styles.todayAdjacent]: isTodayAdjacent,
+                })}
+              >
+                {date}
+              </p>
             )}
 
             {data && (
@@ -174,6 +209,8 @@ function MonthEventItem({
                   const eventBgColor =
                     item.style?.backgroundColor ||
                     LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
+                  // Text contrast is computed from the hex fallback; overriding
+                  // --cal-event-default does not recompute it.
                   const textColor = getContrastColor(String(eventBgColor));
 
                   // If cellWidth is 0, we can't calculate a proper spanning width.
@@ -186,31 +223,23 @@ function MonthEventItem({
                   const id = item.id || `${item.startDate}-${index}`;
 
                   return (
-                    <div
+                    <MonthChip
                       key={id}
-                      role="button"
-                      tabIndex={0}
+                      item={item}
+                      testIdValue={`${testId}-${id}-month-event-item`}
                       className={cx(styles.eventItem, classNames?.event)}
-                      id={item.id}
-                      data-testid={`${testId}-${id}-month-event-item`}
                       style={{
-                        width: calculatedWidth,
-                        backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                        backgroundColor: "var(--cal-event-default)",
                         color: textColor,
-                        ...item.style,
+                        ...stripLayoutStyle(item.style),
+                        width: calculatedWidth,
                       }}
                       title={tooltipText}
-                      aria-label={`${item.title}, ${tooltipText}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEventClick?.(item);
-                      }}
-                      onKeyDown={handleKeyboardActivation(() =>
-                        onEventClick?.(item),
-                      )}
+                      ariaLabel={`${item.title || messages.noTitle}, ${tooltipText}`}
+                      onEventClick={onEventClick}
                     >
                       {renderEvent ? renderEvent(item) : item.title}
-                    </div>
+                    </MonthChip>
                   );
                 })}
                 {hiddenEventsCount > 0 && (
@@ -218,24 +247,31 @@ function MonthEventItem({
                     <button
                       className={styles.moreEvents}
                       data-testid={`${testId}-${date}-more-events`}
-                      aria-label={`${hiddenEventsCount} more events on ${formatDate(dateObj, DATE_FORMATS.MONTH_DAY_YEAR, locale)}`}
+                      aria-label={messages.moreEventsOn(
+                        hiddenEventsCount,
+                        formatDate(
+                          dateObj,
+                          DATE_FORMATS.MONTH_DAY_YEAR,
+                          locale,
+                        ),
+                      )}
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (!showPopover) {
+                        if (showMorePopover && !showPopover) {
                           setAnchorEl(e.currentTarget);
                           setShowPopover(true);
                         }
                         onMoreClick?.(dateObj, hiddenEventsList);
                       }}
                       onKeyDown={handleKeyboardActivation((e) => {
-                        if (!showPopover) {
+                        if (showMorePopover && !showPopover) {
                           setAnchorEl(e.currentTarget as HTMLButtonElement);
                           setShowPopover(true);
                         }
                         onMoreClick?.(dateObj, hiddenEventsList);
                       })}
                     >
-                      + {hiddenEventsCount} more
+                      {messages.more(hiddenEventsCount)}
                     </button>
                     {showPopover && anchorEl && (
                       <Popover
@@ -256,6 +292,64 @@ function MonthEventItem({
         )}
       </div>
     </td>
+  );
+}
+
+interface MonthChipProps extends Pick<CalendarContentProps, "onEventClick"> {
+  item: EventListType;
+  testIdValue: string;
+  className: string;
+  style: React.CSSProperties;
+  title: string;
+  ariaLabel: string;
+  children: React.ReactNode;
+}
+
+/** One event chip in a month cell; draggable to another day or week. */
+function MonthChip({
+  item,
+  testIdValue,
+  className,
+  style,
+  title,
+  ariaLabel,
+  onEventClick,
+  children,
+}: MonthChipProps) {
+  // Drops report the app's own object, not the layout copy.
+  const source = (!item.isSpacer && item.sourceEvent) || item;
+  const { ref: chipRef, ...move } = useDayMove(source, {
+    axis: "both",
+    measure: measureMonthCell,
+  });
+  return (
+    <div
+      ref={chipRef}
+      role="button"
+      tabIndex={0}
+      className={cx(className, {
+        [styles.draggable]: move.canMove,
+        [styles.dragging]: move.dragging,
+      })}
+      id={item.id}
+      data-testid={testIdValue}
+      style={{ ...style, ...move.style }}
+      title={title}
+      aria-label={ariaLabel}
+      aria-keyshortcuts={move.keyShortcuts}
+      aria-description={move.description}
+      {...move.handlers}
+      onClick={(e) => {
+        e.stopPropagation();
+        onEventClick?.(item);
+      }}
+      onKeyDown={(e) => {
+        if (move.handleKey(e)) return;
+        handleKeyboardActivation(() => onEventClick?.(item))(e);
+      }}
+    >
+      {children}
+    </div>
   );
 }
 

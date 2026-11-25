@@ -10,40 +10,32 @@
  */
 
 import { useMemo, useEffect, useRef } from "react";
-import { CalendarEvent } from "../types";
+import { CalendarEvent, CalendarMessages } from "../types";
+import type { DateType } from "../utils";
 import {
   formatDate,
   dateFn,
-  DateType,
   getDiffDays,
   getStartOfDay,
   isAllDayEvent,
+  getLastEventDay,
 } from "../utils";
-import { DATE_FORMATS } from "../constants";
-
-/**
- * Returns the last calendar day an event occupies. A timed event ending at
- * exactly 00:00 is over before that day starts, so its last day is the one
- * before. Date-only (all-day) ranges keep their inclusive end date.
- */
-function getLastEventDay(event: CalendarEvent): DateType {
-  const start = dateFn(event.startDate);
-  if (!event.endDate) return start.startOf("day");
-
-  const end = dateFn(event.endDate);
-  const endsAtMidnight =
-    !isAllDayEvent(event) && end > start && end.equals(end.startOf("day"));
-  return (endsAtMidnight ? end.minus({ days: 1 }) : end).startOf("day");
-}
+import { DATE_FORMATS, resolveMessages } from "../constants";
 
 /**
  * Properties for configuring the schedule view hook.
  */
 interface UseScheduleViewProps {
   events: CalendarEvent[];
+  /** Date the list scrolls to; defaults to today. */
+  selectedDate?: DateType;
+  /** Changes on every Today / SET_DATE navigation, even to the same date. */
+  navigationId?: number;
   autoScrollToCurrentTime?: boolean;
   is12Hour?: boolean;
   locale?: string;
+  /** Resolved UI strings; defaults to the English messages. */
+  messages?: CalendarMessages;
 }
 
 /**
@@ -54,11 +46,14 @@ interface UseScheduleViewProps {
  */
 export default function useScheduleView({
   events,
+  selectedDate,
+  navigationId,
   autoScrollToCurrentTime,
   is12Hour,
   locale,
+  messages = resolveMessages(),
 }: UseScheduleViewProps) {
-  const todayRef = useRef<HTMLDivElement>(null);
+  const targetRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const groupedEvents = useMemo(() => {
@@ -93,13 +88,35 @@ export default function useScheduleView({
     return groups;
   }, [events]);
 
-  useEffect(() => {
-    if (autoScrollToCurrentTime && todayRef.current && containerRef.current) {
+  const selectedKey = (selectedDate ?? dateFn()).toISODate();
+
+  // First group on or after the selected date, else the last group
+  const targetDateKey = useMemo(() => {
+    const keys = Object.keys(groupedEvents).sort();
+    if (keys.length === 0) return undefined;
+    return keys.find((key) => selectedKey && key >= selectedKey) ?? keys.at(-1);
+  }, [groupedEvents, selectedKey]);
+
+  const scrollToTarget = () => {
+    if (targetRef.current && containerRef.current) {
       const containerRect = containerRef.current.getBoundingClientRect();
-      const elementRect = todayRef.current.getBoundingClientRect();
+      const elementRect = targetRef.current.getBoundingClientRect();
       containerRef.current.scrollTop += elementRect.top - containerRect.top;
     }
+  };
+
+  // On mount (and when events change) scroll only if autoScrollToCurrentTime
+  useEffect(() => {
+    if (autoScrollToCurrentTime) scrollToTarget();
   }, [autoScrollToCurrentTime, groupedEvents]);
+
+  // Every later navigation (even to the same date) scrolls; first run skipped
+  const lastNavigationId = useRef(navigationId);
+  useEffect(() => {
+    if (lastNavigationId.current === navigationId) return;
+    lastNavigationId.current = navigationId;
+    scrollToTarget();
+  }, [navigationId]);
 
   // ---------------------------------------------------------------------------
   // 3. Presentation formatting helpers
@@ -112,7 +129,7 @@ export default function useScheduleView({
    */
   const renderEventTime = (event: CalendarEvent, dateKey: string) => {
     if (isAllDayEvent(event)) {
-      return "All day";
+      return messages.allDay;
     }
 
     const currentDay = dateFn(dateKey).startOf("day");
@@ -121,7 +138,8 @@ export default function useScheduleView({
     const isMultiDay = !startDay.equals(endDay);
 
     const timeFormat = is12Hour ? DATE_FORMATS.TIME_12H : DATE_FORMATS.TIME;
-    const formatTime = (t: string) => t.replace(/^0/, "").replace(":00", " ");
+    const formatTime = (t: string) =>
+      t.replace(/^0/, "").replace(":00", " ").replace(/\s+/g, " ").trim();
 
     const isMidnight = (d: string) =>
       dateFn(d).hour === 0 && dateFn(d).minute === 0;
@@ -131,15 +149,15 @@ export default function useScheduleView({
     if (isMultiDay) {
       if (currentDay.equals(startDay)) {
         return isMidnight(event.startDate)
-          ? "All day"
+          ? messages.allDay
           : `${formatTime(formatDate(event.startDate, timeFormat, locale))}`;
       } else if (currentDay.equals(endDay)) {
         // A 00:00 end means the event runs to the end of its last day
         return isEndOfDay(event.endDate!) || isMidnight(event.endDate!)
-          ? "All day"
-          : `Until ${formatTime(formatDate(event.endDate!, timeFormat, locale))}`;
+          ? messages.allDay
+          : `${messages.until} ${formatTime(formatDate(event.endDate!, timeFormat, locale))}`;
       } else {
-        return "All day";
+        return messages.allDay;
       }
     }
 
@@ -153,7 +171,7 @@ export default function useScheduleView({
         isMidnight(event.startDate) &&
         (isEndOfDay(event.endDate) || endsAtNextMidnight)
       ) {
-        return "All day";
+        return messages.allDay;
       }
       const endStr = formatDate(event.endDate, timeFormat, locale);
       return `${formatTime(startStr)} – ${formatTime(endStr)}`;
@@ -173,13 +191,15 @@ export default function useScheduleView({
       const dayIndex = getDiffDays(currentDay, startDay) + 1;
       // Compare day starts so partial days count as whole calendar days
       const totalDays = getDiffDays(lastDay, startDay) + 1;
-      return `${event.title} (Day ${dayIndex}/${totalDays})`;
+      return `${event.title} ${messages.dayOfTotal(dayIndex, totalDays)}`;
     }
     return event.title;
   };
 
   return {
-    todayRef,
+    targetRef,
+    todayRef: targetRef,
+    targetDateKey,
     containerRef,
     groupedEvents,
     renderEventTime,

@@ -2,6 +2,8 @@ name: CI Pipeline
 
 on:
   pull_request:
+  push:
+    branches: [dev]
 
 permissions:
   contents: read
@@ -12,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x, 22.x]
+        node-version: [22.x, 24.x]
 
     steps:
       - name: Checkout repository
@@ -38,3 +40,97 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+  size:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: "npm"
+
+      # The action also builds the base branch to compare sizes. A base
+      # without size-limit (before the setup reached it) cannot be measured,
+      # so then only the PR's own limits are checked.
+      - name: Check the base branch has size-limit
+        id: base
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --depth=1 origin "$BASE_REF"
+          if git cat-file -e FETCH_HEAD:.size-limit.json 2>/dev/null; then
+            echo "has_size_limit=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_size_limit=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::$BASE_REF has no .size-limit.json; checking this PR's limits without a comparison."
+          fi
+
+      - name: Check bundle size (compare with base)
+        if: steps.base.outputs.has_size_limit == 'true'
+        uses: andresz1/size-limit-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies
+        if: steps.base.outputs.has_size_limit != 'true'
+        run: npm ci
+
+      - name: Check bundle size (limits only)
+        if: steps.base.outputs.has_size_limit != 'true'
+        run: npm run build && npx size-limit
+
+  # NOTE: `--update-snapshots=missing` writes missing baselines and PASSES, so
+  # until e2e/__screenshots__/ is committed this job is always green and guards
+  # nothing. Follow-up: download the `visual-baselines` artifact from the first
+  # CI run and commit it to e2e/__screenshots__/; after that, runs compare
+  # against the committed baselines.
+  visual:
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    # Keep this tag in lockstep with the exact @playwright/test version in
+    # package.json (bump both together; Dependabot ignores @playwright/test).
+    container: mcr.microsoft.com/playwright:v1.65.1-noble
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Storybook
+        run: npm run build-storybook
+
+      - name: Run visual tests
+        run: npx playwright test --update-snapshots=missing
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+
+      - name: Upload visual baselines
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baselines
+          path: e2e/__screenshots__/
+          if-no-files-found: ignore

@@ -7,14 +7,34 @@
 
 A lightweight, customizable, and accessible calendar component for React. Built with TypeScript and Luxon.
 
-**[Live Demo](https://calendarsimple.netlify.app)**
+**[Live Demo](https://jaganath-msj.github.io/CalendarSimple/)**
+
+<p align="center">
+  <img src=".github/assets/demo/views.gif" alt="Switching between the Month, Week, Day and Schedule views" width="720" />
+</p>
+
+<p align="center">
+  <img src=".github/assets/demo/drag-and-resize.gif" alt="Dragging an event to another day and time, then resizing another event from its bottom edge" width="720" />
+</p>
+
+<table>
+  <tr>
+    <td align="center"><img src=".github/assets/demo/dark-mode.gif" alt="The month view switching between light and dark mode" width="400" /><br /><sub>Light and dark mode</sub></td>
+    <td align="center"><img src=".github/assets/demo/localization.gif" alt="The month view in English, German and Arabic (right-to-left)" width="400" /><br /><sub>Localization and right-to-left</sub></td>
+  </tr>
+</table>
+
+Using React Native? See [calendar-simple-native](https://www.npmjs.com/package/calendar-simple-native).
 
 ## Features
 
-- **🗓️ Multiple Views** — Month, Week, Day, Schedule, and Custom Days views.
+- **🗓️ Multiple Views** — Month, Week, Day, Schedule, and Custom Days views. No Prev/Next in Schedule view; Today and the month/year pickers scroll the full list to the chosen date.
 - **✨ Event Handling** — Display and manage events with custom styling and arbitrary metadata.
+- **🔁 Recurring Events** — RFC 5545 `rrule` (daily, weekly, monthly, yearly) with `exdates`, expanded for the visible range.
+- **🖱️ Drag & Resize** — Move events by pointer or keyboard in every view but Schedule, and resize timed events in time grids.
+- **⌨️ Keyboard & Gestures** — Arrow-key day and period navigation, optional touch swipe between periods, and hour zoom (Ctrl/⌘ + wheel); same API as calendar-simple-native.
 - **📱 Responsive** — Built-in CSS breakpoints at 768px (tablet) and 480px (phone).
-- **🎨 Theming & Customization** — Override colors via `theme` and inject CSS classes via `classNames`.
+- **🎨 Theming & Customization** — Override colors via `theme` and inject CSS classes via `classNames`. The selected day is outlined; see the dark mode section for overridable palette tokens.
 - **🌙 Dark Mode & Color Schemes** — Built-in light/dark palettes with OS auto-detection.
 - **🌐 RTL Support** — Full right-to-left layout with auto-detection for Arabic, Hebrew, Farsi, and more.
 - **🧩 Custom Renderers** — Replace events, headers, and grid cells with your own React components.
@@ -202,9 +222,126 @@ const MyCalendar = () => {
     month: "Mois",
     schedule: "Planning",
     days: "Jours",
+    more: (n) => `+ ${n} autres`,
   }}
 />
 ```
+
+Plain strings: `today`, `day`, `week`, `month`, `schedule`, `days`, `allDay`, `until`, `noEvents`, `noTitle` (aria-label for untitled events), `previous`, `next`, `selectView`, `selectMonth`, `selectYear`, `calendarNavigation`, `allDayEvents`, `expandAllDay`, `collapseAllDay`, `weekView`, `dayView`, `scheduleView`.
+
+Functions: `nDaysView(n)`, `more(n)`, `moreAllDay(n)`, `moreEventsOn(n, date)`, `dayOfTotal(i, n)`, `eventsOn(date)`, `createEventAt(time, date)`, `weekNumber(n)` (week-title suffix, default `W45`).
+
+Keys you leave out (or set to `undefined`) use the English default; an empty string is used as given.
+
+### Recurring events
+
+Give an event an RFC 5545 `rrule` and the calendar shows each occurrence as its own event. `startDate` is the first occurrence and sets the time and the length (from `endDate`).
+
+```tsx
+const events = [
+  {
+    id: "standup",
+    title: "Standup",
+    startDate: "2026-10-05T09:00:00",
+    endDate: "2026-10-05T09:15:00",
+    rrule: "FREQ=WEEKLY;BYDAY=MO,WE,FR",
+    exdates: ["2026-11-11", "2026-11-13T09:00:00"],
+  },
+];
+```
+
+- **Supported rule parts** — `FREQ` (`DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`), `INTERVAL`, `COUNT`, `UNTIL` (`YYYYMMDD`, `YYYYMMDDTHHMMSS` or `…Z`), `WKST`, `BYDAY` (with ordinals such as `1MO` or `-1FR` in `MONTHLY`, and in `YEARLY` with `BYMONTH`), `BYMONTHDAY` (1 to 31 or -1 to -31) and `BYMONTH`. An optional `RRULE:` prefix is allowed.
+- **Unsupported rules** — Any other part (for example `BYSETPOS`, `BYHOUR`, `FREQ=HOURLY`), or a malformed rule, shows the event once, unexpanded, and logs a `console.warn` (once per calendar). A series whose `startDate` or `endDate` is not a valid date is passed through unexpanded, and the usual invalid-date handling drops it.
+- **`exdates`** — Occurrences to skip, as ISO dates (`"2026-11-04"`, skips that day) or exact start times (`"2026-11-04T09:00:00"`).
+- **Occurrences** — Each occurrence copies the event with its own `startDate` / `endDate`, the id `"<id>::<occurrence start>"` (for example `"standup::2026-11-09T09:00:00"`), `recurringEventId` (the series `id`) and `occurrenceDate` (its start). `onEventClick` and `renderEvent` receive the occurrence.
+- **Expansion window** — Occurrences are generated around the visible range: two months either side, widened to whole quarters. In Schedule view, which lists every event, series are expanded from two months before `selectedDate` to 12 months after it, widened to whole quarters; every series (endless or not) is cut there, as in calendar-simple-native, while non-recurring events are all listed as usual. `onDateRangeChange` in Schedule reports the span of what is listed, occurrences included.
+- **Limits** — At most 1000 occurrences per event per window; the rest are dropped with a warning.
+- **Ids** — Give recurring events an `id`; without one, occurrence ids fall back to the start date and two id-less series with the same start would collide.
+- **Editing** — Occurrences carry the series' `rrule`; to edit, update the series (via `recurringEventId`), not the occurrence.
+- **Time zones** — Times are held in the viewer's local zone: a series given with `Z`/offset repeats at the same local clock time.
+- **Weekly intervals** — Weekly `INTERVAL > 1` grouping follows the rule's `WKST` (default Monday, RFC 5545), not the calendar's `weekStartsOn`.
+- **Not expanded with `enableEnrichedEvents`** — pre-enriched events are used as given.
+- Events without `rrule` are unchanged.
+
+**Upgrading:** `rrule`, `exdates`, `recurringEventId` and `occurrenceDate` on events are now interpreted by the calendar. If you already expand series yourself, either remove `rrule` from the occurrences you pass, or keep `recurringEventId` on them; the calendar leaves events with `recurringEventId` alone. A non-string `rrule` is ignored at runtime, but the TypeScript types now expect a string.
+
+### Drag & resize
+
+<img src=".github/assets/demo/drag-and-resize.gif" alt="Dragging an event to another day and time, then resizing another event from its bottom edge" width="560" />
+
+Turn on `draggable` (and `resizable` for time grids) and handle the callbacks. **The calendar never changes `events` itself:** apply the new times in your state and pass the updated `events` back.
+
+```tsx
+// toIso(date, allDay): your own Date → "yyyy-MM-dd" or "yyyy-MM-ddTHH:mm:ss"
+const [events, setEvents] = useState(initialEvents);
+
+<Calendar
+  events={events}
+  draggable
+  resizable
+  onEventDrop={({ event, start, end, allDay }) =>
+    setEvents((prev) =>
+      prev.map((e) =>
+        e.id === event.id
+          ? {
+              ...e,
+              startDate: toIso(start, allDay),
+              endDate: toIso(end, allDay),
+            }
+          : e,
+      ),
+    )
+  }
+  onEventResize={({ event, start, end }) =>
+    setEvents((prev) =>
+      prev.map((e) =>
+        e.id === event.id
+          ? { ...e, startDate: toIso(start, false), endDate: toIso(end, false) }
+          : e,
+      ),
+    )
+  }
+/>;
+```
+
+| Prop                      | Type                              | Default     | Description                                                                                       |
+| ------------------------- | --------------------------------- | ----------- | ------------------------------------------------------------------------------------------------- |
+| `draggable`               | `boolean \| (event) => boolean`   | `undefined` | Events that can be moved. Needs `onEventDrop`.                                                    |
+| `onEventDrop`             | `(info: EventDropInfo) => void`   | `undefined` | `{ event, start: Date, end: Date, allDay, view }` after a move.                                   |
+| `dragSnapMinutes`         | `number`                          | `15`        | Snap for moves in Day, Week and Custom Days.                                                      |
+| `resizable`               | `boolean \| (event) => boolean`   | `undefined` | Timed events that can be resized from the top or bottom edge (time grids). Needs `onEventResize`. |
+| `onEventResize`           | `(info: EventResizeInfo) => void` | `undefined` | `{ event, start: Date, end: Date, edge: "top" \| "bottom", view }` after a resize.                |
+| `resizeSnapMinutes`       | `number`                          | `15`        | Snap for resize edges.                                                                            |
+| `minEventDurationMinutes` | `number`                          | `15`        | Shortest length a resize can leave.                                                               |
+
+- **Where** — Day, Week and Custom Days: x moves days, y moves time (snapped). Month: x moves days, y moves whole weeks; times are kept. All-day row: x moves days. Schedule has no drag.
+- **Pointer** — Mouse and pen start after a 4 px move, touch after a 300 ms hold. A press without a move is still a click (`onEventClick`); the click after a drag is not sent. Escape (or a cancelled pointer) puts the event back without a callback, and that Escape does not reach other handlers such as an open popover.
+- **Bounds** — An event within one day stays inside `minHour`–`maxHour` when moved or resized, and a resize never leaves less than `minEventDurationMinutes`. Events that run past midnight are moved as they are. Resize edges appear on hover/focus on the first and last day of an event, and not on items shorter than 24 px (use Alt+Shift+↑/↓ there).
+- **Wall clock** — Times move by the clock shown in the grid, so on a daylight-saving day 10:00 moved one hour lands on 11:00.
+- **RTL** — On screen directions are mirrored: dragging right (or Alt+→) moves to the previous day.
+- **Keyboard** — On a focused event: Alt+↑/↓ moves by `dragSnapMinutes` (in Month, by a week), Alt+←/→ moves a day, Alt+Shift+↑/↓ moves the end by `resizeSnapMinutes`. The keys are listed in `aria-keyshortcuts`, and focus stays on the moved event once you update `events`.
+- **Recurring events** — You receive the occurrence (`recurringEventId` set). Decide in your handler whether to move the series or just that day (for example add an `exdate` and a one-off event).
+- **All-day events in the time grid** — With `showAllDayRow={false}`, all-day events drawn in the grid move by whole days only (`allDay: true`) and cannot be resized.
+- **Not supported** — Turning a timed event into an all-day one (or back), and dragging in Schedule.
+
+### TypeScript: typed events
+
+`Calendar` is generic over your event shape, so callbacks and renderers receive your type instead of `CalendarEvent`:
+
+```tsx
+import Calendar, { useCalendar, type CalendarEvent } from "calendar-simple";
+
+interface MyEvent extends CalendarEvent {
+  room: number;
+}
+
+<Calendar<MyEvent> events={events} onEventClick={(e) => e.room} />;
+
+// Inside compound children:
+const { config } = useCalendar<MyEvent>(); // config.events: MyEvent[] | undefined
+```
+
+`TEvent` is set only by an explicit type argument (`<Calendar<MyEvent>>`, `useCalendar<MyEvent>()`); without one it stays `CalendarEvent`, even when `events` has a narrower type. The type definitions do not need TypeScript 5.4 `NoInfer` (they use an equivalent that works on older compilers). It types `events`, `onEventClick`, `onMoreClick`, `renderEvent`, `enrichedEventsByDate` and the `sortedMonthView` comparator; it is not checked at runtime.
 
 ## API Reference
 
@@ -212,57 +349,76 @@ const MyCalendar = () => {
 
 ### Props
 
-| Prop                      | Type                                                          | Default             |
-| ------------------------- | ------------------------------------------------------------- | ------------------- |
-| `events`                  | `CalendarEvent[]`                                             | `[]`                |
-| `selectedDate`            | `Date`                                                        | `undefined`         |
-| `view`                    | `ECalendarViewType`                                           | `"month"`           |
-| `testId`                  | `string`                                                      | `undefined`         |
-| `isLoading`               | `boolean`                                                     | `undefined`         |
-| `renderLoading`           | `() => ReactNode`                                             | `undefined`         |
-| `selectable`              | `boolean`                                                     | `false`             |
-| `creatable`               | `boolean`                                                     | `false`             |
-| `is12Hour`                | `boolean`                                                     | `false`             |
-| `colorScheme`             | `'light' \| 'dark' \| 'auto'`                                 | `'auto'`            |
-| `direction`               | `'ltr' \| 'rtl'`                                              | `` `auto-detect` `` |
-| `locale`                  | `string`                                                      | `'en'`              |
-| `localeMessages`          | `object`                                                      | `{}`                |
-| `theme`                   | `CalendarTheme`                                               | `{}`                |
-| `classNames`              | `CalendarClassNames`                                          | `{}`                |
-| `width`                   | `number \| string`                                            | `` `auto` ``        |
-| `height`                  | `number \| string`                                            | `` `auto` ``        |
-| `dayType`                 | `EDayType`                                                    | `"half"`            |
-| `weekStartsOn`            | `number`                                                      | `0`                 |
-| `weekEndsOn`              | `number`                                                      | `6`                 |
-| `customDays`              | `number`                                                      | `3`                 |
-| `showAdjacentMonths`      | `boolean`                                                     | `true`              |
-| `showWeekNumbers`         | `boolean`                                                     | `false`             |
-| `showAllDayRow`           | `boolean`                                                     | `true`              |
-| `maxEvents`               | `number`                                                      | `` `auto` ``        |
-| `minHour`                 | `number`                                                      | `0`                 |
-| `maxHour`                 | `number`                                                      | `24`                |
-| `eventOverlapOffset`      | `number`                                                      | `0`                 |
-| `showCurrentTime`         | `boolean`                                                     | `false`             |
-| `autoScrollToCurrentTime` | `boolean`                                                     | `false`             |
-| `resetDateOnViewChange`   | `boolean`                                                     | `false`             |
-| `pastYearLength`          | `number`                                                      | `5`                 |
-| `futureYearLength`        | `number`                                                      | `5`                 |
-| `onDateClick`             | `(date: Date) => void`                                        | `undefined`         |
-| `onEventClick`            | `(event: CalendarEvent) => void`                              | `undefined`         |
-| `onMoreClick`             | `(date: Date, hiddenEvents?: CalendarEvent[]) => void`        | `undefined`         |
-| `onNavigate`              | `(date: Date) => void`                                        | `undefined`         |
-| `onViewChange`            | `(view: ECalendarViewType) => void`                           | `undefined`         |
-| `onSlotClick`             | `(startDate: Date, endDate: Date) => void`                    | `undefined`         |
-| `renderEvent`             | `(event: CalendarEvent) => ReactNode`                         | `undefined`         |
-| `renderHeader`            | `(props: RenderHeaderProps) => ReactNode`                     | `undefined`         |
-| `renderHourCell`          | `(date: Date) => ReactNode`                                   | `undefined`         |
-| `renderDateCell`          | `(props: RenderDateCellProps) => ReactNode`                   | `undefined`         |
-| `renderScheduleSeparator` | `(date: Date) => ReactNode`                                   | `undefined`         |
-| `enableEnrichedEvents`    | `boolean`                                                     | `false`             |
-| `enrichedEventsByDate`    | `Record<string, CalendarEvent[]>`                             | `undefined`         |
-| `eventsAreSorted`         | `boolean`                                                     | `false`             |
-| `isEventOrderingEnabled`  | `boolean`                                                     | `true`              |
-| `sortedMonthView`         | `boolean \| ((a: CalendarEvent, b: CalendarEvent) => number)` | `true`              |
+| Prop                              | Type                                                                    | Default             |
+| --------------------------------- | ----------------------------------------------------------------------- | ------------------- |
+| `events`                          | `CalendarEvent[]`                                                       | `[]`                |
+| `selectedDate`                    | `Date`                                                                  | `undefined`         |
+| `view`                            | `ECalendarViewType`                                                     | `"month"`           |
+| `testId`                          | `string`                                                                | `undefined`         |
+| `testID`                          | `string` (alias of `testId`, which wins)                                | `undefined`         |
+| `keyboardNavigation`              | `boolean`                                                               | `true`              |
+| `swipeNavigation`                 | `boolean`                                                               | `false`             |
+| `hourHeight`                      | `number`                                                                | `60`                |
+| `minHourHeight` / `maxHourHeight` | `number`                                                                | `30` / `180`        |
+| `pinchToZoom`                     | `boolean`                                                               | `false`             |
+| `onHourHeightChange`              | `(hourHeight: number) => void`                                          | `undefined`         |
+| `palette`                         | `{ light?: Partial<CalendarPalette>; dark?: Partial<CalendarPalette> }` | `undefined`         |
+| `isLoading`                       | `boolean`                                                               | `undefined`         |
+| `renderLoading`                   | `() => ReactNode`                                                       | `undefined`         |
+| `selectable`                      | `boolean`                                                               | `false`             |
+| `creatable`                       | `boolean`                                                               | `false`             |
+| `is12Hour`                        | `boolean \| "locale"`                                                   | `false`             |
+| `colorScheme`                     | `'light' \| 'dark' \| 'auto'`                                           | `'auto'`            |
+| `direction`                       | `'ltr' \| 'rtl'`                                                        | `` `auto-detect` `` |
+| `locale`                          | `string`                                                                | `'en'`              |
+| `localeMessages`                  | `Partial<CalendarMessages>`                                             | `{}`                |
+| `theme`                           | `CalendarTheme`                                                         | `{}`                |
+| `classNames`                      | `CalendarClassNames`                                                    | `{}`                |
+| `width`                           | `number \| string`                                                      | `` `auto` ``        |
+| `height`                          | `number \| string`                                                      | `` `auto` ``        |
+| `dayType`                         | `EDayType`                                                              | `"half"`            |
+| `weekStartsOn`                    | `number \| "locale"`                                                    | `0`                 |
+| `weekEndsOn`                      | `number`                                                                | `6`                 |
+| `customDays`                      | `1 \| 2 \| 3 \| 4 \| 5 \| 6 \| 7` (`CustomDaysCount`)                   | `3`                 |
+| `showAdjacentMonths`              | `boolean`                                                               | `true`              |
+| `showWeekNumbers`                 | `boolean`                                                               | `false`             |
+| `showAllDayRow`                   | `boolean`                                                               | `true`              |
+| `maxEvents`                       | `number`                                                                | `` `auto` ``        |
+| `minHour`                         | `number`                                                                | `0`                 |
+| `maxHour`                         | `number`                                                                | `24`                |
+| `eventOverlapOffset`              | `number`                                                                | `0`                 |
+| `showCurrentTime`                 | `boolean`                                                               | `false`             |
+| `autoScrollToCurrentTime`         | `boolean`                                                               | `false`             |
+| `resetDateOnViewChange`           | `boolean`                                                               | `false`             |
+| `pastYearLength`                  | `number`                                                                | `5`                 |
+| `futureYearLength`                | `number`                                                                | `5`                 |
+| `onDateClick`                     | `(date: Date) => void`                                                  | `undefined`         |
+| `onEventClick`                    | `(event: CalendarEvent) => void`                                        | `undefined`         |
+| `showMorePopover`                 | `boolean`                                                               | `true`              |
+| `onMoreClick`                     | `(date: Date, hiddenEvents: CalendarEvent[]) => void`                   | `undefined`         |
+| `onNavigate`                      | `(date: Date) => void`                                                  | `undefined`         |
+| `onViewChange`                    | `(view: ECalendarViewType) => void`                                     | `undefined`         |
+| `onDateRangeChange`               | `(start: Date, end: Date, view: ECalendarViewType) => void`             | `undefined`         |
+| `onSlotClick`                     | `(startDate: Date, endDate: Date) => void`                              | `undefined`         |
+| `draggable`                       | `boolean \| (event) => boolean`                                         | `undefined`         |
+| `onEventDrop`                     | `(info: EventDropInfo) => void`                                         | `undefined`         |
+| `dragSnapMinutes`                 | `number`                                                                | `15`                |
+| `resizable`                       | `boolean \| (event) => boolean`                                         | `undefined`         |
+| `onEventResize`                   | `(info: EventResizeInfo) => void`                                       | `undefined`         |
+| `resizeSnapMinutes`               | `number`                                                                | `15`                |
+| `minEventDurationMinutes`         | `number`                                                                | `15`                |
+| `renderEvent`                     | `(event: CalendarEvent) => ReactNode`                                   | `undefined`         |
+| `renderHeader`                    | `(props: RenderHeaderProps) => ReactNode`                               | `undefined`         |
+| `renderHourCell`                  | `(date: Date) => ReactNode`                                             | `undefined`         |
+| `renderDateCell`                  | `(props: RenderDateCellProps) => ReactNode`                             | `undefined`         |
+| `renderScheduleSeparator`         | `(date: Date) => ReactNode`                                             | `undefined`         |
+| `enableEnrichedEvents`            | `boolean`                                                               | `false`             |
+| `enrichedEventsByDate`            | `Record<string, CalendarEvent[]>`                                       | `undefined`         |
+| `eventsAreSorted`                 | `boolean`                                                               | `false`             |
+| `isEventOrderingEnabled`          | `boolean`                                                               | `true`              |
+| `sortedMonthView`                 | `boolean \| ((a: CalendarEvent, b: CalendarEvent) => number)`           | `true`              |
+
+> `onDateRangeChange`: in Schedule view it also fires when `events` change (the range is the span of the loaded events, so it cannot drive lazy-loading there); with `enableEnrichedEvents` Schedule reports `selectedDate…selectedDate`.
 
 ### Types
 
@@ -277,9 +433,15 @@ interface CalendarEvent {
   endDate?: string;
   title: string;
   style?: CSSProperties;
+  rrule?: string; // RFC 5545 rule, e.g. "FREQ=WEEKLY;BYDAY=TU"
+  exdates?: string[]; // occurrences to skip (dates or exact start times)
+  recurringEventId?: string; // set on occurrences: the series id
+  occurrenceDate?: string; // set on occurrences: their start
   [key: string]: unknown; // custom metadata fields
 }
 ```
+
+Layout keys in `style` (position, top/right/bottom/left, inset\*, width, height, zIndex) are ignored; colours and other cosmetic keys still apply.
 
 #### `ECalendarViewType` & `EDayType`
 
@@ -327,6 +489,7 @@ interface RenderDateCellProps {
   isToday: boolean;
   isSelected?: boolean;
   isCurrentMonth?: boolean;
+  isTodayAdjacent?: boolean; // today shown in an adjacent-month cell
 }
 ```
 
@@ -380,7 +543,7 @@ interface CalendarClassNames {
 <Calendar colorScheme="light" />
 ```
 
-Override individual CSS custom properties for fine-grained control. Light is the `:root` default; dark values live under `[data-color-scheme="dark"]`:
+Override individual CSS custom properties for fine-grained control. Override per scheme on the calendar root (`[data-color-scheme="light"]` / `[data-color-scheme="dark"]`, or scope with `classNames.root`); a `:root`-only override is ignored in dark mode. With `weekStartsOn="locale"` the week ends on the day before it unless you pass `weekEndsOn`. With server rendering, Intl data may differ between server and client; pass explicit values if you need identical output. Palette tokens `--cal-on-primary`, `--cal-event-default` and `--cal-surface-raised` follow the same pattern:
 
 ```css
 [data-color-scheme="dark"] {
@@ -400,6 +563,63 @@ Override individual CSS custom properties for fine-grained control. Light is the
   }}
 />
 ```
+
+### Keyboard navigation
+
+On by default (`keyboardNavigation={false}` turns it off), with the same keys as calendar-simple-native:
+
+| View                   | Keys                                                                                                                                                                                                                                                                                                                                                            |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Month                  | One tab stop (the selected day). ← → (mirrored in RTL), ↑ ↓ a week, Home / End the week row, PageUp / PageDown a month (Shift: a year), T today. Leaving the month navigates (like Next / Previous, this moves the selected date) and keeps focus on the day. Enter / Space activates the day. Keys on event chips and in the "+N more" popover stay with them. |
+| Day, Week, Custom Days | PageUp / PageDown and ← / → (mirrored in RTL) turn the period; T goes to today.                                                                                                                                                                                                                                                                                 |
+| Schedule               | ↑ / ↓ move between rows; T goes to today (Schedule has no periods).                                                                                                                                                                                                                                                                                             |
+
+Keys pressed with Ctrl, ⌘ or Alt, and keys typed in an input, are left alone (Alt+arrows move a draggable event).
+
+### Palette
+
+`palette` takes calendar-simple-native's palette keys per scheme and sets the matching CSS custom properties on the calendar (and the "+N more" popover). `theme` still wins.
+
+```tsx
+<Calendar
+  palette={{
+    light: { primary: "#7c3aed", nowLine: "#16a34a" },
+    dark: { primary: "#a78bfa" },
+  }}
+/>
+```
+
+| Key             | CSS property       | Key             | CSS property                               |
+| --------------- | ------------------ | --------------- | ------------------------------------------ |
+| `primary`       | `--primary-color`  | `bgMuted`       | `--bg-hover`                               |
+| `primaryStrong` | `--primary-hover`  | `border`        | `--border-color`                           |
+| `onPrimary`     | `--cal-on-primary` | `surfaceRaised` | `--cal-surface-raised`                     |
+| `textPrimary`   | `--text-primary`   | `focus`         | `--cal-focus-color`                        |
+| `textSecondary` | `--text-secondary` | `eventDefault`  | `--cal-event-default`                      |
+| `bg`            | `--bg-color`       | `nowLine`       | `--cal-now-line`                           |
+|                 |                    | `scrim`         | `--cal-scrim` (no web element uses it yet) |
+
+### Hour height and zoom
+
+`hourHeight` sets the pixels per hour in Day, Week and Custom Days (default 60). With `pinchToZoom`, Ctrl/⌘ + wheel zooms (browsers that report a trackpad pinch as Ctrl + wheel, such as Chrome, Edge and Firefox, zoom on a pinch too) between `minHourHeight` (30) and `maxHourHeight` (180); `onHourHeightChange(height)` fires when the gesture stops. Leave `hourHeight` out to let the zoom change it, or control it:
+
+```tsx
+const [hourHeight, setHourHeight] = useState(60);
+<Calendar
+  view="week"
+  pinchToZoom
+  hourHeight={hourHeight}
+  onHourHeightChange={setHourHeight}
+/>;
+```
+
+### Swipe navigation
+
+`swipeNavigation` (default `false`, as calendar-simple-native on web): a horizontal touch swipe of at least 50 px on Month or a time grid turns the period; swipe left for next (mirrored in RTL). Not in Schedule. While it is on, the view leaves only vertical panning to the browser, so horizontal scrolling and the browser's own pinch-zoom do not start on the calendar; a swipe that starts on a draggable event drags it instead.
+
+### Custom Days
+
+`customDays` is `1`–`7` (`CustomDaysCount`, default 3). Values from JavaScript are rounded and clamped to that range, so the view always draws.
 
 ### RTL Layout
 

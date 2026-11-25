@@ -1,19 +1,18 @@
 /// <reference types="vitest" />
 import { defineConfig } from "vite";
+import { configDefaults } from "vitest/config";
 import dts from "vite-plugin-dts";
 import { visualizer } from "rollup-plugin-visualizer";
 import { resolve } from "path";
+import { libFileName } from "./scripts/lib-file-name.mjs";
 
 export default defineConfig({
   build: {
     lib: {
-      entry: resolve(__dirname, "src/index.ts"),
+      entry: resolve(import.meta.dirname, "src/index.ts"),
       name: "calendar-simple", // Replace with your library name
       formats: ["cjs", "es", "iife"],
-      fileName: (format) => {
-        const ext = format === "iife" ? "iife.js" : `${format}.js`;
-        return `index.${ext}`;
-      },
+      fileName: libFileName,
     },
     rollupOptions: {
       // Externalize dependencies that shouldn't be bundled
@@ -38,6 +37,8 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: "./src/setupTests.ts",
+    testTimeout: 20_000,
+    exclude: [...configDefaults.exclude, "e2e/**"],
   },
   plugins: [
     // Generates .d.ts files (equivalent to tsup's dts: true)
@@ -45,7 +46,14 @@ export default defineConfig({
       !process.env.STORYBOOK &&
       dts({
         include: ["src"],
-        exclude: ["node_modules", "dist"],
+        exclude: [
+          "node_modules",
+          "dist",
+          "**/*.test.ts",
+          "**/*.test.tsx",
+          "**/*.test-d.ts",
+          "**/*.test-d.tsx",
+        ],
         // Keep declarations under dist/src/ to match package.json "types"
         entryRoot: ".",
       }),

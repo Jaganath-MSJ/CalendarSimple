@@ -3,7 +3,7 @@
   top: calc(100% + 4px);
   inset-inline-start: 0;
   z-index: 100;
-  background-color: var(--bg-color);
+  background-color: var(--cal-surface-raised);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   box-shadow:
@@ -39,6 +39,51 @@
   letter-spacing: 0.05em;
   background-color: var(--bg-hover);
   border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.closeButton {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  background-color: var(--bg-color);
+}
+
+.closeButton:focus-visible,
+.newEventButton:focus-visible {
+  outline: 2px solid var(--cal-focus-color);
+  outline-offset: 1px;
+}
+
+.newEventButton {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--primary-color);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+
+.newEventButton:hover {
+  background-color: var(--bg-hover);
 }
 
 .popoverContent {
@@ -52,7 +97,7 @@
 .popoverItem {
   padding: 0.25rem 0.5rem;
   background-color: var(--primary-color);
-  color: white;
+  color: var(--cal-on-primary);
   border-radius: var(--radius-md);
   font-size: 0.75rem;
   white-space: nowrap;

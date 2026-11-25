@@ -585,3 +585,33 @@ export const RenderHourCellPerDay: Story = {
     },
   },
 };
+
+/**
+ * Palette tokens (`--cal-on-primary`, `--cal-event-default`, `--cal-surface-raised`)
+ * and the outlined selected day. Override the tokens from your own CSS.
+ */
+export const PaletteTokensAndSelectedDay: Story = {
+  args: {
+    view: ECalendarViewType.month,
+    events: [
+      {
+        id: "pt1",
+        startDate: today.toFormat("yyyy-MM-dd"),
+        title: "Default-colour event",
+      },
+    ],
+    selectedDate: today.plus({ days: 2 }).toJSDate(),
+    classNames: { root: "paletteDemo" },
+  },
+  decorators: [
+    (StoryFn: React.ComponentType) => (
+      <>
+        <style>{`
+          .paletteDemo[data-color-scheme="light"] { --cal-event-default: #8b5cf6; }
+          .paletteDemo[data-color-scheme="dark"] { --cal-event-default: #a78bfa; }
+        `}</style>
+        <StoryFn />
+      </>
+    ),
+  ],
+};

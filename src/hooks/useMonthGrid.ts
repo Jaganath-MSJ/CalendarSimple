@@ -10,7 +10,8 @@
  */
 
 import { useMemo } from "react";
-import calendarize from "calendarize";
+import { DateTime } from "luxon";
+import { buildMonthMatrix } from "../utils/monthMatrix";
 import {
   checkIsToday,
   DateType,
@@ -28,11 +29,10 @@ import {
   getDate,
 } from "../utils/date";
 import { CalendarEvent, EventListType } from "../types";
+import { getLastEventDay, hasValidDates } from "../utils/common";
 import { DATE_FORMATS, TIME_CONSTANTS } from "../constants";
 
-interface InternalCalendarEvent extends CalendarEvent {
-  _tempId?: string;
-}
+type InternalCalendarEvent = CalendarEvent;
 
 /**
  * Represents the information for a single day in the calendar grid.
@@ -50,6 +50,8 @@ interface CalendarDayInfo {
   totalEvents: number;
   /** Whether this day is today */
   isToday: boolean;
+  /** Whether this is today's date shown as an adjacent-month (leading/trailing) cell */
+  isTodayAdjacent: boolean;
 }
 
 /**
@@ -107,7 +109,7 @@ export default function useMonthGrid(
       ((weekEndsOn - weekStartsOn + TIME_CONSTANTS.DAYS_IN_WEEK) %
         TIME_CONSTANTS.DAYS_IN_WEEK) +
       1;
-    const calendarArray = calendarize(selectedDate.toJSDate(), weekStartsOn);
+    const calendarArray = buildMonthMatrix(selectedDate, weekStartsOn);
 
     return calendarArray.map((week: number[], weekIndex: number) => {
       const slicedWeek = week.slice(0, length);
@@ -156,6 +158,10 @@ export default function useMonthGrid(
       );
 
       let weekEvents: InternalCalendarEvent[] = [];
+      // Slot ids and the app's own objects, kept beside the events: the
+      // events passed in are never mutated, and drops report the original.
+      const tempIds = new Map<CalendarEvent, string>();
+      const sourceOf = new Map<CalendarEvent, CalendarEvent>();
 
       if (enableEnrichedEvents && enrichedEventsByDate) {
         const addedEventIds = new Set<string>();
@@ -164,11 +170,15 @@ export default function useMonthGrid(
             processedWeek[i].currentDate,
             DATE_FORMATS.DATE,
           );
-          const dayEvents = enrichedEventsByDate[dateStr] || [];
+          const dayEvents = (enrichedEventsByDate[dateStr] || []).filter(
+            hasValidDates,
+          );
           dayEvents.forEach((e) => {
             const eventId = e.id || e.startDate + e.title;
             if (!addedEventIds.has(eventId)) {
-              weekEvents.push({ ...e });
+              const copy = { ...e };
+              sourceOf.set(copy, e);
+              weekEvents.push(copy);
               addedEventIds.add(eventId);
             }
           });
@@ -176,7 +186,7 @@ export default function useMonthGrid(
       } else {
         weekEvents = dataEvents.filter((item) => {
           const start = getStartOfDay(item.startDate);
-          const end = item.endDate ? getStartOfDay(item.endDate) : start;
+          const end = getLastEventDay(item);
           // Check overlap
           return (
             isBeforeDate(start, addDays(weekEnd, 1)) &&
@@ -204,8 +214,8 @@ export default function useMonthGrid(
             if (!isSameDate(startA, startB)) return getDiffDays(startA, startB);
 
             // Secondary sort: Duration (descending)
-            const endA = a.endDate ? getStartOfDay(a.endDate) : startA;
-            const endB = b.endDate ? getStartOfDay(b.endDate) : startB;
+            const endA = getLastEventDay(a);
+            const endB = getLastEventDay(b);
             const durA = getDiffDays(endA, startA);
             const durB = getDiffDays(endB, startB);
             return durB - durA; // Longer events first
@@ -238,7 +248,7 @@ export default function useMonthGrid(
         // We clip the event's start/end to the current week's boundaries because
         // we are only rendering one week at a time in this loop.
         const start = getStartOfDay(event.startDate);
-        const end = event.endDate ? getStartOfDay(event.endDate) : start;
+        const end = getLastEventDay(event);
 
         let startIndex = getDiffDays(start, weekStart);
         let endIndex = getDiffDays(end, weekStart);
@@ -276,7 +286,7 @@ export default function useMonthGrid(
         }
 
         // Store the ID on the event object temporarily for step 5
-        event._tempId = eventId;
+        tempIds.set(event, eventId);
       });
 
       // -------------------------------------------------------------------------
@@ -289,7 +299,7 @@ export default function useMonthGrid(
         // Find events active on this day
         const activeEvents = weekEvents.filter((event) => {
           const start = getStartOfDay(event.startDate);
-          const end = event.endDate ? getStartOfDay(event.endDate) : start;
+          const end = getLastEventDay(event);
           return (
             !isBeforeDate(currentDate, start) && !isAfterDate(currentDate, end)
           );
@@ -299,13 +309,13 @@ export default function useMonthGrid(
 
         let maxDaySlot = -1;
         activeEvents.forEach((e) => {
-          const s = eventSlots.get(e._tempId!);
+          const s = eventSlots.get(tempIds.get(e)!);
           if (s !== undefined && s > maxDaySlot) maxDaySlot = s;
         });
 
         for (let s = 0; s <= maxDaySlot; s++) {
           const event = activeEvents.find(
-            (e) => eventSlots.get(e._tempId!) === s,
+            (e) => eventSlots.get(tempIds.get(e)!) === s,
           );
           if (event) {
             const itemStartDate = getStartOfDay(event.startDate);
@@ -317,9 +327,7 @@ export default function useMonthGrid(
             if (isStart || isWeekStart) {
               // Ensure the visual end date doesn't exceed the end of the current week.
               // This is crucial for rendering the correct width for the event bar using CSS/col-span.
-              const itemEndDate = event.endDate
-                ? getStartOfDay(event.endDate)
-                : getStartOfDay(event.startDate);
+              const itemEndDate = getLastEventDay(event);
               const endOfWeekDate = addDays(currentDate, length - 1 - dayIndex);
 
               let effectiveEndDate = itemEndDate;
@@ -332,6 +340,7 @@ export default function useMonthGrid(
                 startDateWeek: formatDate(currentDate, DATE_FORMATS.DATE),
                 endDateWeek: formatDate(effectiveEndDate, DATE_FORMATS.DATE),
                 isSpacer: false,
+                sourceEvent: sourceOf.get(event) ?? event,
               });
             } else {
               // Spacer: The event exists on this day but was started in a previous cell in this row.
@@ -351,6 +360,8 @@ export default function useMonthGrid(
           events: displayData,
           totalEvents: activeEvents.length,
           isToday: checkIsToday(selectedDate, displayDay) && isCurrentMonth,
+          isTodayAdjacent:
+            !isCurrentMonth && currentDate.hasSame(DateTime.now(), "day"),
         };
       });
     });

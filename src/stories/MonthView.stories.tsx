@@ -161,3 +161,69 @@ export const SortedMonthViewCustomComparator: Story = {
     },
   },
 };
+
+/**
+ * Today is outlined (muted, no fill) when it shows up as a leading/trailing
+ * cell of the adjacent month. The view opens on the month before today's, so
+ * today normally appears among the trailing cells.
+ */
+export const TodayOnAdjacentMonth: Story = {
+  args: {
+    showAdjacentMonths: true,
+    selectedDate: (today.day > today.daysInMonth - 7
+      ? today.endOf("month").plus({ days: 1 })
+      : today.startOf("month").minus({ days: 1 })
+    ).toJSDate(),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "With `showAdjacentMonths`, today is outlined on an adjacent-month cell. `renderDateCell` receives `isTodayAdjacent` for custom cells. The mark appears only when today falls in an adjacent cell (e.g. the first or last week of a month); otherwise the grid shows no mark.",
+      },
+    },
+  },
+};
+
+const busyDay = today.toISODate() ?? "";
+
+function ShowMorePopoverOffDemo(args: React.ComponentProps<typeof Calendar>) {
+  const [clicked, setClicked] = React.useState("—");
+  return (
+    <div>
+      <Calendar
+        {...args}
+        showMorePopover={false}
+        onMoreClick={(date, hidden) =>
+          setClicked(
+            `${DateTime.fromJSDate(date).toISODate()}, ${hidden?.length ?? 0} hidden`,
+          )
+        }
+      />
+      <p data-testid="more-click-readout">Clicked: {clicked}</p>
+    </div>
+  );
+}
+
+export const ShowMorePopoverOff: Story = {
+  args: {
+    maxEvents: 2,
+    selectedDate: today.toJSDate(),
+    events: Array.from({ length: 5 }, (_, i) => ({
+      id: `busy-${i}`,
+      title: `Meeting ${i + 1}`,
+      startDate: busyDay,
+    })),
+  },
+  render: (args: React.ComponentProps<typeof Calendar>) => (
+    <ShowMorePopoverOffDemo {...args} />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`showMorePopover={false}`: "+N more" opens no popover and only calls `onMoreClick(date, hiddenEvents)`, so you can show your own list.',
+      },
+    },
+  },
+};

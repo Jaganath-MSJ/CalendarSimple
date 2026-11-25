@@ -35,3 +35,7 @@ tests/
 
 # Local test reports (not tracked — results live in PLAYWRIGHT_TEST_PLAN.md)
 TEST_REPORT.md
+
+# Playwright
+test-results/
+playwright-report/

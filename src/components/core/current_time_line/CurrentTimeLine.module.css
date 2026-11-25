@@ -11,7 +11,7 @@
 .circle {
   width: 12px;
   height: 12px;
-  background-color: #ea4335;
+  background-color: var(--cal-now-line);
   border-radius: 50%;
   position: absolute;
   inset-inline-start: -6px;
@@ -20,5 +20,5 @@
 .line {
   height: 2px;
   width: 100%;
-  background-color: #ea4335;
+  background-color: var(--cal-now-line);
 }

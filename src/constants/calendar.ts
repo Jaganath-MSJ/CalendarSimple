@@ -45,6 +45,7 @@ export const defaultCalendarProps = {
   theme: {},
   classNames: {},
   showAdjacentMonths: true,
+  showMorePopover: true,
   showWeekNumbers: false,
   resetDateOnViewChange: false,
   showAllDayRow: true,
@@ -55,6 +56,14 @@ export const defaultCalendarProps = {
   sortedMonthView: true,
   testId: "calendar",
   isLoading: false,
+  keyboardNavigation: true,
+  pinchToZoom: false,
+  swipeNavigation: false,
+  minHourHeight: 30,
+  maxHourHeight: 180,
+  dragSnapMinutes: 15,
+  resizeSnapMinutes: 15,
+  minEventDurationMinutes: 15,
 };
 
 /**
@@ -85,6 +94,8 @@ export const CALENDAR_ACTIONS = {
 /** Common time unit values used in duration and overlap calculations. */
 export const TIME_CONSTANTS = {
   MINUTES_IN_HOUR: 60,
+  /** Default `hourHeight` (px per hour in the time grids), as calendar-simple-native. */
+  DEFAULT_HOUR_HEIGHT: 60,
   HOURS_IN_DAY: 24,
   DAYS_IN_WEEK: 7,
   MS_PER_MINUTE: 60_000,
@@ -98,9 +109,7 @@ export const DATE_FORMATS = {
   TIME_12H: "hh:mm a",
   HOUR_12H: "hh a",
   MONTH_YEAR: "MMMM yyyy",
-  DAY_INDEX: "c",
   DAY_NUMBER: "d",
-  FULL_DATE: "EEEE, MMMM d, yyyy",
   MONTH_DAY_YEAR: "MMMM d, yyyy",
   SHORT_MONTH_YEAR: "MMM yyyy",
   SHORT_MONTH: "MMM",

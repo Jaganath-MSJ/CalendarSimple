@@ -18,6 +18,8 @@ import {
   generateTooltipText,
   getContrastColor,
   handleKeyboardActivation,
+  stripLayoutStyle,
+  paletteStyle,
 } from "../../../utils";
 import {
   CalendarContentProps,
@@ -30,6 +32,7 @@ import {
   KEYBOARD_SHORTCUTS,
 } from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
+import useMessages from "../../../hooks/useMessages";
 
 interface PopoverProps extends Pick<
   CalendarContentProps,
@@ -51,6 +54,7 @@ function Popover({
   renderEvent,
 }: PopoverProps) {
   const { testId, colorScheme, config } = useCalendar();
+  const messages = useMessages();
   const popoverRef = useRef<HTMLDivElement>(null);
   const [stylePosition, setStylePosition] = useState<CSSProperties>({
     visibility: "hidden",
@@ -143,8 +147,11 @@ function Popover({
   }, []);
 
   const handlePopoverKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // The popover is portaled, but React still bubbles its keys to the month
+    // cell (Enter/Space would click the day) and the grid (arrows would move
+    // the roving focus): keys inside the dialog stay inside it.
+    e.stopPropagation();
     if (e.key === KEYBOARD_SHORTCUTS.CLOSE) {
-      e.stopPropagation();
       handleClose();
       return;
     }
@@ -171,17 +178,37 @@ function Popover({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`Events on ${formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH, config.locale)}`}
-      className={styles.popover}
+      aria-label={messages.eventsOn(
+        formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH, config.locale),
+      )}
+      className={cx(styles.popover, config.classNames?.root)}
       ref={popoverRef}
-      style={stylePosition}
+      style={{
+        ...paletteStyle(config.palette, colorScheme),
+        ...stylePosition,
+      }}
       onClick={(e) => e.stopPropagation()}
       onKeyDown={handlePopoverKeyDown}
       data-testid={`${testId}-popover-content`}
       data-color-scheme={colorScheme}
     >
       <div className={styles.popoverHeader}>
-        {formatDate(dateObj, DATE_FORMATS.DAY_DATE_SHORT_MONTH, config.locale)}
+        <span>
+          {formatDate(
+            dateObj,
+            DATE_FORMATS.DAY_DATE_SHORT_MONTH,
+            config.locale,
+          )}
+        </span>
+        <button
+          type="button"
+          className={styles.closeButton}
+          aria-label={messages.close}
+          data-testid={`${testId}-popover-close`}
+          onClick={handleClose}
+        >
+          ×
+        </button>
       </div>
       <div className={styles.popoverContent}>
         {events.map((item, idx) => {
@@ -194,7 +221,7 @@ function Popover({
           const isStartBefore = isBeforeDate(eventStart, dayStart);
           const isEndAfter = isAfterDate(eventEnd, dayStart);
           const tooltipText = generateTooltipText(
-            item,
+            { ...item, title: item.title || messages.noTitle },
             ECalendarViewType.month,
             is12Hour,
             config.locale,
@@ -202,6 +229,8 @@ function Popover({
 
           const eventBgColor =
             item.style?.backgroundColor || LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
+          // Text contrast is computed from the hex fallback; overriding
+          // --cal-event-default does not recompute it.
           const textColor = getContrastColor(String(eventBgColor));
 
           return (
@@ -216,9 +245,9 @@ function Popover({
               id={item.id}
               data-testid={`${testId}-${item.id}-popover-item`}
               style={{
-                backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                backgroundColor: "var(--cal-event-default)",
                 color: textColor,
-                ...item.style,
+                ...stripLayoutStyle(item.style),
               }}
               aria-label={tooltipText}
               onClick={(e) => {
@@ -236,6 +265,23 @@ function Popover({
             </div>
           );
         })}
+        {config.creatable && config.onSlotClick && (
+          <button
+            type="button"
+            className={styles.newEventButton}
+            aria-label={messages.newEvent}
+            data-testid={`${testId}-popover-new-event`}
+            onClick={() => {
+              handleClose();
+              config.onSlotClick?.(
+                getStartOfDay(dateObj).toJSDate(),
+                getStartOfDay(dateObj).endOf("day").toJSDate(),
+              );
+            }}
+          >
+            {`+ ${messages.newEvent}`}
+          </button>
+        )}
       </div>
     </div>
   );

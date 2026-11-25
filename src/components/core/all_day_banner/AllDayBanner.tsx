@@ -6,6 +6,7 @@ import {
   generateTooltipText,
   getContrastColor,
   handleKeyboardActivation,
+  stripLayoutStyle,
 } from "../../../utils";
 import {
   CalendarEvent,
@@ -18,6 +19,8 @@ import useAllDayBanner, {
 import styles from "./AllDayBanner.module.css";
 import { LAYOUT_CONSTANTS } from "../../../constants";
 import { useCalendar } from "../../../context/CalendarContext";
+import useMessages from "../../../hooks/useMessages";
+import useDayMove from "../../../hooks/useDayMove";
 
 interface AllDayBannerProps extends Pick<
   CalendarContentProps,
@@ -43,6 +46,7 @@ export default function AllDayBanner({
   locale,
 }: AllDayBannerProps) {
   const { testId } = useCalendar();
+  const messages = useMessages();
   const [isExpanded, setIsExpanded] = useState(false);
   const MAX_VISIBLE_ROWS = maxEvents ?? 3;
 
@@ -73,7 +77,7 @@ export default function AllDayBanner({
     return (
       <div
         role="region"
-        aria-label="All-day events"
+        aria-label={messages.allDayEvents}
         className={styles.bannerWrapper}
         data-testid={`${testId}-all-day-banner`}
       >
@@ -90,7 +94,7 @@ export default function AllDayBanner({
   return (
     <div
       role="region"
-      aria-label="All-day events"
+      aria-label={messages.allDayEvents}
       className={styles.bannerWrapper}
       data-testid={`${testId}-all-day-banner`}
     >
@@ -105,7 +109,7 @@ export default function AllDayBanner({
             })}
             data-testid={`${testId}-all-day-expand-icon`}
             aria-label={
-              isExpanded ? "Collapse all-day events" : "Expand all-day events"
+              isExpanded ? messages.collapseAllDay : messages.expandAllDay
             }
             aria-expanded={isExpanded}
             onClick={() => setIsExpanded((prev) => !prev)}
@@ -151,35 +155,34 @@ export default function AllDayBanner({
             const eventBgColor =
               event.style?.backgroundColor ||
               LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR;
+            // Text contrast is computed from the hex fallback; overriding
+            // --cal-event-default does not recompute it.
             const textColor = getContrastColor(String(eventBgColor));
 
             return (
-              <div
+              <BannerChip
                 key={event.id || `banner-evt-${idx}`}
-                role="button"
-                tabIndex={0}
+                event={event}
+                startIndex={startIndex}
+                totalCols={totalCols}
                 className={cx(styles.bannerChip, classNames?.event, {
                   [styles.clippedLeft]: isClippedLeft,
                   [styles.clippedRight]: isClippedRight,
                 })}
                 style={{
-                  top: `${topPx}px`,
-                  left: `${leftPct}%`,
-                  width: `calc(${widthPct}% - 4px)`,
-                  backgroundColor: LAYOUT_CONSTANTS.DEFAULT_EVENT_COLOR,
+                  backgroundColor: "var(--cal-event-default)",
                   color: textColor,
-                  ...event.style,
+                  ...stripLayoutStyle(event.style),
+                  top: `${topPx}px`,
+                  insetInlineStart: `${leftPct}%`,
+                  width: `calc(${widthPct}% - 4px)`,
                 }}
-                data-testid={`${testId}-${event.id}-all-day-event`}
-                aria-label={generateTooltipText(
-                  event,
+                testIdValue={`${testId}-${event.id}-all-day-event`}
+                ariaLabel={generateTooltipText(
+                  { ...event, title: event.title || messages.noTitle },
                   ECalendarViewType.week,
                   is12Hour,
                   locale,
-                )}
-                onClick={() => onEventClick?.(event)}
-                onKeyDown={handleKeyboardActivation(() =>
-                  onEventClick?.(event),
                 )}
                 title={generateTooltipText(
                   event,
@@ -187,13 +190,14 @@ export default function AllDayBanner({
                   is12Hour,
                   locale,
                 )}
+                onEventClick={onEventClick}
               >
                 {renderEvent ? (
                   renderEvent(event)
                 ) : (
                   <span className={styles.title}>{event.title}</span>
                 )}
-              </div>
+              </BannerChip>
             );
           },
         )}
@@ -213,19 +217,84 @@ export default function AllDayBanner({
                 className={styles.moreChip}
                 style={{
                   top: `${topPx}px`,
-                  left: `${leftPct}%`,
+                  insetInlineStart: `${leftPct}%`,
                   width: `calc(${widthPct}% - 4px)`,
                 }}
                 data-testid={`${testId}-${idx}-all-day-more-chip`}
-                aria-label={`${count} more all-day events, click to expand`}
+                aria-label={messages.moreAllDay(count)}
                 onClick={() => setIsExpanded(true)}
                 onKeyDown={handleKeyboardActivation(() => setIsExpanded(true))}
               >
-                + {count} more
+                {messages.more(count)}
               </div>
             );
           })}
       </div>
+    </div>
+  );
+}
+
+interface BannerChipProps extends Pick<CalendarContentProps, "onEventClick"> {
+  event: CalendarEvent;
+  startIndex: number;
+  totalCols: number;
+  className: string;
+  style: React.CSSProperties;
+  testIdValue: string;
+  ariaLabel: string;
+  title: string;
+  children: React.ReactNode;
+}
+
+/** One chip in the all-day row; draggable to another day along the row. */
+function BannerChip({
+  event,
+  startIndex,
+  totalCols,
+  className,
+  style,
+  testIdValue,
+  ariaLabel,
+  title,
+  onEventClick,
+  children,
+}: BannerChipProps) {
+  const { ref: chipRef, ...move } = useDayMove(event, {
+    axis: "x",
+    measure: (el) => {
+      const row = el.parentElement;
+      if (!row || totalCols <= 0) return null;
+      return {
+        cellWidth: row.getBoundingClientRect().width / totalCols,
+        columnIndex: startIndex,
+        columnCount: totalCols,
+        stepPx: 0,
+      };
+    },
+  });
+  return (
+    <div
+      ref={chipRef}
+      role="button"
+      tabIndex={0}
+      className={cx(className, {
+        [styles.draggable]: move.canMove,
+        [styles.dragging]: move.dragging,
+      })}
+      style={{ ...style, ...move.style }}
+      data-testid={testIdValue}
+      aria-label={ariaLabel}
+      aria-keyshortcuts={move.keyShortcuts}
+      aria-description={move.description}
+      {...move.handlers}
+      onClick={() => onEventClick?.(event)}
+      onKeyDown={(e) => {
+        if (move.handleKey(e)) return;
+        handleKeyboardActivation(() => onEventClick?.(event))(e);
+      }}
+      title={title}
+    >
+      {children}
     </div>
   );
 }

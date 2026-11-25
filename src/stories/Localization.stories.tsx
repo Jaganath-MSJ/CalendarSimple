@@ -212,3 +212,44 @@ export const Korean12Hour: Story = {
     },
   },
 };
+
+const LOCALE_CHOICES = ["en-US", "en-GB", "de-DE", "ar-EG"];
+
+function LocaleWeekStartDemo(args: React.ComponentProps<typeof Calendar>) {
+  const [locale, setLocale] = React.useState("en-GB");
+  return (
+    <div>
+      <label>
+        Locale{" "}
+        <select value={locale} onChange={(e) => setLocale(e.target.value)}>
+          {LOCALE_CHOICES.map((l) => (
+            <option key={l} value={l}>
+              {l}
+            </option>
+          ))}
+        </select>
+      </label>
+      <Calendar
+        {...args}
+        locale={locale}
+        weekStartsOn="locale"
+        is12Hour="locale"
+      />
+    </div>
+  );
+}
+
+export const LocaleWeekStartAndClock: Story = {
+  args: { view: ECalendarViewType.week, selectedDate: today.toJSDate() },
+  render: (args: React.ComponentProps<typeof Calendar>) => (
+    <LocaleWeekStartDemo {...args} />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`weekStartsOn="locale"` and `is12Hour="locale"` follow the chosen locale: en-GB starts on Monday, en-US on Sunday with AM/PM, de-DE uses 24-hour time, ar-EG starts on Saturday.',
+      },
+    },
+  },
+};

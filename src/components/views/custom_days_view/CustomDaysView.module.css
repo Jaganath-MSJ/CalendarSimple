@@ -57,7 +57,7 @@
 
 .today {
   background-color: var(--primary-color);
-  color: #fff;
+  color: var(--cal-on-primary);
 }
 
 .timeGrid {

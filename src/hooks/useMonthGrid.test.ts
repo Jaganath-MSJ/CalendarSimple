@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import useMonthGrid from "./useMonthGrid";
 import { dateFn } from "../utils/date";
 import { CalendarEvent } from "../types";
@@ -99,6 +99,31 @@ describe("useMonthGrid Hook", () => {
     expect(thirdWeek[4].events[0]?.id).toBe("A");
   });
 
+  it("drops invalid-date events from enrichedEventsByDate", () => {
+    const enrichedEvents = {
+      "2024-02-15": [
+        { id: "bad", title: "Bad", startDate: "not-a-date" },
+        { id: "A", title: "Good", startDate: "2024-02-15" },
+      ],
+    };
+
+    const { result } = renderHook(() =>
+      useMonthGrid(selectedDate, [], weekStartsOn, weekEndsOn, {
+        enableEnrichedEvents: true,
+        enrichedEventsByDate: enrichedEvents,
+      }),
+    );
+
+    const cell = result.current[2][4];
+    expect(cell.events.map((e) => e?.id)).toEqual(["A"]);
+    expect(cell.totalEvents).toBe(1);
+    result.current.flat().forEach((c) =>
+      c.events.forEach((e) => {
+        expect(e?.endDateWeek).not.toBe("Invalid DateTime");
+      }),
+    );
+  });
+
   it("handles custom sortedMonthView function", () => {
     const events: CalendarEvent[] = [
       { id: "1", title: "A", startDate: "2024-02-01", endDate: "2024-02-02" },
@@ -195,5 +220,60 @@ describe("useMonthGrid Hook", () => {
     const thirdWeek = result.current[2];
     expect(thirdWeek[4].displayDay).toBe(15);
     expect(thirdWeek[4].events[0]?.id).toBe("Zero");
+  });
+
+  it("does not draw a 22:00–00:00 event on the next day", () => {
+    const events: CalendarEvent[] = [
+      {
+        id: "m",
+        title: "Late",
+        startDate: "2026-11-10T22:00:00",
+        endDate: "2026-11-11T00:00:00",
+      },
+    ];
+    const { result } = renderHook(() =>
+      useMonthGrid(dateFn("2026-11-15"), events, 0, 6),
+    );
+    const cells = result.current.flat();
+    const nov10 = cells.find(
+      (c) => c.currentDate.toISODate() === "2026-11-10",
+    )!;
+    const nov11 = cells.find(
+      (c) => c.currentDate.toISODate() === "2026-11-11",
+    )!;
+    expect(nov10.events[0]?.endDateWeek).toBe("2026-11-10");
+    expect(nov11.totalEvents).toBe(0);
+  });
+
+  describe("isTodayAdjacent", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("flags today on an adjacent-month cell without setting isToday", () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(2026, 11, 1, 10, 0));
+      const { result } = renderHook(() =>
+        useMonthGrid(dateFn("2026-11-15"), [], 0, 6),
+      );
+      const cells = result.current.flat();
+      const dec1 = cells.find(
+        (c) =>
+          !c.isCurrentMonth &&
+          c.currentDate.toFormat("yyyy-MM-dd") === "2026-12-01",
+      )!;
+      expect(dec1.isTodayAdjacent).toBe(true);
+      expect(dec1.isToday).toBe(false);
+      expect(cells.filter((c) => c.isTodayAdjacent)).toHaveLength(1);
+    });
+
+    it("does not flag current-month cells", () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(2026, 10, 15, 10, 0));
+      const { result } = renderHook(() =>
+        useMonthGrid(dateFn("2026-11-15"), [], 0, 6),
+      );
+      expect(result.current.flat().some((c) => c.isTodayAdjacent)).toBe(false);
+    });
   });
 });
