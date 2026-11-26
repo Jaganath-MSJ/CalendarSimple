@@ -9,6 +9,7 @@ import {
   handleKeyboardActivation,
   stripLayoutStyle,
   resolveTheme,
+  formatMonth,
 } from "../../../utils";
 import styles from "./ScheduleView.module.css";
 import { DATE_FORMATS } from "../../../constants";
@@ -161,12 +162,7 @@ export default function ScheduleView(props: ScheduleViewProps) {
                                   classNames?.scheduleDateSubInfo,
                                 )}
                               >
-                                {formatDate(
-                                  dateObj,
-                                  DATE_FORMATS.SHORT_MONTH,
-                                  locale,
-                                ).toUpperCase()}
-                                ,{" "}
+                                {formatMonth(dateObj, locale).toUpperCase()},{" "}
                                 {formatDate(
                                   dateObj,
                                   DATE_FORMATS.SHORT_DAY,

@@ -579,7 +579,7 @@ describe("Calendar Component Integration", () => {
         />,
       );
       // January in Spanish is "enero"
-      expect(screen.getByText(/enero 2024/i)).toBeInTheDocument();
+      expect(screen.getByText(/enero (de )?2024/i)).toBeInTheDocument();
     });
 
     it("uses localeMessages to override default UI text", () => {

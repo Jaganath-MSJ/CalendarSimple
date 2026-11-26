@@ -27,6 +27,12 @@ describe("CommonJS packaging", () => {
   });
 });
 
+describe("package.json export", () => {
+  it("lets tools read calendar-simple/package.json", () => {
+    expect(pkg.exports["./package.json"]).toBe("./package.json");
+  });
+});
+
 describe("CommonJS types", () => {
   it("routes require() to a CommonJS copy of the declarations", () => {
     const entry = pkg.exports["."] as {

@@ -20,7 +20,8 @@
         "default": "./dist/index.cjs"
       }
     },
-    "./dist/styles.css": "./dist/calendar-simple.css"
+    "./dist/styles.css": "./dist/calendar-simple.css",
+    "./package.json": "./package.json"
   },
   "repository": {
     "type": "git",
