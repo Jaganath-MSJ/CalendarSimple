@@ -5,6 +5,7 @@ import dts from "vite-plugin-dts";
 import { visualizer } from "rollup-plugin-visualizer";
 import { resolve } from "path";
 import { libFileName } from "./scripts/lib-file-name.mjs";
+import { DTS_EXCLUDE } from "./scripts/build-options.mjs";
 
 export default defineConfig({
   build: {
@@ -46,14 +47,7 @@ export default defineConfig({
       !process.env.STORYBOOK &&
       dts({
         include: ["src"],
-        exclude: [
-          "node_modules",
-          "dist",
-          "**/*.test.ts",
-          "**/*.test.tsx",
-          "**/*.test-d.ts",
-          "**/*.test-d.tsx",
-        ],
+        exclude: DTS_EXCLUDE,
         // Keep declarations under dist/src/ to match package.json "types"
         entryRoot: ".",
       }),
