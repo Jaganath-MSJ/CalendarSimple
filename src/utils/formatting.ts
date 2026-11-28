@@ -90,3 +90,28 @@ export function getMonthList(locale?: string): MonthListType[] {
     value: i,
   }));
 }
+
+/**
+ * Month and year in the locale's own pattern ("March 2026", "März 2026",
+ * "2026年3月"), from `Intl`. Luxon's `MMMM yyyy` tokens drop the month
+ * suffix in CJK locales ("3 2026").
+ */
+export function formatMonthYear(
+  date: Parameters<typeof dateFn>[0],
+  locale?: string,
+  month: "long" | "short" = "long",
+): string {
+  return dateFn(date)
+    .setLocale(locale || "en")
+    .toLocaleString({ month, year: "numeric" });
+}
+
+/** Short month name in the locale's own form ("Mar", "3月"), from `Intl`. */
+export function formatMonth(
+  date: Parameters<typeof dateFn>[0],
+  locale?: string,
+): string {
+  return dateFn(date)
+    .setLocale(locale || "en")
+    .toLocaleString({ month: "short" });
+}

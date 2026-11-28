@@ -8,20 +8,16 @@ import React, {
 } from "react";
 import cx from "classnames";
 import { CalendarContentProps } from "../../../types";
-import {
-  LAYOUT_CONSTANTS,
-  DATE_FORMATS,
-  TIME_CONSTANTS,
-} from "../../../constants";
+import { LAYOUT_CONSTANTS, TIME_CONSTANTS } from "../../../constants";
 import {
   dateFn,
   convertToDate,
   DateType,
   calculateMaxEvents,
-  formatDate,
   getDayListNames,
   getRowWeekNumber,
   getMonthKeyTarget,
+  formatMonthYear,
   isVisibleWeekday,
   resolveDirection,
 } from "../../../utils";
@@ -213,11 +209,7 @@ function MonthView(props: MonthViewProps) {
     );
   }, [dayType, weekStartsOn, weekEndsOn, locale]);
 
-  const tableAriaLabel = formatDate(
-    selectedDate,
-    DATE_FORMATS.MONTH_YEAR,
-    locale,
-  );
+  const tableAriaLabel = formatMonthYear(selectedDate, locale);
 
   return (
     <div className={styles.monthView} data-testid={`${testId}-month-view`}>

@@ -85,6 +85,11 @@ const event = {
 - With `autoScrollToCurrentTime`, the mount scroll now goes to the first day on/after today that has events (before: only if today itself had events).
 - New `onDateRangeChange(start, end, view)` prop.
 
+### Month titles follow the locale (v2.2.0-beta.2)
+
+- Header titles, the month grid label and the Schedule month labels now use the locale's own month/year pattern (`Intl`). Japanese, Chinese and Korean read "2026年3月" / "2026년 3월" (before: "3 2026"); Spanish and Portuguese gain "de" ("enero de 2024"); Russian uses the nominative month ("январь 2024 г."). English, French, German, Italian and Dutch are unchanged. Tests or snapshots that match the old text may need updating.
+- The package no longer ships type declarations for the Storybook stories and test setup, and `calendar-simple/package.json` can be imported.
+
 ### CommonJS build (v2.2)
 
 - The CommonJS bundle is now `dist/index.cjs` (was `dist/index.cjs.js`). Because the package is `"type": "module"`, Node read the old `.js` file as an ES module, so `require("calendar-simple")` returned no exports. `require()` now works, and `main` / `exports` point to the new file; only code that imported `dist/index.cjs.js` by path needs updating.

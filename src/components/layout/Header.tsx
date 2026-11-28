@@ -27,6 +27,8 @@ import {
   getLastEventDay,
   getNavigatedDate,
   clampCustomDays,
+  formatMonth,
+  formatMonthYear,
 } from "../../utils";
 import styles from "./Header.module.css";
 import LeftArrow from "../../assets/LeftArrow";
@@ -141,12 +143,12 @@ function Header(props: HeaderProps) {
       let baseString;
       if (startOfWeek.month !== endOfWeek.month) {
         if (startOfWeek.year !== endOfWeek.year) {
-          baseString = `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
+          baseString = `${formatMonthYear(startOfWeek, locale, "short")} - ${formatMonthYear(endOfWeek, locale, "short")}`;
         } else {
-          baseString = `${formatDate(startOfWeek, DATE_FORMATS.SHORT_MONTH, locale)} - ${formatDate(endOfWeek, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
+          baseString = `${formatMonth(startOfWeek, locale)} - ${formatMonthYear(endOfWeek, locale, "short")}`;
         }
       } else {
-        baseString = formatDate(startOfWeek, DATE_FORMATS.MONTH_YEAR, locale);
+        baseString = formatMonthYear(startOfWeek, locale);
       }
       return `${baseString}${weekSuffix}`;
     }
@@ -155,9 +157,9 @@ function Header(props: HeaderProps) {
       const endDate = selectedDate.plus({ days: days - 1 });
       if (selectedDate.month !== endDate.month) {
         if (selectedDate.year !== endDate.year) {
-          return `${formatDate(selectedDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)} - ${formatDate(endDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
+          return `${formatMonthYear(selectedDate, locale, "short")} - ${formatMonthYear(endDate, locale, "short")}`;
         }
-        return `${formatDate(selectedDate, DATE_FORMATS.SHORT_MONTH, locale)} - ${formatDate(endDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
+        return `${formatMonth(selectedDate, locale)} - ${formatMonthYear(endDate, locale, "short")}`;
       }
       if (days === 1) {
         return formatDate(selectedDate, DATE_FORMATS.MONTH_DAY_YEAR, locale);
@@ -178,14 +180,14 @@ function Header(props: HeaderProps) {
 
         if (minDate.month !== maxDate.month || minDate.year !== maxDate.year) {
           if (minDate.year !== maxDate.year) {
-            return `${formatDate(minDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)} - ${formatDate(maxDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
+            return `${formatMonthYear(minDate, locale, "short")} - ${formatMonthYear(maxDate, locale, "short")}`;
           }
-          return `${formatDate(minDate, DATE_FORMATS.SHORT_MONTH, locale)} - ${formatDate(maxDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale)}`;
+          return `${formatMonth(minDate, locale)} - ${formatMonthYear(maxDate, locale, "short")}`;
         }
-        return formatDate(minDate, DATE_FORMATS.SHORT_MONTH_YEAR, locale);
+        return formatMonthYear(minDate, locale, "short");
       }
     }
-    return formatDate(selectedDate, DATE_FORMATS.MONTH_YEAR, locale);
+    return formatMonthYear(selectedDate, locale);
   };
 
   return (
